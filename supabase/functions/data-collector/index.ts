@@ -121,7 +121,9 @@ serve(async (req) => {
       collectSocialData(client, result),
       collectWebScrapingData(client, result),
       // New: Intelligent fallback data collection
-      collectMissingSocialProfiles(client, result)
+      collectMissingSocialProfiles(client, result),
+      // Business Intelligence & Sentiment Analysis
+      collectSentimentAnalysis(client, result)
     ];
 
     await Promise.allSettled(promises);
@@ -1355,5 +1357,183 @@ async function testYouTubeDataApi() {
       success: false, 
       message: `YouTube Data API fel: ${error.message}` 
     };
+}
+
+// Business Intelligence & Sentiment Analysis Collection
+async function collectSentimentAnalysis(client: any, result: DataCollectionResult) {
+  console.log('Collecting sentiment analysis and business intelligence for:', client.name);
+  
+  try {
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.log('OpenAI API key not found, skipping sentiment analysis');
+      return;
+    }
+
+    if (!googleSearchApiKey || !googleSearchEngineId) {
+      console.log('Google Search API credentials missing, skipping sentiment analysis');
+      return;
+    }
+
+    // 1. Collect data from various sources for sentiment analysis
+    const sentimentData = await collectSentimentData(client.name);
+    
+    // 2. Analyze with OpenAI
+    const analysis = await analyzeSentimentWithAI(client.name, sentimentData, openAIApiKey);
+    
+    // 3. Store the results
+    if (analysis) {
+      result.collected_data.push({
+        id: `sentiment-${Date.now()}`,
+        data_type: 'sentiment_analysis',
+        source: 'openai_analysis',
+        data: analysis,
+        created_at: new Date().toISOString()
+      });
+    }
+
+  } catch (error) {
+    console.error('Error collecting sentiment analysis:', error);
+    result.errors.push(`Sentiment analysis error: ${error.message}`);
   }
+}
+
+async function collectSentimentData(clientName: string) {
+  const searchQueries = [
+    // Sentiment analysis sources
+    `"${clientName}" site:flashback.org`,
+    `"${clientName}" site:reddit.com`,
+    `"${clientName}" kritik OR problem OR skandal`,
+    `"${clientName}" positiv OR bra OR excellent`,
+    
+    // Industry trends
+    `"${clientName}" branschtrend OR influencer trend 2024 2025`,
+    `svenska influencers trends 2024 2025`,
+    
+    // Competitors
+    `svenska influencers liknande "${clientName}"`,
+    `konkurrenter till "${clientName}" influencer`,
+    
+    // Collaboration opportunities
+    `"${clientName}" samarbete OR collaboration OR partnerskap`,
+    `märkessamarbeten influencers Sverige 2024`,
+  ];
+
+  const allData = [];
+  
+  for (const query of searchQueries) {
+    try {
+      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(query)}&num=5`;
+      
+      const response = await fetch(searchUrl);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.items) {
+          for (const item of data.items) {
+            allData.push({
+              title: item.title,
+              snippet: item.snippet,
+              url: item.link,
+              source: item.displayLink,
+              query: query,
+              date: item.pagemap?.newsarticle?.[0]?.datepublished || 
+                    item.pagemap?.article?.[0]?.datepublished ||
+                    new Date().toISOString()
+            });
+          }
+        }
+      }
+      
+      // Rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+    } catch (error) {
+      console.error('Error in sentiment data query:', query, error);
+    }
+  }
+  
+  return allData;
+}
+
+async function analyzeSentimentWithAI(clientName: string, sentimentData: any[], openAIApiKey: string) {
+  try {
+    const prompt = `Analysera följande data om "${clientName}" och skapa en komplett business intelligence rapport. 
+
+Insamlad data:
+${JSON.stringify(sentimentData, null, 2)}
+
+Skapa en strukturerad analys med följande sektioner:
+
+1. SENTIMENTANALYS
+- Övergripande sentiment (Positiv/Neutral/Negativ + procentuell fördelning)
+- Huvudteman i positiva och negativa kommentarer
+- Riskområden att vara uppmärksam på
+- Styrkor som framhävs
+
+2. BRANSCHTRENDER
+- Aktuella trends inom influencer-branschen
+- Hur "${clientName}" positionerar sig mot trenderna
+- Kommande trender att förbereda sig för
+
+3. KONKURRENTANALYS
+- Identifierade konkurrenter
+- Styrkor och svagheter jämfört med konkurrenter
+- Marknadspositition
+
+4. SAMARBETSMÖJLIGHETER
+- Potentiella märkessamarbeten
+- Branschpartners
+- Nya affärsmöjligheter
+
+5. HANDLINGSPLAN
+- Konkreta rekommendationer för nästa 3 månader
+- Riskhantering
+- Möjligheter att utveckla
+
+Skriv rapporten på svenska och gör den användbar för både managers och klienten själv.`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: 'Du är en expert på influencer marketing och business intelligence. Skapa strukturerade, användbara rapporter baserat på data.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 3000,
+        temperature: 0.3
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const aiResponse = await response.json();
+    const analysis = aiResponse.choices[0].message.content;
+
+    return {
+      client_name: clientName,
+      analysis_date: new Date().toISOString(),
+      raw_data_sources: sentimentData.length,
+      analysis: analysis,
+      source_data: sentimentData,
+      analysis_type: 'comprehensive_business_intelligence'
+    };
+
+  } catch (error) {
+    console.error('Error in AI sentiment analysis:', error);
+    return null;
+  }
+}
 }

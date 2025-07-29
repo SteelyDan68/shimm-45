@@ -17,7 +17,7 @@ import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
-import { GeminiWidget } from '@/components/GeminiWidget';
+import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
 
 interface Client {
@@ -41,6 +41,11 @@ export const ClientProfile = () => {
   
   const { processClientLogic, isProcessing } = useClientLogic();
   const { getClientCacheData, getNewsMentions, getSocialMetrics } = useClientData();
+  
+  // Filter cache data by type
+  const newsItems = getNewsMentions(cacheData);
+  const socialMetrics = getSocialMetrics(cacheData);
+  const sentimentData = cacheData?.filter(item => item.data_type === 'sentiment_analysis') || [];
 
   useEffect(() => {
     if (clientId && user) {
@@ -99,6 +104,11 @@ export const ClientProfile = () => {
     }
   };
 
+  const collectData = async (clientId: string) => {
+    // This will trigger the data collection via DataCollectorWidget
+    await loadClientData();
+  };
+
 
   const getRankColor = (rank: string) => {
     switch (rank) {
@@ -134,8 +144,6 @@ export const ClientProfile = () => {
     );
   }
 
-  const newsItems = getNewsMentions(cacheData);
-  const socialMetrics = getSocialMetrics(cacheData);
   const logicState = client.logic_state;
 
   return (
@@ -258,8 +266,8 @@ export const ClientProfile = () => {
         {/* Social Media Widget - Full Width */}
         <SocialWidget socialMetrics={socialMetrics} />
         
-        {/* Gemini Research */}
-        <GeminiWidget clientId={clientId} clientName={client.name} />
+        {/* Business Intelligence & Sentiment Analysis */}
+        <SentimentAnalysisWidget sentimentData={sentimentData} onCollectData={() => collectData(clientId!)} />
       </div>
 
       {/* Summary Stats */}
