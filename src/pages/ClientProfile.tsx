@@ -19,7 +19,6 @@ import { NewsWidget } from '@/components/NewsWidget';
 import { SocialWidget } from '@/components/SocialWidget';
 import { GeminiWidget } from '@/components/GeminiWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
-import { generateMockData } from '@/utils/mockDataGenerator';
 
 interface Client {
   id: string;
@@ -100,24 +99,6 @@ export const ClientProfile = () => {
     }
   };
 
-  const handleGenerateMockData = async () => {
-    if (!clientId) return;
-    
-    try {
-      await generateMockData(clientId);
-      toast({
-        title: "Testdata genererad",
-        description: "Mock-data har lagts till för att testa dashboard",
-      });
-      loadClientData();
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte generera testdata",
-        variant: "destructive",
-      });
-    }
-  };
 
   const getRankColor = (rank: string) => {
     switch (rank) {
@@ -198,16 +179,6 @@ export const ClientProfile = () => {
               </>
             )}
           </Button>
-          {cacheData.length === 0 && (
-            <Button 
-              variant="outline"
-              onClick={handleGenerateMockData}
-              className="flex items-center gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Lägg till testdata
-            </Button>
-          )}
         </div>
       </div>
 

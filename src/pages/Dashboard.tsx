@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ClientForm } from '@/components/ClientForm';
+import { ApiStatusChecker } from '@/components/ApiStatusChecker';
 
 interface Client {
   id: string;
@@ -208,6 +209,9 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* API Status Check */}
+      <ApiStatusChecker />
 
       {/* Recent Clients */}
       <Card>
