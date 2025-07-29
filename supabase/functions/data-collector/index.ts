@@ -122,8 +122,8 @@ serve(async (req) => {
       collectWebScrapingData(client, result),
       // New: Intelligent fallback data collection
       collectMissingSocialProfiles(client, result),
-      // Business Intelligence & Sentiment Analysis
-      collectSentimentAnalysis(client, result)
+      // Business Intelligence & Sentiment Analysis (temporarily disabled)
+      // collectSentimentAnalysis(client, result)
     ];
 
     await Promise.allSettled(promises);
