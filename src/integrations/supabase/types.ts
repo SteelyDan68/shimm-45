@@ -61,6 +61,7 @@ export type Database = {
           follower_counts: Json | null
           id: string
           instagram_handle: string | null
+          logic_state: Json | null
           manager_email: string | null
           manager_name: string | null
           name: string
@@ -83,6 +84,7 @@ export type Database = {
           follower_counts?: Json | null
           id?: string
           instagram_handle?: string | null
+          logic_state?: Json | null
           manager_email?: string | null
           manager_name?: string | null
           name: string
@@ -105,6 +107,7 @@ export type Database = {
           follower_counts?: Json | null
           id?: string
           instagram_handle?: string | null
+          logic_state?: Json | null
           manager_email?: string | null
           manager_name?: string | null
           name?: string
