@@ -245,7 +245,7 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
 
     for (const { platform, handle } of platforms) {
       try {
-        const socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey);
+        const socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
         if (socialData) {
           result.collected_data.social_metrics.push(socialData);
         }
@@ -639,12 +639,12 @@ async function testSocialBladeApi(apiKey: string | undefined) {
   }
 }
 
-async function fetchRealSocialData(platform: string, handle: string, apiKey: string) {
+async function fetchRealSocialData(platform: string, handle: string, apiKey: string, clientName?: string) {
   console.log(`Fetching real ${platform} data for handle: ${handle}`);
   
   // For YouTube, try YouTube Data API first, then fallback to Social Blade
   if (platform.toLowerCase() === 'youtube') {
-    const youtubeData = await fetchYouTubeData(handle);
+    const youtubeData = await fetchYouTubeData(handle, clientName);
     if (youtubeData) {
       return youtubeData;
     }
@@ -655,7 +655,7 @@ async function fetchRealSocialData(platform: string, handle: string, apiKey: str
   return await fetchSocialBladeData(platform, handle, apiKey);
 }
 
-async function fetchYouTubeData(handle: string) {
+async function fetchYouTubeData(handle: string, clientName?: string) {
   const youtubeApiKey = Deno.env.get('YOUTUBE_DATA_API_KEY');
   
   if (!youtubeApiKey) {
@@ -666,7 +666,7 @@ async function fetchYouTubeData(handle: string) {
   try {
     // Extract channel ID or username from various YouTube URL formats
     let channelIdentifier = handle;
-    let searchType = 'search'; // Use search as default for better results
+    let searchType = 'search';
     
     if (handle.includes('youtube.com/@')) {
       channelIdentifier = handle.split('@')[1];
@@ -691,16 +691,44 @@ async function fetchYouTubeData(handle: string) {
     
     // If we don't have a direct channel ID, search for it
     if (searchType !== 'id') {
-      // Try multiple search approaches for better results
-      const searchAttempts = [
-        `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=${encodeURIComponent(channelIdentifier)}&key=${youtubeApiKey}&maxResults=5`,
-        `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=${encodeURIComponent('@' + channelIdentifier)}&key=${youtubeApiKey}&maxResults=5`,
-        `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=${encodeURIComponent('"' + channelIdentifier + '"')}&key=${youtubeApiKey}&maxResults=5`
-      ];
+      // Create intelligent search queries using client name and handle
+      const searchQueries = [];
       
-      for (let i = 0; i < searchAttempts.length; i++) {
-        const searchUrl = searchAttempts[i];
-        console.log(`YouTube API: Search attempt ${i + 1}`);
+      // Primary searches with exact handle/identifier
+      searchQueries.push(`"${channelIdentifier}"`);
+      searchQueries.push(`@${channelIdentifier}`);
+      
+      // If we have client name, add searches combining name variations
+      if (clientName) {
+        const nameVariations = [
+          clientName,
+          clientName.split(' ')[0], // First name
+          clientName.split(' ').slice(-1)[0], // Last name
+          `${clientName.split(' ')[0]} ${clientName.split(' ').slice(-1)[0]}`, // First + Last
+          `Familjen ${clientName.split(' ').slice(-1)[0]}`, // Family + Last name (Swedish pattern)
+        ];
+        
+        nameVariations.forEach(variation => {
+          searchQueries.push(`"${variation}"`);
+          searchQueries.push(`${variation} kanal`);
+          searchQueries.push(`${variation} family`);
+          searchQueries.push(`${variation} familjen`);
+        });
+      }
+      
+      // Broader searches as fallback
+      searchQueries.push(channelIdentifier);
+      if (clientName) {
+        searchQueries.push(clientName);
+      }
+      
+      console.log(`YouTube API: Trying ${searchQueries.length} search variations`);
+      
+      for (let i = 0; i < Math.min(searchQueries.length, 8); i++) { // Limit to avoid quota issues
+        const query = searchQueries[i];
+        console.log(`YouTube API: Search attempt ${i + 1}: "${query}"`);
+        
+        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=id,snippet&type=channel&q=${encodeURIComponent(query)}&key=${youtubeApiKey}&maxResults=5`;
         
         const searchResponse = await fetch(searchUrl);
         
@@ -712,23 +740,60 @@ async function fetchYouTubeData(handle: string) {
         const searchData = await searchResponse.json();
         
         if (searchData.items && searchData.items.length > 0) {
-          // Find the best match
+          // Score and find the best match
+          let bestMatch = null;
+          let bestScore = 0;
+          
           for (const item of searchData.items) {
-            channelId = item.id.channelId || item.id;
-            if (channelId) {
-              console.log(`YouTube API: Found channel ID: ${channelId}`);
-              break;
+            const title = item.snippet?.title?.toLowerCase() || '';
+            const channelTitle = item.snippet?.channelTitle?.toLowerCase() || '';
+            const description = item.snippet?.description?.toLowerCase() || '';
+            
+            let score = 0;
+            
+            // Scoring algorithm
+            if (clientName) {
+              const nameWords = clientName.toLowerCase().split(' ');
+              nameWords.forEach(word => {
+                if (title.includes(word)) score += 3;
+                if (channelTitle.includes(word)) score += 3;
+                if (description.includes(word)) score += 1;
+              });
+              
+              // Bonus for family channels (Swedish context)
+              if (title.includes('familjen') || title.includes('family')) score += 2;
+            }
+            
+            // Handle matching
+            if (channelIdentifier && (title.includes(channelIdentifier.toLowerCase()) || 
+                channelTitle.includes(channelIdentifier.toLowerCase()))) {
+              score += 5;
+            }
+            
+            // Exact title match bonus
+            if (query.toLowerCase().replace(/"/g, '') === title) score += 10;
+            
+            console.log(`Candidate: "${title}" (Score: ${score})`);
+            
+            if (score > bestScore) {
+              bestScore = score;
+              bestMatch = item;
             }
           }
-          if (channelId) break;
+          
+          if (bestMatch && bestScore > 0) {
+            channelId = bestMatch.id.channelId || bestMatch.id;
+            console.log(`YouTube API: Best match found - "${bestMatch.snippet?.title}" (Score: ${bestScore}, ID: ${channelId})`);
+            break;
+          }
         }
         
         // Rate limiting between attempts
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
       if (!channelId) {
-        console.log('No YouTube channel found for identifier:', channelIdentifier);
+        console.log('No YouTube channel found after trying all search variations');
         return null;
       }
     } else {
