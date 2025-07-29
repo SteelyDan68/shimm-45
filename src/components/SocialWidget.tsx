@@ -154,6 +154,27 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
             posts = stats?.uploads || daily?.uploads || 0;
             likes = stats?.likes || daily?.likes || 0;
             following = stats?.following || daily?.following || 0;
+          } else if (platform === 'youtube' && rawData) {
+            const stats = rawData.statistics?.total;
+            const daily = rawData.daily?.[0]; // Latest day
+            followers = stats?.subscribers || daily?.subscribers || 0; // YouTube uses subscribers
+            posts = stats?.videos || daily?.videos || 0; // YouTube has videos
+            likes = stats?.likes || daily?.likes || 0;
+            following = 0; // YouTube doesn't have following concept
+          }
+          
+          // Check for direct data properties from Social Blade API
+          if (followers === 0 && data.subscribers) {
+            followers = data.subscribers; // YouTube subscribers
+          }
+          if (followers === 0 && data.followers) {
+            followers = data.followers; // Instagram/TikTok followers
+          }
+          if (posts === 0 && data.videos) {
+            posts = data.videos; // YouTube videos
+          }
+          if (posts === 0 && data.posts) {
+            posts = data.posts; // Instagram posts
           }
           
           return (
