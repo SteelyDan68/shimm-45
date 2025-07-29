@@ -88,9 +88,9 @@ export const SentimentAnalysisWidget = ({ sentimentData, onCollectData }: Sentim
     );
   }
 
-  // Get the latest analysis
+  // Get the latest analysis - check both ai_analysis and sentiment_analysis types
   const latestAnalysis = sentimentData
-    .filter(item => item.data_type === 'sentiment_analysis')
+    .filter(item => item.data_type === 'ai_analysis' || item.data_type === 'sentiment_analysis')
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
 
   if (!latestAnalysis) {
