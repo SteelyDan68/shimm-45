@@ -36,12 +36,38 @@ serve(async (req) => {
   }
 
   try {
-    const { client_id, test_mode } = await req.json();
+    const { client_id, test_mode, platform, url } = await req.json();
 
-    // Test mode - check API connectivity
+    // Test mode - check API connectivity or specific platform test
     if (test_mode) {
-      console.log('Running API connectivity tests...');
+      console.log('Running API tests...');
       
+      // YouTube API specific test
+      if (platform === 'youtube' && url) {
+        console.log('YouTube API test mode for URL:', url);
+        
+        let handle = url;
+        if (url.includes('youtube.com/@')) {
+          handle = url.split('@')[1];
+        } else if (url.includes('youtube.com/channel/')) {
+          handle = url.split('/channel/')[1];
+        } else if (url.includes('youtube.com/c/')) {
+          handle = url.split('/c/')[1];
+        }
+        
+        const youtubeData = await fetchYouTubeData(handle);
+        
+        return new Response(JSON.stringify({
+          success: !!youtubeData,
+          data: youtubeData,
+          error: youtubeData ? null : 'Failed to fetch YouTube data'
+        }), {
+          status: youtubeData ? 200 : 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      // General API connectivity tests
       const testResults = {
         firecrawl: await testFirecrawlApi(firecrawlApiKey),
         google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),

@@ -16,10 +16,13 @@ import {
   Upload,
   Download,
   Trash2,
-  FileText
+  FileText,
+  Youtube,
+  Play
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Administration() {
   const { user } = useAuth();
@@ -44,6 +47,12 @@ export function Administration() {
     alertThresholds: false
   });
 
+  const [youtubeTest, setYoutubeTest] = useState({
+    url: 'https://www.youtube.com/@JockeJonna',
+    isLoading: false,
+    result: null as any
+  });
+
   const handleSaveProfile = () => {
     toast({
       title: "Profil sparad",
@@ -63,6 +72,44 @@ export function Administration() {
       title: "Automationsinställningar sparade", 
       description: "Dina automationsinställningar har uppdaterats."
     });
+  };
+
+  const handleTestYouTube = async () => {
+    setYoutubeTest(prev => ({ ...prev, isLoading: true, result: null }));
+    
+    try {
+      const response = await supabase.functions.invoke('data-collector', {
+        body: { 
+          test_mode: true,
+          platform: 'youtube',
+          url: youtubeTest.url 
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      setYoutubeTest(prev => ({ 
+        ...prev, 
+        result: response.data,
+        isLoading: false 
+      }));
+
+      toast({
+        title: "YouTube API Test komplett",
+        description: `Hämtade data för: ${response.data?.channel_title || 'okänd kanal'}`,
+      });
+
+    } catch (error: any) {
+      console.error('YouTube test error:', error);
+      setYoutubeTest(prev => ({ ...prev, isLoading: false }));
+      toast({
+        title: "YouTube API Test misslyckades",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -339,6 +386,71 @@ export function Administration() {
                   <h4 className="font-semibold text-2xl">156</h4>
                   <p className="text-sm text-muted-foreground">AI Insights</p>
                   <Badge variant="secondary" className="mt-1">genererade</Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* YouTube API Test Section */}
+              <div>
+                <h4 className="font-medium mb-3 flex items-center gap-2">
+                  <Youtube className="h-4 w-4" />
+                  YouTube API Test
+                </h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Testa YouTube Data API integration med direkt API-anrop
+                </p>
+                
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="YouTube URL (t.ex. https://www.youtube.com/@JockeJonna)"
+                      value={youtubeTest.url}
+                      onChange={(e) => setYoutubeTest(prev => ({ ...prev, url: e.target.value }))}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={handleTestYouTube}
+                      disabled={youtubeTest.isLoading}
+                      size="sm"
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      {youtubeTest.isLoading ? 'Testar...' : 'Testa YouTube API'}
+                    </Button>
+                  </div>
+
+                  {youtubeTest.result && (
+                    <div className="bg-muted p-4 rounded-lg">
+                      <h5 className="font-medium mb-2">YouTube API Resultat:</h5>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium">Kanal:</span>
+                          <br />
+                          {youtubeTest.result.channel_title || 'N/A'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Prenumeranter:</span>
+                          <br />
+                          {youtubeTest.result.subscribers?.toLocaleString() || 'N/A'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Videos:</span>
+                          <br />
+                          {youtubeTest.result.videos?.toLocaleString() || 'N/A'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Totala visningar:</span>
+                          <br />
+                          {youtubeTest.result.views?.toLocaleString() || 'N/A'}
+                        </div>
+                      </div>
+                      {youtubeTest.result.raw_data?.source && (
+                        <Badge variant="outline" className="mt-2">
+                          Källa: {youtubeTest.result.raw_data.source}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
