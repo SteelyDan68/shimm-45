@@ -664,163 +664,347 @@ async function fetchYouTubeData(handle: string, clientName?: string) {
   }
 
   try {
+    console.log(`YouTube API: Starting search for handle: "${handle}", client: "${clientName}"`);
+    
     // Extract channel ID or username from various YouTube URL formats
     let channelIdentifier = handle;
     let searchType = 'search';
     
     if (handle.includes('youtube.com/@')) {
       channelIdentifier = handle.split('@')[1];
-      searchType = 'search';
     } else if (handle.includes('youtube.com/channel/')) {
       channelIdentifier = handle.split('/channel/')[1];
       searchType = 'id';
     } else if (handle.includes('youtube.com/c/')) {
       channelIdentifier = handle.split('/c/')[1];
-      searchType = 'search';
     } else if (handle.includes('youtube.com/user/')) {
       channelIdentifier = handle.split('/user/')[1];
-      searchType = 'search';
     } else if (handle.startsWith('@')) {
       channelIdentifier = handle.substring(1);
-      searchType = 'search';
     }
-
-    console.log(`YouTube API: Searching for channel: ${channelIdentifier} (type: ${searchType})`);
 
     let channelId = '';
     
-    // If we don't have a direct channel ID, search for it
-    if (searchType !== 'id') {
-      // Create intelligent search queries using client name and handle
-      const searchQueries = [];
-      
-      // Primary searches with exact handle/identifier
-      searchQueries.push(`"${channelIdentifier}"`);
-      searchQueries.push(`@${channelIdentifier}`);
-      
-      // If we have client name, add searches combining name variations
-      if (clientName) {
-        const nameWords = clientName.split(' ');
-        const firstName = nameWords[0];
-        const lastName = nameWords.slice(-1)[0];
-        
-        const nameVariations = [
-          clientName,
-          firstName,
-          lastName,
-          `${firstName} ${lastName}`, // First + Last
-        ];
-        
-        // Add family/channel patterns in multiple languages
-        const familyPatterns = [
-          'Family', 'Familjen', 'Familia', 'Familie', // English, Swedish, Spanish, German
-          'Channel', 'Kanal', 'Canal', // Channel in different languages
-          'Official', 'Officiell', // Official channels
-        ];
-        
-        nameVariations.forEach(variation => {
-          // Exact name searches
-          searchQueries.push(`"${variation}"`);
-          
-          // Family/channel pattern searches
-          familyPatterns.forEach(pattern => {
-            searchQueries.push(`"${pattern} ${variation}"`);
-            searchQueries.push(`"${variation} ${pattern}"`);
-            // For last names specifically (common pattern)
-            if (variation === lastName && nameWords.length > 1) {
-              searchQueries.push(`"${pattern} ${lastName}"`);
-            }
-          });
-          
-          // General variations
-          searchQueries.push(`${variation} channel`);
-          searchQueries.push(`${variation} official`);
-        });
-      }
-      
-      // Broader searches as fallback
-      searchQueries.push(channelIdentifier);
-      if (clientName) {
-        searchQueries.push(clientName);
-      }
-      
-      console.log(`YouTube API: Trying ${searchQueries.length} search variations`);
-      
-      for (let i = 0; i < Math.min(searchQueries.length, 8); i++) { // Limit to avoid quota issues
-        const query = searchQueries[i];
-        console.log(`YouTube API: Search attempt ${i + 1}: "${query}"`);
-        
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=id,snippet&type=channel&q=${encodeURIComponent(query)}&key=${youtubeApiKey}&maxResults=5`;
-        
-        const searchResponse = await fetch(searchUrl);
-        
-        if (!searchResponse.ok) {
-          console.error(`YouTube API search error: ${searchResponse.status}`);
-          continue;
-        }
-        
-        const searchData = await searchResponse.json();
-        
-        if (searchData.items && searchData.items.length > 0) {
-          // Score and find the best match
-          let bestMatch = null;
-          let bestScore = 0;
-          
-          for (const item of searchData.items) {
-            const title = item.snippet?.title?.toLowerCase() || '';
-            const channelTitle = item.snippet?.channelTitle?.toLowerCase() || '';
-            const description = item.snippet?.description?.toLowerCase() || '';
-            
-            let score = 0;
-            
-            // Scoring algorithm
-            if (clientName) {
-              const nameWords = clientName.toLowerCase().split(' ');
-              nameWords.forEach(word => {
-                if (title.includes(word)) score += 3;
-                if (channelTitle.includes(word)) score += 3;
-                if (description.includes(word)) score += 1;
-              });
-              
-              // Bonus for family channels (Swedish context)
-              if (title.includes('familjen') || title.includes('family')) score += 2;
-            }
-            
-            // Handle matching
-            if (channelIdentifier && (title.includes(channelIdentifier.toLowerCase()) || 
-                channelTitle.includes(channelIdentifier.toLowerCase()))) {
-              score += 5;
-            }
-            
-            // Exact title match bonus
-            if (query.toLowerCase().replace(/"/g, '') === title) score += 10;
-            
-            console.log(`Candidate: "${title}" (Score: ${score})`);
-            
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatch = item;
-            }
-          }
-          
-          if (bestMatch && bestScore > 0) {
-            channelId = bestMatch.id.channelId || bestMatch.id;
-            console.log(`YouTube API: Best match found - "${bestMatch.snippet?.title}" (Score: ${bestScore}, ID: ${channelId})`);
-            break;
-          }
-        }
-        
-        // Rate limiting between attempts
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-      
-      if (!channelId) {
-        console.log('No YouTube channel found after trying all search variations');
-        return null;
-      }
-    } else {
+    // If we have a direct channel ID, use it
+    if (searchType === 'id') {
       channelId = channelIdentifier;
+    } else {
+      // Use intelligent multi-strategy search
+      channelId = await findYouTubeChannelWithIntelligentSearch(channelIdentifier, clientName, youtubeApiKey);
     }
+    
+    if (!channelId) {
+      console.log('No YouTube channel found after all search strategies');
+      return null;
+    }
+
+    console.log(`YouTube API: Using channel ID: ${channelId}`);
+
+    // Get channel statistics
+    const statsUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet,brandingSettings&id=${channelId}&key=${youtubeApiKey}`;
+    
+    const statsResponse = await fetch(statsUrl);
+    
+    if (!statsResponse.ok) {
+      console.error(`YouTube API stats error: ${statsResponse.status}`);
+      return null;
+    }
+    
+    const statsData = await statsResponse.json();
+    
+    if (!statsData.items || statsData.items.length === 0) {
+      console.log('No channel data found for ID:', channelId);
+      return null;
+    }
+    
+    const channel = statsData.items[0];
+    const stats = channel.statistics;
+    const snippet = channel.snippet;
+    
+    console.log(`YouTube API: Successfully retrieved data for channel: ${snippet.title}`);
+
+    return {
+      platform: 'youtube',
+      handle: channelIdentifier,
+      url: `https://www.youtube.com/channel/${channelId}`,
+      source: 'youtube_api',
+      last_updated: new Date().toISOString(),
+      followers: 0, // YouTube uses subscribers
+      subscribers: parseInt(stats.subscriberCount || '0'),
+      following: 0, // YouTube doesn't have following
+      posts: 0, // YouTube uses videos
+      videos: parseInt(stats.videoCount || '0'),
+      engagement_rate: 0,
+      avg_likes: 0,
+      avg_comments: 0,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      growth_rate: 0,
+      posts_per_week: 0,
+      avg_views: 0,
+      page_views: parseInt(stats.viewCount || '0'),
+      channel_title: snippet.title,
+      channel_description: snippet.description,
+      raw_data: {
+        statistics: stats,
+        snippet: snippet,
+        channel_id: channelId
+      }
+    };
+
+  } catch (error) {
+    console.error('Error in fetchYouTubeData:', error);
+    return null;
+  }
+}
+
+async function findYouTubeChannelWithIntelligentSearch(handle: string, clientName: string, apiKey: string) {
+  console.log(`Intelligent YouTube search for handle: "${handle}", client: "${clientName}"`);
+  
+  // Strategy 1: Direct handle/identifier searches
+  const directSearchResults = await searchYouTubeChannels([
+    `"@${handle}"`,
+    `"${handle}"`,
+    handle,
+    `@${handle}`
+  ], apiKey, 'Direct handle search');
+  
+  if (directSearchResults.length > 0) {
+    const match = findBestChannelMatch(directSearchResults, handle, clientName, 'handle');
+    if (match) return match.id.channelId || match.id;
+  }
+
+  // Strategy 2: Client name searches (if available)
+  if (clientName && clientName.trim()) {
+    const nameSearchResults = await searchYouTubeChannels(
+      generateClientNameSearchQueries(clientName), 
+      apiKey, 
+      'Client name search'
+    );
+    
+    if (nameSearchResults.length > 0) {
+      const match = findBestChannelMatch(nameSearchResults, handle, clientName, 'name');
+      if (match) return match.id.channelId || match.id;
+    }
+  }
+
+  // Strategy 3: Fuzzy/broad searches
+  const fuzzyQueries = generateFuzzySearchQueries(handle, clientName);
+  const fuzzyResults = await searchYouTubeChannels(fuzzyQueries, apiKey, 'Fuzzy search');
+  
+  if (fuzzyResults.length > 0) {
+    const match = findBestChannelMatch(fuzzyResults, handle, clientName, 'fuzzy');
+    if (match) return match.id.channelId || match.id;
+  }
+
+  return null;
+}
+
+async function searchYouTubeChannels(queries: string[], apiKey: string, strategy: string) {
+  const allResults = [];
+  console.log(`${strategy}: Trying ${queries.length} search queries`);
+  
+  for (let i = 0; i < Math.min(queries.length, 6); i++) { // Limit to avoid quota issues
+    const query = queries[i];
+    console.log(`  Query ${i + 1}: "${query}"`);
+    
+    try {
+      const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=id,snippet&type=channel&q=${encodeURIComponent(query)}&key=${apiKey}&maxResults=8`;
+      
+      const response = await fetch(searchUrl);
+      if (!response.ok) {
+        console.error(`Search error for "${query}": ${response.status}`);
+        continue;
+      }
+      
+      const data = await response.json();
+      if (data.items && data.items.length > 0) {
+        allResults.push(...data.items);
+        console.log(`  Found ${data.items.length} results for "${query}"`);
+      }
+      
+      // Rate limiting
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+    } catch (error) {
+      console.error(`Error searching for "${query}":`, error);
+    }
+  }
+  
+  // Remove duplicates based on channel ID
+  const uniqueResults = allResults.filter((item, index, self) => 
+    index === self.findIndex(t => (t.id.channelId || t.id) === (item.id.channelId || item.id))
+  );
+  
+  console.log(`${strategy}: Found ${uniqueResults.length} unique channels`);
+  return uniqueResults;
+}
+
+function generateClientNameSearchQueries(clientName: string): string[] {
+  if (!clientName || !clientName.trim()) return [];
+  
+  const nameWords = clientName.trim().split(/\s+/);
+  const firstName = nameWords[0];
+  const lastName = nameWords.slice(-1)[0];
+  const fullName = clientName.trim();
+  
+  const queries = [];
+  
+  // Exact name searches
+  queries.push(`"${fullName}"`);
+  
+  // Family/group patterns (international)
+  const familyPatterns = ['Family', 'Familjen', 'Familia', 'Familie', 'Семья'];
+  const channelPatterns = ['Channel', 'Kanal', 'Canal', 'Канал'];
+  const officialPatterns = ['Official', 'Officiell', 'Oficial', 'Официальный'];
+  
+  [...familyPatterns, ...channelPatterns, ...officialPatterns].forEach(pattern => {
+    queries.push(`"${pattern} ${fullName}"`);
+    queries.push(`"${fullName} ${pattern}"`);
+    if (nameWords.length > 1) {
+      queries.push(`"${pattern} ${lastName}"`);
+      queries.push(`"${firstName} ${lastName} ${pattern}"`);
+    }
+  });
+  
+  // Name component searches
+  if (nameWords.length > 1) {
+    queries.push(`"${firstName} ${lastName}"`);
+    queries.push(`${firstName} ${lastName}`);
+  }
+  
+  // Single name searches (for mononyms or when desperate)
+  queries.push(`"${firstName}"`);
+  if (nameWords.length > 1) {
+    queries.push(`"${lastName}"`);
+  }
+  
+  // Broad searches as last resort
+  queries.push(fullName);
+  queries.push(`${firstName} content creator`);
+  queries.push(`${firstName} influencer`);
+  
+  return queries;
+}
+
+function generateFuzzySearchQueries(handle: string, clientName?: string): string[] {
+  const queries = [];
+  
+  // Handle variations
+  if (handle) {
+    // Remove special characters and try variations
+    const cleanHandle = handle.replace(/[^a-zA-Z0-9]/g, '');
+    if (cleanHandle !== handle) {
+      queries.push(cleanHandle);
+    }
+    
+    // Partial handle searches
+    if (handle.length > 4) {
+      queries.push(handle.substring(0, Math.floor(handle.length * 0.7)));
+    }
+  }
+  
+  // Client name fuzzy matches
+  if (clientName) {
+    const words = clientName.split(/\s+/);
+    
+    // Try different word combinations
+    if (words.length > 2) {
+      queries.push(`${words[0]} ${words.slice(-1)[0]}`); // First + Last
+      queries.push(words[0]); // Just first name
+      queries.push(words.slice(-1)[0]); // Just last name
+    }
+    
+    // Common content creator patterns
+    queries.push(`${words[0]} vlogs`);
+    queries.push(`${words[0]} gaming`);
+    queries.push(`${words[0]} lifestyle`);
+  }
+  
+  return queries;
+}
+
+function findBestChannelMatch(channels: any[], handle: string, clientName: string, searchType: string): any {
+  let bestMatch = null;
+  let bestScore = 0;
+  
+  console.log(`Scoring ${channels.length} channels for ${searchType} search`);
+  
+  for (const channel of channels) {
+    const title = (channel.snippet?.title || '').toLowerCase();
+    const description = (channel.snippet?.description || '').toLowerCase();
+    const channelId = channel.id.channelId || channel.id;
+    
+    let score = 0;
+    
+    // Handle matching (exact and partial)
+    if (handle) {
+      const handleLower = handle.toLowerCase();
+      if (title.includes(handleLower)) score += 10;
+      if (description.includes(handleLower)) score += 5;
+      
+      // Partial handle matching for fuzzy search
+      const handleParts = handleLower.split(/[^a-z0-9]/);
+      handleParts.forEach(part => {
+        if (part.length > 2 && title.includes(part)) score += 3;
+      });
+    }
+    
+    // Client name matching
+    if (clientName) {
+      const nameLower = clientName.toLowerCase();
+      const nameWords = nameLower.split(/\s+/);
+      
+      // Exact name match bonus
+      if (title.includes(nameLower)) score += 15;
+      
+      // Individual word matching
+      nameWords.forEach(word => {
+        if (word.length > 2) {
+          if (title.includes(word)) score += 5;
+          if (description.includes(word)) score += 2;
+        }
+      });
+      
+      // Family/channel pattern bonuses
+      const familyPatterns = ['family', 'familjen', 'familia', 'familie'];
+      const channelPatterns = ['channel', 'kanal', 'canal'];
+      const officialPatterns = ['official', 'officiell', 'oficial'];
+      
+      [...familyPatterns, ...channelPatterns, ...officialPatterns].forEach(pattern => {
+        if (title.includes(pattern)) score += 3;
+      });
+    }
+    
+    // Subscriber count bonus (popular channels more likely to be correct)
+    const subCount = parseInt(channel.snippet?.subscriberCount || '0');
+    if (subCount > 100000) score += 2;
+    if (subCount > 1000000) score += 3;
+    
+    // Verified channel bonus
+    if (channel.snippet?.customUrl) score += 2;
+    
+    console.log(`  "${title}" - Score: ${score}`);
+    
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = channel;
+    }
+  }
+  
+  // Minimum score threshold based on search type
+  const minScores = { handle: 8, name: 10, fuzzy: 5 };
+  const minScore = minScores[searchType] || 5;
+  
+  if (bestScore >= minScore) {
+    console.log(`Best match: "${bestMatch.snippet.title}" (Score: ${bestScore})`);
+    return bestMatch;
+  }
+  
+  console.log(`No match found above threshold (${minScore}). Best score was: ${bestScore}`);
+  return null;
+}
 
     console.log(`YouTube API: Found channel ID: ${channelId}`);
 
