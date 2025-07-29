@@ -16,33 +16,61 @@ export type Database = {
     Tables: {
       client_data_cache: {
         Row: {
+          author: string | null
           client_id: string
           created_at: string
           data: Json
           data_type: string
           expires_at: string | null
           id: string
+          image: string | null
+          metadata: Json | null
+          platform: string | null
+          snippet: string | null
           source: string
+          title: string | null
+          url: string | null
         }
         Insert: {
+          author?: string | null
           client_id: string
           created_at?: string
           data: Json
           data_type: string
           expires_at?: string | null
           id?: string
+          image?: string | null
+          metadata?: Json | null
+          platform?: string | null
+          snippet?: string | null
           source: string
+          title?: string | null
+          url?: string | null
         }
         Update: {
+          author?: string | null
           client_id?: string
           created_at?: string
           data?: Json
           data_type?: string
           expires_at?: string | null
           id?: string
+          image?: string | null
+          metadata?: Json | null
+          platform?: string | null
+          snippet?: string | null
           source?: string
+          title?: string | null
+          url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "client_data_cache_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "client_data_cache_client_id_fkey"
             columns: ["client_id"]
@@ -129,7 +157,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      client_analytics_summary: {
+        Row: {
+          client_id: string | null
+          client_name: string | null
+          instagram_data_count: number | null
+          last_update: string | null
+          news_count: number | null
+          sentiment_count: number | null
+          social_metrics_count: number | null
+          tiktok_data_count: number | null
+          youtube_data_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
