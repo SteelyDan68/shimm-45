@@ -189,6 +189,9 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
           if (views === 0 && data.page_views) {
             views = data.page_views; // YouTube total views
           }
+          if (views === 0 && data.views) {
+            views = data.views; // General views
+          }
           
           return (
             <div key={index} className="space-y-4">
