@@ -45,7 +45,7 @@ export const ClientProfile = () => {
   // Filter cache data by type
   const newsItems = getNewsMentions(cacheData);
   const socialMetrics = getSocialMetrics(cacheData);
-  const sentimentData = cacheData?.filter(item => item.data_type === 'sentiment_analysis') || [];
+  const sentimentData = cacheData?.filter(item => item.data_type === 'ai_analysis' && item.metadata?.original_data_type === 'sentiment_analysis') || [];
 
   useEffect(() => {
     if (clientId && user) {

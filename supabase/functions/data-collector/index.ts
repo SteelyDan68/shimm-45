@@ -529,16 +529,20 @@ async function collectSentimentAnalysis(client: any, result: DataCollectionResul
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       console.log('OpenAI API key not found, skipping sentiment analysis');
+      result.errors.push('OpenAI API key not configured - sentiment analysis skipped');
       return;
     }
 
     if (!googleSearchApiKey || !googleSearchEngineId) {
       console.log('Google Search API credentials missing, skipping sentiment analysis');
+      result.errors.push('Google Search API credentials missing - sentiment analysis skipped');
       return;
     }
 
     // 1. Collect data from various sources for sentiment analysis
+    console.log('Collecting sentiment data...');
     const sentimentData = await collectSentimentData(client.name);
+    console.log(`Found ${sentimentData.length} sentiment data items`);
     
     // 2. Twitter API removed due to authentication issues
     // const twitterData = await collectTwitterData(client.name);
@@ -548,14 +552,18 @@ async function collectSentimentAnalysis(client: any, result: DataCollectionResul
     
     if (combinedData.length === 0) {
       console.log('No data found for sentiment analysis');
+      result.errors.push('No data found for sentiment analysis');
       return;
     }
+    
+    console.log(`Analyzing ${combinedData.length} data items with OpenAI...`);
     
     // 4. Analyze with OpenAI
     const analysis = await analyzeSentimentWithAI(client.name, combinedData, openAIApiKey);
     
     // 5. Store the results
     if (analysis) {
+      console.log('Sentiment analysis result:', analysis);
       result.collected_data.social_metrics.push({
         id: `sentiment-${Date.now()}`,
         data_type: 'sentiment_analysis',
@@ -571,6 +579,9 @@ async function collectSentimentAnalysis(client: any, result: DataCollectionResul
       });
       
       console.log('Sentiment analysis completed successfully');
+    } else {
+      console.log('No analysis result from OpenAI');
+      result.errors.push('Failed to generate sentiment analysis from OpenAI');
     }
 
   } catch (error) {
