@@ -21,6 +21,7 @@ import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';
 import { NewsWidget } from '@/components/NewsWidget';
 import { SocialWidget } from '@/components/SocialWidget';
+import { GeminiWidget } from '@/components/GeminiWidget';
 
 interface Client {
   id: string;
@@ -285,9 +286,15 @@ export const ClientDashboard = () => {
           )}
 
           {/* Data Widgets Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <NewsWidget newsItems={newsItems} />
-            <SocialWidget socialMetrics={socialMetrics} />
+          <div className="grid gap-6">
+            {/* Top Row - News and Social */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <NewsWidget newsItems={newsItems} />
+              <SocialWidget socialMetrics={socialMetrics} />
+            </div>
+            
+            {/* Full Width - Gemini Research */}
+            <GeminiWidget clientId={clientId} clientName={client.name} />
           </div>
 
           {/* Summary Stats */}

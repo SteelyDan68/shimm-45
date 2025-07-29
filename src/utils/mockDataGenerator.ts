@@ -57,6 +57,32 @@ export const generateMockData = async (clientId: string) => {
         topics: ['hållbarhet', 'lifestyle', 'mode'],
         confidence: 0.87
       }
+    },
+    // Mock Gemini web research
+    {
+      client_id: clientId,
+      data_type: 'web_research',
+      source: 'gemini',
+      data: {
+        query_type: 'comprehensive',
+        research_results: [
+          {
+            category: 'news_mentions',
+            title: 'Senaste nyhetsomnämnanden',
+            query: 'Sök efter senaste nyhetsomnämnanden',
+            result: 'Hittade 3 relevanta omnämnanden från senaste veckan:\n\n1. Dagens Media: "Influencer marketing når nya höjder"\n2. Resumé: "Authenticity wins in 2024 campaigns"\n3. Marketing Week: "Rising stars in sustainability content"',
+            timestamp: new Date().toISOString()
+          },
+          {
+            category: 'industry_trends',
+            title: 'Branschtrends och konkurrenter',
+            query: 'Analysera aktuella trender inom branchen',
+            result: 'Stora trender 2024:\n• Micro-influencers får större fokus\n• Hållbarhetsbudskap allt viktigare\n• Video-first content dominerar\n• Autenticitet värdesätts högre än reach',
+            timestamp: new Date().toISOString()
+          }
+        ],
+        timestamp: new Date().toISOString()
+      }
     }
   ];
 
