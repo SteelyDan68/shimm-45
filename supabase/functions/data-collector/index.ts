@@ -1237,15 +1237,28 @@ async function storeDataInCache(clientId: string, result: DataCollectionResult) 
 
     // Process social metrics data
     result.collected_data.social_metrics.forEach(item => {
+      // Map data_type to allowed values
+      let mappedDataType = 'social_metrics'; // default
+      if (item.data_type === 'sentiment_analysis') {
+        mappedDataType = 'ai_analysis';
+      } else if (item.data_type === 'discovered_profile') {
+        mappedDataType = 'social_metrics';
+      } else if (item.data_type === 'ai_analysis') {
+        mappedDataType = 'ai_analysis';
+      }
+      
       allData.push({
         client_id: clientId,
-        data_type: item.data_type || 'social_metrics',
+        data_type: mappedDataType,
         source: item.source || 'unknown',
         platform: item.platform,
         title: item.title,
         url: item.url,
         data: item.data,
-        metadata: item.metadata || {},
+        metadata: {
+          ...item.metadata || {},
+          original_data_type: item.data_type // Store original type in metadata
+        },
         created_at: item.created_at || new Date().toISOString()
       });
     });
