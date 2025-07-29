@@ -202,7 +202,16 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
       platforms.push({ platform: 'tiktok', handle: client.tiktok_handle });
     }
     if (client.youtube_channel) {
-      platforms.push({ platform: 'youtube', handle: client.youtube_channel });
+      // Extract username from YouTube URL if it's a full URL
+      let youtubeHandle = client.youtube_channel;
+      if (youtubeHandle.includes('youtube.com/@')) {
+        youtubeHandle = youtubeHandle.split('@')[1];
+      } else if (youtubeHandle.includes('youtube.com/channel/')) {
+        youtubeHandle = youtubeHandle.split('/channel/')[1];
+      } else if (youtubeHandle.includes('youtube.com/c/')) {
+        youtubeHandle = youtubeHandle.split('/c/')[1];
+      }
+      platforms.push({ platform: 'youtube', handle: youtubeHandle });
     }
     if (client.facebook_page) {
       platforms.push({ platform: 'facebook', handle: client.facebook_page });
