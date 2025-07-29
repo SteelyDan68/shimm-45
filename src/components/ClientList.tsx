@@ -3,9 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, User, Mail, Phone } from 'lucide-react';
+import { Eye, User, Mail, Phone, Brain } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useToast } from '@/components/ui/use-toast';
+import { ClientLogicCard } from './ClientLogicCard';
+
 
 interface Client {
   id: string;
@@ -30,6 +32,7 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
   const { toast } = useToast();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
   const fetchClients = async () => {
     if (!user) return;
@@ -93,65 +96,86 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {clients.map((client) => (
-        <Card key={client.id} className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <CardTitle className="text-lg">{client.name}</CardTitle>
-              <Button variant="ghost" size="sm">
-                <Eye className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Badge className={getCategoryColor(client.category)}>
-                {client.category}
-              </Badge>
-              <Badge className={getStatusColor(client.status)}>
-                {client.status}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {client.email && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                {client.email}
-              </div>
-            )}
-            {client.phone && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                {client.phone}
-              </div>
-            )}
-            {(client.instagram_handle || client.tiktok_handle || client.youtube_channel) && (
-              <div className="pt-2">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Sociala kanaler:</p>
-                <div className="flex flex-wrap gap-1">
-                  {client.instagram_handle && (
-                    <Badge variant="outline" className="text-xs">IG: @{client.instagram_handle}</Badge>
-                  )}
-                  {client.tiktok_handle && (
-                    <Badge variant="outline" className="text-xs">TT: @{client.tiktok_handle}</Badge>
-                  )}
-                  {client.youtube_channel && (
-                    <Badge variant="outline" className="text-xs">YT: {client.youtube_channel}</Badge>
-                  )}
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {clients.map((client) => (
+          <Card key={client.id} className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg">{client.name}</CardTitle>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setSelectedClient(selectedClient === client.id ? null : client.id)}
+                  >
+                    <Brain className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm">
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            )}
-            {client.notes && (
-              <div className="pt-2">
-                <p className="text-xs text-muted-foreground line-clamp-2">{client.notes}</p>
+              <div className="flex gap-2">
+                <Badge className={getCategoryColor(client.category)}>
+                  {client.category}
+                </Badge>
+                <Badge className={getStatusColor(client.status)}>
+                  {client.status}
+                </Badge>
               </div>
-            )}
-            <div className="pt-2 text-xs text-muted-foreground">
-              Skapad: {new Date(client.created_at).toLocaleDateString('sv-SE')}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {client.email && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  {client.email}
+                </div>
+              )}
+              {client.phone && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                  {client.phone}
+                </div>
+              )}
+              {(client.instagram_handle || client.tiktok_handle || client.youtube_channel) && (
+                <div className="pt-2">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Sociala kanaler:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {client.instagram_handle && (
+                      <Badge variant="outline" className="text-xs">IG: @{client.instagram_handle}</Badge>
+                    )}
+                    {client.tiktok_handle && (
+                      <Badge variant="outline" className="text-xs">TT: @{client.tiktok_handle}</Badge>
+                    )}
+                    {client.youtube_channel && (
+                      <Badge variant="outline" className="text-xs">YT: {client.youtube_channel}</Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+              {client.notes && (
+                <div className="pt-2">
+                  <p className="text-xs text-muted-foreground line-clamp-2">{client.notes}</p>
+                </div>
+              )}
+              <div className="pt-2 text-xs text-muted-foreground">
+                Skapad: {new Date(client.created_at).toLocaleDateString('sv-SE')}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* AI Logic Analysis Card */}
+      {selectedClient && (
+        <div className="mt-6">
+          <ClientLogicCard 
+            clientId={selectedClient} 
+            clientName={clients.find(c => c.id === selectedClient)?.name || 'Okänd klient'}
+          />
+        </div>
+      )}
     </div>
   );
 };

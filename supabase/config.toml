@@ -1,1 +1,4 @@
 project_id = "gcoorbcglxczmukzcmqs"
+
+[functions.client-logic]
+verify_jwt = false
