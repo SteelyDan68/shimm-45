@@ -621,14 +621,141 @@ async function testSocialBladeApi(apiKey: string | undefined) {
 }
 
 async function fetchRealSocialData(platform: string, handle: string, apiKey: string) {
+  console.log(`Fetching real ${platform} data for handle: ${handle}`);
+  
+  // For YouTube, try YouTube Data API first, then fallback to Social Blade
+  if (platform.toLowerCase() === 'youtube') {
+    const youtubeData = await fetchYouTubeData(handle);
+    if (youtubeData) {
+      return youtubeData;
+    }
+    console.log('YouTube API failed, falling back to Social Blade');
+  }
+  
+  // Use Social Blade for other platforms or as YouTube fallback
+  return await fetchSocialBladeData(platform, handle, apiKey);
+}
+
+async function fetchYouTubeData(handle: string) {
+  const youtubeApiKey = Deno.env.get('YOUTUBE_DATA_API_KEY');
+  
+  if (!youtubeApiKey) {
+    console.log('YouTube Data API key not found, using Social Blade fallback');
+    return null;
+  }
+
+  try {
+    // Extract channel ID or username from various YouTube URL formats
+    let channelIdentifier = handle;
+    let searchType = 'forUsername'; // Default search type
+    
+    if (handle.includes('youtube.com/@')) {
+      channelIdentifier = handle.split('@')[1];
+      searchType = 'forHandle';
+    } else if (handle.includes('youtube.com/channel/')) {
+      channelIdentifier = handle.split('/channel/')[1];
+      searchType = 'id';
+    } else if (handle.includes('youtube.com/c/')) {
+      channelIdentifier = handle.split('/c/')[1];
+      searchType = 'forUsername';
+    } else if (handle.includes('youtube.com/user/')) {
+      channelIdentifier = handle.split('/user/')[1];
+      searchType = 'forUsername';
+    }
+
+    console.log(`YouTube API: Searching for channel with ${searchType}: ${channelIdentifier}`);
+
+    let channelId = '';
+    
+    // If we don't have a direct channel ID, search for it
+    if (searchType !== 'id') {
+      let searchUrl = '';
+      
+      if (searchType === 'forHandle') {
+        searchUrl = `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=@${channelIdentifier}&key=${youtubeApiKey}&maxResults=1`;
+      } else {
+        searchUrl = `https://www.googleapis.com/youtube/v3/channels?part=id&${searchType}=${channelIdentifier}&key=${youtubeApiKey}`;
+      }
+      
+      console.log(`YouTube API: Making search request to find channel ID`);
+      const searchResponse = await fetch(searchUrl);
+      
+      if (!searchResponse.ok) {
+        console.error(`YouTube API search error: ${searchResponse.status}`);
+        return null;
+      }
+      
+      const searchData = await searchResponse.json();
+      
+      if (searchData.items && searchData.items.length > 0) {
+        channelId = searchData.items[0].id.channelId || searchData.items[0].id;
+      } else {
+        console.log('No YouTube channel found for identifier:', channelIdentifier);
+        return null;
+      }
+    } else {
+      channelId = channelIdentifier;
+    }
+
+    console.log(`YouTube API: Found channel ID: ${channelId}`);
+
+    // Get channel statistics
+    const statsUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet,brandingSettings&id=${channelId}&key=${youtubeApiKey}`;
+    
+    console.log(`YouTube API: Getting channel statistics`);
+    const statsResponse = await fetch(statsUrl);
+    
+    if (!statsResponse.ok) {
+      console.error(`YouTube API stats error: ${statsResponse.status}`);
+      return null;
+    }
+    
+    const statsData = await statsResponse.json();
+    
+    if (!statsData.items || statsData.items.length === 0) {
+      console.log('No channel data found for ID:', channelId);
+      return null;
+    }
+    
+    const channel = statsData.items[0];
+    const stats = channel.statistics;
+    const snippet = channel.snippet;
+    
+    console.log(`YouTube API: Successfully retrieved data for channel: ${snippet.title}`);
+    
+    return {
+      platform: 'youtube',
+      handle: handle,
+      subscribers: parseInt(stats.subscriberCount) || 0,
+      videos: parseInt(stats.videoCount) || 0,
+      views: parseInt(stats.viewCount) || 0,
+      channel_id: channelId,
+      channel_title: snippet.title,
+      channel_description: snippet.description,
+      channel_created: snippet.publishedAt,
+      thumbnail_url: snippet.thumbnails?.high?.url,
+      raw_data: {
+        source: 'youtube_api',
+        statistics: stats,
+        snippet: snippet,
+        branding: channel.brandingSettings
+      },
+      last_updated: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    console.error('Error fetching YouTube data:', error);
+    return null;
+  }
+}
+
+async function fetchSocialBladeData(platform: string, handle: string, apiKey: string) {
   const socialBladeClientId = Deno.env.get('SOCIAL_BLADE_CLIENT_ID');
   
   if (!socialBladeClientId) {
     console.log('Social Blade Client ID not found');
     return null;
   }
-
-  console.log(`Fetching real ${platform} data for handle: ${handle}`);
   
   try {
     let apiEndpoint = '';
@@ -739,9 +866,16 @@ async function storeDataInCache(clientId: string, result: DataCollectionResult) 
     });
   }
 
-  // Store social metrics - dynamically set source based on discovery method
+  // Store social metrics - dynamically set source based on data source
   for (const socialItem of result.collected_data.social_metrics) {
-    const source = socialItem.source === 'auto_discovery' ? 'auto_discovery' : 'social_blade';
+    let source = 'social_blade'; // Default
+    
+    if (socialItem.source === 'auto_discovery') {
+      source = 'auto_discovery';
+    } else if (socialItem.raw_data?.source === 'youtube_api') {
+      source = 'youtube_api';
+    }
+    
     cacheEntries.push({
       client_id: clientId,
       data_type: 'social_metrics',
