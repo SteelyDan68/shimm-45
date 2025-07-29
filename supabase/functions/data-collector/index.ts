@@ -1,6 +1,5 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createHmac } from "https://deno.land/std@0.208.0/node/crypto.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 
 const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
@@ -1603,7 +1602,7 @@ async function searchTwitter(query: string, consumerKey: string, consumerSecret:
     const fullUrl = `${url}?${params.toString()}`;
     
     // Generate OAuth 1.0a signature
-    const oauthHeader = generateTwitterOAuthHeader('GET', fullUrl, consumerKey, consumerSecret, accessToken, accessTokenSecret);
+    const oauthHeader = await generateTwitterOAuthHeader('GET', fullUrl, consumerKey, consumerSecret, accessToken, accessTokenSecret);
     
     const response = await fetch(fullUrl, {
       method: 'GET',
@@ -1656,7 +1655,7 @@ async function searchTwitter(query: string, consumerKey: string, consumerSecret:
   }
 }
 
-function generateTwitterOAuthHeader(method: string, url: string, consumerKey: string, consumerSecret: string, accessToken: string, accessTokenSecret: string): string {
+async function generateTwitterOAuthHeader(method: string, url: string, consumerKey: string, consumerSecret: string, accessToken: string, accessTokenSecret: string): Promise<string> {
   const oauthParams = {
     oauth_consumer_key: consumerKey,
     oauth_nonce: Math.random().toString(36).substring(2),
@@ -1666,7 +1665,7 @@ function generateTwitterOAuthHeader(method: string, url: string, consumerKey: st
     oauth_version: '1.0',
   };
 
-  const signature = generateOAuthSignature(method, url, oauthParams, consumerSecret, accessTokenSecret);
+  const signature = await generateOAuthSignature(method, url, oauthParams, consumerSecret, accessTokenSecret);
 
   const signedOAuthParams = {
     ...oauthParams,
@@ -1683,7 +1682,7 @@ function generateTwitterOAuthHeader(method: string, url: string, consumerKey: st
   );
 }
 
-function generateOAuthSignature(method: string, url: string, params: Record<string, string>, consumerSecret: string, tokenSecret: string): string {
+async function generateOAuthSignature(method: string, url: string, params: Record<string, string>, consumerSecret: string, tokenSecret: string): Promise<string> {
   const signatureBaseString = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(
     Object.entries(params)
       .sort()
@@ -1693,9 +1692,25 @@ function generateOAuthSignature(method: string, url: string, params: Record<stri
   
   const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(tokenSecret)}`;
   
-  // Use Node.js crypto for proper HMAC-SHA1
-  const hmacSha1 = createHmac('sha1', signingKey);
-  const signature = hmacSha1.update(signatureBaseString).digest('base64');
+  // Use Web Crypto API for HMAC-SHA1
+  return await generateHmacSha1(signingKey, signatureBaseString);
+}
+
+async function generateHmacSha1(key: string, data: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const dataToSign = encoder.encode(data);
   
-  return signature;
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, dataToSign);
+  const base64Signature = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  
+  return base64Signature;
 }
