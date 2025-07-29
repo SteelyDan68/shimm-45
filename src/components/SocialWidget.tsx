@@ -61,7 +61,13 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
           <div className="text-center py-8 text-muted-foreground">
             <Users className="mx-auto h-12 w-12 mb-4 opacity-50" />
             <p>Inga sociala siffror hittade</p>
-            <p className="text-sm">Kör dataCollector för att samla metrics</p>
+            <p className="text-sm">Kör DataCollector för att samla metrics från:</p>
+            <div className="flex justify-center gap-2 mt-2">
+              <Badge variant="outline" className="text-xs">Instagram</Badge>
+              <Badge variant="outline" className="text-xs">TikTok</Badge>
+              <Badge variant="outline" className="text-xs">YouTube</Badge>
+              <Badge variant="outline" className="text-xs">Facebook</Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -104,6 +110,19 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
       <CardContent className="space-y-6">
         {socialMetrics
           .filter(metric => metric && metric.data && Object.keys(metric.data).length > 0)
+          .reduce((uniqueMetrics: SocialMetrics[], metric) => {
+            // Remove duplicates based on platform and handle
+            const platform = metric.data.platform?.toLowerCase() || 'unknown';
+            const handle = metric.data.handle || '';
+            const exists = uniqueMetrics.find(m => 
+              m.data.platform?.toLowerCase() === platform && 
+              m.data.handle === handle
+            );
+            if (!exists) {
+              uniqueMetrics.push(metric);
+            }
+            return uniqueMetrics;
+          }, [])
           .map((metric, index) => {
           const data = metric.data || {};
           const platform = data.platform?.toLowerCase() || 'unknown';
