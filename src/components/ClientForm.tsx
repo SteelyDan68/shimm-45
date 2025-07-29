@@ -29,6 +29,7 @@ export const ClientForm = ({ onSuccess }: ClientFormProps) => {
     instagram_handle: '',
     tiktok_handle: '',
     youtube_channel: '',
+    facebook_page: '',
     notes: '',
   });
 
@@ -66,6 +67,7 @@ export const ClientForm = ({ onSuccess }: ClientFormProps) => {
         instagram_handle: '',
         tiktok_handle: '',
         youtube_channel: '',
+        facebook_page: '',
         notes: '',
       });
       
@@ -157,6 +159,11 @@ export const ClientForm = ({ onSuccess }: ClientFormProps) => {
               placeholder="YouTube kanal"
               value={formData.youtube_channel}
               onChange={(e) => setFormData({ ...formData, youtube_channel: e.target.value })}
+            />
+            <Input
+              placeholder="Facebook sida"
+              value={formData.facebook_page}
+              onChange={(e) => setFormData({ ...formData, facebook_page: e.target.value })}
             />
             <Select
               value={formData.status}
