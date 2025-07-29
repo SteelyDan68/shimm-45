@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
+import { Administration } from "./pages/Administration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,9 @@ const AppRoutes = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/clients" element={<AllClients />} />
         <Route path="/client/:clientId" element={<ClientProfile />} />
+        <Route path="/admin" element={<Administration />} />
+        <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys - Kommer snart</h1></div>} />
+        <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter - Kommer snart</h1></div>} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
