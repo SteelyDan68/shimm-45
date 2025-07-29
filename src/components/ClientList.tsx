@@ -111,7 +111,11 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
                   >
                     <Brain className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => window.open(`/client/${client.id}`, '_blank')}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                 </div>
