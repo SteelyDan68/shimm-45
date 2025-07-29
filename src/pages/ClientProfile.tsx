@@ -54,6 +54,29 @@ export const ClientProfile = () => {
   useEffect(() => {
     if (clientId && user) {
       loadClientData();
+      
+      // Set up real-time updates for cache data
+      const channel = supabase
+        .channel('client-cache-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'client_data_cache',
+            filter: `client_id=eq.${clientId}`
+          },
+          (payload) => {
+            console.log('New cache data inserted:', payload);
+            // Reload data when new cache items are added
+            loadClientData();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [clientId, user]);
 

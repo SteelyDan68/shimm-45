@@ -34,7 +34,11 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
       console.log('DataCollectorWidget: Data collection successful, updating state...');
       setLastResult(result);
       console.log('DataCollectorWidget: Calling onDataCollected callback...');
-      onDataCollected?.();
+      
+      // Small delay to ensure database write completes before UI refresh
+      setTimeout(() => {
+        onDataCollected?.();
+      }, 1000);
     } else {
       console.log('DataCollectorWidget: Data collection failed');
     }
