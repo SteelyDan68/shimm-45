@@ -107,6 +107,31 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
           .map((metric, index) => {
           const data = metric.data || {};
           const platform = data.platform?.toLowerCase() || 'unknown';
+          const rawData = data.raw_data?.data;
+          
+          // Extract metrics from raw_data structure
+          let followers = 0;
+          let posts = 0;
+          let likes = 0;
+          let engagement = 0;
+          let following = 0;
+          
+          if (platform === 'instagram' && rawData) {
+            const stats = rawData.statistics?.total;
+            const daily = rawData.daily?.[0]; // Latest day
+            followers = stats?.followers || daily?.followers || 0;
+            posts = stats?.media || daily?.media || 0;
+            likes = Math.round(stats?.avg_likes || daily?.avg_likes || 0);
+            engagement = Math.round((stats?.engagement_rate || 0) * 100) / 100;
+            following = stats?.following || daily?.following || 0;
+          } else if (platform === 'tiktok' && rawData) {
+            const stats = rawData.statistics?.total;
+            const daily = rawData.daily?.[0]; // Latest day
+            followers = stats?.followers || daily?.followers || 0;
+            posts = stats?.uploads || daily?.uploads || 0;
+            likes = stats?.likes || daily?.likes || 0;
+            following = stats?.following || daily?.following || 0;
+          }
           
           return (
             <div key={index} className="space-y-4">
@@ -122,7 +147,7 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Followers/Subscribers */}
-                {(data.followers || data.subscribers) && (
+                {followers > 0 && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4 text-blue-600" />
@@ -131,98 +156,92 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
                       </span>
                     </div>
                     <p className="text-xl sm:text-2xl font-bold">
-                      {formatNumber(data.followers || data.subscribers || 0)}
+                      {formatNumber(followers)}
                     </p>
-                    {data.growth_rate !== undefined && (
-                      <div className="flex items-center gap-1 text-xs">
-                        {getGrowthIcon(data.growth_rate)}
-                        <span className={data.growth_rate >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          {data.growth_rate > 0 ? '+' : ''}{data.growth_rate.toFixed(1)}%
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )}
 
                 {/* Engagement Rate */}
-                {data.engagement_rate && (
+                {engagement > 0 && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <Heart className="h-4 w-4 text-red-600" />
                       <span className="text-sm font-medium">Engagement</span>
                     </div>
-                    <p className="text-xl sm:text-2xl font-bold">{data.engagement_rate.toFixed(1)}%</p>
+                    <p className="text-xl sm:text-2xl font-bold">{engagement.toFixed(1)}%</p>
                   </div>
                 )}
 
                 {/* Posts/Videos */}
-                {(data.posts || data.videos) && (
+                {posts > 0 && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <Share2 className="h-4 w-4 text-purple-600" />
                       <span className="text-sm font-medium">
-                        {platform === 'youtube' ? 'Videos' : 'Inlägg'}
+                        {platform === 'youtube' ? 'Videos' : platform === 'tiktok' ? 'Videos' : 'Inlägg'}
                       </span>
                     </div>
                     <p className="text-xl sm:text-2xl font-bold">
-                      {formatNumber(data.posts || data.videos || 0)}
+                      {formatNumber(posts)}
                     </p>
                   </div>
                 )}
 
-                {/* Platform specific metrics */}
-                {platform === 'youtube' && data.views && (
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1">
-                      <MessageCircle className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium">Visningar</span>
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(data.views)}</p>
-                  </div>
-                )}
-
-                {platform === 'tiktok' && data.likes && (
+                {/* TikTok likes */}
+                {platform === 'tiktok' && likes > 0 && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <Heart className="h-4 w-4 text-red-600" />
                       <span className="text-sm font-medium">Likes</span>
                     </div>
-                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(data.likes)}</p>
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(likes)}</p>
                   </div>
                 )}
 
-                {(platform === 'instagram' || platform === 'facebook') && data.following && (
+                {/* Instagram average likes */}
+                {platform === 'instagram' && likes > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Heart className="h-4 w-4 text-red-600" />
+                      <span className="text-sm font-medium">Snitt-likes</span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(likes)}</p>
+                  </div>
+                )}
+
+                {/* Following */}
+                {following > 0 && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4 text-blue-600" />
                       <span className="text-sm font-medium">Följer</span>
                     </div>
-                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(data.following)}</p>
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(following)}</p>
                   </div>
                 )}
               </div>
 
-              {/* Additional metrics */}
-              {(data.likes || data.comments || data.shares || data.avg_likes || data.avg_comments) && (
+              {/* Additional metrics from daily data */}
+              {rawData?.daily?.[0] && (
                 <div className="pt-4 border-t">
-                  <h4 className="text-sm font-medium mb-2">Genomsnittlig aktivitet</h4>
+                  <h4 className="text-sm font-medium mb-2">Senaste aktivitet</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-                    {(data.avg_likes || data.likes) && (
-                      <div className="flex items-center gap-1">
-                        <Heart className="h-3 w-3 text-red-500" />
-                        <span>{formatNumber(data.avg_likes || data.likes || 0)} likes</span>
-                      </div>
-                    )}
-                    {(data.avg_comments || data.comments) && (
+                    {platform === 'instagram' && rawData.daily[0].avg_comments && (
                       <div className="flex items-center gap-1">
                         <MessageCircle className="h-3 w-3 text-blue-500" />
-                        <span>{formatNumber(data.avg_comments || data.comments || 0)} kommentarer</span>
+                        <span>{formatNumber(Math.round(rawData.daily[0].avg_comments))} snitt-kommentarer</span>
                       </div>
                     )}
-                    {data.shares && (
+                    {rawData.daily[0].uploads && platform === 'tiktok' && (
                       <div className="flex items-center gap-1">
                         <Share2 className="h-3 w-3 text-green-500" />
-                        <span>{formatNumber(data.shares)} delningar</span>
+                        <span>{formatNumber(rawData.daily[0].uploads)} totala videos</span>
+                      </div>
+                    )}
+                    {rawData.daily[0].media && platform === 'instagram' && (
+                      <div className="flex items-center gap-1">
+                        <Share2 className="h-3 w-3 text-green-500" />
+                        <span>{formatNumber(rawData.daily[0].media)} totala inlägg</span>
                       </div>
                     )}
                   </div>
