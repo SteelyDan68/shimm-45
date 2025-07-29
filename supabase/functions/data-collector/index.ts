@@ -231,16 +231,8 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
       platforms.push({ platform: 'tiktok', handle: client.tiktok_handle });
     }
     if (client.youtube_channel) {
-      // Extract username from YouTube URL if it's a full URL
-      let youtubeHandle = client.youtube_channel;
-      if (youtubeHandle.includes('youtube.com/@')) {
-        youtubeHandle = youtubeHandle.split('@')[1];
-      } else if (youtubeHandle.includes('youtube.com/channel/')) {
-        youtubeHandle = youtubeHandle.split('/channel/')[1];
-      } else if (youtubeHandle.includes('youtube.com/c/')) {
-        youtubeHandle = youtubeHandle.split('/c/')[1];
-      }
-      platforms.push({ platform: 'youtube', handle: youtubeHandle });
+      // Use the full YouTube URL for better matching
+      platforms.push({ platform: 'youtube', handle: client.youtube_channel });
     }
     if (client.facebook_page) {
       platforms.push({ platform: 'facebook', handle: client.facebook_page });
@@ -674,49 +666,68 @@ async function fetchYouTubeData(handle: string) {
   try {
     // Extract channel ID or username from various YouTube URL formats
     let channelIdentifier = handle;
-    let searchType = 'forUsername'; // Default search type
+    let searchType = 'search'; // Use search as default for better results
     
     if (handle.includes('youtube.com/@')) {
       channelIdentifier = handle.split('@')[1];
-      searchType = 'forHandle';
+      searchType = 'search';
     } else if (handle.includes('youtube.com/channel/')) {
       channelIdentifier = handle.split('/channel/')[1];
       searchType = 'id';
     } else if (handle.includes('youtube.com/c/')) {
       channelIdentifier = handle.split('/c/')[1];
-      searchType = 'forUsername';
+      searchType = 'search';
     } else if (handle.includes('youtube.com/user/')) {
       channelIdentifier = handle.split('/user/')[1];
-      searchType = 'forUsername';
+      searchType = 'search';
+    } else if (handle.startsWith('@')) {
+      channelIdentifier = handle.substring(1);
+      searchType = 'search';
     }
 
-    console.log(`YouTube API: Searching for channel with ${searchType}: ${channelIdentifier}`);
+    console.log(`YouTube API: Searching for channel: ${channelIdentifier} (type: ${searchType})`);
 
     let channelId = '';
     
     // If we don't have a direct channel ID, search for it
     if (searchType !== 'id') {
-      let searchUrl = '';
+      // Try multiple search approaches for better results
+      const searchAttempts = [
+        `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=${encodeURIComponent(channelIdentifier)}&key=${youtubeApiKey}&maxResults=5`,
+        `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=${encodeURIComponent('@' + channelIdentifier)}&key=${youtubeApiKey}&maxResults=5`,
+        `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=${encodeURIComponent('"' + channelIdentifier + '"')}&key=${youtubeApiKey}&maxResults=5`
+      ];
       
-      if (searchType === 'forHandle') {
-        searchUrl = `https://www.googleapis.com/youtube/v3/search?part=id&type=channel&q=@${channelIdentifier}&key=${youtubeApiKey}&maxResults=1`;
-      } else {
-        searchUrl = `https://www.googleapis.com/youtube/v3/channels?part=id&${searchType}=${channelIdentifier}&key=${youtubeApiKey}`;
+      for (let i = 0; i < searchAttempts.length; i++) {
+        const searchUrl = searchAttempts[i];
+        console.log(`YouTube API: Search attempt ${i + 1}`);
+        
+        const searchResponse = await fetch(searchUrl);
+        
+        if (!searchResponse.ok) {
+          console.error(`YouTube API search error: ${searchResponse.status}`);
+          continue;
+        }
+        
+        const searchData = await searchResponse.json();
+        
+        if (searchData.items && searchData.items.length > 0) {
+          // Find the best match
+          for (const item of searchData.items) {
+            channelId = item.id.channelId || item.id;
+            if (channelId) {
+              console.log(`YouTube API: Found channel ID: ${channelId}`);
+              break;
+            }
+          }
+          if (channelId) break;
+        }
+        
+        // Rate limiting between attempts
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      console.log(`YouTube API: Making search request to find channel ID`);
-      const searchResponse = await fetch(searchUrl);
-      
-      if (!searchResponse.ok) {
-        console.error(`YouTube API search error: ${searchResponse.status}`);
-        return null;
-      }
-      
-      const searchData = await searchResponse.json();
-      
-      if (searchData.items && searchData.items.length > 0) {
-        channelId = searchData.items[0].id.channelId || searchData.items[0].id;
-      } else {
+      if (!channelId) {
         console.log('No YouTube channel found for identifier:', channelIdentifier);
         return null;
       }
