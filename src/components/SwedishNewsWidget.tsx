@@ -41,13 +41,13 @@ export const SwedishNewsWidget = ({ newsItems, clientName }: SwedishNewsWidgetPr
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Newspaper className="h-5 w-5" />
-            Svenska nyheter
+            Svenska nyheter & omnämnanden
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <Newspaper className="mx-auto h-12 w-12 mb-4 opacity-50" />
-            <p>Inga svenska nyheter hittade för {clientName}</p>
+            <p>Inga nyheter hittade för {clientName}</p>
             <p className="text-sm mt-2">Kör DataCollector för att söka i svenska medier som:</p>
             <div className="flex flex-wrap justify-center gap-1 mt-2">
               {['Aftonbladet', 'Expressen', 'DN', 'SVD', 'SVT', 'SR', 'GP', 'Sydsvenskan'].map(source => (
@@ -62,11 +62,15 @@ export const SwedishNewsWidget = ({ newsItems, clientName }: SwedishNewsWidgetPr
     );
   }
 
-  // Filter for Swedish news only and sort by date
-  const swedishNews = newsItems
-    .filter(item => item.data.type === 'swedish_news')
+  // Filter for Swedish news and regular news, sort by date
+  const allNews = newsItems
+    .filter(item => item.data && item.data.title) // Basic validation
     .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
     .slice(0, 10); // Show latest 10
+  
+  // Prioritize Swedish news but show all if needed
+  const swedishNews = allNews.filter(item => item.data.type === 'swedish_news');
+  const displayNews = swedishNews.length > 0 ? swedishNews : allNews;
 
   const formatDate = (dateString: string) => {
     try {
@@ -98,17 +102,17 @@ export const SwedishNewsWidget = ({ newsItems, clientName }: SwedishNewsWidgetPr
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Newspaper className="h-5 w-5" />
-          Svenska nyheter
+          Svenska nyheter & omnämnanden
           <Badge variant="outline" className="bg-blue-50 text-blue-700">
-            {swedishNews.length} artiklar
+            {displayNews.length} artiklar
           </Badge>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Senaste omnämnanden av {clientName} i svenska medier
+          Senaste omnämnanden av {clientName} i medier
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {swedishNews.map((item, index) => {
+        {displayNews.map((item, index) => {
           const newsData = item.data;
           
           return (
@@ -189,10 +193,10 @@ export const SwedishNewsWidget = ({ newsItems, clientName }: SwedishNewsWidgetPr
           );
         })}
         
-        {swedishNews.length === 0 && (
+        {displayNews.length === 0 && (
           <div className="text-center py-6 text-muted-foreground">
             <FileText className="mx-auto h-8 w-8 mb-2 opacity-50" />
-            <p>Inga svenska nyheter hittade ännu</p>
+            <p>Inga nyheter hittade ännu</p>
             <p className="text-sm">Prova att köra datainsamling igen</p>
           </div>
         )}

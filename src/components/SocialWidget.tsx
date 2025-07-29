@@ -130,7 +130,7 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
           .map((metric, index) => {
           const data = metric.data || {};
           const platform = data.platform?.toLowerCase() || 'unknown';
-          const rawData = data.raw_data?.data;
+          const rawData = data.raw_data;
           
           // Extract metrics from raw_data structure
           let followers = 0;
@@ -138,32 +138,42 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
           let likes = 0;
           let engagement = 0;
           let following = 0;
+          let views = 0;
           
-          if (platform === 'instagram' && rawData) {
-            const stats = rawData.statistics?.total;
-            const daily = rawData.daily?.[0]; // Latest day
+          if (platform === 'instagram' && rawData?.data) {
+            const stats = rawData.data.statistics?.total;
+            const daily = rawData.data.daily?.[0]; // Latest day
             followers = stats?.followers || daily?.followers || 0;
             posts = stats?.media || daily?.media || 0;
             likes = Math.round(stats?.avg_likes || daily?.avg_likes || 0);
             engagement = Math.round((stats?.engagement_rate || 0) * 100) / 100;
             following = stats?.following || daily?.following || 0;
-          } else if (platform === 'tiktok' && rawData) {
-            const stats = rawData.statistics?.total;
-            const daily = rawData.daily?.[0]; // Latest day
+          } else if (platform === 'tiktok' && rawData?.data) {
+            const stats = rawData.data.statistics?.total;
+            const daily = rawData.data.daily?.[0]; // Latest day
             followers = stats?.followers || daily?.followers || 0;
             posts = stats?.uploads || daily?.uploads || 0;
             likes = stats?.likes || daily?.likes || 0;
             following = stats?.following || daily?.following || 0;
           } else if (platform === 'youtube' && rawData) {
-            const stats = rawData.statistics?.total;
-            const daily = rawData.daily?.[0]; // Latest day
-            followers = stats?.subscribers || daily?.subscribers || 0; // YouTube uses subscribers
-            posts = stats?.videos || daily?.videos || 0; // YouTube has videos
-            likes = stats?.likes || daily?.likes || 0;
+            // YouTube data has different structure from fetchYouTubeData
+            if (rawData.statistics) {
+              // Direct YouTube API data
+              followers = parseInt(rawData.statistics.subscriberCount || '0');
+              posts = parseInt(rawData.statistics.videoCount || '0');
+              views = parseInt(rawData.statistics.viewCount || '0');
+            } else if (rawData.data?.statistics) {
+              // Social Blade YouTube data
+              const stats = rawData.data.statistics.total;
+              const daily = rawData.data.daily?.[0];
+              followers = stats?.subscribers || daily?.subscribers || 0;
+              posts = stats?.videos || daily?.videos || 0;
+              likes = stats?.likes || daily?.likes || 0;
+            }
             following = 0; // YouTube doesn't have following concept
           }
           
-          // Check for direct data properties from Social Blade API
+          // Check for direct data properties (fallback)
           if (followers === 0 && data.subscribers) {
             followers = data.subscribers; // YouTube subscribers
           }
@@ -175,6 +185,9 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
           }
           if (posts === 0 && data.posts) {
             posts = data.posts; // Instagram posts
+          }
+          if (views === 0 && data.page_views) {
+            views = data.page_views; // YouTube total views
           }
           
           return (
@@ -255,6 +268,17 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
                       <span className="text-sm font-medium">Snitt-likes</span>
                     </div>
                     <p className="text-xl sm:text-2xl font-bold">{formatNumber(likes)}</p>
+                  </div>
+                )}
+
+                {/* YouTube total views */}
+                {platform === 'youtube' && views > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium">Totala visningar</span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(views)}</p>
                   </div>
                 )}
 

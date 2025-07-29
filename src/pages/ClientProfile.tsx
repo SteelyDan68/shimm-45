@@ -15,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useClientLogic } from '@/hooks/useClientLogic';
 import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';
-import { NewsWidget } from '@/components/NewsWidget';
 import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { GeminiWidget } from '@/components/GeminiWidget';
@@ -256,11 +255,8 @@ export const ClientProfile = () => {
         {/* Swedish News - Featured prominently */}
         <SwedishNewsWidget newsItems={newsItems} clientName={client.name} />
         
-        {/* News and Social */}
-        <div className="grid gap-6 xl:grid-cols-2">
-          <NewsWidget newsItems={newsItems} />
-          <SocialWidget socialMetrics={socialMetrics} />
-        </div>
+        {/* Social Media Widget - Full Width */}
+        <SocialWidget socialMetrics={socialMetrics} />
         
         {/* Gemini Research */}
         <GeminiWidget clientId={clientId} clientName={client.name} />

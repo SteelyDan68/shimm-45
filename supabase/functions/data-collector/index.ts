@@ -165,16 +165,16 @@ async function collectNewsData(client: any, result: DataCollectionResult) {
     // First collect Swedish news specifically
     await collectSwedishNews(client, result);
 
-    // Then collect general news
+    // Then collect general news for backwards compatibility
     const searchQueries = [
       `"${client.name}" influencer`,
       `"${client.name}" ${client.category}`,
       `${client.name} campaign`
     ];
 
-    for (const query of searchQueries) {
+    for (const query of searchQueries.slice(0, 2)) { // Limit to 2 queries to save quota
       try {
-        const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(query)}&num=3&sort=date`;
+        const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(query)}&num=2&sort=date`;
         
         const response = await fetch(searchUrl);
         
@@ -192,14 +192,13 @@ async function collectNewsData(client: any, result: DataCollectionResult) {
               url: item.link,
               snippet: item.snippet,
               source: item.displayLink,
-              date: new Date().toISOString(), // Google doesn't always provide dates
+              date: new Date().toISOString(),
               query: query,
               type: 'general'
             });
           }
         }
 
-        // Rate limiting delay
         await new Promise(resolve => setTimeout(resolve, 100));
         
       } catch (error) {
