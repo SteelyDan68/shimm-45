@@ -700,19 +700,41 @@ async function fetchYouTubeData(handle: string, clientName?: string) {
       
       // If we have client name, add searches combining name variations
       if (clientName) {
+        const nameWords = clientName.split(' ');
+        const firstName = nameWords[0];
+        const lastName = nameWords.slice(-1)[0];
+        
         const nameVariations = [
           clientName,
-          clientName.split(' ')[0], // First name
-          clientName.split(' ').slice(-1)[0], // Last name
-          `${clientName.split(' ')[0]} ${clientName.split(' ').slice(-1)[0]}`, // First + Last
-          `Familjen ${clientName.split(' ').slice(-1)[0]}`, // Family + Last name (Swedish pattern)
+          firstName,
+          lastName,
+          `${firstName} ${lastName}`, // First + Last
+        ];
+        
+        // Add family/channel patterns in multiple languages
+        const familyPatterns = [
+          'Family', 'Familjen', 'Familia', 'Familie', // English, Swedish, Spanish, German
+          'Channel', 'Kanal', 'Canal', // Channel in different languages
+          'Official', 'Officiell', // Official channels
         ];
         
         nameVariations.forEach(variation => {
+          // Exact name searches
           searchQueries.push(`"${variation}"`);
-          searchQueries.push(`${variation} kanal`);
-          searchQueries.push(`${variation} family`);
-          searchQueries.push(`${variation} familjen`);
+          
+          // Family/channel pattern searches
+          familyPatterns.forEach(pattern => {
+            searchQueries.push(`"${pattern} ${variation}"`);
+            searchQueries.push(`"${variation} ${pattern}"`);
+            // For last names specifically (common pattern)
+            if (variation === lastName && nameWords.length > 1) {
+              searchQueries.push(`"${pattern} ${lastName}"`);
+            }
+          });
+          
+          // General variations
+          searchQueries.push(`${variation} channel`);
+          searchQueries.push(`${variation} official`);
         });
       }
       
