@@ -36,7 +36,9 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Parsing request body...');
     const { client_id, test_mode, platform, url } = await req.json();
+    console.log('Request parameters:', { client_id, test_mode, platform, url });
 
     // Test mode - check API connectivity or specific platform test
     if (test_mode) {
@@ -102,8 +104,11 @@ serve(async (req) => {
     console.log('Processing data collection for client:', client_id);
 
     if (!client_id) {
+      console.error('Missing client_id parameter');
       throw new Error('client_id is required');
     }
+
+    console.log('Fetching client from database...');
 
     // Get client info
     const { data: client, error: clientError } = await supabase
@@ -113,10 +118,12 @@ serve(async (req) => {
       .single();
 
     if (clientError || !client) {
+      console.error('Client not found:', { clientError, client_id });
       throw new Error('Client not found');
     }
 
     console.log('Found client:', client.name);
+    console.log('Starting data collection processes...');
 
     // Initialize result
     const result: DataCollectionResult = {
@@ -140,8 +147,11 @@ serve(async (req) => {
     ];
 
     await Promise.allSettled(promises);
+    
+    console.log('All data collection processes completed');
 
     // Store all collected data in cache
+    console.log('Storing data in cache...');
     await storeDataInCache(client_id, result);
 
     console.log('Data collection completed for:', client.name);
@@ -149,7 +159,8 @@ serve(async (req) => {
     console.log('Social metrics:', result.collected_data.social_metrics.length);
     console.log('Web scraping results:', result.collected_data.web_scraping.length);
     console.log('Errors:', result.errors);
-
+    
+    console.log('Returning successful response...');
     return new Response(JSON.stringify({
       success: true,
       result: result
@@ -159,6 +170,11 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in data-collector function:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return new Response(JSON.stringify({
       error: error.message,
       success: false

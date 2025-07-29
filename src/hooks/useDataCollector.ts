@@ -23,30 +23,38 @@ export const useDataCollector = () => {
     try {
       console.log('Starting data collection for client:', clientId);
       
+      console.log('Calling data-collector edge function...');
       const { data, error } = await supabase.functions.invoke('data-collector', {
         body: { client_id: clientId }
       });
+      console.log('Data collector response:', { data, error });
 
       if (error) {
         console.error('Edge function error:', error);
         throw new Error(`Data collection fel: ${error.message}`);
       }
 
-      if (!data.success) {
-        throw new Error(data.error || 'Okänt fel vid datainsamling');
+      console.log('Checking data.success:', data?.success);
+      if (!data?.success) {
+        console.error('Data collection failed:', data?.error);
+        throw new Error(data?.error || 'Okänt fel vid datainsamling');
       }
 
       const result = data.result;
-      const totalItems = result.collected_data.news.length + 
-                        result.collected_data.social_metrics.length + 
-                        result.collected_data.web_scraping.length;
+      console.log('Data collection result:', result);
+      
+      const totalItems = (result?.collected_data?.news?.length || 0) + 
+                        (result?.collected_data?.social_metrics?.length || 0) + 
+                        (result?.collected_data?.web_scraping?.length || 0);
+      
+      console.log('Total items collected:', totalItems);
 
       toast({
         title: "Datainsamling klar",
-        description: `${totalItems} datapunkter insamlade för ${result.client_name}`,
+        description: `${totalItems} datapunkter insamlade för ${result?.client_name || 'klient'}`,
       });
 
-      if (result.errors.length > 0) {
+      if (result?.errors?.length > 0) {
         console.warn('Collection completed with errors:', result.errors);
         toast({
           title: "Varningar",
@@ -59,6 +67,11 @@ export const useDataCollector = () => {
 
     } catch (error: any) {
       console.error('Error in data collection:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       toast({
         title: "Fel vid datainsamling",
         description: error.message,
