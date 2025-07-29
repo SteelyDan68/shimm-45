@@ -59,9 +59,11 @@ export const SentimentAnalysisWidget = ({ sentimentData, onCollectData }: Sentim
             </p>
             <div className="grid grid-cols-2 gap-2 mb-4">
               <Badge variant="outline" className="text-xs justify-center">Sentimentanalys</Badge>
+              <Badge variant="outline" className="text-xs justify-center">Twitter-övervakning</Badge>
               <Badge variant="outline" className="text-xs justify-center">Branschtrender</Badge>
               <Badge variant="outline" className="text-xs justify-center">Konkurrentanalys</Badge>
               <Badge variant="outline" className="text-xs justify-center">Samarbetsmöjligheter</Badge>
+              <Badge variant="outline" className="text-xs justify-center">Realtidsdata</Badge>
             </div>
             {onCollectData && (
               <button 
@@ -113,7 +115,7 @@ export const SentimentAnalysisWidget = ({ sentimentData, onCollectData }: Sentim
         </CardTitle>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Eye className="h-4 w-4" />
-          Analyserade {analysisData.raw_data_sources} källor
+          Analyserade {analysisData.raw_data_sources} källor (inkl. Twitter)
           <Separator orientation="vertical" className="h-4" />
           {new Date(analysisData.analysis_date).toLocaleDateString('sv-SE')}
         </div>
