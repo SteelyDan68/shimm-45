@@ -71,7 +71,8 @@ serve(async (req) => {
       const testResults = {
         firecrawl: await testFirecrawlApi(firecrawlApiKey),
         google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
-        social_blade: await testSocialBladeApi(socialBladeApiKey)
+        social_blade: await testSocialBladeApi(socialBladeApiKey),
+        youtube_api: await testYouTubeDataApi()
       };
 
       return new Response(JSON.stringify({
@@ -931,5 +932,35 @@ async function storeDataInCache(clientId: string, result: DataCollectionResult) 
     }
 
     console.log(`Stored ${cacheEntries.length} cache entries`);
+  }
+}
+
+async function testYouTubeDataApi() {
+  const youtubeApiKey = Deno.env.get('YOUTUBE_DATA_API_KEY');
+  
+  if (!youtubeApiKey) {
+    return { success: false, message: 'YouTube Data API key saknas' };
+  }
+
+  try {
+    // Test with a known YouTube channel (@JockeJonna)
+    const testData = await fetchYouTubeData('JockeJonna');
+    
+    if (testData && testData.channel_title) {
+      return { 
+        success: true, 
+        message: `YouTube Data API fungerar korrekt (${testData.channel_title})` 
+      };
+    } else {
+      return { 
+        success: false, 
+        message: 'YouTube Data API svarade men ingen kanal hittades' 
+      };
+    }
+  } catch (error) {
+    return { 
+      success: false, 
+      message: `YouTube Data API fel: ${error.message}` 
+    };
   }
 }
