@@ -1006,58 +1006,6 @@ function findBestChannelMatch(channels: any[], handle: string, clientName: strin
   return null;
 }
 
-    console.log(`YouTube API: Found channel ID: ${channelId}`);
-
-    // Get channel statistics
-    const statsUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet,brandingSettings&id=${channelId}&key=${youtubeApiKey}`;
-    
-    console.log(`YouTube API: Getting channel statistics`);
-    const statsResponse = await fetch(statsUrl);
-    
-    if (!statsResponse.ok) {
-      console.error(`YouTube API stats error: ${statsResponse.status}`);
-      return null;
-    }
-    
-    const statsData = await statsResponse.json();
-    
-    if (!statsData.items || statsData.items.length === 0) {
-      console.log('No channel data found for ID:', channelId);
-      return null;
-    }
-    
-    const channel = statsData.items[0];
-    const stats = channel.statistics;
-    const snippet = channel.snippet;
-    
-    console.log(`YouTube API: Successfully retrieved data for channel: ${snippet.title}`);
-    
-    return {
-      platform: 'youtube',
-      handle: handle,
-      subscribers: parseInt(stats.subscriberCount) || 0,
-      videos: parseInt(stats.videoCount) || 0,
-      views: parseInt(stats.viewCount) || 0,
-      channel_id: channelId,
-      channel_title: snippet.title,
-      channel_description: snippet.description,
-      channel_created: snippet.publishedAt,
-      thumbnail_url: snippet.thumbnails?.high?.url,
-      raw_data: {
-        source: 'youtube_api',
-        statistics: stats,
-        snippet: snippet,
-        branding: channel.brandingSettings
-      },
-      last_updated: new Date().toISOString()
-    };
-    
-  } catch (error) {
-    console.error('Error fetching YouTube data:', error);
-    return null;
-  }
-}
-
 async function fetchSocialBladeData(platform: string, handle: string, apiKey: string) {
   const socialBladeClientId = Deno.env.get('SOCIAL_BLADE_CLIENT_ID');
   
