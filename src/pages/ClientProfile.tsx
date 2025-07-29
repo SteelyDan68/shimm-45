@@ -253,7 +253,7 @@ export const ClientProfile = () => {
         />
         
         {/* News and Social */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 xl:grid-cols-2">
           <NewsWidget newsItems={newsItems} />
           <SocialWidget socialMetrics={socialMetrics} />
         </div>

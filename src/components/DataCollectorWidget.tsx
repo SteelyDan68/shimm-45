@@ -97,7 +97,7 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
           <div className="space-y-4 mb-6">
             <div className="text-sm font-medium">Samlar data för {clientName}...</div>
             <Progress value={33} className="w-full" />
-            <div className="grid grid-cols-3 gap-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Newspaper className="h-3 w-3" />
                 Google News

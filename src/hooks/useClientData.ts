@@ -49,9 +49,9 @@ export const useClientData = () => {
   };
 
   const getSocialMetrics = (cacheData: CacheData[]) => {
-    return cacheData
-      .filter(item => item.data_type === 'social_metrics')
-      .slice(0, 1)[0]; // Latest social metrics
+    const socialData = cacheData.filter(item => item.data_type === 'social_metrics');
+    // Return all social metrics, not just the first one
+    return socialData.length > 0 ? socialData : [];
   };
 
   const getAIAnalysis = (cacheData: CacheData[]) => {
