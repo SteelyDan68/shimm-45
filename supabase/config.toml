@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.gemini-research]
 verify_jwt = false
+
+[functions.data-collector]
+verify_jwt = false

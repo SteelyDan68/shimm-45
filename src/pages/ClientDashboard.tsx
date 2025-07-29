@@ -14,7 +14,6 @@ import {
   Settings
 } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
-import { generateMockData } from '@/utils/mockDataGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useClientLogic } from '@/hooks/useClientLogic';
 import { useClientData } from '@/hooks/useClientData';
@@ -22,6 +21,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { NewsWidget } from '@/components/NewsWidget';
 import { SocialWidget } from '@/components/SocialWidget';
 import { GeminiWidget } from '@/components/GeminiWidget';
+import { DataCollectorWidget } from '@/components/DataCollectorWidget';
+import { generateMockData } from '@/utils/mockDataGenerator';
 
 interface Client {
   id: string;
@@ -287,6 +288,13 @@ export const ClientDashboard = () => {
 
           {/* Data Widgets Grid */}
           <div className="grid gap-6">
+            {/* Full Width - Live Data Collection */}
+            <DataCollectorWidget 
+              clientId={clientId} 
+              clientName={client.name}
+              onDataCollected={loadClientData}
+            />
+            
             {/* Top Row - News and Social */}
             <div className="grid gap-6 md:grid-cols-2">
               <NewsWidget newsItems={newsItems} />

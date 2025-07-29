@@ -108,6 +108,7 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
                     variant="ghost" 
                     size="sm"
                     onClick={() => setSelectedClient(selectedClient === client.id ? null : client.id)}
+                    title="AI-analys"
                   >
                     <Brain className="h-4 w-4" />
                   </Button>
@@ -115,6 +116,7 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
                     variant="ghost" 
                     size="sm"
                     onClick={() => window.open(`/client/${client.id}`, '_blank')}
+                    title="Öppna dashboard"
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
