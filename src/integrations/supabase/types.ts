@@ -14,7 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      client_data_cache: {
+        Row: {
+          client_id: string
+          created_at: string
+          data: Json
+          data_type: string
+          expires_at: string | null
+          id: string
+          source: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          data: Json
+          data_type: string
+          expires_at?: string | null
+          id?: string
+          source: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          data?: Json
+          data_type?: string
+          expires_at?: string | null
+          id?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_data_cache_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          category: string
+          created_at: string
+          custom_fields: Json | null
+          email: string | null
+          follower_counts: Json | null
+          id: string
+          instagram_handle: string | null
+          manager_email: string | null
+          manager_name: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          primary_contact_email: string | null
+          primary_contact_name: string | null
+          status: string
+          tags: string[] | null
+          tiktok_handle: string | null
+          updated_at: string
+          user_id: string
+          youtube_channel: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          follower_counts?: Json | null
+          id?: string
+          instagram_handle?: string | null
+          manager_email?: string | null
+          manager_name?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          status?: string
+          tags?: string[] | null
+          tiktok_handle?: string | null
+          updated_at?: string
+          user_id: string
+          youtube_channel?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          follower_counts?: Json | null
+          id?: string
+          instagram_handle?: string | null
+          manager_email?: string | null
+          manager_name?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          status?: string
+          tags?: string[] | null
+          tiktok_handle?: string | null
+          updated_at?: string
+          user_id?: string
+          youtube_channel?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
