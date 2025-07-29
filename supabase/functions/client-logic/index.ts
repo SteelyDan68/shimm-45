@@ -37,7 +37,61 @@ serve(async (req) => {
   }
 
   try {
-    const { client_id } = await req.json();
+    const { client_id, test_mode } = await req.json();
+    
+    // Test mode - check OpenAI API connectivity
+    if (test_mode) {
+      console.log('Testing OpenAI API connectivity...');
+      
+      if (!openAIApiKey) {
+        return new Response(JSON.stringify({
+          success: false,
+          test_success: false,
+          error: 'OpenAI API key not configured'
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      try {
+        const testResponse = await fetch('https://api.openai.com/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+          }
+        });
+
+        if (testResponse.ok) {
+          return new Response(JSON.stringify({
+            success: true,
+            test_success: true,
+            message: 'OpenAI API fungerar korrekt'
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          return new Response(JSON.stringify({
+            success: false,
+            test_success: false,
+            error: `OpenAI API error: ${testResponse.status}`
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      } catch (error) {
+        return new Response(JSON.stringify({
+          success: false,
+          test_success: false,
+          error: `OpenAI API network error: ${error.message}`
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     console.log('Processing logic for client:', client_id);
 
     if (!client_id) {

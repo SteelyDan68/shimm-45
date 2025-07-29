@@ -21,7 +21,57 @@ serve(async (req) => {
   }
 
   try {
-    const { client_id, query_type = 'comprehensive' } = await req.json();
+    const { client_id, query_type = 'comprehensive', test_mode } = await req.json();
+    
+    // Test mode - check Gemini API connectivity
+    if (test_mode) {
+      console.log('Testing Gemini API connectivity...');
+      
+      if (!geminiApiKey) {
+        return new Response(JSON.stringify({
+          success: false,
+          test_success: false,
+          error: 'Gemini API key not configured'
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      try {
+        const testResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
+
+        if (testResponse.ok) {
+          return new Response(JSON.stringify({
+            success: true,
+            test_success: true,
+            message: 'Gemini API fungerar korrekt'
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          return new Response(JSON.stringify({
+            success: false,
+            test_success: false,
+            error: `Gemini API error: ${testResponse.status}`
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      } catch (error) {
+        return new Response(JSON.stringify({
+          success: false,
+          test_success: false,
+          error: `Gemini API network error: ${error.message}`
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+    
     console.log('Processing Gemini research for client:', client_id, 'type:', query_type);
 
     if (!client_id) {
