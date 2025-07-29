@@ -12,7 +12,8 @@ import {
   Search,
   Share2,
   AlertTriangle,
-  Youtube
+  Youtube,
+  Twitter
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +32,7 @@ export const ApiStatusChecker = () => {
     { name: 'OpenAI API', icon: Brain, status: 'pending', message: 'Inte testad än' },
     { name: 'Gemini API', icon: Brain, status: 'pending', message: 'Inte testad än' },
     { name: 'YouTube Data API', icon: Youtube, status: 'pending', message: 'Inte testad än' },
+    { name: 'Twitter API', icon: Twitter, status: 'pending', message: 'Inte testad än' },
     { name: 'Firecrawl API', icon: Globe, status: 'pending', message: 'Inte testad än' },
     { name: 'Google Search API', icon: Search, status: 'pending', message: 'Inte testad än' },
     { name: 'Social Blade API', icon: Share2, status: 'pending', message: 'Inte testad än' }
@@ -136,6 +138,7 @@ export const ApiStatusChecker = () => {
         updateApiStatus('Google Search API', 'error', `Fel: ${error.message}`, responseTime);
         updateApiStatus('Social Blade API', 'error', `Fel: ${error.message}`, responseTime);
         updateApiStatus('YouTube Data API', 'error', `Fel: ${error.message}`, responseTime);
+        updateApiStatus('Twitter API', 'error', `Fel: ${error.message}`, responseTime);
       } else if (data?.test_results) {
         // Update each API based on individual test results
         const results = data.test_results;
