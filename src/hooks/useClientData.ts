@@ -8,6 +8,7 @@ interface CacheData {
   source: string;
   data: any;
   created_at: string;
+  metadata?: any;
 }
 
 export const useClientData = () => {

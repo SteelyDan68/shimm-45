@@ -28,10 +28,15 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
   const { collectData, isCollecting } = useDataCollector();
 
   const handleCollectData = async () => {
+    console.log('DataCollectorWidget: Starting data collection...');
     const result = await collectData(clientId);
     if (result) {
+      console.log('DataCollectorWidget: Data collection successful, updating state...');
       setLastResult(result);
+      console.log('DataCollectorWidget: Calling onDataCollected callback...');
       onDataCollected?.();
+    } else {
+      console.log('DataCollectorWidget: Data collection failed');
     }
   };
 

@@ -45,7 +45,11 @@ export const ClientProfile = () => {
   // Filter cache data by type
   const newsItems = getNewsMentions(cacheData);
   const socialMetrics = getSocialMetrics(cacheData);
-  const sentimentData = cacheData?.filter(item => item.data_type === 'ai_analysis' && item.metadata?.original_data_type === 'sentiment_analysis') || [];
+  const sentimentData = cacheData?.filter(item => {
+    console.log('Checking cache item:', item.data_type, item.metadata?.original_data_type);
+    return item.data_type === 'ai_analysis' && item.metadata?.original_data_type === 'sentiment_analysis';
+  }) || [];
+  console.log('Filtered sentiment data:', sentimentData.length, sentimentData);
 
   useEffect(() => {
     if (clientId && user) {
@@ -80,7 +84,10 @@ export const ClientProfile = () => {
       setClient(clientData);
 
       // Load cache data
+      console.log('Loading cache data for client:', clientId);
       const cache = await getClientCacheData(clientId);
+      console.log('Loaded cache data:', cache.length, 'items');
+      console.log('Cache data types:', cache.map(item => ({ type: item.data_type, metadata: item.metadata?.original_data_type })));
       setCacheData(cache);
 
     } catch (error) {
@@ -105,8 +112,10 @@ export const ClientProfile = () => {
   };
 
   const collectData = async (clientId: string) => {
+    console.log('collectData called - reloading client data...');
     // This will trigger the data collection via DataCollectorWidget
     await loadClientData();
+    console.log('Client data reloaded, cache data length:', cacheData.length);
   };
 
 
