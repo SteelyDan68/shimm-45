@@ -17,6 +17,7 @@ import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';
 import { NewsWidget } from '@/components/NewsWidget';
 import { SocialWidget } from '@/components/SocialWidget';
+import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { GeminiWidget } from '@/components/GeminiWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
 
@@ -251,6 +252,9 @@ export const ClientProfile = () => {
           clientName={client.name}
           onDataCollected={loadClientData}
         />
+        
+        {/* Swedish News - Featured prominently */}
+        <SwedishNewsWidget newsItems={newsItems} clientName={client.name} />
         
         {/* News and Social */}
         <div className="grid gap-6 xl:grid-cols-2">

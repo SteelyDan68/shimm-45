@@ -162,6 +162,10 @@ async function collectNewsData(client: any, result: DataCollectionResult) {
       throw new Error('Google Search API credentials missing');
     }
 
+    // First collect Swedish news specifically
+    await collectSwedishNews(client, result);
+
+    // Then collect general news
     const searchQueries = [
       `"${client.name}" influencer`,
       `"${client.name}" ${client.category}`,
@@ -189,7 +193,8 @@ async function collectNewsData(client: any, result: DataCollectionResult) {
               snippet: item.snippet,
               source: item.displayLink,
               date: new Date().toISOString(), // Google doesn't always provide dates
-              query: query
+              query: query,
+              type: 'general'
             });
           }
         }
@@ -207,6 +212,137 @@ async function collectNewsData(client: any, result: DataCollectionResult) {
     console.error('Error collecting news data:', error);
     result.errors.push(`News collection error: ${error.message}`);
   }
+}
+
+async function collectSwedishNews(client: any, result: DataCollectionResult) {
+  console.log('Collecting Swedish news for:', client.name);
+  
+  // Swedish news sources to search in
+  const swedishNewsSources = [
+    'aftonbladet.se',
+    'expressen.se', 
+    'dn.se',
+    'svd.se',
+    'svt.se',
+    'sr.se',
+    'gp.se',
+    'sydsvenskan.se',
+    'tt.se',
+    'dagens.se',
+    'metro.se'
+  ];
+
+  try {
+    // Create site-specific search queries for Swedish news
+    const searchTerms = [
+      `"${client.name}"`,
+      client.name,
+      `${client.name} influencer`
+    ];
+
+    for (const term of searchTerms) {
+      try {
+        // Search in multiple Swedish news sites
+        const siteQueries = swedishNewsSources.slice(0, 5).map(site => 
+          `${term} site:${site}`
+        );
+
+        for (const siteQuery of siteQueries) {
+          try {
+            // Use Google Custom Search with date sorting for fresh news
+            const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(siteQuery)}&num=2&sort=date&dateRestrict=m3`; // Last 3 months
+            
+            const response = await fetch(searchUrl);
+            
+            if (!response.ok) {
+              console.log(`Search failed for ${siteQuery}: ${response.status}`);
+              continue;
+            }
+
+            const data = await response.json();
+            
+            if (data.items && data.items.length > 0) {
+              for (const item of data.items) {
+                // Extract additional metadata if available
+                const newsItem = {
+                  title: item.title,
+                  url: item.link,
+                  snippet: item.snippet,
+                  source: item.displayLink,
+                  date: item.pagemap?.metatags?.[0]?.['article:published_time'] || 
+                        item.pagemap?.metatags?.[0]?.['datePublished'] ||
+                        extractDateFromSnippet(item.snippet) ||
+                        new Date().toISOString(),
+                  query: term,
+                  type: 'swedish_news',
+                  image: item.pagemap?.cse_image?.[0]?.src || 
+                         item.pagemap?.metatags?.[0]?.['og:image'] ||
+                         item.pagemap?.metatags?.[0]?.image,
+                  author: item.pagemap?.metatags?.[0]?.author,
+                  newsSource: item.displayLink
+                };
+
+                result.collected_data.news.push(newsItem);
+                console.log(`Found Swedish news: ${item.title} from ${item.displayLink}`);
+              }
+            }
+
+            // Rate limiting - important for API quotas
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+          } catch (error) {
+            console.error(`Error searching ${siteQuery}:`, error);
+          }
+        }
+
+      } catch (error) {
+        console.error(`Error with search term ${term}:`, error);
+      }
+    }
+
+    console.log(`Swedish news collection completed. Found ${result.collected_data.news.filter(n => n.type === 'swedish_news').length} Swedish news items`);
+
+  } catch (error) {
+    console.error('Error collecting Swedish news:', error);
+    result.errors.push(`Swedish news collection failed: ${error.message}`);
+  }
+}
+
+function extractDateFromSnippet(snippet: string): string | null {
+  // Try to extract date from snippet using common Swedish date patterns
+  const datePatterns = [
+    /(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i,
+    /(\d{4})-(\d{2})-(\d{2})/,
+    /(\d{1,2})\/(\d{1,2})\/(\d{4})/,
+    /(\d{1,2})\s+(\w+)\s+sedan/i // "X dagar sedan"
+  ];
+
+  for (const pattern of datePatterns) {
+    const match = snippet.match(pattern);
+    if (match) {
+      try {
+        // Convert Swedish month names to English for Date parsing
+        const swedishMonths = {
+          'januari': 'January', 'februari': 'February', 'mars': 'March',
+          'april': 'April', 'maj': 'May', 'juni': 'June',
+          'juli': 'July', 'augusti': 'August', 'september': 'September',
+          'oktober': 'October', 'november': 'November', 'december': 'December'
+        };
+        
+        let dateString = match[0];
+        Object.entries(swedishMonths).forEach(([sv, en]) => {
+          dateString = dateString.replace(new RegExp(sv, 'i'), en);
+        });
+        
+        return new Date(dateString).toISOString();
+      } catch {
+        // If date parsing fails, continue to next pattern
+        continue;
+      }
+    }
+  }
+  
+  return null;
 }
 
 async function collectSocialData(client: any, result: DataCollectionResult) {
