@@ -99,7 +99,7 @@ serve(async (req) => {
     const cacheEntries = [
       {
         client_id: client_id,
-        data_type: 'web_research',
+        data_type: 'ai_analysis',
         source: 'gemini',
         data: {
           query_type: query_type,
@@ -214,38 +214,61 @@ function generateResearchQueries(client: any, queryType: string) {
   return baseQueries;
 }
 
-async function callGeminiAPI(prompt: string) {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 2048,
-      }
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Gemini API error:', response.status, errorText);
-    throw new Error(`Gemini API error: ${response.status}`);
-  }
-
-  const data = await response.json();
+async function callGeminiAPI(prompt: string, retryCount = 0) {
+  const maxRetries = 3;
+  const retryDelay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
   
-  if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-    throw new Error('Invalid response from Gemini API');
-  }
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        }
+      }),
+    });
 
-  return data.candidates[0].content.parts[0].text;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error:', response.status, errorText);
+      
+      // If it's a 503 (service unavailable) or 429 (rate limit), retry
+      if ((response.status === 503 || response.status === 429) && retryCount < maxRetries) {
+        console.log(`Retrying Gemini API call in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return await callGeminiAPI(prompt, retryCount + 1);
+      }
+      
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      throw new Error('Invalid response from Gemini API');
+    }
+
+    return data.candidates[0].content.parts[0].text;
+    
+  } catch (error) {
+    // If it's a network error and we haven't exceeded retries, try again
+    if (retryCount < maxRetries && (error.name === 'TypeError' || error.message.includes('fetch'))) {
+      console.log(`Network error, retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries + 1})`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      return await callGeminiAPI(prompt, retryCount + 1);
+    }
+    
+    throw error;
+  }
 }
