@@ -9,7 +9,9 @@ import {
   TrendingDown,
   Instagram,
   Twitter,
-  Youtube
+  Youtube,
+  Music,
+  Facebook
 } from 'lucide-react';
 
 interface SocialMetrics {
@@ -64,6 +66,8 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
       case 'instagram': return <Instagram className="h-4 w-4" />;
       case 'twitter': return <Twitter className="h-4 w-4" />;
       case 'youtube': return <Youtube className="h-4 w-4" />;
+      case 'tiktok': return <Music className="h-4 w-4" />;
+      case 'facebook': return <Facebook className="h-4 w-4" />;
       default: return <Users className="h-4 w-4" />;
     }
   };

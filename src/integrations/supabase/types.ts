@@ -58,6 +58,7 @@ export type Database = {
           created_at: string
           custom_fields: Json | null
           email: string | null
+          facebook_page: string | null
           follower_counts: Json | null
           id: string
           instagram_handle: string | null
@@ -81,6 +82,7 @@ export type Database = {
           created_at?: string
           custom_fields?: Json | null
           email?: string | null
+          facebook_page?: string | null
           follower_counts?: Json | null
           id?: string
           instagram_handle?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           created_at?: string
           custom_fields?: Json | null
           email?: string | null
+          facebook_page?: string | null
           follower_counts?: Json | null
           id?: string
           instagram_handle?: string | null
