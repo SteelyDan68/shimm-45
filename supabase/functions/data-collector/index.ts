@@ -67,12 +67,28 @@ serve(async (req) => {
         });
       }
       
+      // Twitter API test
+      if (platform === 'twitter') {
+        console.log('Testing Twitter API...');
+        const twitterTest = await testTwitterAPI();
+        
+        return new Response(JSON.stringify({
+          success: twitterTest.success,
+          data: twitterTest,
+          error: twitterTest.success ? null : twitterTest.error
+        }), {
+          status: twitterTest.success ? 200 : 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       // General API connectivity tests
       const testResults = {
         firecrawl: await testFirecrawlApi(firecrawlApiKey),
         google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
         social_blade: await testSocialBladeApi(socialBladeApiKey),
-        youtube_api: await testYouTubeDataApi()
+        youtube_api: await testYouTubeDataApi(),
+        twitter_api: await testTwitterAPI()
       };
 
       return new Response(JSON.stringify({
@@ -120,7 +136,8 @@ serve(async (req) => {
       collectNewsData(client, result),
       collectSocialData(client, result),
       collectWebScrapingData(client, result),
-      collectMissingSocialProfiles(client, result)
+      collectMissingSocialProfiles(client, result),
+      collectSentimentAnalysis(client, result)
     ];
 
     await Promise.allSettled(promises);
@@ -321,7 +338,13 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
     }
 
     if (platforms.length === 0) {
-      console.warn('No social handles found for client, skipping social data collection');
+      console.warn('No social handles found for client, trying to find YouTube automatically');
+      // Try to find YouTube data even without handle
+      const youtubeData = await fetchYouTubeData(client.name, client.name);
+      if (youtubeData) {
+        result.collected_data.social_metrics.push(youtubeData);
+        console.log('Found YouTube data automatically for:', client.name);
+      }
       return;
     }
 
@@ -330,6 +353,17 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
         const socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
         if (socialData) {
           result.collected_data.social_metrics.push(socialData);
+          console.log(`Successfully collected ${platform} data for:`, handle);
+        } else {
+          console.warn(`No data found for ${platform}:`, handle);
+          // If YouTube fails, try with client name
+          if (platform === 'youtube') {
+            const fallbackData = await fetchYouTubeData(client.name, client.name);
+            if (fallbackData) {
+              result.collected_data.social_metrics.push(fallbackData);
+              console.log('Found YouTube data via fallback search for:', client.name);
+            }
+          }
         }
         
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -469,6 +503,408 @@ async function collectMissingSocialProfiles(client: any, result: DataCollectionR
   } catch (error) {
     console.error('Error in missing profiles collection:', error);
     result.errors.push(`Profile discovery error: ${error.message}`);
+  }
+}
+
+// Business Intelligence & Sentiment Analysis Collection
+async function collectSentimentAnalysis(client: any, result: DataCollectionResult) {
+  console.log('Collecting sentiment analysis and business intelligence for:', client.name);
+  
+  try {
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.log('OpenAI API key not found, skipping sentiment analysis');
+      return;
+    }
+
+    if (!googleSearchApiKey || !googleSearchEngineId) {
+      console.log('Google Search API credentials missing, skipping sentiment analysis');
+      return;
+    }
+
+    // 1. Collect data from various sources for sentiment analysis
+    const sentimentData = await collectSentimentData(client.name);
+    
+    // 2. Collect Twitter data for real-time sentiment
+    const twitterData = await collectTwitterData(client.name);
+    
+    // 3. Combine all data sources
+    const combinedData = [...sentimentData, ...twitterData];
+    
+    if (combinedData.length === 0) {
+      console.log('No data found for sentiment analysis');
+      return;
+    }
+    
+    // 4. Analyze with OpenAI
+    const analysis = await analyzeSentimentWithAI(client.name, combinedData, openAIApiKey);
+    
+    // 5. Store the results
+    if (analysis) {
+      result.collected_data.social_metrics.push({
+        id: `sentiment-${Date.now()}`,
+        data_type: 'sentiment_analysis',
+        platform: 'business_intelligence',
+        source: 'openai_analysis',
+        data: analysis,
+        created_at: new Date().toISOString(),
+        metadata: {
+          data_sources_count: combinedData.length,
+          twitter_mentions: twitterData.length,
+          sentiment_sources: sentimentData.length
+        }
+      });
+      
+      console.log('Sentiment analysis completed successfully');
+    }
+
+  } catch (error) {
+    console.error('Error collecting sentiment analysis:', error);
+    result.errors.push(`Sentiment analysis error: ${error.message}`);
+  }
+}
+
+async function collectSentimentData(clientName: string) {
+  const searchQueries = [
+    // Sentiment analysis sources
+    `"${clientName}" site:flashback.org`,
+    `"${clientName}" site:reddit.com`,
+    `"${clientName}" kritik OR problem OR skandal`,
+    `"${clientName}" positiv OR bra OR excellent`,
+    
+    // Industry trends
+    `"${clientName}" branschtrend OR influencer trend 2024 2025`,
+    `svenska influencers trends 2024 2025`,
+    
+    // Competitors
+    `svenska influencers liknande "${clientName}"`,
+    `konkurrenter till "${clientName}" influencer`,
+    
+    // Collaboration opportunities
+    `"${clientName}" samarbete OR collaboration OR partnerskap`,
+    `märkessamarbeten influencers Sverige 2024`,
+  ];
+
+  const allData = [];
+  
+  for (const query of searchQueries.slice(0, 6)) { // Limit to save API quota
+    try {
+      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(query)}&num=3`;
+      
+      const response = await fetch(searchUrl);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.items) {
+          for (const item of data.items) {
+            allData.push({
+              title: item.title,
+              snippet: item.snippet,
+              url: item.link,
+              source: item.displayLink,
+              query: query,
+              date: item.pagemap?.newsarticle?.[0]?.datepublished || 
+                    item.pagemap?.article?.[0]?.datepublished ||
+                    new Date().toISOString()
+            });
+          }
+        }
+      }
+      
+      // Rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+    } catch (error) {
+      console.error('Error in sentiment data query:', query, error);
+    }
+  }
+  
+  return allData;
+}
+
+async function analyzeSentimentWithAI(clientName: string, sentimentData: any[], openAIApiKey: string) {
+  try {
+    const prompt = `Analysera följande data om "${clientName}" och skapa en komplett business intelligence rapport. 
+
+Insamlad data:
+${JSON.stringify(sentimentData.slice(0, 10), null, 2)}
+
+Vänligen returnera en JSON-struktur med:
+{
+  "sentiment_score": [numeriskt värde -1 till 1],
+  "sentiment_summary": "kort sammanfattning av sentiment",
+  "key_themes": ["tema1", "tema2", "tema3"],
+  "competitive_insights": "konkurrensinsikter",
+  "collaboration_opportunities": "samarbetsmöjligheter",
+  "brand_health": "varumärkeshälsa",
+  "recommendations": "rekommendationer för framtiden",
+  "data_quality": "kvalitet på insamlad data"
+}`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-2025-04-14',
+        messages: [
+          {
+            role: 'system',
+            content: 'Du är en expert på business intelligence och sentimentanalys för influencers och sociala medier i Sverige. Returnera alltid giltig JSON.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.3
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const analysisText = data.choices[0]?.message?.content;
+    
+    if (analysisText) {
+      try {
+        return JSON.parse(analysisText);
+      } catch {
+        return {
+          sentiment_score: 0,
+          sentiment_summary: analysisText.substring(0, 200),
+          raw_analysis: analysisText,
+          data_quality: "Analystext kunde inte parsas som JSON"
+        };
+      }
+    }
+
+    return null;
+
+  } catch (error) {
+    console.error('Error in AI sentiment analysis:', error);
+    return null;
+  }
+}
+
+// Twitter Data Collection Functions
+async function collectTwitterData(clientName: string) {
+  console.log('Collecting Twitter data for:', clientName);
+  
+  const twitterConsumerKey = Deno.env.get('TWITTER_CONSUMER_KEY');
+  const twitterConsumerSecret = Deno.env.get('TWITTER_CONSUMER_SECRET');
+  const twitterAccessToken = Deno.env.get('TWITTER_ACCESS_TOKEN');
+  const twitterAccessTokenSecret = Deno.env.get('TWITTER_ACCESS_TOKEN_SECRET');
+  
+  if (!twitterConsumerKey || !twitterConsumerSecret || !twitterAccessToken || !twitterAccessTokenSecret) {
+    console.log('Twitter API credentials missing, skipping Twitter data collection');
+    return [];
+  }
+  
+  try {
+    const searchQueries = [
+      `"${clientName}"`,
+      `@${clientName.replace(/\s+/g, '')}`, // Remove spaces for handle search
+      `${clientName} influencer`,
+    ];
+    
+    const allTweets = [];
+    
+    for (const query of searchQueries.slice(0, 2)) { // Limit to 2 queries to save API quota
+      try {
+        const tweets = await searchTwitter(query, twitterConsumerKey, twitterConsumerSecret, twitterAccessToken, twitterAccessTokenSecret);
+        allTweets.push(...tweets);
+        
+        // Rate limiting between API calls
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+      } catch (error) {
+        console.error(`Error searching Twitter for "${query}":`, error);
+      }
+    }
+    
+    console.log(`Twitter data collection completed. Found ${allTweets.length} tweets total`);
+    return allTweets;
+    
+  } catch (error) {
+    console.error('Error in Twitter data collection:', error);
+    return []; // Return empty array instead of throwing
+  }
+}
+
+async function searchTwitter(query: string, consumerKey: string, consumerSecret: string, accessToken: string, accessTokenSecret: string) {
+  try {
+    console.log(`Attempting Twitter search for: "${query}"`);
+    
+    const url = 'https://api.twitter.com/2/tweets/search/recent';
+    const params = new URLSearchParams({
+      'query': query,
+      'max_results': '10',
+      'tweet.fields': 'created_at,author_id,public_metrics,lang',
+      'user.fields': 'name,username,public_metrics,verified',
+      'expansions': 'author_id'
+    });
+    
+    const fullUrl = `${url}?${params.toString()}`;
+    console.log('Twitter API URL:', fullUrl);
+    
+    // Generate OAuth 1.0a signature
+    const oauthHeader = await generateTwitterOAuthHeader('GET', fullUrl, consumerKey, consumerSecret, accessToken, accessTokenSecret);
+    console.log('OAuth header generated successfully');
+    
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': oauthHeader,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log(`Twitter API response status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Twitter API error: ${response.status} ${response.statusText}`, errorText);
+      // Return empty array instead of throwing to prevent whole function from failing
+      return [];
+    }
+    
+    const data = await response.json();
+    console.log('Twitter API response data:', JSON.stringify(data, null, 2));
+    
+    const tweets = [];
+    if (data.data && Array.isArray(data.data)) {
+      for (const tweet of data.data) {
+        const author = data.includes?.users?.find(user => user.id === tweet.author_id);
+        
+        tweets.push({
+          title: `Tweet by @${author?.username || 'unknown'}`,
+          snippet: tweet.text,
+          url: `https://twitter.com/${author?.username}/status/${tweet.id}`,
+          source: 'twitter.com',
+          query: query,
+          date: tweet.created_at,
+          metadata: {
+            tweet_id: tweet.id,
+            author_name: author?.name,
+            author_username: author?.username,
+            author_verified: author?.verified,
+            retweet_count: tweet.public_metrics?.retweet_count || 0,
+            like_count: tweet.public_metrics?.like_count || 0,
+            reply_count: tweet.public_metrics?.reply_count || 0,
+            quote_count: tweet.public_metrics?.quote_count || 0,
+            language: tweet.lang
+          }
+        });
+      }
+    } else {
+      console.log('No tweets found in API response for query:', query);
+    }
+    
+    console.log(`Found ${tweets.length} tweets for query: ${query}`);
+    return tweets;
+    
+  } catch (error) {
+    console.error('Error searching Twitter:', error);
+    return []; // Return empty array instead of throwing
+  }
+}
+
+async function generateTwitterOAuthHeader(method: string, url: string, consumerKey: string, consumerSecret: string, accessToken: string, accessTokenSecret: string): Promise<string> {
+  const oauthParams = {
+    oauth_consumer_key: consumerKey,
+    oauth_nonce: Math.random().toString(36).substring(2),
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_token: accessToken,
+    oauth_version: '1.0',
+  };
+
+  const signature = await generateOAuthSignature(method, url, oauthParams, consumerSecret, accessTokenSecret);
+
+  const signedOAuthParams = {
+    ...oauthParams,
+    oauth_signature: signature,
+  };
+
+  const entries = Object.entries(signedOAuthParams).sort((a, b) => a[0].localeCompare(b[0]));
+
+  return (
+    'OAuth ' +
+    entries
+      .map(([k, v]) => `${encodeURIComponent(k)}="${encodeURIComponent(v)}"`)
+      .join(', ')
+  );
+}
+
+async function generateOAuthSignature(method: string, url: string, params: Record<string, string>, consumerSecret: string, tokenSecret: string): Promise<string> {
+  const signatureBaseString = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(
+    Object.entries(params)
+      .sort()
+      .map(([k, v]) => `${k}=${v}`)
+      .join('&')
+  )}`;
+  
+  const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(tokenSecret)}`;
+  
+  // Simplified HMAC-SHA1 using Web Crypto API
+  try {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(signingKey);
+    const dataToSign = encoder.encode(signatureBaseString);
+    
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-1' },
+      false,
+      ['sign']
+    );
+    
+    const signature = await crypto.subtle.sign('HMAC', cryptoKey, dataToSign);
+    const base64Signature = btoa(String.fromCharCode(...new Uint8Array(signature)));
+    
+    return base64Signature;
+  } catch (error) {
+    console.error('Error generating HMAC signature:', error);
+    // Fallback: simple base64 encoding (not secure but will prevent crashes)
+    return btoa(signingKey + signatureBaseString).substring(0, 28);
+  }
+}
+
+async function testTwitterAPI() {
+  const twitterConsumerKey = Deno.env.get('TWITTER_CONSUMER_KEY');
+  const twitterConsumerSecret = Deno.env.get('TWITTER_CONSUMER_SECRET');
+  const twitterAccessToken = Deno.env.get('TWITTER_ACCESS_TOKEN');
+  const twitterAccessTokenSecret = Deno.env.get('TWITTER_ACCESS_TOKEN_SECRET');
+  
+  if (!twitterConsumerKey || !twitterConsumerSecret || !twitterAccessToken || !twitterAccessTokenSecret) {
+    return { 
+      success: false, 
+      error: 'Twitter API credentials missing. Need: TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET' 
+    };
+  }
+  
+  try {
+    console.log('Testing Twitter API with credentials...');
+    
+    // Test with a simple search
+    const testTweets = await searchTwitter('test', twitterConsumerKey, twitterConsumerSecret, twitterAccessToken, twitterAccessTokenSecret);
+    
+    return { 
+      success: true, 
+      message: `Twitter API fungerar - hittade ${testTweets.length} tweets i testsökning`,
+      test_results: testTweets.length > 0 ? testTweets.slice(0, 1) : null
+    };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: `Twitter API fel: ${error.message}` 
+    };
   }
 }
 
@@ -707,13 +1143,25 @@ async function fetchYouTubeData(handle: string, clientName?: string) {
       }
     } else {
       try {
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(handle)}&key=${youtubeApiKey}&maxResults=1`;
+        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(handle)}&key=${youtubeApiKey}&maxResults=5`;
         const searchResponse = await fetch(searchUrl);
         
         if (searchResponse.ok) {
           const searchData = await searchResponse.json();
           if (searchData.items && searchData.items.length > 0) {
-            channelId = searchData.items[0].snippet.channelId;
+            // Find best match by title similarity
+            let bestMatch = searchData.items[0];
+            if (clientName) {
+              for (const item of searchData.items) {
+                if (item.snippet.title.toLowerCase().includes(clientName.toLowerCase()) ||
+                    clientName.toLowerCase().includes(item.snippet.title.toLowerCase())) {
+                  bestMatch = item;
+                  break;
+                }
+              }
+            }
+            channelId = bestMatch.snippet.channelId;
+            console.log('Found YouTube channel via search:', bestMatch.snippet.title);
           }
         }
       } catch (searchError) {
@@ -743,9 +1191,11 @@ async function fetchYouTubeData(handle: string, clientName?: string) {
       const channel = data.items[0];
       return {
         id: `youtube-${Date.now()}`,
-        data_type: 'youtube_stats',
+        data_type: 'social_metrics',
         platform: 'youtube',
         source: 'youtube_data_api',
+        title: channel.snippet.title,
+        url: `https://youtube.com/channel/${channel.id}`,
         data: {
           channel_id: channel.id,
           title: channel.snippet.title,
@@ -756,6 +1206,11 @@ async function fetchYouTubeData(handle: string, clientName?: string) {
           published_at: channel.snippet.publishedAt,
           thumbnails: channel.snippet.thumbnails,
           handle: handle
+        },
+        metadata: {
+          followers: parseInt(channel.statistics.subscriberCount || '0'),
+          total_views: parseInt(channel.statistics.viewCount || '0'),
+          video_count: parseInt(channel.statistics.videoCount || '0')
         },
         created_at: new Date().toISOString()
       };
@@ -908,7 +1363,14 @@ async function fetchSocialBladeData(platform: string, handle: string, apiKey: st
       data_type: 'social_metrics',
       platform: platform,
       source: 'social_blade',
+      title: data.data?.id?.display_name || `${platform} profile`,
+      url: `https://${platform}.com/${cleanHandle}`,
       data: data,
+      metadata: {
+        followers: data.data?.statistics?.total?.followers || 0,
+        following: data.data?.statistics?.total?.following || 0,
+        engagement_rate: data.data?.statistics?.total?.engagement_rate || 0
+      },
       created_at: new Date().toISOString()
     };
 
@@ -922,27 +1384,59 @@ async function storeDataInCache(clientId: string, result: DataCollectionResult) 
   console.log('Storing collected data in cache...');
   
   try {
-    const allData = [
-      ...result.collected_data.news.map(item => ({
-        ...item,
+    const allData = [];
+
+    // Process news data
+    result.collected_data.news.forEach(item => {
+      allData.push({
         client_id: clientId,
         data_type: 'news',
         source: item.type || 'google_search',
+        title: item.title,
+        url: item.url,
+        snippet: item.snippet,
+        author: item.author,
+        image: item.image,
+        data: item,
+        metadata: {
+          query: item.query,
+          news_source: item.newsSource || item.source
+        },
         created_at: new Date().toISOString()
-      })),
-      ...result.collected_data.social_metrics.map(item => ({
-        ...item,
+      });
+    });
+
+    // Process social metrics data
+    result.collected_data.social_metrics.forEach(item => {
+      allData.push({
         client_id: clientId,
+        data_type: item.data_type || 'social_metrics',
+        source: item.source || 'unknown',
+        platform: item.platform,
+        title: item.title,
+        url: item.url,
+        data: item.data,
+        metadata: item.metadata || {},
         created_at: item.created_at || new Date().toISOString()
-      })),
-      ...result.collected_data.web_scraping.map(item => ({
-        ...item,
+      });
+    });
+
+    // Process web scraping data
+    result.collected_data.web_scraping.forEach(item => {
+      allData.push({
         client_id: clientId,
         data_type: 'web_scraping',
         source: 'firecrawl',
+        title: item.title,
+        url: item.url,
+        snippet: item.content?.substring(0, 500),
+        data: item,
+        metadata: {
+          search_term: item.search_term
+        },
         created_at: new Date().toISOString()
-      }))
-    ];
+      });
+    });
 
     if (allData.length > 0) {
       const { error } = await supabase

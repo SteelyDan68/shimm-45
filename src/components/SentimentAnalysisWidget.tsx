@@ -21,14 +21,23 @@ import {
 interface SentimentData {
   id: string;
   data_type: string;
+  platform: string;
   source: string;
   data: {
-    client_name: string;
-    analysis_date: string;
-    raw_data_sources: number;
-    analysis: string;
-    source_data: any[];
-    analysis_type: string;
+    sentiment_score?: number;
+    sentiment_summary?: string;
+    key_themes?: string[];
+    competitive_insights?: string;
+    collaboration_opportunities?: string;
+    brand_health?: string;
+    recommendations?: string;
+    data_quality?: string;
+    raw_analysis?: string;
+  };
+  metadata?: {
+    data_sources_count?: number;
+    twitter_mentions?: number;
+    sentiment_sources?: number;
   };
   created_at: string;
 }
@@ -101,11 +110,8 @@ export const SentimentAnalysisWidget = ({ sentimentData, onCollectData }: Sentim
   }
 
   const analysisData = latestAnalysis.data;
-  const analysisText = analysisData.analysis || '';
+  const analysisText = analysisData.raw_analysis || analysisData.sentiment_summary || '';
   
-  // Parse the analysis text to extract structured information
-  const sections = parseAnalysisText(analysisText);
-
   return (
     <Card>
       <CardHeader>
@@ -115,75 +121,70 @@ export const SentimentAnalysisWidget = ({ sentimentData, onCollectData }: Sentim
         </CardTitle>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Eye className="h-4 w-4" />
-          Analyserade {analysisData.raw_data_sources} källor (inkl. Twitter)
+          Analyserade {latestAnalysis.metadata?.data_sources_count || 0} källor 
+          {latestAnalysis.metadata?.twitter_mentions && ` (inkl. ${latestAnalysis.metadata.twitter_mentions} tweets)`}
           <Separator orientation="vertical" className="h-4" />
-          {new Date(analysisData.analysis_date).toLocaleDateString('sv-SE')}
+          {new Date(latestAnalysis.created_at).toLocaleDateString('sv-SE')}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Sentiment Overview */}
-        {sections.sentiment && (
+        {/* New JSON-based analysis display */}
+        {analysisData.sentiment_score !== undefined && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-blue-600" />
               <h3 className="text-lg font-semibold">Sentimentanalys</h3>
             </div>
             
-            {/* Sentiment Score Visualization */}
-            <SentimentScoreDisplay sentiment={sections.sentiment} />
-            
-            <div className="grid md:grid-cols-2 gap-4">
-              {sections.sentiment.positiveThemes && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <ThumbsUp className="h-4 w-4 text-green-600" />
-                    <span className="font-medium text-green-700">Positiva teman</span>
-                  </div>
-                  <ul className="text-sm space-y-1">
-                    {sections.sentiment.positiveThemes.map((theme, index) => (
-                      <li key={index} className="text-muted-foreground">• {theme}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              {sections.sentiment.riskAreas && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-600" />
-                    <span className="font-medium text-orange-700">Riskområden</span>
-                  </div>
-                  <ul className="text-sm space-y-1">
-                    {sections.sentiment.riskAreas.map((risk, index) => (
-                      <li key={index} className="text-muted-foreground">• {risk}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {/* Simple Sentiment Score */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {analysisData.sentiment_score > 0.3 ? (
+                  <ThumbsUp className="h-5 w-5 text-green-600" />
+                ) : analysisData.sentiment_score < -0.3 ? (
+                  <ThumbsDown className="h-5 w-5 text-red-600" />
+                ) : (
+                  <Minus className="h-5 w-5 text-gray-600" />
+                )}
+                <span className={`font-semibold ${
+                  analysisData.sentiment_score > 0.3 ? 'text-green-600' : 
+                  analysisData.sentiment_score < -0.3 ? 'text-red-600' : 'text-gray-600'
+                }`}>
+                  Score: {analysisData.sentiment_score.toFixed(2)}
+                </span>
+              </div>
             </div>
+            
+            {analysisData.sentiment_summary && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">{analysisData.sentiment_summary}</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Industry Trends */}
-        {sections.trends && (
+        {/* Key Themes */}
+        {analysisData.key_themes && analysisData.key_themes.length > 0 && (
           <>
             <Separator />
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-purple-600" />
-                <h3 className="text-lg font-semibold">Branschtrender</h3>
+                <Target className="h-5 w-5 text-purple-600" />
+                <h3 className="text-lg font-semibold">Nyckelteman</h3>
               </div>
-              <div className="text-sm text-muted-foreground">
-                {sections.trends.map((trend, index) => (
-                  <p key={index} className="mb-2">• {trend}</p>
+              <div className="grid gap-2">
+                {analysisData.key_themes.map((theme, index) => (
+                  <Badge key={index} variant="outline" className="justify-start">
+                    {theme}
+                  </Badge>
                 ))}
               </div>
             </div>
           </>
         )}
 
-        {/* Competitors */}
-        {sections.competitors && (
+        {/* Competitive Insights */}
+        {analysisData.competitive_insights && (
           <>
             <Separator />
             <div className="space-y-3">
@@ -191,17 +192,15 @@ export const SentimentAnalysisWidget = ({ sentimentData, onCollectData }: Sentim
                 <Users className="h-5 w-5 text-orange-600" />
                 <h3 className="text-lg font-semibold">Konkurrentanalys</h3>
               </div>
-              <div className="text-sm text-muted-foreground">
-                {sections.competitors.map((competitor, index) => (
-                  <p key={index} className="mb-2">• {competitor}</p>
-                ))}
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">{analysisData.competitive_insights}</p>
               </div>
             </div>
           </>
         )}
 
         {/* Collaboration Opportunities */}
-        {sections.collaborations && (
+        {analysisData.collaboration_opportunities && (
           <>
             <Separator />
             <div className="space-y-3">
@@ -209,31 +208,40 @@ export const SentimentAnalysisWidget = ({ sentimentData, onCollectData }: Sentim
                 <Target className="h-5 w-5 text-green-600" />
                 <h3 className="text-lg font-semibold">Samarbetsmöjligheter</h3>
               </div>
-              <div className="text-sm text-muted-foreground">
-                {sections.collaborations.map((collab, index) => (
-                  <p key={index} className="mb-2">• {collab}</p>
-                ))}
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">{analysisData.collaboration_opportunities}</p>
               </div>
             </div>
           </>
         )}
 
-        {/* Action Plan */}
-        {sections.actionPlan && (
+        {/* Brand Health */}
+        {analysisData.brand_health && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Varumärkeshälsa</h3>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">{analysisData.brand_health}</p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Recommendations */}
+        {analysisData.recommendations && (
           <>
             <Separator />
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Lightbulb className="h-5 w-5 text-blue-600" />
-                <h3 className="text-lg font-semibold">Handlingsplan</h3>
+                <h3 className="text-lg font-semibold">Rekommendationer</h3>
               </div>
-              <div className="space-y-3">
-                {sections.actionPlan.map((action, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground">{action}</span>
-                  </div>
-                ))}
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">{analysisData.recommendations}</p>
               </div>
             </div>
           </>
