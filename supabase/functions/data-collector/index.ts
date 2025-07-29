@@ -204,6 +204,9 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
     if (client.youtube_channel) {
       platforms.push({ platform: 'youtube', handle: client.youtube_channel });
     }
+    if (client.facebook_page) {
+      platforms.push({ platform: 'facebook', handle: client.facebook_page });
+    }
 
     if (platforms.length === 0) {
       console.warn('No social handles found for client, skipping social data collection');
@@ -418,6 +421,9 @@ async function fetchRealSocialData(platform: string, handle: string, apiKey: str
       case 'tiktok':
         apiEndpoint = `https://matrix.sbapis.com/b/tiktok/statistics?query=${encodeURIComponent(handle)}&history=default&allow-stale=false`;
         break;
+      case 'facebook':
+        apiEndpoint = `https://matrix.sbapis.com/b/facebook/statistics?query=${encodeURIComponent(handle)}&history=default&allow-stale=false`;
+        break;
       default:
         console.log(`Platform ${platform} not supported yet`);
         return null;
@@ -476,6 +482,14 @@ async function fetchRealSocialData(platform: string, handle: string, apiKey: str
         followers: data.statistics?.followers || data.followers || 0,
         likes: data.statistics?.likes || data.likes || 0,
         videos: data.statistics?.videos || data.videos || 0
+      };
+    } else if (platform === 'facebook') {
+      parsedData = {
+        ...parsedData,
+        followers: data.statistics?.followers || data.followers || 0,
+        likes: data.statistics?.likes || data.likes || 0,
+        posts: data.statistics?.posts || data.posts || 0,
+        page_views: data.statistics?.page_views || data.page_views || 0
       };
     }
     
