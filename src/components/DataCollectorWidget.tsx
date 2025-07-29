@@ -146,9 +146,9 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
               <div className="flex-1">
                 <p className="font-medium text-green-900">Live Data Analysis Klar</p>
                 <p className="text-sm text-green-700">
-                  {lastResult.collected_data.news.length + 
-                   lastResult.collected_data.social_metrics.length + 
-                   lastResult.collected_data.web_scraping.length} datapunkter analyserade
+                  {(lastResult.collected_data?.news?.length || 0) + 
+                   (lastResult.collected_data?.social_metrics?.length || 0) + 
+                   (lastResult.collected_data?.web_scraping?.length || 0)} datapunkter analyserade
                 </p>
               </div>
               <Badge className="bg-green-100 text-green-800">
@@ -165,7 +165,7 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
               </h3>
               
               {/* News & Industry Trends */}
-              {lastResult.collected_data.news.length > 0 && (
+              {lastResult.collected_data.news && lastResult.collected_data.news.length > 0 && (
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
                     <Newspaper className="h-4 w-4" />
@@ -175,7 +175,7 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
                     {lastResult.collected_data.news.slice(0, 3).map((item: any, index: number) => (
                       <div key={index} className="text-sm">
                         <p className="text-blue-800 font-medium">{item.title || 'Nyhet'}</p>
-                        <p className="text-blue-600 text-xs">{item.source || 'Okänd källa'} • {item.published_date || 'Nyligen'}</p>
+                        <p className="text-blue-600 text-xs">{item.newsSource || item.source || 'Okänd källa'} • {item.date || 'Nyligen'}</p>
                       </div>
                     ))}
                     {lastResult.collected_data.news.length > 3 && (
@@ -188,7 +188,7 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
               )}
 
               {/* Social Media Intelligence */}
-              {lastResult.collected_data.social_metrics.length > 0 && (
+              {lastResult.collected_data.social_metrics && lastResult.collected_data.social_metrics.length > 0 && (
                 <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                   <h4 className="font-medium text-green-900 mb-2 flex items-center gap-2">
                     <Users className="h-4 w-4" />
@@ -208,7 +208,7 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
               )}
 
               {/* Web Intelligence & Competitor Analysis */}
-              {lastResult.collected_data.web_scraping.length > 0 && (
+              {lastResult.collected_data.web_scraping && lastResult.collected_data.web_scraping.length > 0 && (
                 <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                   <h4 className="font-medium text-purple-900 mb-2 flex items-center gap-2">
                     <Globe className="h-4 w-4" />
@@ -249,7 +249,7 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
                   Realtids Alerts
                 </h4>
                 <div className="space-y-1 text-sm text-red-800">
-                  <p>• Nya omnämnanden: {lastResult.collected_data.news.length} i senaste sökningen</p>
+                  <p>• Nya omnämnanden: {(lastResult.collected_data?.news?.length || 0)} i senaste sökningen</p>
                   <p>• Social aktivitet: Övervakas kontinuerligt</p>
                   <p>• Konkurrent rörelser: Under bevakning</p>
                 </div>

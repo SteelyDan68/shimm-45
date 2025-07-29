@@ -69,7 +69,7 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
             <div className="flex justify-center gap-2 mt-2">
               <Badge variant="outline" className="text-xs">Instagram</Badge>
               <Badge variant="outline" className="text-xs">TikTok</Badge>
-              <Badge variant="outline" className="text-xs">YouTube</Badge>
+              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700">YouTube (API-problem)</Badge>
               <Badge variant="outline" className="text-xs">Facebook</Badge>
             </div>
           </div>
