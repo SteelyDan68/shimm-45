@@ -102,8 +102,10 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {socialMetrics.map((metric, index) => {
-          const data = metric.data;
+        {socialMetrics
+          .filter(metric => metric && metric.data && Object.keys(metric.data).length > 0)
+          .map((metric, index) => {
+          const data = metric.data || {};
           const platform = data.platform?.toLowerCase() || 'unknown';
           
           return (
