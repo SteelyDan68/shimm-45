@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AuthProvider, useAuth } from '@/components/AuthProvider';
+import { useAuth } from '@/components/AuthProvider';
 import { AuthForm } from '@/components/AuthForm';
 import { ClientForm } from '@/components/ClientForm';
 import { ClientList } from '@/components/ClientList';
@@ -62,12 +62,4 @@ const Dashboard = () => {
   );
 };
 
-const Index = () => {
-  return (
-    <AuthProvider>
-      <Dashboard />
-    </AuthProvider>
-  );
-};
-
-export default Index;
+export default Dashboard;
