@@ -360,24 +360,34 @@ async function testGoogleSearchApi(apiKey: string | undefined, engineId: string 
 }
 
 async function testSocialBladeApi(apiKey: string | undefined) {
+  const socialBladeClientId = Deno.env.get('SOCIAL_BLADE_CLIENT_ID');
+  
   if (!apiKey) {
-    return { success: false, message: 'API key saknas' };
+    return { success: false, message: 'API key (token) saknas' };
+  }
+
+  if (!socialBladeClientId) {
+    return { success: false, message: 'Client ID saknas' };
   }
 
   try {
-    // Note: Social Blade API endpoint structure may vary
-    // This is a generic test - adjust based on actual API documentation
-    const response = await fetch('https://api.socialblade.com/v1/youtube/statistics', {
+    // Test with a known handle to verify API connectivity
+    const testEndpoint = `https://matrix.sbapis.com/b/instagram/statistics?query=instagram&history=default&allow-stale=false`;
+    
+    const response = await fetch(testEndpoint, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'clientid': socialBladeClientId,
+        'token': apiKey,
+        'Content-Type': 'application/json'
       }
     });
 
-    if (response.ok || response.status === 401) {
-      // 401 means API key is recognized but may need different endpoint
-      return { success: true, message: 'API key accepterad' };
+    if (response.ok) {
+      return { success: true, message: 'Social Blade API fungerar korrekt' };
     } else {
-      return { success: false, message: `HTTP ${response.status}` };
+      const errorText = await response.text();
+      return { success: false, message: `HTTP ${response.status}: ${errorText}` };
     }
   } catch (error) {
     return { success: false, message: `Nätverksfel: ${error.message}` };
@@ -385,44 +395,95 @@ async function testSocialBladeApi(apiKey: string | undefined) {
 }
 
 async function fetchRealSocialData(platform: string, handle: string, apiKey: string) {
-  // Implementation would depend on Social Blade API documentation
-  // For now, we'll log what we're trying to fetch and return structured data
+  const socialBladeClientId = Deno.env.get('SOCIAL_BLADE_CLIENT_ID');
+  
+  if (!socialBladeClientId) {
+    console.log('Social Blade Client ID not found');
+    return null;
+  }
+
   console.log(`Fetching real ${platform} data for handle: ${handle}`);
   
   try {
-    // Note: This is a placeholder implementation
-    // You'll need to implement based on Social Blade's actual API structure
+    let apiEndpoint = '';
     
-    if (platform === 'instagram') {
-      // Example Instagram data fetch
-      const response = await fetch(`https://api.socialblade.com/v1/instagram/statistics?username=${handle}`, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        }
-      });
+    // Set correct endpoint based on platform using Social Blade Matrix API
+    switch (platform.toLowerCase()) {
+      case 'instagram':
+        apiEndpoint = `https://matrix.sbapis.com/b/instagram/statistics?query=${encodeURIComponent(handle)}&history=default&allow-stale=false`;
+        break;
+      case 'youtube':
+        apiEndpoint = `https://matrix.sbapis.com/b/youtube/statistics?query=${encodeURIComponent(handle)}&history=default&allow-stale=false`;
+        break;
+      case 'tiktok':
+        apiEndpoint = `https://matrix.sbapis.com/b/tiktok/statistics?query=${encodeURIComponent(handle)}&history=default&allow-stale=false`;
+        break;
+      default:
+        console.log(`Platform ${platform} not supported yet`);
+        return null;
+    }
 
-      if (response.ok) {
-        const data = await response.json();
-        
-        return {
-          platform: 'instagram',
-          handle: handle,
-          followers: data.followers || 0,
-          following: data.following || 0,
-          posts: data.posts || 0,
-          engagement_rate: data.engagement_rate || 0,
-          growth_rate: data.growth_rate || 0,
-          last_updated: new Date().toISOString()
-        };
+    console.log(`Making request to: ${apiEndpoint}`);
+    
+    const response = await fetch(apiEndpoint, {
+      method: 'GET',
+      headers: {
+        'clientid': socialBladeClientId,
+        'token': apiKey,
+        'Content-Type': 'application/json'
       }
+    });
+
+    if (!response.ok) {
+      console.error(`Social Blade API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Response body:', errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log(`Social Blade API response for ${platform}:`, JSON.stringify(data, null, 2));
+    
+    // Parse the response based on platform
+    let parsedData = {
+      platform,
+      handle,
+      raw_data: data,
+      last_updated: new Date().toISOString()
+    };
+
+    if (platform === 'instagram') {
+      parsedData = {
+        ...parsedData,
+        followers: data.statistics?.followers || data.followers || 0,
+        following: data.statistics?.following || data.following || 0,
+        posts: data.statistics?.posts || data.posts || 0,
+        engagement_rate: data.statistics?.engagement_rate || data.engagement_rate || 0,
+        avg_likes: data.statistics?.avg_likes || data.avg_likes || 0,
+        avg_comments: data.statistics?.avg_comments || data.avg_comments || 0
+      };
+    } else if (platform === 'youtube') {
+      parsedData = {
+        ...parsedData,
+        subscribers: data.statistics?.subscribers || data.subscribers || 0,
+        videos: data.statistics?.videos || data.videos || 0,
+        views: data.statistics?.views || data.views || 0,
+        avg_views: data.statistics?.avg_views || data.avg_views || 0
+      };
+    } else if (platform === 'tiktok') {
+      parsedData = {
+        ...parsedData,
+        followers: data.statistics?.followers || data.followers || 0,
+        likes: data.statistics?.likes || data.likes || 0,
+        videos: data.statistics?.videos || data.videos || 0
+      };
     }
     
-    // If API call fails or platform not supported, return null
-    return null;
+    return parsedData;
     
   } catch (error) {
     console.error(`Error fetching ${platform} data:`, error);
-    throw error;
+    return null;
   }
 }
 
