@@ -24,9 +24,17 @@ export const useDataCollector = () => {
       console.log('Starting data collection for client:', clientId);
       
       console.log('Calling data-collector edge function...');
-      const { data, error } = await supabase.functions.invoke('data-collector', {
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout efter 2 minuter')), 120000); // 2 minutes
+      });
+      
+      const requestPromise = supabase.functions.invoke('data-collector', {
         body: { client_id: clientId }
       });
+      
+      const { data, error } = await Promise.race([requestPromise, timeoutPromise]) as any;
       console.log('Data collector response:', { data, error });
 
       if (error) {

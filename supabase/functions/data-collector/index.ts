@@ -137,7 +137,8 @@ serve(async (req) => {
       errors: []
     };
 
-    // Run all data collection in parallel
+    // Run all data collection in parallel for faster execution
+    console.log('Starting parallel data collection processes...');
     const promises = [
       collectNewsData(client, result),
       collectSocialData(client, result),
@@ -146,9 +147,20 @@ serve(async (req) => {
       collectSentimentAnalysis(client, result)
     ];
 
-    await Promise.allSettled(promises);
+    // Use Promise.allSettled with timeout
+    const timeoutPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Data collection timeout reached, continuing with available results');
+        resolve('timeout');
+      }, 90000); // 90 seconds max
+    });
+
+    await Promise.race([
+      Promise.allSettled(promises),
+      timeoutPromise
+    ]);
     
-    console.log('All data collection processes completed');
+    console.log('All data collection processes completed or timed out');
 
     // Store all collected data in cache
     console.log('Storing data in cache...');
@@ -203,7 +215,7 @@ async function collectNewsData(client: any, result: DataCollectionResult) {
       `${client.name} campaign`
     ];
 
-    for (const query of searchQueries.slice(0, 2)) {
+    for (const query of searchQueries.slice(0, 1)) { // Limit to 1 query for speed
       try {
         const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(query)}&num=2&sort=date`;
         
@@ -408,7 +420,7 @@ async function collectWebScrapingData(client: any, result: DataCollectionResult)
       `${client.name} ${client.category} collaboration`
     ];
 
-    for (const term of searchTerms) {
+    for (const term of searchTerms.slice(0, 1)) { // Limit to 1 term for speed
       try {
         const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(term)}&num=2`;
         
@@ -613,7 +625,7 @@ async function collectSentimentData(clientName: string) {
 
   const allData = [];
   
-  for (const query of searchQueries.slice(0, 6)) { // Limit to save API quota
+  for (const query of searchQueries.slice(0, 3)) { // Reduce from 6 to 3 for speed
     try {
       const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(query)}&num=3`;
       
