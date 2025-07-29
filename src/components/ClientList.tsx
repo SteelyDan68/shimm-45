@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +31,7 @@ interface ClientListProps {
 export const ClientList = ({ refreshTrigger }: ClientListProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
@@ -115,8 +117,8 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => window.open(`/client/${client.id}`, '_blank')}
-                    title="Öppna dashboard"
+                    onClick={() => navigate(`/client/${client.id}`)}
+                    title="Öppna klientprofil"
                   >
                     <Eye className="h-4 w-4" />
                   </Button>

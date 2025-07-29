@@ -1,0 +1,283 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/components/AuthProvider';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Users, 
+  TrendingUp, 
+  Brain, 
+  Database,
+  Plus,
+  Eye,
+  Activity
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { ClientForm } from '@/components/ClientForm';
+
+interface Client {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  logic_state?: any;
+  created_at: string;
+}
+
+interface DashboardStats {
+  totalClients: number;
+  activeClients: number;
+  recentAnalyses: number;
+  dataPoints: number;
+}
+
+export const Dashboard = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalClients: 0,
+    activeClients: 0,
+    recentAnalyses: 0,
+    dataPoints: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
+  const loadDashboardData = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Load clients
+      const { data: clientsData, error: clientsError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (clientsError) throw clientsError;
+      
+      const clientsList = clientsData || [];
+      setClients(clientsList);
+
+      // Calculate stats
+      const totalClients = clientsList.length;
+      const activeClients = clientsList.filter(c => c.status === 'active').length;
+      const recentAnalyses = clientsList.filter(c => 
+        c.logic_state && 
+        typeof c.logic_state === 'object' && 
+        !Array.isArray(c.logic_state) &&
+        'last_updated' in c.logic_state
+      ).length;
+
+      // Get total data points
+      const { count: dataPoints } = await supabase
+        .from('client_data_cache')
+        .select('*', { count: 'exact', head: true })
+        .in('client_id', clientsList.map(c => c.id));
+
+      setStats({
+        totalClients,
+        activeClients,
+        recentAnalyses,
+        dataPoints: dataPoints || 0
+      });
+
+    } catch (error: any) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda dashboard-data: " + error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSuccess = () => {
+    setShowForm(false);
+    loadDashboardData();
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'influencer': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'creator': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'brand': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'inactive': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+      case 'prospect': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-8">Laddar dashboard...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">Översikt av dina klienter och aktiviteter</p>
+        </div>
+        <Button onClick={() => setShowForm(!showForm)}>
+          <Plus className="h-4 w-4 mr-2" />
+          {showForm ? 'Avbryt' : 'Lägg till klient'}
+        </Button>
+      </div>
+
+      {/* Add Client Form */}
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Lägg till ny klient</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ClientForm onSuccess={handleSuccess} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Totalt Klienter</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalClients}</div>
+            <p className="text-xs text-muted-foreground">registrerade klienter</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Aktiva Klienter</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activeClients}</div>
+            <p className="text-xs text-muted-foreground">aktiva klienter</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">AI Analyser</CardTitle>
+            <Brain className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.recentAnalyses}</div>
+            <p className="text-xs text-muted-foreground">genomförda analyser</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Datapunkter</CardTitle>
+            <Database className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.dataPoints}</div>
+            <p className="text-xs text-muted-foreground">insamlade datapunkter</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Clients */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Senaste Klienter
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {clients.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="mx-auto h-12 w-12 mb-4 opacity-50" />
+              <h3 className="text-lg font-semibold mb-2">Inga klienter än</h3>
+              <p>Lägg till din första klient för att komma igång.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {clients.slice(0, 6).map((client) => (
+                <Card key={client.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg">{client.name}</CardTitle>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => navigate(`/client/${client.id}`)}
+                        title="Öppna klientprofil"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge className={getCategoryColor(client.category)}>
+                        {client.category}
+                      </Badge>
+                      <Badge className={getStatusColor(client.status)}>
+                        {client.status}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xs text-muted-foreground">
+                      Skapad: {new Date(client.created_at).toLocaleDateString('sv-SE')}
+                    </div>
+                    {client.logic_state?.velocity_rank && (
+                      <div className="mt-2">
+                        <Badge variant="outline">
+                          Velocity: {client.logic_state.velocity_rank}
+                        </Badge>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          
+          {clients.length > 6 && (
+            <div className="mt-4 text-center">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/clients')}
+              >
+                Visa alla klienter ({clients.length})
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
