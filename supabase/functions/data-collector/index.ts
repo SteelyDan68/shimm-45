@@ -67,17 +67,16 @@ serve(async (req) => {
         });
       }
       
-      // Twitter API test
+      // Twitter API test - DISABLED
       if (platform === 'twitter') {
-        console.log('Testing Twitter API...');
-        const twitterTest = await testTwitterAPI();
+        console.log('Twitter API has been disabled due to authentication issues');
         
         return new Response(JSON.stringify({
-          success: twitterTest.success,
-          data: twitterTest,
-          error: twitterTest.success ? null : twitterTest.error
+          success: false,
+          data: null,
+          error: 'Twitter API funktionen har tagits bort på grund av autentiseringsproblem'
         }), {
-          status: twitterTest.success ? 200 : 400,
+          status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
@@ -87,8 +86,8 @@ serve(async (req) => {
         firecrawl: await testFirecrawlApi(firecrawlApiKey),
         google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
         social_blade: await testSocialBladeApi(socialBladeApiKey),
-        youtube_api: await testYouTubeDataApi(),
-        twitter_api: await testTwitterAPI()
+        youtube_api: await testYouTubeDataApi()
+        // twitter_api removed due to authentication issues
       };
 
       return new Response(JSON.stringify({
@@ -525,11 +524,11 @@ async function collectSentimentAnalysis(client: any, result: DataCollectionResul
     // 1. Collect data from various sources for sentiment analysis
     const sentimentData = await collectSentimentData(client.name);
     
-    // 2. Collect Twitter data for real-time sentiment
-    const twitterData = await collectTwitterData(client.name);
+    // 2. Twitter API removed due to authentication issues
+    // const twitterData = await collectTwitterData(client.name);
     
-    // 3. Combine all data sources
-    const combinedData = [...sentimentData, ...twitterData];
+    // 3. Use only sentiment data sources (Twitter removed)
+    const combinedData = [...sentimentData];
     
     if (combinedData.length === 0) {
       console.log('No data found for sentiment analysis');
@@ -550,7 +549,7 @@ async function collectSentimentAnalysis(client: any, result: DataCollectionResul
         created_at: new Date().toISOString(),
         metadata: {
           data_sources_count: combinedData.length,
-          twitter_mentions: twitterData.length,
+          twitter_mentions: 0, // Twitter API removed
           sentiment_sources: sentimentData.length
         }
       });
@@ -691,221 +690,35 @@ Vänligen returnera en JSON-struktur med:
   }
 }
 
-// Twitter Data Collection Functions
-async function collectTwitterData(clientName: string) {
-  console.log('Collecting Twitter data for:', clientName);
-  
-  const twitterConsumerKey = Deno.env.get('TWITTER_CONSUMER_KEY');
-  const twitterConsumerSecret = Deno.env.get('TWITTER_CONSUMER_SECRET');
-  const twitterAccessToken = Deno.env.get('TWITTER_ACCESS_TOKEN');
-  const twitterAccessTokenSecret = Deno.env.get('TWITTER_ACCESS_TOKEN_SECRET');
-  
-  if (!twitterConsumerKey || !twitterConsumerSecret || !twitterAccessToken || !twitterAccessTokenSecret) {
-    console.log('Twitter API credentials missing, skipping Twitter data collection');
-    return [];
-  }
-  
-  try {
-    const searchQueries = [
-      `"${clientName}"`,
-      `@${clientName.replace(/\s+/g, '')}`, // Remove spaces for handle search
-      `${clientName} influencer`,
-    ];
-    
-    const allTweets = [];
-    
-    for (const query of searchQueries.slice(0, 2)) { // Limit to 2 queries to save API quota
-      try {
-        const tweets = await searchTwitter(query, twitterConsumerKey, twitterConsumerSecret, twitterAccessToken, twitterAccessTokenSecret);
-        allTweets.push(...tweets);
-        
-        // Rate limiting between API calls
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-      } catch (error) {
-        console.error(`Error searching Twitter for "${query}":`, error);
-      }
-    }
-    
-    console.log(`Twitter data collection completed. Found ${allTweets.length} tweets total`);
-    return allTweets;
-    
-  } catch (error) {
-    console.error('Error in Twitter data collection:', error);
-    return []; // Return empty array instead of throwing
-  }
-}
+// Twitter Data Collection Functions - DISABLED due to API authentication issues
+// async function collectTwitterData(clientName: string) {
+//   console.log('Twitter API disabled - authentication not working');
+//   return [];
+// }
 
-async function searchTwitter(query: string, consumerKey: string, consumerSecret: string, accessToken: string, accessTokenSecret: string) {
-  try {
-    console.log(`Attempting Twitter search for: "${query}"`);
-    
-    const url = 'https://api.twitter.com/2/tweets/search/recent';
-    const params = new URLSearchParams({
-      'query': query,
-      'max_results': '10',
-      'tweet.fields': 'created_at,author_id,public_metrics,lang',
-      'user.fields': 'name,username,public_metrics,verified',
-      'expansions': 'author_id'
-    });
-    
-    const fullUrl = `${url}?${params.toString()}`;
-    console.log('Twitter API URL:', fullUrl);
-    
-    // Generate OAuth 1.0a signature
-    const oauthHeader = await generateTwitterOAuthHeader('GET', fullUrl, consumerKey, consumerSecret, accessToken, accessTokenSecret);
-    console.log('OAuth header generated successfully');
-    
-    const response = await fetch(fullUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': oauthHeader,
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    console.log(`Twitter API response status: ${response.status}`);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Twitter API error: ${response.status} ${response.statusText}`, errorText);
-      // Return empty array instead of throwing to prevent whole function from failing
-      return [];
-    }
-    
-    const data = await response.json();
-    console.log('Twitter API response data:', JSON.stringify(data, null, 2));
-    
-    const tweets = [];
-    if (data.data && Array.isArray(data.data)) {
-      for (const tweet of data.data) {
-        const author = data.includes?.users?.find(user => user.id === tweet.author_id);
-        
-        tweets.push({
-          title: `Tweet by @${author?.username || 'unknown'}`,
-          snippet: tweet.text,
-          url: `https://twitter.com/${author?.username}/status/${tweet.id}`,
-          source: 'twitter.com',
-          query: query,
-          date: tweet.created_at,
-          metadata: {
-            tweet_id: tweet.id,
-            author_name: author?.name,
-            author_username: author?.username,
-            author_verified: author?.verified,
-            retweet_count: tweet.public_metrics?.retweet_count || 0,
-            like_count: tweet.public_metrics?.like_count || 0,
-            reply_count: tweet.public_metrics?.reply_count || 0,
-            quote_count: tweet.public_metrics?.quote_count || 0,
-            language: tweet.lang
-          }
-        });
-      }
-    } else {
-      console.log('No tweets found in API response for query:', query);
-    }
-    
-    console.log(`Found ${tweets.length} tweets for query: ${query}`);
-    return tweets;
-    
-  } catch (error) {
-    console.error('Error searching Twitter:', error);
-    return []; // Return empty array instead of throwing
-  }
-}
+// Twitter search function - DISABLED
+// async function searchTwitter() {
+//   console.log('Twitter API disabled');
+//   return [];
+// }
 
-async function generateTwitterOAuthHeader(method: string, url: string, consumerKey: string, consumerSecret: string, accessToken: string, accessTokenSecret: string): Promise<string> {
-  const oauthParams = {
-    oauth_consumer_key: consumerKey,
-    oauth_nonce: Math.random().toString(36).substring(2),
-    oauth_signature_method: 'HMAC-SHA1',
-    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-    oauth_token: accessToken,
-    oauth_version: '1.0',
-  };
+// Twitter OAuth functions - DISABLED
+// async function generateTwitterOAuthHeader() {
+//   console.log('Twitter OAuth disabled');
+//   return '';
+// }
 
-  const signature = await generateOAuthSignature(method, url, oauthParams, consumerSecret, accessTokenSecret);
-
-  const signedOAuthParams = {
-    ...oauthParams,
-    oauth_signature: signature,
-  };
-
-  const entries = Object.entries(signedOAuthParams).sort((a, b) => a[0].localeCompare(b[0]));
-
-  return (
-    'OAuth ' +
-    entries
-      .map(([k, v]) => `${encodeURIComponent(k)}="${encodeURIComponent(v)}"`)
-      .join(', ')
-  );
-}
-
-async function generateOAuthSignature(method: string, url: string, params: Record<string, string>, consumerSecret: string, tokenSecret: string): Promise<string> {
-  const signatureBaseString = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(
-    Object.entries(params)
-      .sort()
-      .map(([k, v]) => `${k}=${v}`)
-      .join('&')
-  )}`;
-  
-  const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(tokenSecret)}`;
-  
-  // Simplified HMAC-SHA1 using Web Crypto API
-  try {
-    const encoder = new TextEncoder();
-    const keyData = encoder.encode(signingKey);
-    const dataToSign = encoder.encode(signatureBaseString);
-    
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      keyData,
-      { name: 'HMAC', hash: 'SHA-1' },
-      false,
-      ['sign']
-    );
-    
-    const signature = await crypto.subtle.sign('HMAC', cryptoKey, dataToSign);
-    const base64Signature = btoa(String.fromCharCode(...new Uint8Array(signature)));
-    
-    return base64Signature;
-  } catch (error) {
-    console.error('Error generating HMAC signature:', error);
-    // Fallback: simple base64 encoding (not secure but will prevent crashes)
-    return btoa(signingKey + signatureBaseString).substring(0, 28);
-  }
-}
+// OAuth signature generation - DISABLED
+// async function generateOAuthSignature() {
+//   console.log('OAuth signature disabled');
+//   return '';
+// }
 
 async function testTwitterAPI() {
-  const twitterConsumerKey = Deno.env.get('TWITTER_CONSUMER_KEY');
-  const twitterConsumerSecret = Deno.env.get('TWITTER_CONSUMER_SECRET');
-  const twitterAccessToken = Deno.env.get('TWITTER_ACCESS_TOKEN');
-  const twitterAccessTokenSecret = Deno.env.get('TWITTER_ACCESS_TOKEN_SECRET');
-  
-  if (!twitterConsumerKey || !twitterConsumerSecret || !twitterAccessToken || !twitterAccessTokenSecret) {
-    return { 
-      success: false, 
-      error: 'Twitter API credentials missing. Need: TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET' 
-    };
-  }
-  
-  try {
-    console.log('Testing Twitter API with credentials...');
-    
-    // Test with a simple search
-    const testTweets = await searchTwitter('test', twitterConsumerKey, twitterConsumerSecret, twitterAccessToken, twitterAccessTokenSecret);
-    
-    return { 
-      success: true, 
-      message: `Twitter API fungerar - hittade ${testTweets.length} tweets i testsökning`,
-      test_results: testTweets.length > 0 ? testTweets.slice(0, 1) : null
-    };
-  } catch (error) {
-    return { 
-      success: false, 
-      error: `Twitter API fel: ${error.message}` 
-    };
-  }
+  return { 
+    success: false, 
+    error: 'Twitter API funktionen har tagits bort på grund av autentiseringsproblem' 
+  };
 }
 
 async function searchForSocialProfile(clientName: string, platform: string) {
