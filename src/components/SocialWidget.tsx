@@ -39,6 +39,10 @@ interface SocialMetrics {
     handle?: string;
     raw_data?: any;
     last_updated?: string;
+    source?: string; // For auto-discovery source
+    url?: string;
+    confidence_score?: number;
+    discovery_method?: string;
   };
   created_at: string;
 }
@@ -158,6 +162,11 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
                 <Badge variant="outline" className="flex items-center gap-1">
                   {getPlatformIcon(platform)}
                   {data.platform || metric.source}
+                  {data.source === 'auto_discovery' && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-1 rounded ml-1">
+                      Auto-upptäckt
+                    </span>
+                  )}
                 </Badge>
                 <span className="text-xs text-muted-foreground">
                   {new Date(metric.created_at).toLocaleDateString('sv-SE')}

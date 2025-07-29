@@ -92,7 +92,9 @@ serve(async (req) => {
     const promises = [
       collectNewsData(client, result),
       collectSocialData(client, result),
-      collectWebScrapingData(client, result)
+      collectWebScrapingData(client, result),
+      // New: Intelligent fallback data collection
+      collectMissingSocialProfiles(client, result)
     ];
 
     await Promise.allSettled(promises);
@@ -321,6 +323,218 @@ async function collectWebScrapingData(client: any, result: DataCollectionResult)
   }
 }
 
+// New intelligent fallback function to find missing social profiles
+async function collectMissingSocialProfiles(client: any, result: DataCollectionResult) {
+  console.log('Searching for missing social profiles for:', client.name);
+  
+  try {
+    const missingPlatforms = [];
+    
+    // Check what social platforms are missing
+    if (!client.facebook_page) missingPlatforms.push('facebook');
+    if (!client.instagram_handle) missingPlatforms.push('instagram');
+    if (!client.tiktok_handle) missingPlatforms.push('tiktok');
+    if (!client.youtube_channel) missingPlatforms.push('youtube');
+    
+    if (missingPlatforms.length === 0) {
+      console.log('All social platforms already configured');
+      return;
+    }
+    
+    console.log('Missing platforms:', missingPlatforms);
+    
+    for (const platform of missingPlatforms) {
+      try {
+        const foundProfile = await searchForSocialProfile(client.name, platform);
+        if (foundProfile) {
+          // Store the found profile information
+          result.collected_data.social_metrics.push({
+            platform,
+            handle: foundProfile.handle,
+            url: foundProfile.url,
+            source: 'auto_discovery',
+            discovery_method: foundProfile.method,
+            confidence_score: foundProfile.confidence,
+            raw_data: foundProfile,
+            last_updated: new Date().toISOString()
+          });
+          
+          console.log(`Found ${platform} profile:`, foundProfile.handle);
+        }
+        
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+      } catch (error) {
+        console.error(`Error searching for ${platform} profile:`, error);
+        result.errors.push(`Auto-discovery error for ${platform}: ${error.message}`);
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error in collectMissingSocialProfiles:', error);
+    result.errors.push(`Missing profile search error: ${error.message}`);
+  }
+}
+
+async function searchForSocialProfile(clientName: string, platform: string) {
+  if (!googleSearchApiKey || !googleSearchEngineId) {
+    console.log('Google Search API not available for profile discovery');
+    return null;
+  }
+  
+  try {
+    // Construct smart search queries for each platform
+    const searchQueries = {
+      facebook: [
+        `"${clientName}" site:facebook.com`,
+        `"${clientName}" facebook profile`,
+        `${clientName} influencer facebook`
+      ],
+      instagram: [
+        `"${clientName}" site:instagram.com`,
+        `"${clientName}" instagram profile`,
+        `${clientName} influencer instagram`
+      ],
+      tiktok: [
+        `"${clientName}" site:tiktok.com`,
+        `"${clientName}" tiktok profile`,
+        `${clientName} influencer tiktok`
+      ],
+      youtube: [
+        `"${clientName}" site:youtube.com`,
+        `"${clientName}" youtube channel`,
+        `${clientName} influencer youtube`
+      ]
+    };
+    
+    const queries = searchQueries[platform] || [];
+    
+    for (const query of queries) {
+      try {
+        const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${googleSearchApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(query)}&num=3`;
+        
+        const response = await fetch(searchUrl);
+        if (!response.ok) continue;
+        
+        const data = await response.json();
+        
+        if (data.items) {
+          for (const item of data.items) {
+            const profile = extractSocialHandle(item.link, platform, item.title);
+            if (profile) {
+              return {
+                handle: profile.handle,
+                url: item.link,
+                title: item.title,
+                method: 'google_search',
+                confidence: calculateConfidence(item.title, clientName, platform),
+                query_used: query
+              };
+            }
+          }
+        }
+        
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+      } catch (error) {
+        console.error('Error in search query:', query, error);
+      }
+    }
+    
+    return null;
+    
+  } catch (error) {
+    console.error('Error searching for social profile:', error);
+    return null;
+  }
+}
+
+function extractSocialHandle(url: string, platform: string, title: string) {
+  try {
+    const urlObj = new URL(url);
+    
+    switch (platform) {
+      case 'facebook':
+        if (urlObj.hostname.includes('facebook.com')) {
+          const path = urlObj.pathname;
+          const handle = path.split('/').filter(p => p && p !== 'profile.php')[0];
+          return handle ? { handle, platform: 'facebook' } : null;
+        }
+        break;
+        
+      case 'instagram':
+        if (urlObj.hostname.includes('instagram.com')) {
+          const path = urlObj.pathname;
+          const handle = path.split('/').filter(p => p && p !== 'p')[0];
+          return handle ? { handle, platform: 'instagram' } : null;
+        }
+        break;
+        
+      case 'tiktok':
+        if (urlObj.hostname.includes('tiktok.com')) {
+          const path = urlObj.pathname;
+          const handle = path.split('/').filter(p => p && !p.startsWith('video'))[0];
+          if (handle && handle.startsWith('@')) {
+            return { handle: handle.substring(1), platform: 'tiktok' };
+          }
+        }
+        break;
+        
+      case 'youtube':
+        if (urlObj.hostname.includes('youtube.com')) {
+          const path = urlObj.pathname;
+          if (path.includes('/channel/') || path.includes('/@') || path.includes('/c/')) {
+            return { handle: url, platform: 'youtube' }; // Return full URL for YouTube
+          }
+        }
+        break;
+    }
+    
+    return null;
+    
+  } catch (error) {
+    console.error('Error extracting handle from URL:', url, error);
+    return null;
+  }
+}
+
+function calculateConfidence(title: string, clientName: string, platform: string): number {
+  let confidence = 0;
+  
+  // Check if client name appears in title
+  if (title.toLowerCase().includes(clientName.toLowerCase())) {
+    confidence += 40;
+  }
+  
+  // Check for platform-specific keywords
+  const platformKeywords = {
+    facebook: ['facebook', 'fb'],
+    instagram: ['instagram', 'ig'],
+    tiktok: ['tiktok', 'tt'],
+    youtube: ['youtube', 'yt', 'channel']
+  };
+  
+  const keywords = platformKeywords[platform] || [];
+  for (const keyword of keywords) {
+    if (title.toLowerCase().includes(keyword)) {
+      confidence += 15;
+      break;
+    }
+  }
+  
+  // Check for influencer/profile keywords
+  const profileKeywords = ['influencer', 'profile', 'official', 'verified'];
+  for (const keyword of profileKeywords) {
+    if (title.toLowerCase().includes(keyword)) {
+      confidence += 10;
+    }
+  }
+  
+  return Math.min(confidence, 100);
+}
+
 // Test API functions
 async function testFirecrawlApi(apiKey: string | undefined) {
   if (!apiKey) {
@@ -513,10 +727,6 @@ async function fetchRealSocialData(platform: string, handle: string, apiKey: str
 async function storeDataInCache(clientId: string, result: DataCollectionResult) {
   console.log('Storing collected data in cache...');
   
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  const supabase = createClient(supabaseUrl, supabaseKey)
-  
   const cacheEntries = [];
 
   // Store news data
@@ -529,12 +739,13 @@ async function storeDataInCache(clientId: string, result: DataCollectionResult) 
     });
   }
 
-  // Store social metrics
+  // Store social metrics - dynamically set source based on discovery method
   for (const socialItem of result.collected_data.social_metrics) {
+    const source = socialItem.source === 'auto_discovery' ? 'auto_discovery' : 'social_blade';
     cacheEntries.push({
       client_id: clientId,
       data_type: 'social_metrics',
-      source: 'social_blade',
+      source: source,
       data: socialItem
     });
   }
