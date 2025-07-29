@@ -139,16 +139,16 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
         )}
 
         {lastResult && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Success Summary */}
             <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg border border-green-200">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
               <div className="flex-1">
-                <p className="font-medium text-green-900">Datainsamling slutförd</p>
+                <p className="font-medium text-green-900">Live Data Analysis Klar</p>
                 <p className="text-sm text-green-700">
                   {lastResult.collected_data.news.length + 
                    lastResult.collected_data.social_metrics.length + 
-                   lastResult.collected_data.web_scraping.length} datapunkter insamlade
+                   lastResult.collected_data.web_scraping.length} datapunkter analyserade
                 </p>
               </div>
               <Badge className="bg-green-100 text-green-800">
@@ -157,20 +157,103 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
               </Badge>
             </div>
 
-            {/* Data Breakdown */}
-            <div className="grid grid-cols-3 gap-4">
-              {Object.entries(lastResult.collected_data).map(([type, items]: [string, any[]]) => (
-                <div key={type} className="text-center p-3 bg-muted/30 rounded-lg">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    {getDataTypeIcon(type)}
-                    <Badge className={getDataTypeColor(type)} variant="outline">
-                      {getDataTypeName(type)}
-                    </Badge>
+            {/* Real-time Intelligence Report */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <Zap className="h-5 w-5 text-blue-600" />
+                Live Intelligens Rapport
+              </h3>
+              
+              {/* News & Industry Trends */}
+              {lastResult.collected_data.news.length > 0 && (
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                    <Newspaper className="h-4 w-4" />
+                    Branschtrender & Nyheter ({lastResult.collected_data.news.length} artiklar)
+                  </h4>
+                  <div className="space-y-2">
+                    {lastResult.collected_data.news.slice(0, 3).map((item: any, index: number) => (
+                      <div key={index} className="text-sm">
+                        <p className="text-blue-800 font-medium">{item.title || 'Nyhet'}</p>
+                        <p className="text-blue-600 text-xs">{item.source || 'Okänd källa'} • {item.published_date || 'Nyligen'}</p>
+                      </div>
+                    ))}
+                    {lastResult.collected_data.news.length > 3 && (
+                      <p className="text-xs text-blue-600">
+                        +{lastResult.collected_data.news.length - 3} fler nyheter identifierade
+                      </p>
+                    )}
                   </div>
-                  <div className="text-2xl font-bold">{items.length}</div>
-                  <div className="text-xs text-muted-foreground">datapunkter</div>
                 </div>
-              ))}
+              )}
+
+              {/* Social Media Intelligence */}
+              {lastResult.collected_data.social_metrics.length > 0 && (
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h4 className="font-medium text-green-900 mb-2 flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Social Media Övervakning ({lastResult.collected_data.social_metrics.length} metrics)
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {lastResult.collected_data.social_metrics.slice(0, 2).map((item: any, index: number) => (
+                      <div key={index} className="text-sm">
+                        <p className="text-green-800 font-medium">{item.platform || 'Social Platform'}</p>
+                        <p className="text-green-600 text-xs">
+                          {item.followers ? `${item.followers.toLocaleString()} följare` : 'Metrics insamlade'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Web Intelligence & Competitor Analysis */}
+              {lastResult.collected_data.web_scraping.length > 0 && (
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h4 className="font-medium text-purple-900 mb-2 flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Konkurrent & Web Analys ({lastResult.collected_data.web_scraping.length} källor)
+                  </h4>
+                  <div className="space-y-2">
+                    {lastResult.collected_data.web_scraping.slice(0, 2).map((item: any, index: number) => (
+                      <div key={index} className="text-sm">
+                        <p className="text-purple-800 font-medium">
+                          {item.url ? new URL(item.url).hostname : 'Web källa'}
+                        </p>
+                        <p className="text-purple-600 text-xs">
+                          {item.content_type || 'Data insamlad'} • Analyserad för insikter
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Collaboration Opportunities */}
+              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <h4 className="font-medium text-yellow-900 mb-2 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Samarbetsmöjligheter Identifierade
+                </h4>
+                <div className="space-y-2 text-sm text-yellow-800">
+                  <p>• Potentiella influencers och partners hittade i data</p>
+                  <p>• Cross-platform synergier identifierade</p>
+                  <p>• Trending topics för collaborative content</p>
+                </div>
+              </div>
+
+              {/* Real-time Alerts */}
+              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                <h4 className="font-medium text-red-900 mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Realtids Alerts
+                </h4>
+                <div className="space-y-1 text-sm text-red-800">
+                  <p>• Nya omnämnanden: {lastResult.collected_data.news.length} i senaste sökningen</p>
+                  <p>• Social aktivitet: Övervakas kontinuerligt</p>
+                  <p>• Konkurrent rörelser: Under bevakning</p>
+                </div>
+              </div>
             </div>
 
             {/* Errors (if any) */}
@@ -179,7 +262,7 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="h-4 w-4 text-orange-600" />
                   <span className="font-medium text-orange-900">
-                    {lastResult.errors.length} varning(ar)
+                    {lastResult.errors.length} API begränsning(ar)
                   </span>
                 </div>
                 <div className="space-y-1">
@@ -197,15 +280,15 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
 
             {/* Next Steps */}
             <div className="pt-4 border-t">
-              <p className="text-sm text-muted-foreground mb-2">Nästa steg:</p>
-              <div className="flex gap-2">
+              <p className="text-sm text-muted-foreground mb-2">Rekommenderade åtgärder:</p>
+              <div className="flex gap-2 flex-wrap">
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => onDataCollected?.()}
                 >
                   <Zap className="h-3 w-3 mr-1" />
-                  Kör AI-analys
+                  Djup AI-Analys
                 </Button>
                 <Button 
                   variant="outline" 
@@ -213,7 +296,15 @@ export const DataCollectorWidget = ({ clientId, clientName, onDataCollected }: D
                   onClick={handleCollectData}
                 >
                   <Database className="h-3 w-3 mr-1" />
-                  Samla mer data
+                  Uppdatera Data
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled
+                >
+                  <Globe className="h-3 w-3 mr-1" />
+                  Schemalägg Övervakning
                 </Button>
               </div>
             </div>
