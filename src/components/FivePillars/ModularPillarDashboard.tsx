@@ -8,7 +8,7 @@ import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 import { PillarHeatmap } from './PillarHeatmap';
 import { ModularPillarAssessment } from './ModularPillarAssessment';
 import { ModularPillarManager } from './ModularPillarManager';
-import { PILLAR_MODULES } from '@/config/pillarModules';
+import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 
@@ -107,12 +107,17 @@ export const ModularPillarDashboard = ({
       {/* Activated Pillars Details */}
       {activatedPillars.length > 0 ? (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">
-            {isCoachView ? "Aktiverade pelare" : "Dina aktiva pelare"}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold">
+              {isCoachView ? "Aktiverade pelare" : "Dina aktiva pelare"}
+            </h2>
+            <HelpTooltip content={helpTexts.fivePillars.pillarsOrder} />
+          </div>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {activatedPillars.map((pillarKey) => {
+            {PILLAR_PRIORITY_ORDER.map((pillarKey) => {
+              if (!activatedPillars.includes(pillarKey)) return null;
+              
               const pillarConfig = PILLAR_MODULES[pillarKey];
               const pillarDefinition = pillarDefinitions.find(p => p.pillar_key === pillarKey);
               const latestAssessment = getLatestAssessment(pillarKey);
@@ -199,9 +204,9 @@ export const ModularPillarDashboard = ({
                     )}
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+            );
+          })}
+        </div>
         </div>
       ) : (
         <Card>

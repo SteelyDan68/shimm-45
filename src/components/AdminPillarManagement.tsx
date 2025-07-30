@@ -1,23 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
-  Users, 
-  Search, 
+  Plus, 
   Settings, 
-  Target,
-  CheckCircle,
+  Users, 
+  BarChart3, 
+  Calendar, 
+  CheckCircle, 
+  Clock, 
+  AlertTriangle,
+  Search,
   XCircle,
-  Calendar,
+  Target,
   Activity
 } from 'lucide-react';
+import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
@@ -275,10 +284,10 @@ export const AdminPillarManagement = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {Object.entries(PILLAR_CONFIG).map(([pillarKey, config]) => {
+                {PILLAR_PRIORITY_ORDER.map((pillarKey) => {
+                  const config = PILLAR_MODULES[pillarKey];
                   const isActive = isPillarActive(pillarKey);
                   const activationDate = getActivationDate(pillarKey);
-                  
                   return (
                     <div key={pillarKey} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">

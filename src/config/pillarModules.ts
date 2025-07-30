@@ -1,5 +1,14 @@
 import { PillarModuleConfig, PillarKey } from '@/types/fivePillarsModular';
 
+// Prioriteringsordning för pillars (Skills först, Self Care sist)
+export const PILLAR_PRIORITY_ORDER: PillarKey[] = [
+  'skills',
+  'talent', 
+  'brand',
+  'economy',
+  'self_care'
+];
+
 // Define questions and scoring logic for each pillar module
 export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
   self_care: {

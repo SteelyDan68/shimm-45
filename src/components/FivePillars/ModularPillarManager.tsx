@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, Circle, Settings } from 'lucide-react';
 import { PillarKey } from '@/types/fivePillarsModular';
-import { PILLAR_MODULES } from '@/config/pillarModules';
+import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 
 interface ModularPillarManagerProps {
@@ -45,7 +45,8 @@ export const ModularPillarManager = ({ clientId, clientName, isCoachView = true 
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2">
-            {activatedPillars.map((pillarKey) => {
+            {PILLAR_PRIORITY_ORDER.map((pillarKey) => {
+              if (!activatedPillars.includes(pillarKey)) return null;
               const pillarConfig = PILLAR_MODULES[pillarKey];
               const heatmapEntry = heatmapData.find(h => h.pillar_key === pillarKey);
               

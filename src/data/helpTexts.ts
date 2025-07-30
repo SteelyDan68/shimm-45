@@ -25,8 +25,9 @@ export const helpTexts = {
 
   // Five Pillars
   fivePillars: {
-    selfCare: "Välmående och hälsa - grundläggande för hållbar prestanda och kreativitet.",
-    skills: "Färdigheter och tekniska kunskaper - kontinuerlig utveckling och kompetensutveckling.",
+    pillarsOrder: "Pillarnas prioriteringsordning: Skills (färdigheter) → Talent (talang) → Brand (varumärke) → Economy (ekonomi) → Self Care (välmående). Skills kommer först för enklare start.",
+    selfCare: "Välmående och hälsa - grundläggande för hållbar prestanda och kreativitet. Kommer sist i bedömningsordningen för att vara mindre överväldigande.",
+    skills: "Färdigheter och tekniska kunskaper - kontinuerlig utveckling och kompetensutveckling. Första pillar i bedömningssekvensen för enkel start.",
     talent: "Naturlig begåvning och kreativitet - identifiera och utveckla unika styrkor.",
     brand: "Personligt varumärke och synlighet - hur du uppfattas och presenterar dig.",
     economy: "Ekonomi och affärsverksamhet - intäkter, investeringar och finansiell hållbarhet.",
