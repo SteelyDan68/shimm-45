@@ -40,7 +40,7 @@ export const ClientPathTimeline = ({
   isCoachView = false 
 }: ClientPathTimelineProps) => {
   const { entries, loading, filters, setFilters } = useClientPath(clientId);
-  const [selectedEntry, setSelectedEntry] = useState<PathEntry | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<TimelineEntry | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   // Transform entries to timeline entries with pillar info and excerpts
@@ -235,8 +235,8 @@ export const ClientPathTimeline = ({
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {(selectedEntry as TimelineEntry).pillarInfo && (
-                <span>{(selectedEntry as TimelineEntry).pillarInfo!.icon}</span>
+              {selectedEntry?.pillarInfo && (
+                <span>{selectedEntry.pillarInfo.icon}</span>
               )}
               {selectedEntry?.title}
             </DialogTitle>
@@ -245,16 +245,16 @@ export const ClientPathTimeline = ({
           {selectedEntry && (
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {(selectedEntry as TimelineEntry).pillarInfo && (
+                {selectedEntry?.pillarInfo && (
                   <Badge 
                     variant="secondary"
                     style={{ 
-                      backgroundColor: `${(selectedEntry as TimelineEntry).pillarInfo!.color}20`,
-                      color: (selectedEntry as TimelineEntry).pillarInfo!.color,
-                      borderColor: `${(selectedEntry as TimelineEntry).pillarInfo!.color}40`
+                      backgroundColor: `${selectedEntry.pillarInfo.color}20`,
+                      color: selectedEntry.pillarInfo.color,
+                      borderColor: `${selectedEntry.pillarInfo.color}40`
                     }}
                   >
-                    {(selectedEntry as TimelineEntry).pillarInfo!.name}
+                    {selectedEntry.pillarInfo.name}
                   </Badge>
                 )}
                 <Badge variant="outline">
