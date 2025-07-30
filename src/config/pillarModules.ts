@@ -91,61 +91,60 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
     color: '#3B82F6',
     questions: [
       {
-        key: 'technical_skills',
-        text: 'Hur nöjd är du med dina tekniska färdigheter?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'skill_training_regularity',
+        text: 'Jag tränar regelbundet på min färdighet.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.2
       },
       {
-        key: 'communication',
-        text: 'Hur bra är du på att kommunicera med olika målgrupper?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.5
-      },
-      {
-        key: 'leadership',
-        text: 'Hur utvecklade är dina ledarskapsförmågor?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'feedback_quality',
+        text: 'Jag får rätt feedback från andra.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.3
       },
       {
-        key: 'creativity',
-        text: 'Hur kreativ känner du dig i ditt arbete?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.0
+        key: 'technical_improvement_time',
+        text: 'Jag använder tid på att förbättra mina tekniska färdigheter.',
+        type: 'slider',
+        min: 0,
+        max: 100,
+        weight: 1.4
       },
       {
-        key: 'learning_ability',
-        text: 'Hur snabbt lär du dig nya saker?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.1
+        key: 'development_feeling',
+        text: 'Jag känner att jag utvecklas.',
+        type: 'slider',
+        min: 0,
+        max: 100,
+        weight: 1.5
+      },
+      {
+        key: 'skill_improvement_needs',
+        text: 'Vad skulle hjälpa dig förbättra dina färdigheter just nu?',
+        type: 'text',
+        weight: 1.0
       }
     ],
     scoreCalculation: (answers) => {
       const weights = {
-        technical_skills: 1.2,
-        communication: 1.5,
-        leadership: 1.3,
-        creativity: 1.0,
-        learning_ability: 1.1
+        skill_training_regularity: 1.2,
+        feedback_quality: 1.3,
+        technical_improvement_time: 1.4,
+        development_feeling: 1.5
       };
 
       let totalScore = 0;
       let totalWeight = 0;
 
       Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined) {
-          totalScore += answers[key] * weight;
+        if (answers[key] !== undefined && typeof answers[key] === 'number') {
+          // Convert 0-100 slider to 1-10 scale
+          const scaledScore = (answers[key] / 100) * 10;
+          totalScore += scaledScore * weight;
           totalWeight += weight;
         }
       });
@@ -153,9 +152,14 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
       return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
     },
     insightGeneration: (answers, score) => ({
-      development_priorities: Object.entries(answers).filter(([_, value]) => value <= 4).map(([key]) => key),
-      expertise_areas: Object.entries(answers).filter(([_, value]) => value >= 8).map(([key]) => key),
-      skill_level: score >= 8 ? 'expert' : score >= 6 ? 'proficient' : score >= 4 ? 'developing' : 'beginner'
+      development_priorities: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value <= 40)
+        .map(([key]) => key),
+      strong_areas: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value >= 80)
+        .map(([key]) => key),
+      skill_level: score >= 8 ? 'expert' : score >= 6 ? 'proficient' : score >= 4 ? 'developing' : 'beginner',
+      improvement_text: answers.skill_improvement_needs || ''
     })
   },
 

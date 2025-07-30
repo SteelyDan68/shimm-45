@@ -74,7 +74,7 @@ export interface PillarModuleConfig {
 export interface PillarQuestion {
   key: string;
   text: string;
-  type: 'scale' | 'boolean' | 'multiple_choice' | 'text';
+  type: 'scale' | 'slider' | 'boolean' | 'multiple_choice' | 'text';
   options?: string[];
   min?: number;
   max?: number;

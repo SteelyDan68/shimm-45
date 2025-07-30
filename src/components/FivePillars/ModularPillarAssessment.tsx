@@ -33,7 +33,7 @@ export const ModularPillarAssessment = ({
   useEffect(() => {
     const defaultAnswers: Record<string, any> = {};
     pillarConfig.questions.forEach(q => {
-      if (q.type === 'scale') {
+      if (q.type === 'scale' || q.type === 'slider') {
         defaultAnswers[q.key] = Math.ceil(((q.max || 10) + (q.min || 1)) / 2);
       } else {
         defaultAnswers[q.key] = '';
@@ -112,24 +112,38 @@ export const ModularPillarAssessment = ({
               )}
             </div>
             
-            {question.type === 'scale' && (
+            {(question.type === 'scale' || question.type === 'slider') && (
               <div className="px-2">
                 <Slider
                   value={[answers[question.key] || question.min || 1]}
                   onValueChange={(value) => handleAnswerChange(question.key, value[0])}
                   max={question.max || 10}
                   min={question.min || 1}
-                  step={1}
+                  step={question.type === 'slider' ? 1 : 1}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>Låg ({question.min})</span>
+                  <span>
+                    {question.type === 'slider' ? `${question.min || 0}%` : `Låg (${question.min || 1})`}
+                  </span>
                   <span className="font-medium text-primary">
                     {answers[question.key] || question.min || 1}
+                    {question.type === 'slider' ? '%' : ''}
                   </span>
-                  <span>Hög ({question.max})</span>
+                  <span>
+                    {question.type === 'slider' ? `${question.max || 100}%` : `Hög (${question.max || 10})`}
+                  </span>
                 </div>
               </div>
+            )}
+
+            {question.type === 'text' && (
+              <Textarea
+                value={answers[question.key] || ''}
+                onChange={(e) => handleAnswerChange(question.key, e.target.value)}
+                placeholder="Skriv ditt svar här..."
+                rows={3}
+              />
             )}
           </div>
         ))}
