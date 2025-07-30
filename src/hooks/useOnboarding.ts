@@ -10,16 +10,23 @@ export const useOnboarding = () => {
   const saveOnboardingData = async (clientId: string, data: OnboardingData) => {
     setIsLoading(true);
     try {
+      console.log('Saving onboarding data:', { clientId, data });
+      
       const { error } = await supabase
         .from('clients')
         .update({ 
-          profile_metadata: data as any,
+          profile_metadata: JSON.parse(JSON.stringify(data)) as any,
           // Uppdatera också namn från onboarding data
           name: data.generalInfo.name || undefined
         })
         .eq('id', clientId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Onboarding data saved successfully');
 
       toast({
         title: "Profil sparad!",
