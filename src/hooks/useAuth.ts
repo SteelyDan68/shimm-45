@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -81,7 +81,7 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -98,9 +98,9 @@ export const useAuth = () => {
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
     }
-  };
+  }, []);
 
-  const fetchUserRoles = async (userId: string) => {
+  const fetchUserRoles = useCallback(async (userId: string) => {
     try {
       console.log('Fetching roles for user:', userId);
       const { data, error } = await supabase
@@ -120,7 +120,7 @@ export const useAuth = () => {
     } catch (error) {
       console.error('Error in fetchUserRoles:', error);
     }
-  };
+  }, []);
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
@@ -276,23 +276,23 @@ export const useAuth = () => {
     }
   };
 
-  const hasRole = (role: AppRole): boolean => {
+  const hasRole = useCallback((role: AppRole): boolean => {
     return roles.includes(role);
-  };
+  }, [roles]);
 
-  const hasAnyRole = (checkRoles: AppRole[]): boolean => {
+  const hasAnyRole = useCallback((checkRoles: AppRole[]): boolean => {
     return checkRoles.some(role => roles.includes(role));
-  };
+  }, [roles]);
 
-  const isAdmin = (): boolean => {
+  const isAdmin = useCallback((): boolean => {
     console.log('Checking isAdmin, current roles:', roles);
     return hasAnyRole(['superadmin', 'admin']);
-  };
+  }, [roles, hasAnyRole]);
 
-  const canManageUsers = (): boolean => {
+  const canManageUsers = useCallback((): boolean => {
     console.log('Checking canManageUsers, current roles:', roles);
     return hasAnyRole(['superadmin', 'admin', 'manager']);
-  };
+  }, [roles, hasAnyRole]);
 
   return {
     user,

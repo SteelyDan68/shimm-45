@@ -77,11 +77,11 @@ export function UserManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (canManageUsers()) {
+    if (canManageUsers) {
       fetchUsers();
       fetchOrganizations();
     }
-  }, []);
+  }, [canManageUsers]);
 
   const fetchUsers = async () => {
     try {
@@ -197,7 +197,7 @@ export function UserManagement() {
     }
   };
 
-  if (!canManageUsers()) {
+  if (!canManageUsers) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-10">
@@ -330,7 +330,7 @@ export function UserManagement() {
                               <Edit3 className="h-4 w-4 mr-2" />
                               Redigera
                             </DropdownMenuItem>
-                            {isAdmin() && (
+                            {isAdmin && (
                               <DropdownMenuItem 
                                 onClick={() => deleteUser(user.id)}
                                 className="text-red-600"
