@@ -17,7 +17,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
+import { PillarDashboard } from '@/components/FivePillars/PillarDashboard';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
@@ -356,69 +356,7 @@ export const ClientDashboard = () => {
 
         {/* Assessment Tab */}
         <TabsContent value="assessment" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Självskattning
-              </CardTitle>
-              <p className="text-muted-foreground">
-                Bedöm din nuvarande situation och få AI-baserade rekommendationer
-              </p>
-            </CardHeader>
-            <CardContent>
-              {/* Visa tidigare assessment-resultat om det finns */}
-              {lastAssessmentResult && stats.lastAssessment && (
-                <Card className="mb-6 bg-primary/5 border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Brain className="h-5 w-5 text-primary" />
-                      Din senaste AI-analys
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Genomförd: {new Date(stats.lastAssessment).toLocaleDateString('sv-SE', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-background/60 border rounded-lg p-4">
-                      <div className="prose prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap text-sm">
-                          {lastAssessmentResult}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Assessment form */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">
-                    {lastAssessmentResult ? 'Gör en ny assessment' : 'Gör din första assessment'}
-                  </h3>
-                  {lastAssessmentResult && (
-                    <Badge variant="outline" className="text-green-700 bg-green-50">
-                      Tidigare genomförd
-                    </Badge>
-                  )}
-                </div>
-                
-                <InsightAssessment 
-                  clientId={clientProfile.id} 
-                  clientName={clientProfile.name}
-                  onComplete={() => {
-                    // Uppdatera sidan efter genomförd assessment
-                    loadStats(clientProfile.id);
-                  }}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <PillarDashboard clientId={clientProfile.id} clientName={clientProfile.name} />
         </TabsContent>
 
         {/* Analytics Tab */}
