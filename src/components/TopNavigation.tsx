@@ -19,18 +19,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-const mainItems = [
+const coachItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Klienter", url: "/clients", icon: Users },
   { title: "Coach", url: "/coach", icon: TrendingUp },
   { title: "Rapporter", url: "/reports", icon: FileText },
 ];
 
+const clientItems = [
+  { title: "Mitt Dashboard", url: "/client-dashboard", icon: Home },
+  { title: "Min Profil", url: "/client-dashboard", icon: User },
+];
+
 export function TopNavigation() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, hasRole } = useAuth();
   const location = useLocation();
   
   const isActive = (path: string) => location.pathname === path;
+  
+  // Välj navigationsmenyn baserat på användarroll
+  const navItems = hasRole('client') ? clientItems : coachItems;
   
   return (
     <header className="h-16 border-b bg-card shadow-sm">
@@ -41,7 +49,7 @@ export function TopNavigation() {
           
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            {mainItems.map((item) => (
+            {navItems.map((item) => (
               <NavLink
                 key={item.title}
                 to={item.url}
@@ -78,14 +86,18 @@ export function TopNavigation() {
             </DropdownMenuTrigger>
             
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem asChild>
-                <NavLink to="/admin" className="flex items-center w-full">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Administration
-                </NavLink>
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
+              {/* Visa administration endast för icke-klienter */}
+              {!hasRole('client') && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <NavLink to="/admin" className="flex items-center w-full">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Administration
+                    </NavLink>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               
               <DropdownMenuItem onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-2" />

@@ -35,7 +35,7 @@ interface DashboardStats {
 }
 
 export const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -51,9 +51,14 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
+      // Redirect clients to their own dashboard
+      if (hasRole('client')) {
+        navigate('/client-dashboard');
+        return;
+      }
       loadDashboardData();
     }
-  }, [user]);
+  }, [user, hasRole, navigate]);
 
   const loadDashboardData = async () => {
     if (!user) return;

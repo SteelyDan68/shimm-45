@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
+import { ClientDashboard } from "./pages/ClientDashboard";
 import { Administration } from "./pages/Administration";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const AppRoutes = () => {
     <AppLayout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/clients" element={<AllClients />} />
         <Route path="/coach" element={<CoachDashboardPage />} />
         <Route path="/client/:clientId" element={<ClientProfile />} />
