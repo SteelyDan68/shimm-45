@@ -43,12 +43,21 @@ export interface ProblemArea {
   trend: 'increasing' | 'decreasing' | 'stable';
 }
 
+export interface FunctionalResourceTrend {
+  date: string;
+  functionalAccessCount: number; // Antal "ja" svar på funktionstillgångsfrågor
+  subjectiveOpportunitiesAvg: number; // Genomsnitt 1-5 för subjektiva möjligheter
+  hasRegularSupport: boolean; // Om de har någon att prata med regelbundet
+  relationshipComments: string; // Sammanställd kommentar från relationsfrågor
+}
+
 export interface AnalyticsData {
   barrierTrends: BarrierTrend[];
   taskProgress: TaskProgress[];
   velocityTrends: VelocityPoint[];
   sentimentTrends: SentimentTrend[];
   problemAreas: ProblemArea[];
+  functionalResources: FunctionalResourceTrend[];
   summary: {
     totalTasks: number;
     completedTasks: number;
@@ -146,6 +155,9 @@ export const useAnalytics = (clientId?: string) => {
       // Analyze problem areas
       const problemAreas = analyzeProblemAreas(pathEntries || []);
 
+      // Process functional resources
+      const functionalResources = processFunctionalResources(pathEntries || []);
+
       // Calculate summary statistics
       const summary = calculateSummary(tasks || [], client?.velocity_score || 50, problemAreas);
 
@@ -155,6 +167,7 @@ export const useAnalytics = (clientId?: string) => {
         velocityTrends,
         sentimentTrends,
         problemAreas,
+        functionalResources,
         summary
       });
 
@@ -284,6 +297,59 @@ export const useAnalytics = (clientId?: string) => {
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
+  };
+
+  const processFunctionalResources = (entries: any[]): FunctionalResourceTrend[] => {
+    const assessmentEntries = entries.filter(entry => 
+      entry.type === 'assessment' && entry.details?.includes('Funktionstillgång')
+    );
+
+    return assessmentEntries.map(entry => {
+      const date = format(new Date(entry.timestamp), 'yyyy-MM-dd');
+      
+      // Parse functional access count (antal "ja" svar)
+      let functionalAccessCount = 0;
+      const functionalMatches = entry.details.match(/🟠 Funktionstillgång:\n(.*?)(?=\n\n|$)/s);
+      if (functionalMatches) {
+        const functionalText = functionalMatches[1];
+        functionalAccessCount = (functionalText.match(/: ja/g) || []).length;
+      }
+
+      // Parse subjective opportunities average
+      let subjectiveOpportunitiesAvg = 0;
+      const subjectiveMatches = entry.details.match(/🟣 Subjektiva möjligheter:\n(.*?)(?=\n\n|$)/s);
+      if (subjectiveMatches) {
+        const subjectiveText = subjectiveMatches[1];
+        const scores = subjectiveText.match(/: (\d+)\/5/g);
+        if (scores) {
+          const values = scores.map(s => parseInt(s.match(/(\d+)\/5/)?.[1] || '0'));
+          subjectiveOpportunitiesAvg = values.reduce((a, b) => a + b, 0) / values.length;
+        }
+      }
+
+      // Parse relationship support
+      let hasRegularSupport = false;
+      let relationshipComments = '';
+      const relationshipMatches = entry.details.match(/🟢 Relationer:\n(.*?)(?=\n\n|$)/s);
+      if (relationshipMatches) {
+        const relationshipText = relationshipMatches[1];
+        hasRegularSupport = relationshipText.includes('prata med regelbundet?: ja');
+        
+        // Extract comments from relationships
+        const commentMatches = relationshipText.match(/\(([^)]+)\)/g);
+        if (commentMatches) {
+          relationshipComments = commentMatches.map(m => m.slice(1, -1)).join('; ');
+        }
+      }
+
+      return {
+        date,
+        functionalAccessCount,
+        subjectiveOpportunitiesAvg: Math.round(subjectiveOpportunitiesAvg * 10) / 10,
+        hasRegularSupport,
+        relationshipComments
+      };
+    });
   };
 
   const calculateSummary = (tasks: any[], velocityScore: number, problemAreas: ProblemArea[]) => {

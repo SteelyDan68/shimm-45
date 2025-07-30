@@ -5,6 +5,7 @@ import { TaskProgressChart } from "./TaskProgressChart";
 import { VelocityTrendChart } from "./VelocityTrendChart";
 import { SentimentTrendChart } from "./SentimentTrendChart";
 import { ProblemAreasChart } from "./ProblemAreasChart";
+import { FunctionalResourcesChart } from "./FunctionalResourcesChart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
@@ -68,12 +69,18 @@ export function AnalyticsDashboard({ clientId, showClientName = false }: Analyti
         {/* Barrier Trends */}
         <BarrierTrendsChart data={data.barrierTrends} />
         
-        {/* Sentiment Trends */}
-        <SentimentTrendChart data={data.sentimentTrends} />
+        {/* Functional Resources - New Chart */}
+        <FunctionalResourcesChart data={data.functionalResources} />
       </div>
 
-      {/* Problem Areas - Full Width */}
-      <ProblemAreasChart data={data.problemAreas} />
+      {/* Full Width Charts */}
+      <div className="space-y-6">
+        {/* Sentiment Trends */}
+        <SentimentTrendChart data={data.sentimentTrends} />
+        
+        {/* Problem Areas - Full Width */}
+        <ProblemAreasChart data={data.problemAreas} />
+      </div>
     </div>
   );
 }
