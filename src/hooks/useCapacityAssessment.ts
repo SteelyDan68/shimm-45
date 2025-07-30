@@ -79,11 +79,15 @@ export const useCapacityAssessment = (clientId: string) => {
 
     } catch (error: any) {
       console.error('Error fetching capacity assessment:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte hämta kapacitetsdata",
-        variant: "destructive"
-      });
+      // Only show error toast for actual errors, not network issues or missing data
+      if (error?.message && !error.message.includes('Failed to fetch')) {
+        toast({
+          title: "Fel",
+          description: "Kunde inte hämta kapacitetsdata",
+          variant: "destructive"
+        });
+      }
+      setCapacityData(null);
     } finally {
       setLoading(false);
     }
