@@ -17,6 +17,8 @@ export function CapacityBarometer({
   showTitle = true 
 }: CapacityBarometerProps) {
   const { capacityData, loading, capacityLevel, assessmentCount } = useCapacityAssessment(clientId);
+  
+  console.log('CapacityBarometer debug:', { capacityData, assessmentCount, clientId });
 
   if (loading) {
     return (
