@@ -1,4 +1,22 @@
-# Welcome to your Lovable project
+# Coaching Platform
+
+En omfattande coachingplattform byggd med React, TypeScript och Supabase.
+
+## 🆘 Hjälpsystem för utvecklare
+
+**KRITISKT**: Alla nya komponenter MÅSTE inkludera hjälptooltips enligt standardprocessen.
+
+### Snabbstart för nya komponenter:
+1. Läs `docs/help-system-guide.md` för fullständig guide  
+2. Använd `docs/component-template.tsx` som utgångspunkt
+3. Lägg till hjälptexter i `src/data/helpTexts.ts`
+4. Använd `src/utils/helpSystem.ts` för enkla wrappers
+
+### Obligatorisk checklist:
+- [ ] Hjälptexter tillagda i `helpTexts.ts`
+- [ ] `HelpTooltip` används vid alla viktiga element  
+- [ ] Komponenten följer design-riktlinjerna
+- [ ] Hjälptexterna är på svenska och tydliga
 
 ## Project info
 
