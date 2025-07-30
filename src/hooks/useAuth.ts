@@ -102,6 +102,7 @@ export const useAuth = () => {
 
   const fetchUserRoles = async (userId: string) => {
     try {
+      console.log('Fetching roles for user:', userId);
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -112,7 +113,9 @@ export const useAuth = () => {
         return;
       }
 
+      console.log('Fetched roles data:', data);
       const userRoles = data?.map(item => item.role) || [];
+      console.log('User roles:', userRoles);
       setRoles(userRoles);
     } catch (error) {
       console.error('Error in fetchUserRoles:', error);
@@ -282,10 +285,12 @@ export const useAuth = () => {
   };
 
   const isAdmin = (): boolean => {
+    console.log('Checking isAdmin, current roles:', roles);
     return hasAnyRole(['superadmin', 'admin']);
   };
 
   const canManageUsers = (): boolean => {
+    console.log('Checking canManageUsers, current roles:', roles);
     return hasAnyRole(['superadmin', 'admin', 'manager']);
   };
 
