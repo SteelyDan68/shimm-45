@@ -33,10 +33,9 @@ const AppRoutes = () => {
     <AppLayout>
       <Routes>
         <Route path="/" element={
-          hasRole('client') ? <ClientDashboard /> : 
-          hasRole('superadmin') || hasRole('admin') ? <Administration /> : 
-          <Dashboard />
+          hasRole('client') ? <ClientDashboard /> : <Dashboard />
         } />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/edit-profile" element={<EditProfilePage />} />

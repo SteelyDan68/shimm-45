@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageIcon } from "@/components/Messaging/MessageIcon";
 
 const coachItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Klienter", url: "/clients", icon: Users },
   { title: "Coach", url: "/coach", icon: TrendingUp },
   { title: "Meddelanden", url: "/messages", icon: FileText },
