@@ -19,6 +19,7 @@ import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
+import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 
 interface Client {
   id: string;
@@ -293,6 +294,9 @@ export const ClientProfile = () => {
         {/* Business Intelligence & Sentiment Analysis */}
         <SentimentAnalysisWidget sentimentData={sentimentData} onCollectData={collectData} />
       </div>
+
+      {/* Client Path Timeline */}
+      <PathTimeline clientId={clientId!} clientName={client.name} />
 
       {/* Summary Stats */}
       <Card>

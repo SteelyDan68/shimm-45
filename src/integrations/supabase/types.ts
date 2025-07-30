@@ -244,6 +244,66 @@ export type Database = {
         }
         Relationships: []
       }
+      path_entries: {
+        Row: {
+          ai_generated: boolean
+          client_id: string
+          created_at: string
+          created_by: string
+          details: string | null
+          id: string
+          linked_task_id: string | null
+          status: string
+          timestamp: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          client_id: string
+          created_at?: string
+          created_by: string
+          details?: string | null
+          id?: string
+          linked_task_id?: string | null
+          status?: string
+          timestamp?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          id?: string
+          linked_task_id?: string | null
+          status?: string
+          timestamp?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "path_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "path_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: Json | null
