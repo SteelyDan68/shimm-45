@@ -108,7 +108,7 @@ export const ClientAssessmentPage = () => {
             <CheckCircle className="h-5 w-5 text-green-500" />
             <span className="text-sm text-green-600 font-medium">Profil komplett!</span>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Sista steget: Self Assessment</h1>
+          <h1 className="text-3xl font-bold mb-2">Sista steget: Självskattning</h1>
           <p className="text-muted-foreground">
             Nu när vi känner dig bättre, hjälp oss förstå din nuvarande situation
           </p>

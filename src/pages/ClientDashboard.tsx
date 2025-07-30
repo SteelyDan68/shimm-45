@@ -326,7 +326,7 @@ export const ClientDashboard = () => {
           <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
           <TabsTrigger value="journey">Min resa</TabsTrigger>
           <TabsTrigger value="tasks">Mina Uppgifter</TabsTrigger>
-          <TabsTrigger value="assessment">Self Assessment</TabsTrigger>
+          <TabsTrigger value="assessment">Självskattning</TabsTrigger>
           <TabsTrigger value="analytics">Analys</TabsTrigger>
         </TabsList>
 
@@ -360,7 +360,7 @@ export const ClientDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Self Assessment
+                Självskattning
               </CardTitle>
               <p className="text-muted-foreground">
                 Bedöm din nuvarande situation och få AI-baserade rekommendationer
