@@ -585,6 +585,7 @@ export type Database = {
           details: string | null
           id: string
           linked_task_id: string | null
+          metadata: Json | null
           status: string
           timestamp: string
           title: string
@@ -599,6 +600,7 @@ export type Database = {
           details?: string | null
           id?: string
           linked_task_id?: string | null
+          metadata?: Json | null
           status?: string
           timestamp?: string
           title: string
@@ -613,6 +615,7 @@ export type Database = {
           details?: string | null
           id?: string
           linked_task_id?: string | null
+          metadata?: Json | null
           status?: string
           timestamp?: string
           title?: string

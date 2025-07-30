@@ -22,7 +22,7 @@ import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { CapacityBarometer } from '@/components/CapacityBarometer';
-import { PillarDashboard } from '@/components/FivePillars/PillarDashboard';
+import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
 
 interface ClientProfile {
   id: string;
@@ -317,13 +317,23 @@ export const ClientDashboard = () => {
       )}
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="tasks" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="pillars" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
           <TabsTrigger value="tasks">Mina Uppgifter</TabsTrigger>
           <TabsTrigger value="assessment">Self Assessment</TabsTrigger>
           <TabsTrigger value="progress">Min Utveckling</TabsTrigger>
           <TabsTrigger value="analytics">Analys</TabsTrigger>
         </TabsList>
+
+        {/* Five Pillars Tab */}
+        <TabsContent value="pillars" className="space-y-6">
+          <ModularPillarDashboard 
+            clientId={clientProfile.id} 
+            clientName={clientProfile.name} 
+            isCoachView={false}
+          />
+        </TabsContent>
 
         {/* Tasks Tab */}
         <TabsContent value="tasks" className="space-y-6">
