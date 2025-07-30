@@ -191,9 +191,9 @@ function generateICSContent(events: CalendarEventData[], clientName?: string): s
   const icsLines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//SHIMS//Calendar//EN',
+    'PRODID:-//SHIMM//Calendar//EN',
     `CALSCALE:GREGORIAN`,
-    `X-WR-CALNAME:${clientName || 'SHIMS'} Kalender`,
+    `X-WR-CALNAME:${clientName || 'SHIMM'} Kalender`,
   ];
 
   events.forEach(event => {
@@ -202,7 +202,7 @@ function generateICSContent(events: CalendarEventData[], clientName?: string): s
     
     icsLines.push(
       'BEGIN:VEVENT',
-      `UID:${event.id}@shims.app`,
+      `UID:${event.id}@shimm.app`,
       `DTSTART:${startDate}`,
       `DTEND:${endDate}`,
       `SUMMARY:${event.title}`,

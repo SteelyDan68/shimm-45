@@ -29,7 +29,7 @@ export function Administration() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [profileData, setProfileData] = useState({
-    name: "SHIMS Management",
+    name: "SHIMM Management",
     email: user?.email || "",
     timezone: "Stockholm (UTC+1)",
     language: "Svenska"

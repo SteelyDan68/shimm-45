@@ -47,7 +47,7 @@ export function TopNavigation() {
       <div className="h-full px-6 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-8">
-          <h1 className="text-xl font-bold text-primary">SHIMS</h1>
+          <h1 className="text-xl font-bold text-primary">SHIMM</h1>
           
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
