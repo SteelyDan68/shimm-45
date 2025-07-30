@@ -21,6 +21,7 @@ import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessm
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
+import { CapacityBarometer } from '@/components/CapacityBarometer';
 
 interface ClientProfile {
   id: string;
@@ -273,6 +274,19 @@ export const ClientDashboard = () => {
             </Badge>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Kapacitetsbarometer - Efter stats-kort */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Din nuvarande kapacitet</h2>
+          <CapacityBarometer clientId={clientProfile.id} />
+        </div>
+        
+        {/* Placeholder för framtida komponenter */}
+        <div className="space-y-4">
+          {/* Här kan vi lägga till fler widgets senare */}
+        </div>
       </div>
 
       {/* AI Recommendations */}

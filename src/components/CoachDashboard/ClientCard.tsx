@@ -16,6 +16,7 @@ import {
 import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import type { ClientPriority, ClientIssue } from '@/hooks/useCoachDashboard';
+import { CapacityBarometer } from '@/components/CapacityBarometer';
 
 interface ClientCardProps {
   client: ClientPriority;
@@ -151,6 +152,13 @@ export function ClientCard({ client }: ClientCardProps) {
             </div>
           </div>
         )}
+
+        {/* Kapacitetsbarometer - Compact version */}
+        <CapacityBarometer 
+          clientId={client.id} 
+          variant="compact" 
+          showTitle={false}
+        />
 
         {/* Assessment Progress */}
         {client.assessment_scores && Object.keys(client.assessment_scores).length > 0 && (
