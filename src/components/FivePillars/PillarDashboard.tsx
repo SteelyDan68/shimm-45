@@ -81,12 +81,13 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{formDefinition.name}</CardTitle>
-                    {latestAssessment && (
-                      <Badge variant="secondary">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {new Date(latestAssessment.created_at).toLocaleDateString('sv-SE')}
-                      </Badge>
-                    )}
+                    <Badge variant="secondary">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {latestAssessment 
+                        ? `Senaste bedömning: ${new Date(latestAssessment.created_at).toLocaleDateString('sv-SE')}`
+                        : 'Ingen bedömning gjord än'
+                      }
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{formDefinition.description}</p>
                 </CardHeader>
@@ -106,7 +107,7 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
                   ) : (
                     <div className="text-center py-4">
                       <p className="text-sm text-muted-foreground mb-2">
-                        Ingen bedömning gjord än
+                        Klicka på knappen nedan för att göra din första bedömning
                       </p>
                     </div>
                   )}

@@ -138,12 +138,13 @@ export const ModularPillarDashboard = ({
                           content={helpTexts.fivePillars[pillarKey as keyof typeof helpTexts.fivePillars] || pillarConfig.description}
                         />
                       </div>
-                      {latestAssessment && (
-                        <Badge variant="secondary">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {new Date(latestAssessment.created_at).toLocaleDateString('sv-SE')}
-                        </Badge>
-                      )}
+                      <Badge variant="secondary">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {latestAssessment 
+                          ? `Senaste bedömning: ${new Date(latestAssessment.created_at).toLocaleDateString('sv-SE')}`
+                          : 'Ingen bedömning gjord än'
+                        }
+                      </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{pillarConfig.description}</p>
                   </CardHeader>
@@ -180,7 +181,7 @@ export const ModularPillarDashboard = ({
                     ) : (
                       <div className="text-center py-4">
                         <p className="text-sm text-muted-foreground mb-2">
-                          Ingen bedömning gjord än
+                          Klicka på knappen nedan för att göra din första bedömning
                         </p>
                       </div>
                     )}
