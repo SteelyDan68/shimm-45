@@ -12,7 +12,6 @@ interface CapacityData {
 export const useCapacityAssessment = (clientId: string) => {
   const [capacityData, setCapacityData] = useState<CapacityData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [assessmentCount, setAssessmentCount] = useState(0);
   const { toast } = useToast();
 
   const fetchLatestAssessment = async () => {
@@ -20,18 +19,6 @@ export const useCapacityAssessment = (clientId: string) => {
 
     try {
       setLoading(true);
-
-      // Hämta alla assessment path entries för att räkna dem
-      const { data: allAssessments, error: countError } = await supabase
-        .from('path_entries')
-        .select('id')
-        .eq('client_id', clientId)
-        .eq('type', 'assessment');
-
-      if (countError) throw countError;
-
-      const totalAssessments = allAssessments?.length || 0;
-      setAssessmentCount(totalAssessments);
 
       // Hämta senaste assessment path entry
       const { data: pathEntries, error } = await supabase
@@ -111,8 +98,8 @@ export const useCapacityAssessment = (clientId: string) => {
   }, [clientId]);
 
   // Calculate overall capacity level
-  const getCapacityLevel = (): 'low' | 'moderate' | 'strong' | 'insufficient_data' => {
-    if (!capacityData || assessmentCount < 2) return 'insufficient_data';
+  const getCapacityLevel = (): 'low' | 'moderate' | 'strong' => {
+    if (!capacityData) return 'low';
 
     const functionalScore = capacityData.functionalAccessCount / 4; // 0-1
     const opportunityScore = (capacityData.subjectiveOpportunitiesAvg - 1) / 4; // 0-1
@@ -128,7 +115,6 @@ export const useCapacityAssessment = (clientId: string) => {
   return {
     capacityData,
     loading,
-    assessmentCount,
     capacityLevel: getCapacityLevel(),
     refresh: fetchLatestAssessment
   };

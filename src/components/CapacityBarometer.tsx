@@ -16,9 +16,7 @@ export function CapacityBarometer({
   variant = 'full',
   showTitle = true 
 }: CapacityBarometerProps) {
-  const { capacityData, loading, capacityLevel, assessmentCount } = useCapacityAssessment(clientId);
-  
-  console.log('CapacityBarometer debug:', { capacityData, assessmentCount, clientId });
+  const { capacityData, loading, capacityLevel } = useCapacityAssessment(clientId);
 
   if (loading) {
     return (
@@ -42,7 +40,7 @@ export function CapacityBarometer({
     );
   }
 
-  if (capacityLevel === 'insufficient_data') {
+  if (!capacityData) {
     return (
       <Card className={variant === 'compact' ? 'p-3' : ''}>
         {showTitle && (
@@ -54,19 +52,8 @@ export function CapacityBarometer({
           </CardHeader>
         )}
         <CardContent className={variant === 'compact' ? 'pt-0' : ''}>
-          <div className={`p-3 rounded-lg border bg-gray-50 border-gray-200`}>
-            <div className="flex items-center gap-2">
-              <span className="text-lg">⏳</span>
-              <span className={`font-medium text-gray-600 ${variant === 'compact' ? 'text-sm' : ''}`}>
-                Inga data ännu
-              </span>
-            </div>
-          </div>
-          <p className={`text-muted-foreground mt-3 ${variant === 'compact' ? 'text-xs' : 'text-sm'}`}>
-            {assessmentCount === 0 
-              ? "Genomför en självskattning för att börja se din kapacitetsbarometer."
-              : "Genomför minst två självskattningar för att se din kapacitetsbarometer."
-            }
+          <p className={`text-muted-foreground ${variant === 'compact' ? 'text-xs' : 'text-sm'}`}>
+            Ingen kapacitetsdata tillgänglig. Genomför en självskattning för att se din kapacitetsbarometer.
           </p>
         </CardContent>
       </Card>
