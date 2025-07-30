@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { OnboardingData } from '@/types/onboarding';
 
 export const OnboardingPage = () => {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const navigate = useNavigate();
   const { saveOnboardingData, isLoading } = useOnboarding();
   const [clientProfile, setClientProfile] = useState<any>(null);
@@ -36,7 +36,12 @@ export const OnboardingPage = () => {
       if (clientError) throw clientError;
 
       if (!clientData) {
-        // Om ingen klientprofil finns, redirecta till vanlig dashboard
+        // Kontrollera om användaren är admin/coach - då ska de inte vara här
+        if (hasRole('superadmin') || hasRole('admin') || hasRole('manager')) {
+          navigate('/admin');
+          return;
+        }
+        // Om vanlig användare utan klientprofil, redirecta till client dashboard
         navigate('/client-dashboard');
         return;
       }

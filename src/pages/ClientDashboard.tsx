@@ -42,7 +42,7 @@ interface ClientStats {
 }
 
 export const ClientDashboard = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, hasRole } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -77,7 +77,12 @@ export const ClientDashboard = () => {
       if (clientError) throw clientError;
 
       if (!clientData) {
-        // Om ingen klientprofil finns, redirecta till onboarding
+        // Kontrollera om användaren är admin/coach - då ska de inte vara här
+        if (hasRole('superadmin') || hasRole('admin') || hasRole('manager')) {
+          navigate('/admin');
+          return;
+        }
+        // Om vanlig användare utan klientprofil, redirecta till onboarding
         navigate('/onboarding');
         return;
       }
