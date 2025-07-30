@@ -37,47 +37,60 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Format assessment data for AI using Lovable template
-    const assessmentText = Object.entries(assessmentData.assessment_scores)
+    // Format assessment data with clearer structure
+    const hinderText = Object.entries(assessmentData.assessment_scores)
       .map(([area, score]) => `${area}: ${score}/10`)
       .join('\n');
 
     // Format opportunities and resources
-    let opportunitiesText = '';
+    let resurserText = '';
     
     if (assessmentData.functional_access) {
-      opportunitiesText += `\n\n🟠 Funktionstillgång:\n${Object.entries(assessmentData.functional_access)
-        .map(([question, answer]) => `${question}: ${answer}`)
-        .join('\n')}`;
+      resurserText += `Funktionstillgång:\n${Object.entries(assessmentData.functional_access)
+        .map(([question, answer]) => `- ${question}: ${answer}`)
+        .join('\n')}\n\n`;
     }
     
     if (assessmentData.subjective_opportunities) {
-      opportunitiesText += `\n\n🟣 Subjektiva möjligheter (1-5 där 5 = lätt/ofta):\n${Object.entries(assessmentData.subjective_opportunities)
-        .map(([question, score]) => `${question}: ${score}/5`)
-        .join('\n')}`;
+      resurserText += `Subjektiva möjligheter (1-5 där 5 = lätt/ofta):\n${Object.entries(assessmentData.subjective_opportunities)
+        .map(([question, score]) => `- ${question}: ${score}/5`)
+        .join('\n')}\n\n`;
     }
     
     if (assessmentData.relationships) {
-      opportunitiesText += `\n\n🟢 Relationer:\n${Object.entries(assessmentData.relationships)
-        .map(([question, data]) => `${question}: ${data.answer}${data.comment ? ` (${data.comment})` : ''}`)
-        .join('\n')}`;
+      resurserText += `Relationer:\n${Object.entries(assessmentData.relationships)
+        .map(([question, data]) => `- ${question}: ${data.answer}${data.comment ? ` (${data.comment})` : ''}`)
+        .join('\n')}\n\n`;
     }
 
-    // Add client comments if provided
-    const fullAssessmentData = `Självskattning (1-10 där 10 = stort hinder):
-${assessmentText}
-${opportunitiesText}
+    // Get profile metadata from the database
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('profile_metadata')
+      .eq('id', assessmentData.client_id)
+      .single();
 
-${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.comments}` : ''}`;
+    const profileMetadata = clientData?.profile_metadata || {};
 
-    // Build AI prompt using Lovable template with the new coaching prompt
-    const systemPrompt = await buildAIPromptWithLovableTemplate(
-      assessmentData.client_id,
-      supabase,
-      fullAssessmentData,
-      'Du är mentor åt en offentlig person. Klienten har gjort en självskattning där de visar både hinder och möjligheter/resurser i sitt liv. Ta hänsyn till klientens yrkesroll, plattformar, styrkor och utmaningar när du svarar.\n\nGör följande:\n1. Reflektera över klientens aktuella situation med fokus på både hinder och resurser.\n2. Identifiera 2–3 hinder som framstår som viktiga att arbeta med.\n3. Ge en konkret, handlingsbar åtgärdsplan i 2–3 steg som bygger på klientens befintliga resurser och möjligheter.\n4. Framhäv vilka positiva förutsättningar klienten har att bygga på.\n5. Håll tonen varm, empatisk och professionell.'
-    );
+    // Build structured prompt
+    const structuredPrompt = `Du är mentor åt en offentlig person med ett starkt personligt varumärke. Personen har gjort en självskattning som visar både hinder och möjligheter.
 
+Här är deras bakgrund:
+${JSON.stringify(profileMetadata, null, 2)}
+
+Här är personens upplevda hinder (1-10 där 10 = stort hinder):
+${hinderText}
+
+Här är personens möjligheter och resurser:
+${resurserText}
+
+${assessmentData.comments ? `Ytterligare kommentarer från personen: ${assessmentData.comments}` : ''}
+
+Din uppgift är att:
+1. Reflektera över deras nuläge – vad är mest utmanande just nu?
+2. Identifiera vilka möjligheter som kan användas som hävstång
+3. Skapa en handlingsplan i 2–3 steg utifrån både hinder och tillgångar
+4. Håll tonen varm, konkret och professionell – och anpassad till deras roll och nisch`;
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -88,8 +101,8 @@ ${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.commen
         model: 'gpt-4.1-2025-04-14',
         messages: [
           {
-            role: 'system',
-            content: systemPrompt
+            role: 'user',
+            content: structuredPrompt
           }
         ],
         max_tokens: 800,
