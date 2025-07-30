@@ -12,6 +12,7 @@ interface CapacityData {
 export const useCapacityAssessment = (clientId: string) => {
   const [capacityData, setCapacityData] = useState<CapacityData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [assessmentCount, setAssessmentCount] = useState(0);
   const { toast } = useToast();
 
   const fetchLatestAssessment = async () => {
@@ -19,6 +20,18 @@ export const useCapacityAssessment = (clientId: string) => {
 
     try {
       setLoading(true);
+
+      // Hämta alla assessment path entries för att räkna dem
+      const { data: allAssessments, error: countError } = await supabase
+        .from('path_entries')
+        .select('id')
+        .eq('client_id', clientId)
+        .eq('type', 'assessment');
+
+      if (countError) throw countError;
+
+      const totalAssessments = allAssessments?.length || 0;
+      setAssessmentCount(totalAssessments);
 
       // Hämta senaste assessment path entry
       const { data: pathEntries, error } = await supabase
@@ -115,6 +128,7 @@ export const useCapacityAssessment = (clientId: string) => {
   return {
     capacityData,
     loading,
+    assessmentCount,
     capacityLevel: getCapacityLevel(),
     refresh: fetchLatestAssessment
   };
