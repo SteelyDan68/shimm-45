@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_rounds: {
+        Row: {
+          ai_analysis: string | null
+          client_id: string
+          comments: string | null
+          created_at: string
+          created_by: string
+          id: string
+          pillar_type: string
+          scores: Json
+          updated_at: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          client_id: string
+          comments?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          pillar_type: string
+          scores?: Json
+          updated_at?: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          client_id?: string
+          comments?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          pillar_type?: string
+          scores?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_data_cache: {
         Row: {
           author: string | null
@@ -79,6 +115,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      client_pillar_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          client_id: string
+          id: string
+          is_active: boolean
+          pillar_type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          client_id: string
+          id?: string
+          is_active?: boolean
+          pillar_type: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          client_id?: string
+          id?: string
+          is_active?: boolean
+          pillar_type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       clients: {
         Row: {

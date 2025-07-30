@@ -22,6 +22,7 @@ import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { CapacityBarometer } from '@/components/CapacityBarometer';
+import { PillarDashboard } from '@/components/FivePillars/PillarDashboard';
 
 interface ClientProfile {
   id: string;
