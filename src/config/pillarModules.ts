@@ -253,60 +253,59 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
     questions: [
       {
         key: 'brand_clarity',
-        text: 'Hur tydligt är ditt personliga varumärke?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        text: 'Mitt varumärke känns tydligt och igenkännbart.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.5
       },
       {
-        key: 'online_presence',
-        text: 'Hur nöjd är du med din online-närvaro?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.3
-      },
-      {
-        key: 'content_creation',
-        text: 'Hur konsekvent skapar du innehåll?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.2
-      },
-      {
-        key: 'audience_engagement',
-        text: 'Hur väl engagerar du din målgrupp?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'platform_messaging',
+        text: 'Jag signalerar rätt saker på mina plattformar.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.4
       },
       {
-        key: 'brand_consistency',
-        text: 'Hur konsekvent är ditt varumärke över alla kanaler?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.1
+        key: 'message_reach',
+        text: 'Jag når fram med det jag vill säga.',
+        type: 'slider',
+        min: 0,
+        max: 100,
+        weight: 1.3
+      },
+      {
+        key: 'credibility',
+        text: 'Jag uppfattas som trovärdig.',
+        type: 'slider',
+        min: 0,
+        max: 100,
+        weight: 1.2
+      },
+      {
+        key: 'brand_aspiration',
+        text: 'Hur vill du att ditt varumärke ska uppfattas?',
+        type: 'text',
+        weight: 1.0
       }
     ],
     scoreCalculation: (answers) => {
       const weights = {
         brand_clarity: 1.5,
-        online_presence: 1.3,
-        content_creation: 1.2,
-        audience_engagement: 1.4,
-        brand_consistency: 1.1
+        platform_messaging: 1.4,
+        message_reach: 1.3,
+        credibility: 1.2
       };
 
       let totalScore = 0;
       let totalWeight = 0;
 
       Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined) {
-          totalScore += answers[key] * weight;
+        if (answers[key] !== undefined && typeof answers[key] === 'number') {
+          // Convert 0-100 slider to 1-10 scale
+          const scaledScore = (answers[key] / 100) * 10;
+          totalScore += scaledScore * weight;
           totalWeight += weight;
         }
       });
@@ -314,9 +313,15 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
       return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
     },
     insightGeneration: (answers, score) => ({
-      brand_strength: score >= 7 ? 'strong' : score >= 5 ? 'developing' : 'weak',
-      focus_areas: Object.entries(answers).filter(([_, value]) => value <= 4).map(([key]) => key),
-      visibility_score: (answers.online_presence + answers.content_creation) / 2
+      brand_strength: score >= 7 ? 'strong' : score >= 5 ? 'developing' : 'needs_attention',
+      strong_areas: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value >= 80)
+        .map(([key]) => key),
+      improvement_areas: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value <= 50)
+        .map(([key]) => key),
+      brand_vision: answers.brand_aspiration || '',
+      overall_brand_maturity: score >= 8 ? 'mature' : score >= 6 ? 'growing' : score >= 4 ? 'emerging' : 'undefined'
     })
   },
 
