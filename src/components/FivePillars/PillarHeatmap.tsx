@@ -53,7 +53,7 @@ export const PillarHeatmap = ({
       navigate(`/client/${clientId}?tab=pillars&pillar=${pillar.pillar_key}`);
     } else {
       // För klientvy, bara fokusera på pelaren i nuvarande vy
-      console.log(`Focus on ${pillar.pillar_key} pillar`);
+      // Focus on pillar logic would go here
     }
   };
 

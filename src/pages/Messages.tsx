@@ -7,7 +7,7 @@ import { MessageList } from '@/components/Messaging/MessageList';
 import { ComposeMessage } from '@/components/Messaging/ComposeMessage';
 import { MessagePreferences } from '@/components/Messaging/MessagePreferences';
 
-export default function Messages() {
+export function Messages() {
   const [showCompose, setShowCompose] = useState(false);
 
   if (showCompose) {

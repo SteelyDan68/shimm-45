@@ -20,7 +20,7 @@ import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
-import { PathTimeline } from '@/components/ClientPath/PathTimeline';
+import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
 import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
@@ -380,7 +380,7 @@ export const ClientProfile = () => {
         {/* Development Tab */}
         <TabsContent value="development" className="space-y-6">
           {/* Client Path Timeline */}
-          <PathTimeline clientId={clientId!} clientName={client.name} />
+          <ClientPathTimeline clientId={clientId!} clientName={client.name} isCoachView={true} />
         </TabsContent>
 
         {/* Analytics Tab */}

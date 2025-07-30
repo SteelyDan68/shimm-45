@@ -24,11 +24,12 @@ const coachItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Klienter", url: "/clients", icon: Users },
   { title: "Coach", url: "/coach", icon: TrendingUp },
-  { title: "Rapporter", url: "/reports", icon: FileText },
+  { title: "Meddelanden", url: "/messages", icon: FileText },
 ];
 
 const clientItems = [
   { title: "Min Dashboard", url: "/client-dashboard", icon: Home },
+  { title: "Meddelanden", url: "/messages", icon: FileText },
   { title: "Redigera Profil", url: "/edit-profile", icon: User },
 ];
 

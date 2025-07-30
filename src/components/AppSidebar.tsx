@@ -82,10 +82,10 @@ export function AppSidebar() {
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {!open && <span>{item.title}</span>}
-                    </NavLink>
+                     <NavLink to={item.url} className={getNavCls}>
+                       <item.icon className="h-4 w-4" />
+                       {open && <span>{item.title}</span>}
+                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -99,7 +99,7 @@ export function AppSidebar() {
             <SidebarGroupLabel>Klienter</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {clients.slice(0, !open ? 0 : 8).map((client) => (
+                {clients.slice(0, open ? 8 : 0).map((client) => (
                   <SidebarMenuItem key={client.id}>
                     <SidebarMenuButton asChild>
                       <NavLink 
@@ -107,20 +107,20 @@ export function AppSidebar() {
                         className={getNavCls}
                       >
                         <User className="h-4 w-4" />
-                        {!open && (
-                          <div className="flex-1 min-w-0">
-                            <span className="truncate">{client.name}</span>
-                            <div className="text-xs text-muted-foreground">
-                              {client.category}
-                            </div>
-                          </div>
-                        )}
+                         {open && (
+                           <div className="flex-1 min-w-0">
+                             <span className="truncate">{client.name}</span>
+                             <div className="text-xs text-muted-foreground">
+                               {client.category}
+                             </div>
+                           </div>
+                         )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
                 
-                {clients.length > 8 && !open && (
+                {clients.length > 8 && open && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <NavLink to="/clients" className={getNavCls}>

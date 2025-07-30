@@ -13,6 +13,7 @@ import { ClientDashboard } from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { EditProfilePage } from "./pages/EditProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
+import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
 import NotFound from "./pages/NotFound";
@@ -20,7 +21,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
 
   if (!user) {
     return <Auth />;
@@ -29,7 +30,7 @@ const AppRoutes = () => {
   return (
     <AppLayout>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={hasRole('client') ? <ClientDashboard /> : <Dashboard />} />
         <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/edit-profile" element={<EditProfilePage />} />
@@ -37,10 +38,12 @@ const AppRoutes = () => {
         <Route path="/clients" element={<AllClients />} />
         <Route path="/coach" element={<CoachDashboardPage />} />
         <Route path="/client/:clientId" element={<ClientProfile />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/admin" element={<Administration />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys - Kommer snart</h1></div>} />
-        <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter - Kommer snart</h1></div>} />
+        <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys</h1><p className="text-muted-foreground">Analytiska insikter om dina klienter finns i varje klientprofil.</p></div>} />
+        <Route path="/data-collection" element={<div className="p-6"><h1 className="text-2xl font-bold">Datainsamling</h1><p className="text-muted-foreground">Datainsamlingsverktyg finns integrerade i klientprofilerna.</p></div>} />
+        <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter</h1><p className="text-muted-foreground">Automatiska veckobrev skickas varje måndag. Mer rapportfunktionalitet utvecklas.</p></div>} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
