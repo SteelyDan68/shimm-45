@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { TopNavigation } from "@/components/TopNavigation";
+import StefanAIChat from "./StefanAIChat";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       <main className="flex-1 overflow-auto bg-background">
         {children}
       </main>
+      <StefanAIChat />
     </div>
   );
 };
