@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { 
   ArrowLeft, 
   Brain, 
@@ -221,142 +222,161 @@ export const ClientProfile = () => {
         </div>
       </div>
 
-      {/* Logic State Card */}
-      {logicState && (
-        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              AI-analys & rekommendationer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Velocity Rank:</span>
-                <Badge className={getRankColor(logicState.velocity_rank)}>
-                  Klass {logicState.velocity_rank}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Ton:</span>
-                <Badge className={getToneColor(logicState.tone)}>
-                  {logicState.tone}
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="p-4 bg-background/60 rounded-lg border">
-              <p className="text-sm leading-relaxed">{logicState.recommendation}</p>
-            </div>
-            
-            {logicState.metrics && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 p-4 bg-background/30 rounded-lg">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {logicState.metrics.followerGrowth.toFixed(1)}%
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">Översikt</TabsTrigger>
+          <TabsTrigger value="data">Data & Insights</TabsTrigger>
+          <TabsTrigger value="tasks">Uppgifter</TabsTrigger>
+          <TabsTrigger value="development">Utveckling</TabsTrigger>
+          <TabsTrigger value="analytics">Analys</TabsTrigger>
+        </TabsList>
+
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Logic State Card */}
+          {logicState && (
+            <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  AI-analys & rekommendationer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Velocity Rank:</span>
+                    <Badge className={getRankColor(logicState.velocity_rank)}>
+                      Klass {logicState.velocity_rank}
+                    </Badge>
                   </div>
-                  <div className="text-xs text-muted-foreground">Följartillväxt</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {logicState.metrics.engagementRate.toFixed(1)}%
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Ton:</span>
+                    <Badge className={getToneColor(logicState.tone)}>
+                      {logicState.tone}
+                    </Badge>
                   </div>
-                  <div className="text-xs text-muted-foreground">Engagement</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {logicState.metrics.postFrequency}
+                
+                <div className="p-4 bg-background/60 rounded-lg border">
+                  <p className="text-sm leading-relaxed">{logicState.recommendation}</p>
+                </div>
+                
+                {logicState.metrics && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 p-4 bg-background/30 rounded-lg">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {logicState.metrics.followerGrowth.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-muted-foreground">Följartillväxt</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {logicState.metrics.engagementRate.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-muted-foreground">Engagement</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {logicState.metrics.postFrequency}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Inlägg/vecka</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {logicState.metrics.recentActivity}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Aktivitetspoäng</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Inlägg/vecka</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {logicState.metrics.recentActivity}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Aktivitetspoäng</div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Data Widgets Grid */}
-      <div className="grid gap-6">
-        {/* Live Data Collection */}
-        <DataCollectorWidget 
-          clientId={clientId} 
-          clientName={client.name}
-          onDataCollected={loadClientData}
-        />
-        
-        {/* Swedish News - Featured prominently */}
-        <SwedishNewsWidget newsItems={newsItems} clientName={client.name} />
-        
-        {/* Social Media Widget - Full Width */}
-        <SocialWidget socialMetrics={socialMetrics} />
-        
-        {/* Business Intelligence & Sentiment Analysis */}
-        <SentimentAnalysisWidget sentimentData={sentimentData} onCollectData={collectData} />
-      </div>
-
-      {/* Client Path Timeline */}
-      <PathTimeline clientId={clientId!} clientName={client.name} />
-
-      {/* Client Tasks */}
-      <ClientTaskList clientId={clientId!} clientName={client.name} />
-
-      {/* Task Scheduler for Coaches */}
-      <TaskScheduler clientId={clientId!} clientName={client.name} />
-
-      {/* Analytics Dashboard */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Utvecklingsanalys</h2>
-        </div>
-        <AnalyticsDashboard clientId={clientId!} />
-      </div>
-
-      {/* Summary Stats */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Datasammanfattning
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold">{cacheData.length}</div>
-              <div className="text-sm text-muted-foreground">Totalt datapunkter</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{newsItems.length}</div>
-              <div className="text-sm text-muted-foreground">Omnämnanden</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {cacheData.filter(d => d.data_type === 'social_metrics').length}
-              </div>
-              <div className="text-sm text-muted-foreground">Sociala metrics</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {cacheData.filter(d => d.data_type === 'ai_analysis').length}
-              </div>
-              <div className="text-sm text-muted-foreground">AI-analyser</div>
-            </div>
-          </div>
-          
-          {cacheData.length > 0 && (
-            <div className="mt-4 text-xs text-muted-foreground text-center">
-              Senaste uppdatering: {new Date(cacheData[0]?.created_at).toLocaleString('sv-SE')}
-            </div>
+                )}
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
+
+          {/* Summary Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Datasammanfattning
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold">{cacheData.length}</div>
+                  <div className="text-sm text-muted-foreground">Totalt datapunkter</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">{newsItems.length}</div>
+                  <div className="text-sm text-muted-foreground">Omnämnanden</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">
+                    {cacheData.filter(d => d.data_type === 'social_metrics').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Sociala metrics</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">
+                    {cacheData.filter(d => d.data_type === 'ai_analysis').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">AI-analyser</div>
+                </div>
+              </div>
+              
+              {cacheData.length > 0 && (
+                <div className="mt-4 text-xs text-muted-foreground text-center">
+                  Senaste uppdatering: {new Date(cacheData[0]?.created_at).toLocaleString('sv-SE')}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Data & Insights Tab */}
+        <TabsContent value="data" className="space-y-6">
+          {/* Live Data Collection */}
+          <DataCollectorWidget 
+            clientId={clientId} 
+            clientName={client.name}
+            onDataCollected={loadClientData}
+          />
+          
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Swedish News */}
+            <SwedishNewsWidget newsItems={newsItems} clientName={client.name} />
+            
+            {/* Sentiment Analysis */}
+            <SentimentAnalysisWidget sentimentData={sentimentData} onCollectData={collectData} />
+          </div>
+
+          {/* Social Media Widget - Full Width */}
+          <SocialWidget socialMetrics={socialMetrics} />
+        </TabsContent>
+
+        {/* Tasks Tab */}
+        <TabsContent value="tasks" className="space-y-6">
+          {/* Client Tasks */}
+          <ClientTaskList clientId={clientId!} clientName={client.name} />
+
+          {/* Task Scheduler for Coaches */}
+          <TaskScheduler clientId={clientId!} clientName={client.name} />
+        </TabsContent>
+
+        {/* Development Tab */}
+        <TabsContent value="development" className="space-y-6">
+          {/* Client Path Timeline */}
+          <PathTimeline clientId={clientId!} clientName={client.name} />
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <AnalyticsDashboard clientId={clientId!} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
