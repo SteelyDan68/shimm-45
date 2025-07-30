@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { MessageIcon } from "@/components/Messaging/MessageIcon";
 
 const coachItems = [
   { title: "Dashboard", url: "/", icon: Home },
@@ -70,6 +71,8 @@ export function TopNavigation() {
 
         {/* User Menu */}
         <div className="flex items-center space-x-4">
+          <MessageIcon />
+          
           <span className="text-sm text-muted-foreground hidden sm:block">
             {user?.email}
           </span>

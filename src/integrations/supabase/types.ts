@@ -161,6 +161,83 @@ export type Database = {
         }
         Relationships: []
       }
+      message_preferences: {
+        Row: {
+          auto_ai_assistance: boolean
+          created_at: string
+          email_notifications: boolean
+          id: string
+          internal_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_ai_assistance?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          internal_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_ai_assistance?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          internal_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_ai_assisted: boolean
+          is_read: boolean
+          parent_message_id: string | null
+          receiver_id: string
+          sender_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_ai_assisted?: boolean
+          is_read?: boolean
+          parent_message_id?: string | null
+          receiver_id: string
+          sender_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_ai_assisted?: boolean
+          is_read?: boolean
+          parent_message_id?: string | null
+          receiver_id?: string
+          sender_id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           id: string
