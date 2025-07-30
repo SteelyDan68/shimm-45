@@ -11,6 +11,7 @@ import { ModularPillarManager } from './ModularPillarManager';
 import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
+import { AnalysisActions } from '@/components/ui/analysis-actions';
 
 interface ModularPillarDashboardProps {
   clientId: string;
@@ -33,6 +34,11 @@ export const ModularPillarDashboard = ({
   
   const [selectedPillar, setSelectedPillar] = useState<PillarKey | null>(null);
   const [showManager, setShowManager] = useState(false);
+  const [showAnalysisModal, setShowAnalysisModal] = useState<{
+    title: string;
+    content: string;
+    pillarName: string;
+  } | null>(null);
 
   const activatedPillars = getActivatedPillars();
   const heatmapData = generateHeatmapData();
@@ -178,18 +184,11 @@ export const ModularPillarDashboard = ({
                           <div 
                             className="p-3 bg-muted rounded text-sm cursor-pointer hover:bg-muted/80 transition-colors"
                             onClick={() => {
-                              // Open dialog or expand to show full text
-                              const dialog = document.createElement('div');
-                              dialog.innerHTML = `
-                                <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="this.remove()">
-                                  <div class="bg-white rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
-                                    <h3 class="text-lg font-semibold mb-4">AI-analys för ${pillarConfig.name}</h3>
-                                    <div class="text-sm whitespace-pre-wrap">${latestAssessment.ai_analysis}</div>
-                                    <button onclick="this.closest('.fixed').remove()" class="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90">Stäng</button>
-                                  </div>
-                                </div>
-                              `;
-                              document.body.appendChild(dialog);
+                              setShowAnalysisModal({
+                                title: `AI-analys för ${pillarConfig.name}`,
+                                content: latestAssessment.ai_analysis,
+                                pillarName: pillarConfig.name
+                              });
                             }}
                           >
                             <p className="line-clamp-3">
@@ -262,6 +261,34 @@ export const ModularPillarDashboard = ({
             <p className="text-sm text-muted-foreground text-center py-2">
               Detaljerad tidslinjevy finns under "Min resa" i huvudmenyn
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Analysis Modal */}
+      {showAnalysisModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAnalysisModal(null)}>
+          <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">{showAnalysisModal.title}</h3>
+              <div className="flex items-center gap-2">
+                <AnalysisActions
+                  title={showAnalysisModal.title}
+                  content={showAnalysisModal.content}
+                  clientName={clientName}
+                  assessmentType={showAnalysisModal.pillarName}
+                />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowAnalysisModal(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </Button>
+              </div>
+            </div>
+            <div className="text-sm whitespace-pre-wrap border-t pt-4">{showAnalysisModal.content}</div>
           </div>
         </div>
       )}

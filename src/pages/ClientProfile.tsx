@@ -28,6 +28,7 @@ import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
 import { CalendarModule } from '@/components/Calendar/CalendarModule';
+import { AnalysisActions } from '@/components/ui/analysis-actions';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 
@@ -264,10 +265,19 @@ export const ClientProfile = () => {
           {logicState && (
             <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
-                  AI-analys & rekommendationer
-                  <HelpTooltip content={helpTexts.clientProfile.aiInsights} />
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-5 w-5" />
+                    AI-analys & rekommendationer
+                    <HelpTooltip content={helpTexts.clientProfile.aiInsights} />
+                  </div>
+                  <AnalysisActions
+                    title="AI-analys & rekommendationer"
+                    content={logicState.recommendation}
+                    clientName={client?.name}
+                    assessmentType="Client Logic Analysis"
+                    className="opacity-75 hover:opacity-100"
+                  />
                 </CardTitle>
               </CardHeader>
               <CardContent>

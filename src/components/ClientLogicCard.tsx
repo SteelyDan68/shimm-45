@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Brain, TrendingUp, MessageSquare, Loader2 } from 'lucide-react';
 import { useClientLogic } from '@/hooks/useClientLogic';
+import { AnalysisActions } from '@/components/ui/analysis-actions';
 
 interface LogicState {
   velocity_rank: string;
@@ -78,23 +79,34 @@ export const ClientLogicCard = ({ clientId, clientName }: ClientLogicCardProps) 
             <Brain className="h-5 w-5" />
             AI-analys: {clientName}
           </CardTitle>
-          <Button 
-            onClick={handleProcessLogic} 
-            disabled={isProcessing}
-            size="sm"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Analyserar...
-              </>
-            ) : (
-              <>
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Kör analys
-              </>
+          <div className="flex items-center gap-2">
+            {logicState && (
+              <AnalysisActions
+                title={`AI-analys för ${clientName}`}
+                content={logicState.recommendation}
+                clientName={clientName}
+                assessmentType="Client Logic Analysis"
+                className="opacity-75 hover:opacity-100"
+              />
             )}
-          </Button>
+            <Button 
+              onClick={handleProcessLogic} 
+              disabled={isProcessing}
+              size="sm"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analyserar...
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Kör analys
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

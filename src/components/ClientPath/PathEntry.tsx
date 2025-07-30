@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AnalysisActions } from '@/components/ui/analysis-actions';
 import { 
   Edit3, 
   Trash2, 
@@ -145,6 +146,15 @@ export function PathEntry({ entry, onUpdate, onDelete }: PathEntryProps) {
               </div>
               
               <div className="flex items-center gap-2">
+                {/* Add mail/print actions for AI-generated recommendations */}
+                {entry.ai_generated && entry.type === 'recommendation' && entry.details && (
+                  <AnalysisActions
+                    title={entry.title}
+                    content={entry.details}
+                    assessmentType="AI-rekommendation"
+                    className="mr-2"
+                  />
+                )}
                 <span className="text-xs text-muted-foreground">
                   {format(new Date(entry.timestamp), 'PPp', { locale: sv })}
                 </span>
