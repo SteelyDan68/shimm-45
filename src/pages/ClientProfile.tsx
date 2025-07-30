@@ -20,6 +20,7 @@ import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
+import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
 
 interface Client {
   id: string;
@@ -212,6 +213,8 @@ export const ClientProfile = () => {
               </>
             )}
           </Button>
+          
+          <InsightAssessment clientId={clientId!} clientName={client.name} />
         </div>
       </div>
 
