@@ -12,12 +12,25 @@ export const useOnboarding = () => {
     try {
       console.log('Saving onboarding data:', { clientId, data });
       
+      // Skapa en strukturerad profile_metadata med nested properties
+      const profileMetadata = {
+        generalInfo: data.generalInfo,
+        publicRole: data.publicRole,
+        lifeMap: data.lifeMap,
+        onboardingCompleted: true,
+        onboardingCompletedAt: new Date().toISOString()
+      };
+
       const { error } = await supabase
         .from('clients')
         .update({ 
-          profile_metadata: JSON.parse(JSON.stringify(data)) as any,
+          profile_metadata: profileMetadata,
           // Uppdatera också namn från onboarding data
-          name: data.generalInfo.name || undefined
+          name: data.generalInfo.name || undefined,
+          // Uppdatera social media handles i huvudkolumnerna för enklare åtkomst
+          instagram_handle: data.publicRole.instagramHandle || null,
+          youtube_channel: data.publicRole.youtubeHandle || null,
+          tiktok_handle: data.publicRole.tiktokHandle || null
         })
         .eq('id', clientId);
 
@@ -66,7 +79,8 @@ export const useOnboarding = () => {
 
   const hasCompletedOnboarding = async (clientId: string): Promise<boolean> => {
     const data = await getOnboardingData(clientId);
-    return !!(data?.generalInfo?.name && data?.publicRole?.primaryRole && data?.lifeMap?.location);
+    // Förbättrad kontroll - kolla både på flagga och på att alla nödvändiga fält finns
+    return !!(data?.onboardingCompleted || (data?.generalInfo?.name && data?.publicRole?.primaryRole && data?.lifeMap?.location));
   };
 
   return {

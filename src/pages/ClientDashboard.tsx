@@ -82,8 +82,12 @@ export const ClientDashboard = () => {
         return;
       }
 
-      // Kontrollera om onboarding är komplett - visa dashboard ändå men med meddelande
-      const hasOnboardingData = !!(clientData.profile_metadata as any)?.generalInfo?.name;
+      // Kontrollera om onboarding är komplett - förbättrad logik
+      const metadata = clientData.profile_metadata as any;
+      const hasOnboardingData = !!(
+        metadata?.onboardingCompleted || 
+        (metadata?.generalInfo?.name && metadata?.publicRole?.primaryRole && metadata?.lifeMap?.location)
+      );
 
       setClientProfile({ ...clientData, hasOnboardingData });
 

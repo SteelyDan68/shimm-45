@@ -43,8 +43,14 @@ export const OnboardingPage = () => {
 
       setClientProfile(clientData);
 
-      // Om onboarding redan är klar, gå vidare till assessment eller dashboard
-      if ((clientData.profile_metadata as any)?.generalInfo?.name) {
+      // Om onboarding redan är klar, gå vidare till dashboard
+      const metadata = clientData.profile_metadata as any;
+      const hasOnboardingData = !!(
+        metadata?.onboardingCompleted || 
+        (metadata?.generalInfo?.name && metadata?.publicRole?.primaryRole && metadata?.lifeMap?.location)
+      );
+      
+      if (hasOnboardingData) {
         navigate('/client-dashboard');
         return;
       }

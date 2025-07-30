@@ -35,6 +35,10 @@ export interface OnboardingData {
     ongoingChanges: string;
     pastCrises: string;
   };
+
+  // Onboarding status tracking
+  onboardingCompleted?: boolean;
+  onboardingCompletedAt?: string;
 }
 
 export interface OnboardingFormData extends OnboardingData {
