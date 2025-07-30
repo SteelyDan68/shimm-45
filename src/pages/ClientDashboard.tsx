@@ -51,6 +51,7 @@ export const ClientDashboard = () => {
     totalPathEntries: 0,
     lastAssessment: null
   });
+  const [lastAssessmentResult, setLastAssessmentResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -125,12 +126,25 @@ export const ClientDashboard = () => {
         .limit(1)
         .maybeSingle();
 
+      // Hämta senaste AI-analys
+      const { data: lastAnalysis } = await supabase
+        .from('path_entries')
+        .select('details')
+        .eq('client_id', clientId)
+        .eq('type', 'recommendation')
+        .eq('ai_generated', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
       setStats({
         completedTasks,
         pendingTasks,
         totalPathEntries: pathEntries || 0,
         lastAssessment: lastAssessment?.created_at || null
       });
+
+      setLastAssessmentResult(lastAnalysis?.details || null);
 
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -314,29 +328,56 @@ export const ClientDashboard = () => {
               </p>
             </CardHeader>
             <CardContent>
-              {!clientProfile.hasOnboardingData ? (
-                <div className="text-center py-8">
-                  <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Fylld i din allmänna information först</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Du behöver fylla i din allmänna information innan du kan göra en självskattning.
-                  </p>
-                  <Button onClick={() => navigate('/onboarding')}>
-                    Gå till allmän information
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  {stats.lastAssessment && (
-                    <div className="mb-4 p-3 bg-muted rounded-lg">
-                      <p className="text-sm">
-                        Senaste assessment: {new Date(stats.lastAssessment).toLocaleDateString('sv-SE')}
-                      </p>
+              {/* Visa tidigare assessment-resultat om det finns */}
+              {lastAssessmentResult && stats.lastAssessment && (
+                <Card className="mb-6 bg-primary/5 border-primary/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Brain className="h-5 w-5 text-primary" />
+                      Din senaste AI-analys
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Genomförd: {new Date(stats.lastAssessment).toLocaleDateString('sv-SE', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-background/60 border rounded-lg p-4">
+                      <div className="prose prose-sm max-w-none">
+                        <div className="whitespace-pre-wrap text-sm">
+                          {lastAssessmentResult}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <InsightAssessment clientId={clientProfile.id} clientName={clientProfile.name} />
-                </>
+                  </CardContent>
+                </Card>
               )}
+
+              {/* Assessment form */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">
+                    {lastAssessmentResult ? 'Gör en ny assessment' : 'Gör din första assessment'}
+                  </h3>
+                  {lastAssessmentResult && (
+                    <Badge variant="outline" className="text-green-700 bg-green-50">
+                      Tidigare genomförd
+                    </Badge>
+                  )}
+                </div>
+                
+                <InsightAssessment 
+                  clientId={clientProfile.id} 
+                  clientName={clientProfile.name}
+                  onComplete={() => {
+                    // Uppdatera sidan efter genomförd assessment
+                    loadStats(clientProfile.id);
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -58,7 +58,7 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
     if (result) {
       setAnalysisResult(result.analysis);
       setShowResults(true);
-      onComplete?.();
+      // Vi kallar inte onComplete här - användaren ska se resultatet först
     }
   };
 
@@ -116,7 +116,7 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
               onClick={onComplete}
               className="flex-1"
             >
-              Stäng
+              Tillbaka till Dashboard
             </Button>
           </div>
         </CardContent>

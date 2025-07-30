@@ -110,8 +110,8 @@ export const useInsightAssessment = (clientId: string) => {
       setLastResult(result);
 
       toast({
-        title: "Assessment genomförd",
-        description: "Din självskattning har sparats och AI-analys är klar"
+        title: "Bra jobbat! 🎉",
+        description: "Din självskattning är genomförd och din personliga analys är klar!"
       });
 
       return result;
