@@ -93,7 +93,12 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
   // Sätt initial data om den finns (för edit-mode)
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      // Merge initialData with default structure to ensure all properties exist
+      setFormData(prev => ({
+        generalInfo: { ...prev.generalInfo, ...initialData.generalInfo },
+        publicRole: { ...prev.publicRole, ...initialData.publicRole },
+        lifeMap: { ...prev.lifeMap, ...initialData.lifeMap }
+      }));
     }
   }, [initialData]);
 
@@ -128,15 +133,15 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
   };
 
   const isSection1Valid = () => {
-    return formData.generalInfo.name.trim() !== '' && formData.generalInfo.age.trim() !== '';
+    return formData.generalInfo?.name?.trim() !== '' && formData.generalInfo?.age?.trim() !== '';
   };
 
   const isSection2Valid = () => {
-    return formData.publicRole.primaryRole !== '' && formData.publicRole.niche.trim() !== '';
+    return formData.publicRole?.primaryRole !== '' && formData.publicRole?.niche?.trim() !== '';
   };
 
   const isSection3Valid = () => {
-    return formData.lifeMap.location.trim() !== '' && formData.lifeMap.hasChildren !== '';
+    return formData.lifeMap?.location?.trim() !== '' && formData.lifeMap?.hasChildren !== '';
   };
 
   const handleNext = () => {
