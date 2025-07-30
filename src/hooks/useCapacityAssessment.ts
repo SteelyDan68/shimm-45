@@ -111,8 +111,8 @@ export const useCapacityAssessment = (clientId: string) => {
   }, [clientId]);
 
   // Calculate overall capacity level
-  const getCapacityLevel = (): 'low' | 'moderate' | 'strong' => {
-    if (!capacityData) return 'low';
+  const getCapacityLevel = (): 'low' | 'moderate' | 'strong' | 'insufficient_data' => {
+    if (!capacityData || assessmentCount < 2) return 'insufficient_data';
 
     const functionalScore = capacityData.functionalAccessCount / 4; // 0-1
     const opportunityScore = (capacityData.subjectiveOpportunitiesAvg - 1) / 4; // 0-1

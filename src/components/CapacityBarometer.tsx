@@ -42,7 +42,7 @@ export function CapacityBarometer({
     );
   }
 
-  if (!capacityData || assessmentCount < 2) {
+  if (capacityLevel === 'insufficient_data') {
     return (
       <Card className={variant === 'compact' ? 'p-3' : ''}>
         {showTitle && (
@@ -63,7 +63,10 @@ export function CapacityBarometer({
             </div>
           </div>
           <p className={`text-muted-foreground mt-3 ${variant === 'compact' ? 'text-xs' : 'text-sm'}`}>
-            Genomför minst två självskattningar för att se din kapacitetsbarometer.
+            {assessmentCount === 0 
+              ? "Genomför en självskattning för att börja se din kapacitetsbarometer."
+              : "Genomför minst två självskattningar för att se din kapacitetsbarometer."
+            }
           </p>
         </CardContent>
       </Card>
