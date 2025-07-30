@@ -40,7 +40,7 @@ export function CapacityBarometer({
     );
   }
 
-  if (!capacityData) {
+  if (!capacityData || capacityLevel === 'insufficient_data') {
     return (
       <Card className={variant === 'compact' ? 'p-3' : ''}>
         {showTitle && (
@@ -53,7 +53,7 @@ export function CapacityBarometer({
         )}
         <CardContent className={variant === 'compact' ? 'pt-0' : ''}>
           <p className={`text-muted-foreground ${variant === 'compact' ? 'text-xs' : 'text-sm'}`}>
-            Ingen kapacitetsdata tillgänglig. Genomför en självskattning för att se din kapacitetsbarometer.
+            Inga data ännu. Genomför en självskattning för att se din kapacitetsbarometer.
           </p>
         </CardContent>
       </Card>
@@ -82,6 +82,13 @@ export function CapacityBarometer({
       borderColor: 'border-green-200',
       icon: '🟢',
       label: 'Stark kapacitet'
+    },
+    insufficient_data: {
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-50',
+      borderColor: 'border-gray-200',
+      icon: '⚪',
+      label: 'Inga data ännu'
     }
   };
 
