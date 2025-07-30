@@ -35,7 +35,7 @@ interface DashboardStats {
 }
 
 export const Dashboard = () => {
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -169,7 +169,7 @@ export const Dashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">Välkommen tillbaka, {profile?.first_name || 'Coach'}!</h1>
           <p className="text-muted-foreground">Översikt av dina klienter och aktiviteter</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>

@@ -201,7 +201,7 @@ export const ClientDashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Välkommen tillbaka, {profile?.first_name || 'Klient'}!</h1>
+          <h1 className="text-3xl font-bold">Välkommen tillbaka, {clientProfile.name?.split(' ')[0] || profile?.first_name || 'Klient'}!</h1>
           <p className="text-muted-foreground">Din personliga utveckling och framsteg</p>
         </div>
         <div className="flex items-center gap-2">

@@ -27,7 +27,7 @@ const coachItems = [
 ];
 
 const clientItems = [
-  { title: "Mitt Dashboard", url: "/client-dashboard", icon: Home },
+  { title: "Min Dashboard", url: "/client-dashboard", icon: Home },
   { title: "Min Profil", url: "/client-dashboard", icon: User },
 ];
 
@@ -45,7 +45,7 @@ export function TopNavigation() {
       <div className="h-full px-6 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-8">
-          <h1 className="text-xl font-bold text-primary">Ninetone</h1>
+          <h1 className="text-xl font-bold text-primary">SHIMS</h1>
           
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
