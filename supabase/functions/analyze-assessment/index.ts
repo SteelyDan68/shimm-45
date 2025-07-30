@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
-import { buildAIPromptWithContext } from '../_shared/client-context.ts';
+import { buildAIPromptWithLovableTemplate } from '../_shared/client-context.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
@@ -34,29 +34,23 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Format assessment data for AI
+    // Format assessment data for AI using Lovable template
     const assessmentText = Object.entries(assessmentData.assessment_scores)
       .map(([area, score]) => `${area}: ${score}/10`)
       .join('\n');
 
-    // Build user message with assessment data
-    const userMessage = `Klient: ${assessmentData.client_name}
-
-Självskattning (1-10 där 10 = stort hinder):
+    // Add client comments if provided
+    const fullAssessmentData = `Självskattning (1-10 där 10 = stort hinder):
 ${assessmentText}
 
-${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.comments}` : ''}
+${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.comments}` : ''}`;
 
-Ge en kort analys och konkreta åtgärdsförslag:`;
-
-    // Build AI prompt with client context
-    const baseSystemPrompt = 'Du är en professionell mentor som hjälper offentliga personer att identifiera och övervinna hinder. Du ger konkreta, genomförbara råd med en varm och stödjande ton. Analysera självskattningen och ge personliga rekommendationer som passar klientens situation.';
-    
-    const { systemPrompt } = await buildAIPromptWithContext(
+    // Build AI prompt using Lovable template
+    const systemPrompt = await buildAIPromptWithLovableTemplate(
       assessmentData.client_id,
       supabase,
-      baseSystemPrompt,
-      userMessage
+      fullAssessmentData,
+      'Du är en professionell mentor som hjälper offentliga personer att identifiera och övervinna hinder. Du ger konkreta, genomförbara råd med en varm och stödjande ton.'
     );
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -71,10 +65,6 @@ Ge en kort analys och konkreta åtgärdsförslag:`;
           {
             role: 'system',
             content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userMessage
           }
         ],
         max_tokens: 800,

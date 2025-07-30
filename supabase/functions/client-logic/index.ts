@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
-import { buildAIPromptWithContext } from '../_shared/client-context.ts';
+import { buildAIPromptWithLovableTemplate } from '../_shared/client-context.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
@@ -238,26 +238,19 @@ async function generateAIRecommendation(
 ): Promise<{ recommendation: string; tone: string }> {
   console.log('Generating AI recommendation...');
 
-  // Build base user message with metrics data
-  const userMessage = `Analysera följande data och ge en konkret rekommendation:
-
-METRICS:
+  // Build metrics and data summary for AI analysis
+  const metricsData = `PERFORMANCE METRICS:
 - Följartillväxt: ${metrics.followerGrowth.toFixed(1)}%
 - Engagement rate: ${metrics.engagementRate.toFixed(1)}%
 - Inläggsfrekvens: ${metrics.postFrequency} per vecka
 - Aktivitetspoäng: ${metrics.recentActivity}
 - Velocity rank: ${velocityRank}
 
-RECENT DATA:
+RECENT DATA INSIGHTS:
 ${cacheData.slice(0, 3).map(d => `- ${d.data_type}: ${JSON.stringify(d.data).substring(0, 200)}...`).join('\n')}
 
-Ge en 2-3 meningar lång rekommendation som är:
-1. Konkret och actionable
-2. Baserad på datan ovan  
-3. Fokuserad på förbättring
-4. Anpassad till klientens professionella roll och situation
-
-Bestäm också tonen som antingen "encouraging", "strategic", eller "urgent" baserat på prestationen.
+UPPGIFT: Baserat på ovan metrics och klientens profil, ge strategiska rekommendationer för förbättring. 
+Fokusera på konkreta åtgärder som passar klientens roll och situation.
 
 Svara i JSON format:
 {
@@ -265,14 +258,12 @@ Svara i JSON format:
   "tone": "strategic"
 }`;
 
-  // Build AI prompt with client context
-  const baseSystemPrompt = 'Du är en expert på influencer marketing och social media strategi. Du analyserar data och ger personliga rekommendationer som är anpassade till klientens unika situation, roll och behov. Svara alltid i JSON format på svenska.';
-  
-  const { systemPrompt } = await buildAIPromptWithContext(
+  // Build AI prompt using Lovable template for strategic recommendations
+  const systemPrompt = await buildAIPromptWithLovableTemplate(
     clientId,
     supabase,
-    baseSystemPrompt,
-    userMessage
+    metricsData,
+    'Du är en expert på influencer marketing och social media strategi. Du analyserar performance data och ger strategiska rekommendationer anpassade till klientens unika situation och roll. Svara alltid i JSON format på svenska.'
   );
 
   try {
@@ -288,8 +279,7 @@ Svara i JSON format:
           { 
             role: 'system', 
             content: systemPrompt
-          },
-          { role: 'user', content: userMessage }
+          }
         ],
         temperature: 0.7,
         max_tokens: 300,

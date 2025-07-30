@@ -77,36 +77,97 @@ export async function buildClientContext(clientId: string, supabase: any): Promi
   }
 }
 
-// Hjälpfunktion för att bygga personlig systemPrompt baserat på klientkontext
-export function buildPersonalizedSystemPrompt(clientContext: string, basePrompt: string): string {
-  if (!clientContext.trim()) {
-    return basePrompt;
-  }
+// Standardiserad AI prompt-template för konsistent rådgivning
+export function buildLovableAIPrompt(clientContext: any, assessmentData: string, baseSystemPrompt: string = ''): string {
+  const metadata = clientContext.profile_metadata || {};
+  
+  // Extrahera data från onboarding med fallbacks
+  const primaryRole = metadata.publicRole?.primaryRole || 'Okänd roll';
+  const secondaryRole = metadata.publicRole?.secondaryRole || 'Ingen sekundär roll';
+  const niche = metadata.publicRole?.niche || 'Okänd nisch';
+  const strengths = metadata.publicRole?.creativeStrengths || 'Inga angivna styrkor';
+  const challenges = metadata.publicRole?.challenges || 'Inga angivna utmaningar';
+  const platforms = metadata.publicRole?.platforms?.length > 0 ? 
+    metadata.publicRole.platforms.join(', ') : 'Inga angivna plattformar';
+  const age = metadata.generalInfo?.age || 'Okänd ålder';
+  const specialNeeds = [
+    metadata.generalInfo?.physicalLimitations,
+    metadata.generalInfo?.neurodiversity
+  ].filter(Boolean).join(', ') || 'Inga angivna särskilda behov';
+  const location = metadata.lifeMap?.location || 'Okänd ort';
+  const ongoingChanges = metadata.lifeMap?.ongoingChanges || 'Inga angivna förändringar';
 
-  return `${clientContext}
+  const promptTemplate = `${baseSystemPrompt}
 
-INSTRUKTIONER: Ta hänsyn till all information ovan om klienten när du ger råd. Anpassa ditt språk, dina exempel och rekommendationer baserat på:
-- Deras professionella roll och nisch
-- Deras kreativa styrkor och utmaningar
-- Deras livssituation och pågående förändringar
-- Eventuella fysiska eller psykiska särskilda behov
-- Deras aktiva plattformar och målgrupp
+Klienten du analyserar är en offentlig person med följande profil:
 
-${basePrompt}`;
+- Primär roll: ${primaryRole}
+- Sekundär roll: ${secondaryRole}
+- Nisch: ${niche}
+- Kreativa styrkor: ${strengths}
+- Upplevda svagheter: ${challenges}
+- Aktiva plattformar: ${platforms}
+- Ålder: ${age}
+- Särskilda behov: ${specialNeeds}
+- Ort: ${location}
+- Pågående livsförändringar: ${ongoingChanges}
+
+Utifrån detta ska du tolka följande självskattning:
+
+${assessmentData}
+
+Gör:
+1. En reflektion över vad som framstår som mest akut
+2. Identifiera mönster
+3. Skapa ett åtgärdsförslag i 2–3 konkreta steg
+4. Använd en varm, professionell och personlig ton`;
+
+  return promptTemplate;
 }
 
-// Huvudfunktion för att enkelt få en komplett AI-prompt med klientkontext
+// Huvudfunktion för att enkelt få en komplett AI-prompt med Lovable template
+export async function buildAIPromptWithLovableTemplate(
+  clientId: string, 
+  supabase: any, 
+  assessmentData: string,
+  baseSystemPrompt: string = 'Du är en professionell mentor som hjälper offentliga personer att identifiera och övervinna hinder.'
+): Promise<string> {
+  try {
+    // Hämta klientdata
+    const { data: clientData, error } = await supabase
+      .from('clients')
+      .select('name, profile_metadata, velocity_score, category')
+      .eq('id', clientId)
+      .single();
+
+    if (error || !clientData) {
+      console.warn('Could not fetch client data for prompt template:', error?.message);
+      return `${baseSystemPrompt}\n\n${assessmentData}`;
+    }
+
+    return buildLovableAIPrompt(clientData, assessmentData, baseSystemPrompt);
+  } catch (error) {
+    console.error('Error building AI prompt with Lovable template:', error);
+    return `${baseSystemPrompt}\n\n${assessmentData}`;
+  }
+}
+
+// Bakåtkompatibilitet - behåller befintlig funktion för andra användningsområden
 export async function buildAIPromptWithContext(
   clientId: string, 
   supabase: any, 
   baseSystemPrompt: string, 
   userMessage: string
 ): Promise<{ systemPrompt: string; userMessage: string }> {
-  const clientContext = await buildClientContext(clientId, supabase);
-  const personalizedSystemPrompt = buildPersonalizedSystemPrompt(clientContext, baseSystemPrompt);
+  const assessmentPrompt = await buildAIPromptWithLovableTemplate(
+    clientId,
+    supabase,
+    userMessage,
+    baseSystemPrompt
+  );
 
   return {
-    systemPrompt: personalizedSystemPrompt,
+    systemPrompt: assessmentPrompt,
     userMessage: userMessage
   };
 }
