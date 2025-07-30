@@ -821,6 +821,7 @@ export type Database = {
           organization: string | null
           phone: string | null
           preferences: Json | null
+          profile_extended: Json | null
           social_links: Json | null
           status: string | null
           updated_at: string | null
@@ -841,6 +842,7 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           preferences?: Json | null
+          profile_extended?: Json | null
           social_links?: Json | null
           status?: string | null
           updated_at?: string | null
@@ -861,6 +863,7 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           preferences?: Json | null
+          profile_extended?: Json | null
           social_links?: Json | null
           status?: string | null
           updated_at?: string | null
