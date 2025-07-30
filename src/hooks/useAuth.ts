@@ -43,27 +43,6 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const markCodeAsUsed = async (userId: string) => {
-    const codeId = localStorage.getItem('shimm_access_code_id');
-    if (!codeId) return;
-
-    try {
-      await supabase
-        .from('access_codes')
-        .update({
-          status: 'used',
-          used_at: new Date().toISOString(),
-          used_by: userId
-        })
-        .eq('id', codeId);
-
-      // Clear access session after successful registration
-      localStorage.removeItem('shimm_access_granted');
-      localStorage.removeItem('shimm_access_code_id');
-    } catch (error) {
-      console.error('Error marking code as used:', error);
-    }
-  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -176,10 +155,6 @@ export const useAuth = () => {
         });
       }
 
-      // Mark access code as used after successful registration
-      if (data.user) {
-        await markCodeAsUsed(data.user.id);
-      }
 
       return { data, error: null };
     } catch (error: any) {

@@ -14,42 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      access_codes: {
-        Row: {
-          code: string
-          created_at: string
-          created_by: string
-          expires_at: string | null
-          id: string
-          status: string
-          updated_at: string
-          used_at: string | null
-          used_by: string | null
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          created_by: string
-          expires_at?: string | null
-          id?: string
-          status?: string
-          updated_at?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          created_by?: string
-          expires_at?: string | null
-          id?: string
-          status?: string
-          updated_at?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Relationships: []
-      }
       assessment_form_assignments: {
         Row: {
           assigned_at: string

@@ -26,7 +26,7 @@ import { UserManagement } from "@/components/UserManagement";
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 import { DataRightsCenter } from "@/components/DataRightsCenter";
-import { AccessCodeManagement } from "@/components/AccessCodeManagement";
+
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { helpTexts } from "@/data/helpTexts";
 
@@ -130,7 +130,7 @@ export function Administration() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profil</span>
@@ -138,10 +138,6 @@ export function Administration() {
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Användare</span>
-          </TabsTrigger>
-          <TabsTrigger value="access" className="flex items-center gap-2">
-            <Key className="h-4 w-4" />
-            <span className="hidden sm:inline">Koder</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -247,10 +243,6 @@ export function Administration() {
           </div>
         </TabsContent>
 
-        {/* Access Codes Tab */}
-        <TabsContent value="access">
-          <AccessCodeManagement />
-        </TabsContent>
 
         {/* Security Tab */}
         <TabsContent value="security">
