@@ -29,6 +29,7 @@ interface ClientProfile {
   status: string;
   logic_state?: any;
   velocity_score?: number;
+  hasOnboardingData?: boolean;
 }
 
 interface ClientStats {
@@ -78,13 +79,10 @@ export const ClientDashboard = () => {
         return;
       }
 
-      // Kontrollera om onboarding är komplett
-      if (!(clientData.profile_metadata as any)?.generalInfo?.name) {
-        navigate('/onboarding');
-        return;
-      }
+      // Kontrollera om onboarding är komplett - visa dashboard ändå men med meddelande
+      const hasOnboardingData = !!(clientData.profile_metadata as any)?.generalInfo?.name;
 
-      setClientProfile(clientData);
+      setClientProfile({ ...clientData, hasOnboardingData });
 
       // Ladda statistik
       await loadStats(clientData.id);
@@ -179,6 +177,27 @@ export const ClientDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Onboarding varning om data saknas */}
+      {!clientProfile.hasOnboardingData && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-orange-800">Här är din översikt</h3>
+                <p className="text-sm text-orange-700">Dina värden visas när du har fyllt i din allmänna information.</p>
+              </div>
+              <Button 
+                onClick={() => navigate('/onboarding')}
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                Starta här! 🚀
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -295,14 +314,29 @@ export const ClientDashboard = () => {
               </p>
             </CardHeader>
             <CardContent>
-              {stats.lastAssessment && (
-                <div className="mb-4 p-3 bg-muted rounded-lg">
-                  <p className="text-sm">
-                    Senaste assessment: {new Date(stats.lastAssessment).toLocaleDateString('sv-SE')}
+              {!clientProfile.hasOnboardingData ? (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Fylld i din allmänna information först</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Du behöver fylla i din allmänna information innan du kan göra en självskattning.
                   </p>
+                  <Button onClick={() => navigate('/onboarding')}>
+                    Gå till allmän information
+                  </Button>
                 </div>
+              ) : (
+                <>
+                  {stats.lastAssessment && (
+                    <div className="mb-4 p-3 bg-muted rounded-lg">
+                      <p className="text-sm">
+                        Senaste assessment: {new Date(stats.lastAssessment).toLocaleDateString('sv-SE')}
+                      </p>
+                    </div>
+                  )}
+                  <InsightAssessment clientId={clientProfile.id} clientName={clientProfile.name} />
+                </>
               )}
-              <InsightAssessment clientId={clientProfile.id} clientName={clientProfile.name} />
             </CardContent>
           </Card>
         </TabsContent>

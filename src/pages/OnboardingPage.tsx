@@ -5,6 +5,7 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { supabase } from '@/integrations/supabase/client';
 import { OnboardingForm } from '@/components/Onboarding/OnboardingForm';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { OnboardingData } from '@/types/onboarding';
 
@@ -101,9 +102,21 @@ export const OnboardingPage = () => {
   }
 
   return (
-    <OnboardingForm 
-      onComplete={handleOnboardingComplete}
-      isLoading={isLoading}
-    />
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="flex justify-end mb-4">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/client-dashboard')}
+          className="text-muted-foreground"
+        >
+          Hoppa över och gå till dashboard
+        </Button>
+      </div>
+      
+      <OnboardingForm 
+        onComplete={handleOnboardingComplete}
+        isLoading={isLoading}
+      />
+    </div>
   );
 };
