@@ -21,12 +21,15 @@ import {
   MoreHorizontal,
   Crown,
   Settings,
-  AlertCircle
+  AlertCircle,
+  Mail
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AdminUserCreation } from "./AdminUserCreation";
 import { ClientList } from "./ClientManagement/ClientList";
 import { ClientGroupManager } from "./ClientManagement/ClientGroupManager";
+import { SendInvitationForm } from "./InvitationSystem/SendInvitationForm";
+import { InvitationList } from "./InvitationSystem/InvitationList";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
 interface Organization {
@@ -247,6 +250,10 @@ export function UserManagement() {
             <Users className="h-4 w-4" />
             Grupper
           </TabsTrigger>
+          <TabsTrigger value="invitations" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Inbjudningar
+          </TabsTrigger>
           <TabsTrigger value="organizations" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             Organisationer ({organizations.length})
@@ -446,6 +453,13 @@ export function UserManagement() {
                 </CardContent>
               </Card>
             ))}
+           </div>
+        </TabsContent>
+      
+        <TabsContent value="invitations" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SendInvitationForm />
+            <InvitationList />
           </div>
         </TabsContent>
       </Tabs>
