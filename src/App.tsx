@@ -4,7 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useAccessControl } from "@/hooks/useAccessControl";
 import { Auth } from "@/pages/Auth";
+import { AccessPage } from "@/pages/AccessPage";
 import { AppLayout } from "@/components/AppLayout";
 import { CookieConsent } from "@/components/CookieConsent";
 import { Dashboard } from "./pages/Dashboard";
@@ -23,7 +25,23 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { user, hasRole } = useAuth();
+  const { hasAccess, isLoading } = useAccessControl();
 
+  // Show loading while checking access
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Laddar...</div>
+      </div>
+    );
+  }
+
+  // If no access granted, show access page
+  if (!hasAccess) {
+    return <AccessPage />;
+  }
+
+  // If access granted but not authenticated, show auth page
   if (!user) {
     return <Auth />;
   }
