@@ -569,6 +569,45 @@ export type Database = {
         }
         Relationships: []
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          invited_role: string
+          metadata: Json | null
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          invited_role?: string
+          metadata?: Json | null
+          status?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          invited_role?: string
+          metadata?: Json | null
+          status?: string
+          token?: string
+        }
+        Relationships: []
+      }
       message_preferences: {
         Row: {
           auto_ai_assistance: boolean
@@ -1258,6 +1297,10 @@ export type Database = {
       }
     }
     Functions: {
+      generate_invitation_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -1272,6 +1315,16 @@ export type Database = {
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      validate_invitation_token: {
+        Args: { invitation_token: string }
+        Returns: {
+          invitation_id: string
+          email: string
+          invited_role: string
+          expires_at: string
+          is_valid: boolean
+        }[]
       }
     }
     Enums: {
