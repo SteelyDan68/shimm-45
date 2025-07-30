@@ -25,7 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UserManagement } from "@/components/UserManagement";
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
-import { TestOnboardingData } from "@/components/TestOnboardingData";
+
 import { DataRightsCenter } from "@/components/DataRightsCenter";
 import StefanTrainingData from "@/components/StefanTrainingData";
 
@@ -247,17 +247,6 @@ export function Administration() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Test Onboarding System</CardTitle>
-                <CardDescription>
-                  Testa onboarding-funktionalitet för klienter
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TestOnboardingData />
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
 
