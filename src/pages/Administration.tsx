@@ -23,6 +23,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { UserManagement } from "@/components/UserManagement";
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
+import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 
 export function Administration() {
   const { user } = useAuth();
@@ -176,16 +177,13 @@ export function Administration() {
             
             <Card>
               <CardHeader>
-                <CardTitle>Assessment Management</CardTitle>
+                <CardTitle>Five Pillars Management</CardTitle>
                 <CardDescription>
-                  Hantera bedömningsformulär för klienter
+                  Hantera och tilldela Five Pillars pelare till klienter
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Välj en klient från listan för att hantera deras tilldelade assessments.
-                </p>
-                {/* AssessmentManager would be shown here when a client is selected */}
+                <AdminPillarManagement />
               </CardContent>
             </Card>
           </div>
