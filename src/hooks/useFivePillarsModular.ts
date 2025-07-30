@@ -263,6 +263,27 @@ export const useFivePillarsModular = (clientId?: string) => {
     return pillarDefinitions.find(p => p.pillar_key === pillarKey);
   };
 
+  const generateOverallAssessment = async () => {
+    if (!clientId) throw new Error('Client ID required');
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-overall-assessment', {
+        body: { client_id: clientId }
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating overall assessment:', error);
+      toast({
+        title: "Fel vid analys",
+        description: "Kunde inte generera helhetsanalys",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   return {
     loading,
     pillarDefinitions,
@@ -275,6 +296,7 @@ export const useFivePillarsModular = (clientId?: string) => {
     getLatestAssessment,
     generateHeatmapData,
     getPillarDefinition,
+    generateOverallAssessment,
     refreshData: () => {
       loadPillarDefinitions();
       loadActivations();
