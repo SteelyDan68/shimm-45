@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Brain, Send, BarChart3, Zap, Users, Activity } from 'lucide-react';
 import { useInsightAssessment } from '@/hooks/useInsightAssessment';
+import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 
 interface AssessmentFormProps {
   clientId: string;
@@ -55,6 +56,7 @@ const relationshipQuestions = [
 
 export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentFormProps) {
   const { submitAssessment, isSubmitting } = useInsightAssessment(clientId);
+  const { submitPillarAssessment } = useFivePillarsModular(clientId);
   
   const [scores, setScores] = useState(() => {
     const initialScores: Record<string, number> = {};
@@ -100,22 +102,35 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
   };
 
   const handleSubmit = async () => {
-    const result = await submitAssessment(
-      { 
-        scores, 
-        comments,
-        functionalAccess,
-        subjectiveOpportunities,
-        relationships
-      },
-      clientName,
-      clientId
-    );
+    const assessmentData = {
+      scores,
+      functionalAccess,
+      subjectiveOpportunities,
+      relationships,
+      comments
+    };
 
-    if (result) {
-      setAnalysisResult(result.analysis);
-      setShowResults(true);
-      // Vi kallar inte onComplete här - användaren ska se resultatet först
+    try {
+      // Submit via InsightAssessment hook (creates path entries)
+      const result = await submitAssessment(assessmentData, clientName, clientId);
+      
+      // Also submit to Five Pillars system for self_care pillar
+      if (result) {
+        // Calculate a score for the pillar system based on assessment data
+        const hinderScores = Object.values(scores);
+        const avgHinder = hinderScores.reduce((a, b) => a + b, 0) / hinderScores.length;
+        
+        // Convert to 0-100 scale, inverted (lower hinder = higher score)
+        const calculatedScore = Math.round(((10 - avgHinder) / 9) * 100);
+        
+        await submitPillarAssessment('self_care', assessmentData, calculatedScore);
+        
+        setAnalysisResult(result.analysis);
+        setShowResults(true);
+        // Vi kallar inte onComplete här - användaren ska se resultatet först
+      }
+    } catch (error) {
+      console.error('Error submitting assessment:', error);
     }
   };
 

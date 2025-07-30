@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAssessmentEngine } from '@/hooks/useAssessmentEngine';
+import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 import { DynamicAssessmentForm } from '@/components/AssessmentEngine/DynamicAssessmentForm';
+import { ModularInsightAssessment } from './ModularInsightAssessment';
 import { ArrowLeft, TrendingUp, Clock } from 'lucide-react';
 
 interface PillarDashboardProps {
@@ -14,10 +16,23 @@ interface PillarDashboardProps {
 
 export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) => {
   const { formDefinitions, assignments, assessmentRounds, getLatestAssessment } = useAssessmentEngine(clientId);
+  const { pillarDefinitions, getActivatedPillars } = useFivePillarsModular(clientId);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
+  const [showSelfCareAssessment, setShowSelfCareAssessment] = useState(false);
+  const activatedPillars = getActivatedPillars();
+  const selfCarePillar = pillarDefinitions.find(p => p.pillar_key === 'self_care');
   
-  const assignedFormIds = assignments.map(a => a.form_definition_id);
-
+  // Show self-care assessment if selected
+  if (showSelfCareAssessment) {
+    return (
+      <ModularInsightAssessment
+        clientId={clientId}
+        clientName={clientName}
+        onBack={() => setShowSelfCareAssessment(false)}
+      />
+    );
+  }
+  
   if (selectedForm) {
     const formDefinition = formDefinitions.find(f => f.id === selectedForm);
     return (
@@ -58,7 +73,31 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
         </p>
       </div>
 
-      {assignedFormIds.length === 0 ? (
+      {/* Show Self Care pillar first if available */}
+      {selfCarePillar && activatedPillars.includes('self_care') && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">{selfCarePillar.name}</CardTitle>
+              <Badge variant="default" className="bg-primary">
+                Aktiverad
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">{selfCarePillar.description}</p>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setShowSelfCareAssessment(true)}
+              className="w-full"
+            >
+              Gör självskattning
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Show regular assessment forms */}
+      {assignments.length === 0 ? (
         <Card>
           <CardContent className="text-center py-10">
             <h2 className="text-xl font-semibold mb-2">Inga assessments tilldelade</h2>
@@ -80,7 +119,7 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
               <Card key={assignment.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{formDefinition.name}</CardTitle>
+                    <CardTitle className="text-lg">{formDefinition?.name}</CardTitle>
                     <Badge variant="secondary">
                       <Clock className="h-3 w-3 mr-1" />
                       {latestAssessment 
@@ -89,7 +128,7 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
                       }
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{formDefinition.description}</p>
+                  <p className="text-sm text-muted-foreground">{formDefinition?.description}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {latestAssessment ? (
