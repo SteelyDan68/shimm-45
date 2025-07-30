@@ -266,6 +266,39 @@ export type Database = {
           },
         ]
       }
+      client_pillar_activations: {
+        Row: {
+          activated_at: string
+          activated_by: string
+          client_id: string
+          deactivated_at: string | null
+          id: string
+          is_active: boolean
+          pillar_key: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string
+          activated_by: string
+          client_id: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          pillar_key: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string
+          client_id?: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          pillar_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_pillar_assignments: {
         Row: {
           assigned_at: string
@@ -602,6 +635,120 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pillar_assessments: {
+        Row: {
+          ai_analysis: string | null
+          assessment_data: Json
+          calculated_score: number | null
+          client_id: string
+          created_at: string
+          created_by: string
+          id: string
+          insights: Json | null
+          pillar_key: string
+          updated_at: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          assessment_data?: Json
+          calculated_score?: number | null
+          client_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          insights?: Json | null
+          pillar_key: string
+          updated_at?: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          assessment_data?: Json
+          calculated_score?: number | null
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          insights?: Json | null
+          pillar_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pillar_definitions: {
+        Row: {
+          ai_prompt_template: string
+          color_code: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          pillar_key: string
+          scoring_weights: Json | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          ai_prompt_template: string
+          color_code?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          pillar_key: string
+          scoring_weights?: Json | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_prompt_template?: string
+          color_code?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          pillar_key?: string
+          scoring_weights?: Json | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pillar_visualization_data: {
+        Row: {
+          client_id: string
+          created_at: string
+          data_points: Json
+          data_type: string
+          id: string
+          metadata: Json | null
+          pillar_key: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          data_points?: Json
+          data_type: string
+          id?: string
+          metadata?: Json | null
+          pillar_key: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          data_points?: Json
+          data_type?: string
+          id?: string
+          metadata?: Json | null
+          pillar_key?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
