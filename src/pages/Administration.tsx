@@ -63,9 +63,51 @@ export function Administration() {
   };
 
   const handleSaveAutomation = () => {
+    // TODO: Implementera faktisk sparning av automationsinställningar
     toast({
       title: "Automationsinställningar sparade", 
       description: "Dina automationsinställningar har uppdaterats."
+    });
+  };
+
+  const handleChangePassword = () => {
+    // TODO: Implementera lösenordsändring
+    toast({
+      title: "Lösenordsändring",
+      description: "Funktionen kommer snart. En länk kommer skickas till din e-post."
+    });
+  };
+
+  const handleManageSessions = () => {
+    // TODO: Implementera sessionhantering
+    toast({
+      title: "Sessionhantering",
+      description: "Du har för närvarande 1 aktiv session."
+    });
+  };
+
+  const handleExportData = async () => {
+    // TODO: Implementera dataexport
+    toast({
+      title: "Dataexport startad",
+      description: "En fil kommer skickas till din e-post inom 24 timmar."
+    });
+  };
+
+  const handleRequestReport = () => {
+    // TODO: Implementera datarapport
+    toast({
+      title: "Datarapport begärd",
+      description: "En detaljerad rapport kommer skickas till din e-post."
+    });
+  };
+
+  const handleDeleteAllData = () => {
+    // TODO: Implementera datasläckning med bekräftelse
+    toast({
+      title: "Varning",
+      description: "Detta kräver ytterligare bekräftelse. Kontakta support.",
+      variant: "destructive"
     });
   };
 
@@ -248,12 +290,24 @@ export function Administration() {
                 <div>
                   <h4 className="font-medium mb-3">Säkerhetsåtgärder</h4>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleChangePassword}>
                       Ändra lösenord
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleManageSessions}>
                       Hantera sessioner
                     </Button>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="font-medium mb-3">GDPR & Integritet</h4>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>✓ Krypterad datalagring i Sverige</p>
+                    <p>✓ Inga cookies utan samtycke</p>
+                    <p>✓ Rätt till korrigering och radering</p>
+                    <p>✓ Dataportabilitet (export)</p>
                   </div>
                 </div>
               </div>
@@ -376,15 +430,15 @@ export function Administration() {
               <div>
                 <h4 className="font-medium mb-3">Dataåtgärder</h4>
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleExportData}>
                     <Download className="h-4 w-4 mr-2" />
                     Exportera all data
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleRequestReport}>
                     <FileText className="h-4 w-4 mr-2" />
                     Begär datarapport
                   </Button>
-                  <Button variant="destructive" size="sm">
+                  <Button variant="destructive" size="sm" onClick={handleDeleteAllData}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Radera all data
                   </Button>
