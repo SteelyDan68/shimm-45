@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,10 +16,12 @@ import {
   Upload,
   Download,
   Trash2,
-  FileText
+  FileText,
+  Users
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { UserManagement } from "@/components/UserManagement";
 
 export function Administration() {
   const { user } = useAuth();
@@ -76,10 +78,14 @@ export function Administration() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profil</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Användare</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -160,6 +166,11 @@ export function Administration() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* User Management Tab */}
+        <TabsContent value="users">
+          <UserManagement />
         </TabsContent>
 
         {/* Security Tab */}

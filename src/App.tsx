@@ -3,8 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/components/AuthProvider";
-import { AuthForm } from "@/components/AuthForm";
+import { useAuth } from "@/hooks/useAuth";
+import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
@@ -18,11 +18,7 @@ const AppRoutes = () => {
   const { user } = useAuth();
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <AuthForm />
-      </div>
-    );
+    return <Auth />;
   }
 
   return (
@@ -32,6 +28,7 @@ const AppRoutes = () => {
         <Route path="/clients" element={<AllClients />} />
         <Route path="/client/:clientId" element={<ClientProfile />} />
         <Route path="/admin" element={<Administration />} />
+        <Route path="/auth" element={<Auth />} />
         <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys - Kommer snart</h1></div>} />
         <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter - Kommer snart</h1></div>} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -44,13 +41,11 @@ const AppRoutes = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

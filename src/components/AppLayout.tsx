@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { TopNavigation } from "@/components/TopNavigation";
 
 interface AppLayoutProps {
