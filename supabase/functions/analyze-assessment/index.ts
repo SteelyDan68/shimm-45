@@ -20,6 +20,9 @@ interface AssessmentData {
   client_name: string;
   assessment_scores: Record<string, number>;
   comments?: string;
+  functional_access?: Record<string, string>;
+  subjective_opportunities?: Record<string, number>;
+  relationships?: Record<string, { answer: string; comment: string }>;
 }
 
 serve(async (req) => {
@@ -39,9 +42,31 @@ serve(async (req) => {
       .map(([area, score]) => `${area}: ${score}/10`)
       .join('\n');
 
+    // Format opportunities and resources
+    let opportunitiesText = '';
+    
+    if (assessmentData.functional_access) {
+      opportunitiesText += `\n\n🟠 Funktionstillgång:\n${Object.entries(assessmentData.functional_access)
+        .map(([question, answer]) => `${question}: ${answer}`)
+        .join('\n')}`;
+    }
+    
+    if (assessmentData.subjective_opportunities) {
+      opportunitiesText += `\n\n🟣 Subjektiva möjligheter (1-5 där 5 = lätt/ofta):\n${Object.entries(assessmentData.subjective_opportunities)
+        .map(([question, score]) => `${question}: ${score}/5`)
+        .join('\n')}`;
+    }
+    
+    if (assessmentData.relationships) {
+      opportunitiesText += `\n\n🟢 Relationer:\n${Object.entries(assessmentData.relationships)
+        .map(([question, data]) => `${question}: ${data.answer}${data.comment ? ` (${data.comment})` : ''}`)
+        .join('\n')}`;
+    }
+
     // Add client comments if provided
     const fullAssessmentData = `Självskattning (1-10 där 10 = stort hinder):
 ${assessmentText}
+${opportunitiesText}
 
 ${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.comments}` : ''}`;
 
@@ -50,7 +75,7 @@ ${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.commen
       assessmentData.client_id,
       supabase,
       fullAssessmentData,
-      'Du är mentor åt en offentlig person. Klienten har gjort en självskattning där de visar hinder i sitt liv. Ta hänsyn till klientens yrkesroll, plattformar, styrkor och utmaningar när du svarar.\n\nGör följande:\n1. Reflektera över klientens aktuella situation.\n2. Identifiera 2–3 hinder som framstår som viktiga att arbeta med.\n3. Ge en konkret, handlingsbar åtgärdsplan i 2–3 steg.\n4. Håll tonen varm, empatisk och professionell.'
+      'Du är mentor åt en offentlig person. Klienten har gjort en självskattning där de visar både hinder och möjligheter/resurser i sitt liv. Ta hänsyn till klientens yrkesroll, plattformar, styrkor och utmaningar när du svarar.\n\nGör följande:\n1. Reflektera över klientens aktuella situation med fokus på både hinder och resurser.\n2. Identifiera 2–3 hinder som framstår som viktiga att arbeta med.\n3. Ge en konkret, handlingsbar åtgärdsplan i 2–3 steg som bygger på klientens befintliga resurser och möjligheter.\n4. Framhäv vilka positiva förutsättningar klienten har att bygga på.\n5. Håll tonen varm, empatisk och professionell.'
     );
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

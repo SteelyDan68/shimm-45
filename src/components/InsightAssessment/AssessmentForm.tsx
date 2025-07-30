@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Send, BarChart3 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Brain, Send, BarChart3, Zap, Users, Activity } from 'lucide-react';
 import { useInsightAssessment } from '@/hooks/useInsightAssessment';
 
 interface AssessmentFormProps {
@@ -30,6 +31,28 @@ const assessmentAreas = [
   'Ensamhet'
 ] as const;
 
+// Funktionell tillgång (ja/nej/ibland)
+const functionalAccessQuestions = [
+  'Kan du laga eller äta bra mat?',
+  'Har du en trygg plats att sova?',
+  'Har du tillgång till dusch eller bad?',
+  'Har du tillgång till internet och telefon?'
+] as const;
+
+// Subjektiva möjligheter (skala 1-5)
+const subjectiveOpportunityQuestions = [
+  'Hur lätt är det för dig att be om hjälp?',
+  'Hur ofta kan du träna eller röra på dig?',
+  'Hur ofta har du energi att svara på meddelanden eller mejl?',
+  'Hur ofta har du möjlighet att läsa eller ta in längre information?'
+] as const;
+
+// Relationer (ja/nej + kommentar)
+const relationshipQuestions = [
+  'Har du någon du kan prata med regelbundet?',
+  'Har du kontakt med någon familjemedlem eller nära vän?'
+] as const;
+
 export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentFormProps) {
   const { submitAssessment, isSubmitting } = useInsightAssessment(clientId);
   
@@ -40,6 +63,34 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
     });
     return initialScores;
   });
+  
+  // Funktionell tillgång (ja/nej/ibland)
+  const [functionalAccess, setFunctionalAccess] = useState(() => {
+    const initial: Record<string, string> = {};
+    functionalAccessQuestions.forEach(question => {
+      initial[question] = 'ja';
+    });
+    return initial;
+  });
+  
+  // Subjektiva möjligheter (1-5)
+  const [subjectiveOpportunities, setSubjectiveOpportunities] = useState(() => {
+    const initial: Record<string, number> = {};
+    subjectiveOpportunityQuestions.forEach(question => {
+      initial[question] = 3;
+    });
+    return initial;
+  });
+  
+  // Relationer (ja/nej + kommentar)
+  const [relationships, setRelationships] = useState(() => {
+    const initial: Record<string, { answer: string; comment: string }> = {};
+    relationshipQuestions.forEach(question => {
+      initial[question] = { answer: 'ja', comment: '' };
+    });
+    return initial;
+  });
+  
   const [comments, setComments] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
@@ -50,7 +101,13 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
 
   const handleSubmit = async () => {
     const result = await submitAssessment(
-      { scores, comments },
+      { 
+        scores, 
+        comments,
+        functionalAccess,
+        subjectiveOpportunities,
+        relationships
+      },
       clientName,
       clientId
     );
@@ -164,6 +221,128 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Möjligheter och Funktionsförutsättningar */}
+        <div className="space-y-6 pt-6 border-t">
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Möjligheter och Funktionsförutsättningar</h3>
+          </div>
+          
+          {/* Block 1: Funktionstillgång */}
+          <Card className="border-orange-200 bg-orange-50/30">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Activity className="h-4 w-4 text-orange-600" />
+                🟠 Funktionstillgång
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {functionalAccessQuestions.map(question => (
+                <div key={question} className="space-y-2">
+                  <Label className="text-sm font-medium">{question}</Label>
+                  <RadioGroup
+                    value={functionalAccess[question]}
+                    onValueChange={(value) => setFunctionalAccess(prev => ({ ...prev, [question]: value }))}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="ja" id={`${question}-ja`} />
+                      <Label htmlFor={`${question}-ja`}>Ja</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="nej" id={`${question}-nej`} />
+                      <Label htmlFor={`${question}-nej`}>Nej</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="ibland" id={`${question}-ibland`} />
+                      <Label htmlFor={`${question}-ibland`}>Ibland</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Block 2: Subjektiva möjligheter */}
+          <Card className="border-purple-200 bg-purple-50/30">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Brain className="h-4 w-4 text-purple-600" />
+                🟣 Subjektiva möjligheter
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Skala 1-5 (1 = mycket svårt, 5 = enkelt och naturligt)
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {subjectiveOpportunityQuestions.map(question => (
+                <div key={question} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">{question}</Label>
+                    <Badge variant="outline" className="text-purple-600 border-purple-300">
+                      {subjectiveOpportunities[question]}/5
+                    </Badge>
+                  </div>
+                  <Slider
+                    value={[subjectiveOpportunities[question]]}
+                    onValueChange={(value) => setSubjectiveOpportunities(prev => ({ ...prev, [question]: value[0] }))}
+                    min={1}
+                    max={5}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Mycket svårt</span>
+                    <span>Enkelt & naturligt</span>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Block 3: Relationer */}
+          <Card className="border-green-200 bg-green-50/30">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Users className="h-4 w-4 text-green-600" />
+                🟢 Relationer
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {relationshipQuestions.map(question => (
+                <div key={question} className="space-y-3">
+                  <Label className="text-sm font-medium">{question}</Label>
+                  <RadioGroup
+                    value={relationships[question].answer}
+                    onValueChange={(value) => setRelationships(prev => ({ 
+                      ...prev, 
+                      [question]: { ...prev[question], answer: value } 
+                    }))}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="ja" id={`${question}-rel-ja`} />
+                      <Label htmlFor={`${question}-rel-ja`}>Ja</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="nej" id={`${question}-rel-nej`} />
+                      <Label htmlFor={`${question}-rel-nej`}>Nej</Label>
+                    </div>
+                  </RadioGroup>
+                  <Textarea
+                    value={relationships[question].comment}
+                    onChange={(e) => setRelationships(prev => ({ 
+                      ...prev, 
+                      [question]: { ...prev[question], comment: e.target.value } 
+                    }))}
+                    placeholder="Frivillig kommentar..."
+                    rows={2}
+                    className="text-sm"
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-2">
