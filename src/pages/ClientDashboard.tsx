@@ -191,7 +191,7 @@ export const ClientDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Onboarding varning om data saknas */}
+      {/* Onboarding varning om data saknas - döljs när användaren fyllt i allmänna info */}
       {!clientProfile.hasOnboardingData && (
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="p-4">
