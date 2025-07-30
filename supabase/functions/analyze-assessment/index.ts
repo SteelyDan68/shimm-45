@@ -2,8 +2,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 import { buildAIPromptWithLovableTemplate } from '../_shared/client-context.ts';
+import { aiService } from '../_shared/ai-service.ts';
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -33,9 +33,20 @@ serve(async (req) => {
   try {
     const assessmentData: AssessmentData = await req.json();
     
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    console.log('Assessment analysis request received');
+
+    // Kontrollera AI-tillgänglighet
+    const availability = await aiService.checkAvailability();
+    if (!availability.openai && !availability.gemini) {
+      return new Response(JSON.stringify({
+        error: 'Inga AI-tjänster tillgängliga'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+
+    console.log(`AI Services available - OpenAI: ${availability.openai}, Gemini: ${availability.gemini}, Primary: ${availability.primary}`);
 
     // Format assessment data with clearer structure
     const hinderText = Object.entries(assessmentData.assessment_scores)
@@ -72,10 +83,16 @@ serve(async (req) => {
 
     const profileMetadata = clientData?.profile_metadata || {};
 
-    // Build structured prompt
-    const structuredPrompt = `Du är mentor åt en offentlig person med ett starkt personligt varumärke. Personen har gjort en självskattning som visar både hinder och möjligheter.
+    // Skapa AI-analys med fallback-system
+    const systemPrompt = `Du är mentor åt en offentlig person med ett starkt personligt varumärke. Personen har gjort en självskattning som visar både hinder och möjligheter.
 
-Här är deras bakgrund:
+Din uppgift är att:
+1. Reflektera över deras nuläge – vad är mest utmanande just nu?
+2. Identifiera vilka möjligheter som kan användas som hävstång
+3. Skapa en handlingsplan i 2–3 steg utifrån både hinder och tillgångar
+4. Håll tonen varm, konkret och professionell – och anpassad till deras roll och nisch`;
+
+    const userPrompt = `Här är deras bakgrund:
 ${JSON.stringify(profileMetadata, null, 2)}
 
 Här är personens upplevda hinder (1-10 där 10 = stort hinder):
@@ -86,42 +103,36 @@ ${resurserText}
 
 ${assessmentData.comments ? `Ytterligare kommentarer från personen: ${assessmentData.comments}` : ''}
 
-Din uppgift är att:
-1. Reflektera över deras nuläge – vad är mest utmanande just nu?
-2. Identifiera vilka möjligheter som kan användas som hävstång
-3. Skapa en handlingsplan i 2–3 steg utifrån både hinder och tillgångar
-4. Håll tonen varm, konkret och professionell – och anpassad till deras roll och nisch`;
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
-        messages: [
-          {
-            role: 'user',
-            content: structuredPrompt
-          }
-        ],
-        max_tokens: 800,
-        temperature: 0.7
-      }),
+Ge en personlig analys enligt instruktionerna ovan.`;
+
+    const aiResponse = await aiService.generateResponse([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ], {
+      maxTokens: 800,
+      temperature: 0.7,
+      model: 'gpt-4.1-2025-04-14'
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+    if (!aiResponse.success) {
+      console.error('AI analysis failed:', aiResponse.error);
+      return new Response(JSON.stringify({
+        error: 'AI-analys misslyckades: ' + aiResponse.error
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const data = await response.json();
-    const analysis = data.choices[0].message.content;
+    console.log(`AI analysis completed using ${aiResponse.model.toUpperCase()}`);
+    const analysis = aiResponse.content;
 
     return new Response(
       JSON.stringify({ 
         analysis,
         assessment_scores: assessmentData.assessment_scores,
-        comments: assessmentData.comments 
+        comments: assessmentData.comments,
+        ai_model_used: aiResponse.model
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -14,9 +14,17 @@ serve(async (req) => {
   try {
     const { messageContent, senderName, context } = await req.json();
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not found');
+    console.log('AI Message Assistant request received');
+
+    // Kontrollera AI-tillgänglighet
+    const availability = await aiService.checkAvailability();
+    if (!availability.openai && !availability.gemini) {
+      return new Response(JSON.stringify({
+        error: 'Inga AI-tjänster tillgängliga'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const systemPrompt = `Du är en hjälpsam coach-assistent som hjälper till att svara på meddelanden från klienter. 

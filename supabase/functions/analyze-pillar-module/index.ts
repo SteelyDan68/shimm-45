@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { aiService } from '../_shared/ai-service.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,10 +22,20 @@ serve(async (req) => {
   }
 
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY is not set');
+    console.log('Pillar module analysis request received');
+
+    // Kontrollera AI-tillgänglighet
+    const availability = await aiService.checkAvailability();
+    if (!availability.openai && !availability.gemini) {
+      return new Response(JSON.stringify({
+        error: 'Inga AI-tjänster tillgängliga'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+
+    console.log(`AI Services available - OpenAI: ${availability.openai}, Gemini: ${availability.gemini}, Primary: ${availability.primary}`);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -59,7 +70,9 @@ serve(async (req) => {
     // Use the pillar-specific AI prompt template
     const prompt = pillarDefinition.ai_prompt_template.replace('{assessment_data}', formattedData);
 
-    const fullPrompt = `Du är mentor åt en offentlig person med ett starkt personligt varumärke.
+    const systemPrompt = `Du är en erfaren mentor och coach som hjälper offentliga personer utveckla sina karriärer och personliga varumärken. Du specialiserar dig på ${pillarDefinition.name}-området.`;
+
+    const userPrompt = `Du är mentor åt en offentlig person med ett starkt personligt varumärke.
 
 Klient: ${clientData?.name || 'Okänd'}
 Bakgrund: ${JSON.stringify(clientData?.profile_metadata || {})}
@@ -76,35 +89,26 @@ Ge en konkret handlingsplan i 2-3 steg. Håll tonen varm, konkret och profession
 
 Avsluta med en sammanfattning av de viktigaste områdena för förbättring inom denna pelare.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Du är en erfaren mentor och coach som hjälper offentliga personer utveckla sina karriärer och personliga varumärken. Du specialiserar dig på ${pillarDefinition.name}-området.`
-          },
-          {
-            role: 'user',
-            content: fullPrompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
-      }),
+    const aiResponse = await aiService.generateResponse([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ], {
+      maxTokens: 1000,
+      temperature: 0.7,
+      model: 'gpt-4o-mini'
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+    if (!aiResponse.success) {
+      console.error('AI analysis failed:', aiResponse.error);
+      return new Response(JSON.stringify({
+        error: 'AI-analys misslyckades: ' + aiResponse.error
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const aiResponse = await response.json();
-    const analysis = aiResponse.choices[0].message.content;
+    console.log(`AI analysis completed using ${aiResponse.model.toUpperCase()}`);
 
     // Generate structured insights for visualizations
     const insights = {
@@ -118,12 +122,13 @@ Avsluta med en sammanfattning av de viktigaste områdena för förbättring inom
     console.log(`AI analysis completed for ${data.pillar_key} pillar`);
 
     return new Response(JSON.stringify({
-      analysis,
+      analysis: aiResponse.content,
       insights,
       pillar_key: data.pillar_key,
       pillar_name: pillarDefinition.name,
       calculated_score: data.calculated_score,
-      client_id: data.client_id
+      client_id: data.client_id,
+      ai_model_used: aiResponse.model
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

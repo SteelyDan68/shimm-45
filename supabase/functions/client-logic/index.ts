@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { aiService } from '../_shared/ai-service.ts';
 import { buildAIPromptWithLovableTemplate } from '../_shared/client-context.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
