@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { PillarType, PILLAR_CONFIGS } from '@/types/fivePillars';
-import { useFivePillars } from '@/hooks/useFivePillars';
-import { PillarAssessmentForm } from './PillarAssessmentForm';
+import { useAssessmentEngine } from '@/hooks/useAssessmentEngine';
+import { DynamicAssessmentForm } from '@/components/AssessmentEngine/DynamicAssessmentForm';
 import { ArrowLeft, TrendingUp, Clock } from 'lucide-react';
 
 interface PillarDashboardProps {
@@ -14,33 +13,36 @@ interface PillarDashboardProps {
 }
 
 export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) => {
-  const { assignments, assessmentRounds, getAssignedPillars, getLatestAssessment } = useFivePillars(clientId);
-  const [selectedPillar, setSelectedPillar] = useState<PillarType | null>(null);
+  const { formDefinitions, assignments, assessmentRounds, getLatestAssessment } = useAssessmentEngine(clientId);
+  const [selectedForm, setSelectedForm] = useState<string | null>(null);
   
-  const assignedPillars = getAssignedPillars();
+  const assignedFormIds = assignments.map(a => a.form_definition_id);
 
-  if (selectedPillar) {
+  if (selectedForm) {
+    const formDefinition = formDefinitions.find(f => f.id === selectedForm);
     return (
       <div className="space-y-4">
         <Button 
           variant="ghost" 
-          onClick={() => setSelectedPillar(null)}
+          onClick={() => setSelectedForm(null)}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tillbaka till översikt
         </Button>
-        <PillarAssessmentForm
+        <DynamicAssessmentForm
           clientId={clientId}
-          pillarType={selectedPillar}
-          onComplete={() => setSelectedPillar(null)}
+          formDefinitionId={selectedForm}
+          formName={formDefinition?.name || 'Assessment'}
+          formDescription={formDefinition?.description}
+          onComplete={() => setSelectedForm(null)}
         />
       </div>
     );
   }
 
-  const calculatePillarScore = (pillarType: PillarType) => {
-    const assessment = getLatestAssessment(pillarType);
+  const calculateFormScore = (formDefinitionId: string) => {
+    const assessment = getLatestAssessment(formDefinitionId);
     if (!assessment) return 0;
     
     const scores = Object.values(assessment.scores);
@@ -56,27 +58,29 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
         </p>
       </div>
 
-      {assignedPillars.length === 0 ? (
+      {assignedFormIds.length === 0 ? (
         <Card>
           <CardContent className="text-center py-10">
-            <h2 className="text-xl font-semibold mb-2">Inga pelare tilldelade</h2>
+            <h2 className="text-xl font-semibold mb-2">Inga assessments tilldelade</h2>
             <p className="text-muted-foreground">
-              Din coach har inte tilldelat några pelare för bedömning än.
+              Din coach har inte tilldelat några bedömningsformulär än.
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {assignedPillars.map((pillarType) => {
-            const config = PILLAR_CONFIGS[pillarType];
-            const latestAssessment = getLatestAssessment(pillarType);
-            const score = calculatePillarScore(pillarType);
+          {assignments.map((assignment) => {
+            const formDefinition = formDefinitions.find(f => f.id === assignment.form_definition_id);
+            if (!formDefinition) return null;
+            
+            const latestAssessment = getLatestAssessment(assignment.form_definition_id);
+            const score = calculateFormScore(assignment.form_definition_id);
             
             return (
-              <Card key={pillarType} className="hover:shadow-lg transition-shadow">
+              <Card key={assignment.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{config.name}</CardTitle>
+                    <CardTitle className="text-lg">{formDefinition.name}</CardTitle>
                     {latestAssessment && (
                       <Badge variant="secondary">
                         <Clock className="h-3 w-3 mr-1" />
@@ -84,7 +88,7 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{config.description}</p>
+                  <p className="text-sm text-muted-foreground">{formDefinition.description}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {latestAssessment ? (
@@ -108,7 +112,7 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
                   )}
                   
                   <Button 
-                    onClick={() => setSelectedPillar(pillarType)}
+                    onClick={() => setSelectedForm(assignment.form_definition_id)}
                     className="w-full"
                     variant={latestAssessment ? "outline" : "default"}
                   >

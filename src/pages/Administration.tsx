@@ -22,6 +22,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { UserManagement } from "@/components/UserManagement";
+import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 
 export function Administration() {
   const { user } = useAuth();
@@ -170,7 +171,24 @@ export function Administration() {
 
         {/* User Management Tab */}
         <TabsContent value="users">
-          <UserManagement />
+          <div className="space-y-6">
+            <UserManagement />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Assessment Management</CardTitle>
+                <CardDescription>
+                  Hantera bedömningsformulär för klienter
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Välj en klient från listan för att hantera deras tilldelade assessments.
+                </p>
+                {/* AssessmentManager would be shown here when a client is selected */}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Security Tab */}
