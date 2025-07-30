@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PillarHeatmapData } from '@/types/fivePillarsModular';
+import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
@@ -85,11 +86,11 @@ export const PillarHeatmap = ({
                 >
                   <div className="text-center space-y-2">
                     <div className="flex items-center justify-center gap-2">
-                      <span className="text-xl">{pillar.icon}</span>
+                      <span className="text-xl">{PILLAR_MODULES[pillar.pillar_key]?.icon || pillar.icon}</span>
                       <span className="text-lg">{getScoreEmoji(pillar.score)}</span>
                     </div>
                     
-                    <h3 className="font-semibold text-sm">{pillar.name}</h3>
+                    <h3 className="font-semibold text-sm">{PILLAR_MODULES[pillar.pillar_key]?.name || pillar.name}</h3>
                     
                     <div className="space-y-1">
                       <div className="text-2xl font-bold">
@@ -112,7 +113,7 @@ export const PillarHeatmap = ({
               </TooltipTrigger>
               <TooltipContent>
                 <div className="space-y-1">
-                  <p className="font-medium">{pillar.name}</p>
+                  <p className="font-medium">{PILLAR_MODULES[pillar.pillar_key]?.name || pillar.name}</p>
                   {pillar.score > 0 ? (
                     <>
                       <p className="text-sm">Poäng: {pillar.score.toFixed(1)}/10</p>

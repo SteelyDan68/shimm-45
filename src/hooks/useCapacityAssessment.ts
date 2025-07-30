@@ -20,61 +20,52 @@ export const useCapacityAssessment = (clientId: string) => {
     try {
       setLoading(true);
 
-      // Hämta senaste assessment path entry
-      const { data: pathEntries, error } = await supabase
-        .from('path_entries')
+      // Hämta senaste pillar assessment för self_care (den som innehåller alla frågor nu)
+      const { data: pillarAssessments, error } = await supabase
+        .from('pillar_assessments')
         .select('*')
         .eq('client_id', clientId)
-        .eq('type', 'assessment')
-        .order('timestamp', { ascending: false })
+        .eq('pillar_key', 'self_care')
+        .order('created_at', { ascending: false })
         .limit(1);
 
       if (error) throw error;
 
-      if (!pathEntries || pathEntries.length === 0) {
+      if (!pillarAssessments || pillarAssessments.length === 0) {
         setCapacityData(null);
         return;
       }
 
-      const latestAssessment = pathEntries[0];
+      const latestAssessment = pillarAssessments[0];
       
-      // Parse assessment details
+      // Parse assessment responses
       let functionalAccessCount = 0;
       let subjectiveOpportunitiesAvg = 0;
       let hasRegularSupport = false;
 
-      if (latestAssessment.details) {
-        // Parse functional access count (antal "ja" svar)
-        const functionalMatches = latestAssessment.details.match(/🟠 Funktionstillgång:\n(.*?)(?=\n\n|$)/s);
-        if (functionalMatches) {
-          const functionalText = functionalMatches[1];
-          functionalAccessCount = (functionalText.match(/: ja/gi) || []).length;
+      if (latestAssessment.assessment_data) {
+        const responses = latestAssessment.assessment_data as Record<string, any>;
+        
+        // Count functional access "ja" responses (questions 14-17)
+        const functionalQuestions = ['praktisk_hjalp', 'emotionellt_stod', 'kunskapsstod', 'fysisk_narvaro'];
+        functionalAccessCount = functionalQuestions.filter(q => responses[q] === 'ja').length;
+
+        // Calculate subjective opportunities average (questions 18-21)
+        const opportunityQuestions = ['egen_tid', 'energi', 'motivation', 'framtidstro'];
+        const opportunityScores = opportunityQuestions.map(q => responses[q] || 0).filter(score => score > 0);
+        if (opportunityScores.length > 0) {
+          subjectiveOpportunitiesAvg = opportunityScores.reduce((a, b) => a + b, 0) / opportunityScores.length;
         }
 
-        // Parse subjective opportunities average
-        const subjectiveMatches = latestAssessment.details.match(/🟣 Subjektiva möjligheter:\n(.*?)(?=\n\n|$)/s);
-        if (subjectiveMatches) {
-          const subjectiveText = subjectiveMatches[1];
-          const scores = subjectiveText.match(/: (\d+)\/5/g);
-          if (scores && scores.length > 0) {
-            const values = scores.map(s => parseInt(s.match(/(\d+)\/5/)?.[1] || '0'));
-            subjectiveOpportunitiesAvg = values.reduce((a, b) => a + b, 0) / values.length;
-          }
-        }
-
-        // Parse relationship support
-        const relationshipMatches = latestAssessment.details.match(/🟢 Relationer:\n(.*?)(?=\n\n|$)/s);
-        if (relationshipMatches) {
-          const relationshipText = relationshipMatches[1];
-          hasRegularSupport = relationshipText.toLowerCase().includes('prata med regelbundet?: ja');
-        }
+        // Check relationship support (question 22)
+        hasRegularSupport = responses['prata_med_regelbundet'] === 'ja';
       }
 
       setCapacityData({
         functionalAccessCount,
         subjectiveOpportunitiesAvg: Math.round(subjectiveOpportunitiesAvg * 10) / 10,
         hasRegularSupport,
-        assessmentDate: latestAssessment.timestamp
+        assessmentDate: latestAssessment.created_at
       });
 
     } catch (error: any) {
