@@ -51,14 +51,36 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      // Redirect clients to their own dashboard
+      // Redirect clients to onboarding or their dashboard
       if (hasRole('client')) {
-        navigate('/client-dashboard');
+        // Kontrollera om onboarding behöver göras
+        checkClientOnboardingStatus();
         return;
       }
       loadDashboardData();
     }
   }, [user, hasRole, navigate]);
+
+  const checkClientOnboardingStatus = async () => {
+    try {
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('profile_metadata')
+        .eq('email', user!.email)
+        .maybeSingle();
+
+      if ((clientData?.profile_metadata as any)?.generalInfo?.name) {
+        // Onboarding är klar, gå till client dashboard
+        navigate('/client-dashboard');
+      } else {
+        // Behöver göra onboarding
+        navigate('/onboarding');
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+      navigate('/client-dashboard');
+    }
+  };
 
   const loadDashboardData = async () => {
     if (!user) return;

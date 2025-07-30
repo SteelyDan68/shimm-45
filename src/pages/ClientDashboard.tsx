@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
@@ -40,6 +41,7 @@ interface ClientStats {
 export const ClientDashboard = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
   const [stats, setStats] = useState<ClientStats>({
@@ -71,11 +73,14 @@ export const ClientDashboard = () => {
       if (clientError) throw clientError;
 
       if (!clientData) {
-        toast({
-          title: "Ingen klientprofil hittades",
-          description: "Kontakta din coach för att få en profil skapad.",
-          variant: "destructive",
-        });
+        // Om ingen klientprofil finns, redirecta till onboarding
+        navigate('/onboarding');
+        return;
+      }
+
+      // Kontrollera om onboarding är komplett
+      if (!(clientData.profile_metadata as any)?.generalInfo?.name) {
+        navigate('/onboarding');
         return;
       }
 

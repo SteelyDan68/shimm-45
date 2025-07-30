@@ -98,6 +98,7 @@ export type Database = {
           phone: string | null
           primary_contact_email: string | null
           primary_contact_name: string | null
+          profile_metadata: Json | null
           status: string
           tags: string[] | null
           tiktok_handle: string | null
@@ -123,6 +124,7 @@ export type Database = {
           phone?: string | null
           primary_contact_email?: string | null
           primary_contact_name?: string | null
+          profile_metadata?: Json | null
           status?: string
           tags?: string[] | null
           tiktok_handle?: string | null
@@ -148,6 +150,7 @@ export type Database = {
           phone?: string | null
           primary_contact_email?: string | null
           primary_contact_name?: string | null
+          profile_metadata?: Json | null
           status?: string
           tags?: string[] | null
           tiktok_handle?: string | null

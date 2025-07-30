@@ -7,13 +7,15 @@ import { Brain, BarChart3 } from 'lucide-react';
 interface InsightAssessmentProps {
   clientId: string;
   clientName: string;
+  onComplete?: () => void;
 }
 
-export function InsightAssessment({ clientId, clientName }: InsightAssessmentProps) {
+export function InsightAssessment({ clientId, clientName, onComplete }: InsightAssessmentProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleComplete = () => {
     setIsOpen(false);
+    onComplete?.(); // Anropa callback om den finns
   };
 
   return (
