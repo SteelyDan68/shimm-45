@@ -10,7 +10,7 @@ import {
   RefreshCw,
   Settings
 } from 'lucide-react';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useClientLogic } from '@/hooks/useClientLogic';
 import { useClientData } from '@/hooks/useClientData';
