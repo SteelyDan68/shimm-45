@@ -18,6 +18,13 @@ export interface OnboardingData {
     creativeStrengths: string;
     platforms: string[];
     challenges: string;
+    // Social media handles
+    instagramHandle: string;
+    youtubeHandle: string;
+    tiktokHandle: string;
+    snapchatHandle: string;
+    facebookHandle: string;
+    twitterHandle: string;
   };
   
   // Sektion 3 - Livskarta

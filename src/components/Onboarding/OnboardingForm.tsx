@@ -71,7 +71,13 @@ export function OnboardingForm({ onComplete, isLoading = false }: OnboardingForm
       niche: '',
       creativeStrengths: '',
       platforms: [],
-      challenges: ''
+      challenges: '',
+      instagramHandle: '',
+      youtubeHandle: '',
+      tiktokHandle: '',
+      snapchatHandle: '',
+      facebookHandle: '',
+      twitterHandle: ''
     },
     lifeMap: {
       location: '',
@@ -350,6 +356,69 @@ export function OnboardingForm({ onComplete, isLoading = false }: OnboardingForm
               ))}
             </div>
           )}
+        </div>
+
+        <div>
+          <Label>Dina sociala medier</Label>
+          <p className="text-sm text-muted-foreground mb-4">
+            Klistra in dina handles/användarnamn för de plattformar du är aktiv på
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="instagramHandle">Instagram</Label>
+              <Input
+                id="instagramHandle"
+                value={formData.publicRole.instagramHandle}
+                onChange={(e) => updatePublicRole('instagramHandle', e.target.value)}
+                placeholder="@dittanvändarnamn"
+              />
+            </div>
+            <div>
+              <Label htmlFor="youtubeHandle">YouTube</Label>
+              <Input
+                id="youtubeHandle"
+                value={formData.publicRole.youtubeHandle}
+                onChange={(e) => updatePublicRole('youtubeHandle', e.target.value)}
+                placeholder="Kanalnamn eller @handle"
+              />
+            </div>
+            <div>
+              <Label htmlFor="tiktokHandle">TikTok</Label>
+              <Input
+                id="tiktokHandle"
+                value={formData.publicRole.tiktokHandle}
+                onChange={(e) => updatePublicRole('tiktokHandle', e.target.value)}
+                placeholder="@dittanvändarnamn"
+              />
+            </div>
+            <div>
+              <Label htmlFor="snapchatHandle">Snapchat</Label>
+              <Input
+                id="snapchatHandle"
+                value={formData.publicRole.snapchatHandle}
+                onChange={(e) => updatePublicRole('snapchatHandle', e.target.value)}
+                placeholder="@dittanvändarnamn"
+              />
+            </div>
+            <div>
+              <Label htmlFor="facebookHandle">Facebook</Label>
+              <Input
+                id="facebookHandle"
+                value={formData.publicRole.facebookHandle}
+                onChange={(e) => updatePublicRole('facebookHandle', e.target.value)}
+                placeholder="Sidnamn eller användarnamn"
+              />
+            </div>
+            <div>
+              <Label htmlFor="twitterHandle">Twitter/X</Label>
+              <Input
+                id="twitterHandle"
+                value={formData.publicRole.twitterHandle}
+                onChange={(e) => updatePublicRole('twitterHandle', e.target.value)}
+                placeholder="@dittanvändarnamn"
+              />
+            </div>
+          </div>
         </div>
 
         <div>
