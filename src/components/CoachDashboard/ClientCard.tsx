@@ -185,26 +185,38 @@ export function ClientCard({ client }: ClientCardProps) {
           </div>
         )}
 
-        {/* Five Pillars Status */}
+        {/* Five Pillars Mini-Heatmap */}
         {activatedPillars.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-medium flex items-center gap-1">
               <Star className="h-3 w-3" />
               Five Pillars ({activatedPillars.length}/5 aktiva)
             </h4>
-            <div className="grid grid-cols-2 gap-1">
-              {heatmapData.slice(0, 4).map((pillar) => (
-                <div key={pillar.pillar_key} className="flex items-center gap-1 text-xs">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: pillar.color_code }} />
-                  <span className="flex-1 truncate">{pillar.name}</span>
-                  {pillar.score > 0 && (
-                    <span className="font-medium">{pillar.score.toFixed(1)}</span>
-                  )}
-                </div>
-              ))}
-              {heatmapData.length > 4 && (
-                <div className="text-xs text-muted-foreground col-span-2 text-center">
-                  +{heatmapData.length - 4} fler...
+            <div className="grid grid-cols-3 gap-1">
+              {heatmapData.slice(0, 6).map((pillar) => {
+                const getScoreColor = (score: number) => {
+                  if (score === 0) return '#gray';
+                  if (score <= 3) return '#ef4444'; // 🔴 Kritisk
+                  if (score <= 6) return '#f97316'; // 🟠 Utmaning  
+                  return '#22c55e'; // 🟢 Stark
+                };
+                
+                return (
+                  <div key={pillar.pillar_key} className="flex items-center gap-1 text-xs">
+                    <span 
+                      className="w-2 h-2 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: getScoreColor(pillar.score) }} 
+                    />
+                    <span className="flex-1 truncate">{pillar.name}</span>
+                    {pillar.score > 0 && (
+                      <span className="font-medium text-[10px]">{pillar.score.toFixed(1)}</span>
+                    )}
+                  </div>
+                );
+              })}
+              {heatmapData.length > 6 && (
+                <div className="text-xs text-muted-foreground col-span-3 text-center">
+                  +{heatmapData.length - 6} fler...
                 </div>
               )}
             </div>

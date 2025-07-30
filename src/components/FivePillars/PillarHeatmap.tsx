@@ -1,43 +1,63 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PillarHeatmapData } from '@/types/fivePillarsModular';
+import { useNavigate } from 'react-router-dom';
+import { ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface PillarHeatmapProps {
   heatmapData: PillarHeatmapData[];
   title?: string;
   showInactive?: boolean;
+  clientId?: string;
+  isCoachView?: boolean;
 }
 
-export const PillarHeatmap = ({ heatmapData, title = "Five Pillars Översikt", showInactive = false }: PillarHeatmapProps) => {
+export const PillarHeatmap = ({ 
+  heatmapData, 
+  title = "Five Pillars Heatmap", 
+  showInactive = false,
+  clientId,
+  isCoachView = false
+}: PillarHeatmapProps) => {
+  const navigate = useNavigate();
+
+  // Exakt färgkodning enligt ursprunglig prompt
   const getScoreColor = (score: number) => {
-    if (score >= 8) return 'bg-green-500 text-white';
-    if (score >= 6) return 'bg-yellow-500 text-white';
-    if (score >= 4) return 'bg-orange-500 text-white';
-    if (score > 0) return 'bg-red-500 text-white';
-    return 'bg-gray-300 text-gray-600';
+    if (score === 0) return 'bg-gray-100 text-gray-500 border-gray-200';
+    if (score <= 3) return 'bg-red-100 text-red-700 border-red-200'; // 🔴 Kritisk
+    if (score <= 6) return 'bg-orange-100 text-orange-700 border-orange-200'; // 🟠 Utmaning  
+    return 'bg-green-100 text-green-700 border-green-200'; // 🟢 Stark
+  };
+
+  const getScoreEmoji = (score: number) => {
+    if (score === 0) return '⚪';
+    if (score <= 3) return '🔴';
+    if (score <= 6) return '🟠'; 
+    return '🟢';
   };
 
   const getScoreText = (score: number) => {
-    if (score >= 8) return 'Excellent';
-    if (score >= 6) return 'Good';
-    if (score >= 4) return 'Fair';
-    if (score > 0) return 'Needs Work';
-    return 'Not Assessed';
+    if (score === 0) return 'Obearbetad';
+    if (score <= 3) return 'Kritisk';
+    if (score <= 6) return 'Utmaning';
+    return 'Stark';
   };
 
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'up':
-        return <TrendingUp className="h-3 w-3 text-green-500" />;
-      case 'down':
-        return <TrendingDown className="h-3 w-3 text-red-500" />;
-      default:
-        return <Minus className="h-3 w-3 text-gray-500" />;
+  const handlePillarClick = (pillar: PillarHeatmapData) => {
+    if (pillar.score === 0 || !clientId) return;
+    
+    // Navigera till klientprofil med Five Pillars tab öppen
+    if (isCoachView) {
+      navigate(`/client/${clientId}?tab=pillars&pillar=${pillar.pillar_key}`);
+    } else {
+      // För klientvy, bara fokusera på pelaren i nuvarande vy
+      console.log(`Focus on ${pillar.pillar_key} pillar`);
     }
   };
 
-  const filteredData = showInactive ? heatmapData : heatmapData.filter(pillar => pillar.is_active);
+  const displayData = showInactive ? heatmapData : heatmapData.filter(pillar => pillar.is_active);
 
   return (
     <Card>
@@ -45,97 +65,108 @@ export const PillarHeatmap = ({ heatmapData, title = "Five Pillars Översikt", s
         <CardTitle className="flex items-center justify-between">
           {title}
           <Badge variant="outline">
-            {filteredData.length} av 5 pelare
+            {displayData.filter(p => p.is_active).length} av 5 pelare
           </Badge>
         </CardTitle>
       </CardHeader>
+      
       <CardContent>
-        <div className="grid gap-4 md:grid-cols-5">
-          {filteredData.map((pillar) => (
-            <div
-              key={pillar.pillar_key}
-              className={`relative rounded-lg p-4 transition-all hover:shadow-md ${
-                pillar.is_active ? 'opacity-100' : 'opacity-50'
-              }`}
-              style={{ backgroundColor: `${pillar.color_code}15` }}
-            >
-              {/* Pillar Icon and Name */}
-              <div className="text-center mb-3">
-                <div className="text-2xl mb-1">{pillar.icon}</div>
-                <h3 className="font-medium text-sm">{pillar.name}</h3>
-              </div>
-
-              {/* Score Circle */}
-              <div className="flex justify-center mb-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {displayData.map((pillar) => (
+            <Tooltip key={pillar.pillar_key}>
+              <TooltipTrigger asChild>
                 <div
-                  className={`w-16 h-16 rounded-full flex items-center justify-center text-sm font-bold ${getScoreColor(pillar.score)}`}
+                  className={`
+                    p-4 rounded-lg border-2 transition-all cursor-pointer hover:shadow-md
+                    ${getScoreColor(pillar.score)}
+                    ${pillar.score > 0 ? 'hover:scale-105' : 'cursor-not-allowed opacity-75'}
+                  `}
+                  onClick={() => handlePillarClick(pillar)}
                 >
-                  {pillar.score > 0 ? pillar.score.toFixed(1) : '—'}
+                  <div className="text-center space-y-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-xl">{pillar.icon}</span>
+                      <span className="text-lg">{getScoreEmoji(pillar.score)}</span>
+                    </div>
+                    
+                    <h3 className="font-semibold text-sm">{pillar.name}</h3>
+                    
+                    <div className="space-y-1">
+                      <div className="text-2xl font-bold">
+                        {pillar.score > 0 ? pillar.score.toFixed(1) : '—'}
+                      </div>
+                      <div className="text-xs font-medium">
+                        {getScoreText(pillar.score)}
+                      </div>
+                    </div>
+
+                    {pillar.score > 0 && (
+                      <div className="flex items-center justify-center text-xs">
+                        {pillar.trend === 'up' && <TrendingUp className="h-3 w-3 text-green-600" />}
+                        {pillar.trend === 'down' && <TrendingDown className="h-3 w-3 text-red-600" />}
+                        {pillar.trend === 'stable' && <Minus className="h-3 w-3 text-gray-500" />}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              {/* Score Text */}
-              <div className="text-center mb-2">
-                <p className="text-xs text-muted-foreground">{getScoreText(pillar.score)}</p>
-              </div>
-
-              {/* Trend and Last Assessment */}
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  {getTrendIcon(pillar.trend)}
-                  <span className="capitalize">{pillar.trend}</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="space-y-1">
+                  <p className="font-medium">{pillar.name}</p>
+                  {pillar.score > 0 ? (
+                    <>
+                      <p className="text-sm">Poäng: {pillar.score.toFixed(1)}/10</p>
+                      <p className="text-sm">Status: {getScoreText(pillar.score)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Senaste: {new Date(pillar.last_assessment).toLocaleDateString('sv-SE')}
+                      </p>
+                      {pillar.score > 0 && (
+                        <p className="text-xs text-primary">
+                          <ExternalLink className="h-3 w-3 inline mr-1" />
+                          Klicka för att se senaste analys
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Ingen assessment genomförd än
+                    </p>
+                  )}
                 </div>
-                {pillar.last_assessment && (
-                  <span>
-                    {new Date(pillar.last_assessment).toLocaleDateString('sv-SE', {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </span>
-                )}
-              </div>
-
-              {/* Status Indicator */}
-              <div className="absolute top-2 right-2">
-                {pillar.is_active ? (
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                ) : (
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                )}
-              </div>
-            </div>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
 
-        {filteredData.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            <p>Inga pelare aktiverade än.</p>
-            <p className="text-sm">Kontakta din coach för att aktivera pelare.</p>
-          </div>
-        )}
-
-        {/* Overall Score */}
-        {filteredData.length > 0 && (
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Genomsnittlig poäng</h4>
-                <p className="text-sm text-muted-foreground">Baserat på aktiverade pelare</p>
+        {/* Sammanfattning */}
+        <div className="mt-6 pt-4 border-t">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm">
+            <div>
+              <div className="font-semibold text-green-600">
+                {displayData.filter(p => p.score >= 7).length}
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">
-                  {(
-                    filteredData
-                      .filter(p => p.score > 0)
-                      .reduce((sum, p) => sum + p.score, 0) /
-                    filteredData.filter(p => p.score > 0).length || 0
-                  ).toFixed(1)}
-                </div>
-                <p className="text-sm text-muted-foreground">av 10</p>
+              <div className="text-muted-foreground">Starka</div>
+            </div>
+            <div>
+              <div className="font-semibold text-orange-600">
+                {displayData.filter(p => p.score >= 4 && p.score < 7).length}
               </div>
+              <div className="text-muted-foreground">Utmaningar</div>
+            </div>
+            <div>
+              <div className="font-semibold text-red-600">
+                {displayData.filter(p => p.score > 0 && p.score < 4).length}
+              </div>
+              <div className="text-muted-foreground">Kritiska</div>
+            </div>
+            <div>
+              <div className="font-semibold text-gray-500">
+                {displayData.filter(p => p.score === 0).length}
+              </div>
+              <div className="text-muted-foreground">Obearbetade</div>
             </div>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -93,8 +93,10 @@ export const ModularPillarDashboard = ({
       {/* Heatmap Overview */}
       <PillarHeatmap 
         heatmapData={heatmapData} 
-        title={isCoachView ? `${clientName}s Five Pillars Status` : "Din Five Pillars Status"}
+        title={isCoachView ? `${clientName}s Five Pillars Status` : "Din aktuella helhetsbild"}
         showInactive={isCoachView}
+        clientId={clientId}
+        isCoachView={isCoachView}
       />
 
       {/* Activated Pillars Details */}
