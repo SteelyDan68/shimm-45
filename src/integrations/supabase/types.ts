@@ -14,13 +14,151 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_form_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          client_id: string
+          due_date: string | null
+          form_definition_id: string
+          id: string
+          is_active: boolean
+          reminder_sent: boolean
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          client_id: string
+          due_date?: string | null
+          form_definition_id: string
+          id?: string
+          is_active?: boolean
+          reminder_sent?: boolean
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          client_id?: string
+          due_date?: string | null
+          form_definition_id?: string
+          id?: string
+          is_active?: boolean
+          reminder_sent?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_form_assignments_form_definition_id_fkey"
+            columns: ["form_definition_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_form_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_form_definitions: {
+        Row: {
+          ai_prompt_template: string
+          assessment_type: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          ai_prompt_template: string
+          assessment_type: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          ai_prompt_template?: string
+          assessment_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      assessment_questions: {
+        Row: {
+          created_at: string
+          form_definition_id: string
+          id: string
+          is_required: boolean
+          max_value: number | null
+          min_value: number | null
+          options: Json | null
+          question_key: string
+          question_text: string
+          question_type: string
+          sort_order: number
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          form_definition_id: string
+          id?: string
+          is_required?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          options?: Json | null
+          question_key: string
+          question_text: string
+          question_type: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          form_definition_id?: string
+          id?: string
+          is_required?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          options?: Json | null
+          question_key?: string
+          question_text?: string
+          question_type?: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_questions_form_definition_id_fkey"
+            columns: ["form_definition_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_form_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_rounds: {
         Row: {
           ai_analysis: string | null
+          answers: Json
           client_id: string
           comments: string | null
           created_at: string
           created_by: string
+          form_definition_id: string | null
           id: string
           pillar_type: string
           scores: Json
@@ -28,10 +166,12 @@ export type Database = {
         }
         Insert: {
           ai_analysis?: string | null
+          answers?: Json
           client_id: string
           comments?: string | null
           created_at?: string
           created_by: string
+          form_definition_id?: string | null
           id?: string
           pillar_type: string
           scores?: Json
@@ -39,16 +179,26 @@ export type Database = {
         }
         Update: {
           ai_analysis?: string | null
+          answers?: Json
           client_id?: string
           comments?: string | null
           created_at?: string
           created_by?: string
+          form_definition_id?: string | null
           id?: string
           pillar_type?: string
           scores?: Json
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "assessment_rounds_form_definition_id_fkey"
+            columns: ["form_definition_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_form_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_data_cache: {
         Row: {
