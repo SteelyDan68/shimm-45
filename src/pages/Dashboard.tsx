@@ -17,6 +17,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ClientForm } from '@/components/ClientForm';
 import { ApiStatusChecker } from '@/components/ApiStatusChecker';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 
 interface Client {
   id: string;
@@ -169,7 +171,10 @@ export const Dashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Välkommen tillbaka, {profile?.first_name || 'Coach'}!</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold">Välkommen tillbaka, {profile?.first_name || 'Coach'}!</h1>
+            <HelpTooltip content={helpTexts.dashboard.welcomeMessage} />
+          </div>
           <p className="text-muted-foreground">Översikt av dina klienter och aktiviteter</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
@@ -194,7 +199,10 @@ export const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totalt Klienter</CardTitle>
+            <div className="flex items-center gap-1">
+              <CardTitle className="text-sm font-medium">Totalt Klienter</CardTitle>
+              <HelpTooltip content={helpTexts.dashboard.clientCount} />
+            </div>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -205,7 +213,10 @@ export const Dashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva Klienter</CardTitle>
+            <div className="flex items-center gap-1">
+              <CardTitle className="text-sm font-medium">Aktiva Klienter</CardTitle>
+              <HelpTooltip content="Antal klienter med aktiv status som arbetar tillsammans med dig" />
+            </div>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -216,7 +227,10 @@ export const Dashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">AI Analyser</CardTitle>
+            <div className="flex items-center gap-1">
+              <CardTitle className="text-sm font-medium">AI Analyser</CardTitle>
+              <HelpTooltip content="Antal genomförda AI-analyser och rekommendationer för dina klienter" />
+            </div>
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -227,7 +241,10 @@ export const Dashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Datapunkter</CardTitle>
+            <div className="flex items-center gap-1">
+              <CardTitle className="text-sm font-medium">Datapunkter</CardTitle>
+              <HelpTooltip content="Totalt antal insamlade datapunkter från alla källor för alla dina klienter" />
+            </div>
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -246,6 +263,7 @@ export const Dashboard = () => {
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Senaste Klienter
+            <HelpTooltip content={helpTexts.dashboard.recentActivity} />
           </CardTitle>
         </CardHeader>
         <CardContent>

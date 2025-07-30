@@ -28,6 +28,8 @@ import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
 import { CalendarModule } from '@/components/Calendar/CalendarModule';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 
 interface Client {
   id: string;
@@ -193,12 +195,21 @@ export const ClientProfile = () => {
         </Button>
         
         <div className="flex-1">
-          <h1 className="text-2xl font-bold">{client.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">{client.name}</h1>
+            <HelpTooltip content={helpTexts.clientProfile.clientName} />
+          </div>
           <div className="flex items-center gap-2 mt-1">
-            <Badge variant="outline">{client.category}</Badge>
-            <Badge variant={client.status === 'active' ? 'default' : 'secondary'}>
-              {client.status}
-            </Badge>
+            <div className="flex items-center gap-1">
+              <Badge variant="outline">{client.category}</Badge>
+              <HelpTooltip content={helpTexts.clientProfile.category} />
+            </div>
+            <div className="flex items-center gap-1">
+              <Badge variant={client.status === 'active' ? 'default' : 'secondary'}>
+                {client.status}
+              </Badge>
+              <HelpTooltip content={helpTexts.clientProfile.status} />
+            </div>
           </div>
         </div>
         
@@ -246,6 +257,7 @@ export const ClientProfile = () => {
                 <CardTitle className="flex items-center gap-2">
                   <Brain className="h-5 w-5" />
                   AI-analys & rekommendationer
+                  <HelpTooltip content={helpTexts.clientProfile.aiInsights} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -255,6 +267,7 @@ export const ClientProfile = () => {
                     <Badge className={getRankColor(logicState.velocity_rank)}>
                       Klass {logicState.velocity_rank}
                     </Badge>
+                    <HelpTooltip content={helpTexts.clientProfile.velocityScore} />
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium">Ton:</span>
@@ -271,14 +284,20 @@ export const ClientProfile = () => {
                 {logicState.metrics && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 p-4 bg-background/30 rounded-lg">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">
-                        {logicState.metrics.followerGrowth.toFixed(1)}%
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <div className="text-2xl font-bold text-primary">
+                          {logicState.metrics.followerGrowth.toFixed(1)}%
+                        </div>
+                        <HelpTooltip content={helpTexts.analytics.growthRate} />
                       </div>
                       <div className="text-xs text-muted-foreground">Följartillväxt</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">
-                        {logicState.metrics.engagementRate.toFixed(1)}%
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <div className="text-2xl font-bold text-primary">
+                          {logicState.metrics.engagementRate.toFixed(1)}%
+                        </div>
+                        <HelpTooltip content={helpTexts.analytics.engagementRate} />
                       </div>
                       <div className="text-xs text-muted-foreground">Engagement</div>
                     </div>
@@ -306,35 +325,49 @@ export const ClientProfile = () => {
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
                 Datasammanfattning
+                <HelpTooltip content={helpTexts.clientProfile.dataCollection} />
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold">{cacheData.length}</div>
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <div className="text-2xl font-bold">{cacheData.length}</div>
+                    <HelpTooltip content="Totalt antal insamlade datapunkter från alla källor" />
+                  </div>
                   <div className="text-sm text-muted-foreground">Totalt datapunkter</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{newsItems.length}</div>
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <div className="text-2xl font-bold">{newsItems.length}</div>
+                    <HelpTooltip content="Antal gånger klienten omnämnts i svenska nyhetsmedier" />
+                  </div>
                   <div className="text-sm text-muted-foreground">Omnämnanden</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {cacheData.filter(d => d.data_type === 'social_metrics').length}
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <div className="text-2xl font-bold">
+                      {cacheData.filter(d => d.data_type === 'social_metrics').length}
+                    </div>
+                    <HelpTooltip content="Antal insamlade sociala medier-statistik från olika plattformar" />
                   </div>
                   <div className="text-sm text-muted-foreground">Sociala metrics</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {cacheData.filter(d => d.data_type === 'ai_analysis').length}
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <div className="text-2xl font-bold">
+                      {cacheData.filter(d => d.data_type === 'ai_analysis').length}
+                    </div>
+                    <HelpTooltip content={helpTexts.analytics.aiInsightsGenerated} />
                   </div>
                   <div className="text-sm text-muted-foreground">AI-analyser</div>
                 </div>
               </div>
               
               {cacheData.length > 0 && (
-                <div className="mt-4 text-xs text-muted-foreground text-center">
-                  Senaste uppdatering: {new Date(cacheData[0]?.created_at).toLocaleString('sv-SE')}
+                <div className="mt-4 text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                  <span>Senaste uppdatering: {new Date(cacheData[0]?.created_at).toLocaleString('sv-SE')}</span>
+                  <HelpTooltip content={helpTexts.clientProfile.lastUpdate} />
                 </div>
               )}
             </CardContent>

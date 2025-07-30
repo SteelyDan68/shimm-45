@@ -14,6 +14,8 @@ import {
   User
 } from 'lucide-react';
 import type { Task, TaskPriority, TaskStatus } from '@/types/tasks';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 
 interface TaskItemProps {
   task: Task;
@@ -108,14 +110,20 @@ export function TaskItem({ task, onComplete, onUpdate, readonly = false }: TaskI
               
               <div className="flex items-center gap-2 ml-2">
                 {task.ai_generated && (
-                  <Badge variant="secondary" className="text-xs">
-                    <Brain className="h-3 w-3 mr-1" />
-                    AI
-                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <Badge variant="secondary" className="text-xs">
+                      <Brain className="h-3 w-3 mr-1" />
+                      AI
+                    </Badge>
+                    <HelpTooltip content={helpTexts.tasks.aiGenerated} />
+                  </div>
                 )}
-                <Badge variant="outline" className={`text-xs ${getPriorityColor(task.priority)}`}>
-                  {task.priority}
-                </Badge>
+                <div className="flex items-center gap-1">
+                  <Badge variant="outline" className={`text-xs ${getPriorityColor(task.priority)}`}>
+                    {task.priority}
+                  </Badge>
+                  <HelpTooltip content={helpTexts.tasks.priority} />
+                </div>
               </div>
             </div>
 
@@ -136,6 +144,7 @@ export function TaskItem({ task, onComplete, onUpdate, readonly = false }: TaskI
                    task.status === 'in_progress' ? 'Pågår' :
                    task.status === 'planned' ? 'Planerad' : 'Avbruten'}
                 </span>
+                <HelpTooltip content={helpTexts.tasks.taskStatus} />
               </div>
 
               {task.deadline && (
@@ -147,6 +156,7 @@ export function TaskItem({ task, onComplete, onUpdate, readonly = false }: TaskI
                     {format(new Date(task.deadline), 'PPp', { locale: sv })}
                     {overdue && task.status !== 'completed' && ' (Försenad)'}
                   </span>
+                  <HelpTooltip content={helpTexts.tasks.deadline} />
                 </div>
               )}
 

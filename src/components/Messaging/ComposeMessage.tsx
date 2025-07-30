@@ -9,6 +9,8 @@ import { ArrowLeft, Bot, Send } from 'lucide-react';
 import { useMessages } from '@/hooks/useMessages';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 
 interface Profile {
   id: string;
@@ -124,9 +126,12 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage }: ComposeMessa
         <Button variant="ghost" size="sm" onClick={onClose}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h3 className="font-semibold">
-          {replyToMessage ? 'Svara på meddelande' : 'Nytt meddelande'}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold">
+            {replyToMessage ? 'Svara på meddelande' : 'Nytt meddelande'}
+          </h3>
+          <HelpTooltip content={helpTexts.messages.composeMessage} />
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -170,7 +175,10 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage }: ComposeMessa
               checked={useAI}
               onCheckedChange={setUseAI}
             />
-            <Label htmlFor="use-ai">Använd AI-assistent för svar</Label>
+            <div className="flex items-center gap-1">
+              <Label htmlFor="use-ai">Använd AI-assistent för svar</Label>
+              <HelpTooltip content={helpTexts.messages.aiAssisted} />
+            </div>
             {useAI && (
               <Button
                 variant="outline"

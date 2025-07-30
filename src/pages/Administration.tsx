@@ -25,6 +25,8 @@ import { UserManagement } from "@/components/UserManagement";
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 import { DataRightsCenter } from "@/components/DataRightsCenter";
+import { HelpTooltip } from "@/components/HelpTooltip";
+import { helpTexts } from "@/data/helpTexts";
 
 export function Administration() {
   const { user } = useAuth();
@@ -116,7 +118,10 @@ export function Administration() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Administration</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl font-bold">Administration</h1>
+          <HelpTooltip content="Hantera dina inställningar, användare och kontrollera systemfunktioner. Här hittar du också GDPR-relaterade verktyg." />
+        </div>
         <p className="text-muted-foreground mt-2">
           Hantera dina inställningar och kontrollera systemfunktioner
         </p>
@@ -433,7 +438,10 @@ export function Administration() {
 
 
               <div>
-                <h4 className="font-medium mb-3">Dataåtgärder</h4>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="font-medium">Dataåtgärder</h4>
+                  <HelpTooltip content={helpTexts.administration.dataExport} />
+                </div>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" onClick={handleExportData}>
                     <Download className="h-4 w-4 mr-2" />

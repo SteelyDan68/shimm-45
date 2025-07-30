@@ -9,6 +9,8 @@ import { PillarHeatmap } from './PillarHeatmap';
 import { ModularPillarAssessment } from './ModularPillarAssessment';
 import { ModularPillarManager } from './ModularPillarManager';
 import { PILLAR_MODULES } from '@/config/pillarModules';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 
 interface ModularPillarDashboardProps {
   clientId: string;
@@ -74,7 +76,10 @@ export const ModularPillarDashboard = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Five Pillars</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold">Five Pillars</h1>
+            <HelpTooltip content="Five Pillars är ett utvecklingssystem med fem grundpelare för hållbar framgång och välmående." />
+          </div>
           <p className="text-muted-foreground">
             {isCoachView 
               ? `Hantera ${clientName}s utvecklingspelare` 
@@ -124,6 +129,9 @@ export const ModularPillarDashboard = ({
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{pillarConfig.icon}</span>
                         <CardTitle className="text-lg">{pillarConfig.name}</CardTitle>
+                        <HelpTooltip 
+                          content={helpTexts.fivePillars[pillarKey as keyof typeof helpTexts.fivePillars] || pillarConfig.description}
+                        />
                       </div>
                       {latestAssessment && (
                         <Badge variant="secondary">
@@ -140,7 +148,10 @@ export const ModularPillarDashboard = ({
                       <div className="space-y-3">
                         {/* Current Score */}
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Nuvarande poäng</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm text-muted-foreground">Nuvarande poäng</span>
+                            <HelpTooltip content={helpTexts.fivePillars.pillarScore} />
+                          </div>
                           <div className="flex items-center gap-2">
                             <span 
                               className="text-lg font-bold"
@@ -181,8 +192,9 @@ export const ModularPillarDashboard = ({
                     )}
 
                     {isCoachView && latestAssessment && (
-                      <div className="text-xs text-muted-foreground">
-                        Senast uppdaterad: {new Date(latestAssessment.updated_at).toLocaleDateString('sv-SE')}
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span>Senast uppdaterad: {new Date(latestAssessment.updated_at).toLocaleDateString('sv-SE')}</span>
+                        <HelpTooltip content={helpTexts.fivePillars.lastAssessment} />
                       </div>
                     )}
                   </CardContent>
