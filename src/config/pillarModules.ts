@@ -333,61 +333,60 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
     color: '#EF4444',
     questions: [
       {
-        key: 'income_satisfaction',
-        text: 'Hur nöjd är du med din nuvarande inkomst?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.3
+        key: 'financial_security',
+        text: 'Jag känner mig ekonomiskt trygg i min nuvarande situation.',
+        type: 'slider',
+        min: 0,
+        max: 100,
+        weight: 1.5
       },
       {
-        key: 'financial_planning',
-        text: 'Hur väl planerar du din ekonomi?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'clear_income_sources',
+        text: 'Jag har tydliga intäktskällor kopplade till mitt arbete.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.4
       },
       {
-        key: 'investment_knowledge',
-        text: 'Hur bra är din kunskap om investeringar?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.1
+        key: 'new_income_opportunities',
+        text: 'Jag ser nya möjligheter att tjäna pengar på mitt varumärke.',
+        type: 'slider',
+        min: 0,
+        max: 100,
+        weight: 1.3
       },
       {
-        key: 'income_diversification',
-        text: 'Hur diversifierade är dina inkomstkällor?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'cost_control',
+        text: 'Jag har kontroll över mina kostnader.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.2
       },
       {
-        key: 'financial_security',
-        text: 'Hur säker känner du dig ekonomiskt?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.5
+        key: 'economic_improvement_ideas',
+        text: 'Vad skulle öka din ekonomiska trygghet och intäkter?',
+        type: 'text',
+        weight: 1.0
       }
     ],
     scoreCalculation: (answers) => {
       const weights = {
-        income_satisfaction: 1.3,
-        financial_planning: 1.4,
-        investment_knowledge: 1.1,
-        income_diversification: 1.2,
-        financial_security: 1.5
+        financial_security: 1.5,
+        clear_income_sources: 1.4,
+        new_income_opportunities: 1.3,
+        cost_control: 1.2
       };
 
       let totalScore = 0;
       let totalWeight = 0;
 
       Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined) {
-          totalScore += answers[key] * weight;
+        if (answers[key] !== undefined && typeof answers[key] === 'number') {
+          // Convert 0-100 slider to 1-10 scale
+          const scaledScore = (answers[key] / 100) * 10;
+          totalScore += scaledScore * weight;
           totalWeight += weight;
         }
       });
@@ -396,8 +395,14 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
     },
     insightGeneration: (answers, score) => ({
       financial_health: score >= 7 ? 'strong' : score >= 5 ? 'stable' : 'vulnerable',
-      priority_areas: Object.entries(answers).filter(([_, value]) => value <= 4).map(([key]) => key),
-      security_level: answers.financial_security || 0
+      strong_areas: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value >= 80)
+        .map(([key]) => key),
+      priority_areas: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value <= 50)
+        .map(([key]) => key),
+      improvement_ideas: answers.economic_improvement_ideas || '',
+      financial_stability: score >= 8 ? 'very_stable' : score >= 6 ? 'stable' : score >= 4 ? 'developing' : 'unstable'
     })
   }
 };
