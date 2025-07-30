@@ -1066,6 +1066,57 @@ export type Database = {
           },
         ]
       }
+      training_data_stefan: {
+        Row: {
+          client_name: string | null
+          content: string
+          content_type: string
+          created_at: string
+          date_created: string | null
+          file_size_bytes: number | null
+          file_url: string | null
+          id: string
+          metadata: Json | null
+          original_filename: string | null
+          subject: string | null
+          tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_name?: string | null
+          content: string
+          content_type: string
+          created_at?: string
+          date_created?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          original_filename?: string | null
+          subject?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_name?: string | null
+          content?: string
+          content_type?: string
+          created_at?: string
+          date_created?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          original_filename?: string | null
+          subject?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_consent_records: {
         Row: {
           consent_given: boolean

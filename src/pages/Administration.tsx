@@ -27,6 +27,7 @@ import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManag
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 import { TestOnboardingData } from "@/components/TestOnboardingData";
 import { DataRightsCenter } from "@/components/DataRightsCenter";
+import StefanTrainingData from "@/components/StefanTrainingData";
 
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { helpTexts } from "@/data/helpTexts";
@@ -131,7 +132,7 @@ export function Administration() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profil</span>
@@ -151,6 +152,10 @@ export function Administration() {
           <TabsTrigger value="data" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
             <span className="hidden sm:inline">Data</span>
+          </TabsTrigger>
+          <TabsTrigger value="stefan-data" className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            <span className="hidden sm:inline">Stefandata</span>
           </TabsTrigger>
           <TabsTrigger value="gdpr" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -484,6 +489,11 @@ export function Administration() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Stefan Training Data Tab */}
+        <TabsContent value="stefan-data">
+          <StefanTrainingData />
         </TabsContent>
 
         {/* GDPR Tab */}
