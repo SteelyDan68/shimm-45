@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { aiService } from '../_shared/ai-service.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,32 +28,20 @@ serve(async (req) => {
       throw new Error('Missing required fields: recommendation_text, client_id');
     }
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    // Kontrollera AI-tillgänglighet
+    const availability = await aiService.checkAvailability();
+    if (!availability.openai && !availability.gemini) {
+      throw new Error('Inga AI-tjänster tillgängliga');
     }
 
     console.log('Generating planning for client:', client_id);
     console.log('Recommendation text length:', recommendation_text.length);
 
-    // Generate plan using OpenAI
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Du är en expert på att skapa genomförbara utvecklingsplaner för offentliga personer och influencers. 
-            Du förstår vikten av balans mellan produktivitet och återhämtning.`
-          },
-          {
-            role: 'user',
-            content: `Du har gett följande rekommendation till en offentlig person:
+    // Generate plan using AI (with fallback)
+    const systemPrompt = `Du är en expert på att skapa genomförbara utvecklingsplaner för offentliga personer och influencers. 
+            Du förstår vikten av balans mellan produktivitet och återhämtning.`;
+
+    const userPrompt = `Du har gett följande rekommendation till en offentlig person:
 
 "${recommendation_text}"
 
@@ -74,20 +63,22 @@ Returnera ENDAST en giltig JSON-array utan kommentarer:
     "pillar": "brand",
     "category": "deadline"
   }
-]`
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      }),
+]`;
+
+    const aiResponse = await aiService.generateResponse([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ], {
+      maxTokens: 2000,
+      temperature: 0.7,
+      model: 'gpt-4o-mini'
     });
 
-    if (!openAIResponse.ok) {
-      throw new Error(`OpenAI API error: ${openAIResponse.status}`);
+    if (!aiResponse.success) {
+      throw new Error('AI-planering misslyckades: ' + aiResponse.error);
     }
 
-    const openAIData = await openAIResponse.json();
-    const planText = openAIData.choices[0].message.content;
+    const planText = aiResponse.content;
     
     console.log('OpenAI raw response:', planText);
 

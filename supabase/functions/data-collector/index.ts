@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { aiService } from '../_shared/ai-service.ts';
 
 const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
 const googleSearchApiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY');
@@ -497,10 +498,11 @@ async function collectSentimentAnalysis(client: any, result: DataCollectionResul
   console.log('Collecting sentiment analysis and business intelligence for:', client.name);
   
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      console.log('OpenAI API key not found, skipping sentiment analysis');
-      result.errors.push('OpenAI API key not configured - sentiment analysis skipped');
+    // Kontrollera AI-tillgänglighet
+    const availability = await aiService.checkAvailability();
+    if (!availability.openai && !availability.gemini) {
+      console.log('Inga AI-tjänster tillgängliga, hoppar över sentimentanalys');
+      result.errors.push('Inga AI-tjänster tillgängliga - sentimentanalys hoppades över');
       return;
     }
 
@@ -529,8 +531,8 @@ async function collectSentimentAnalysis(client: any, result: DataCollectionResul
     
     console.log(`Analyzing ${combinedData.length} data items with OpenAI...`);
     
-    // 4. Analyze with OpenAI
-    const analysis = await analyzeSentimentWithAI(client.name, combinedData, openAIApiKey);
+    // 4. Analyze with AI (fallback system)
+    const analysis = await analyzeSentimentWithAI(client.name, combinedData);
     
     // 5. Store the results
     if (analysis) {
@@ -618,9 +620,11 @@ async function collectSentimentData(clientName: string) {
   return allData;
 }
 
-async function analyzeSentimentWithAI(clientName: string, sentimentData: any[], openAIApiKey: string) {
+async function analyzeSentimentWithAI(clientName: string, sentimentData: any[]) {
   try {
-    const prompt = `Analysera följande data om "${clientName}" och skapa en komplett business intelligence rapport. 
+    const systemPrompt = 'Du är en expert på business intelligence och sentimentanalys för influencers och sociala medier i Sverige. Returnera alltid giltig JSON.';
+    
+    const userPrompt = `Analysera följande data om "${clientName}" och skapa en komplett business intelligence rapport. 
 
 Insamlad data:
 ${JSON.stringify(sentimentData.slice(0, 10), null, 2)}
@@ -637,35 +641,20 @@ Vänligen returnera en JSON-struktur med:
   "data_quality": "kvalitet på insamlad data"
 }`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
-        messages: [
-          {
-            role: 'system',
-            content: 'Du är en expert på business intelligence och sentimentanalys för influencers och sociala medier i Sverige. Returnera alltid giltig JSON.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.3
-      })
+    const aiResponse = await aiService.generateResponse([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ], {
+      maxTokens: 1000,
+      temperature: 0.3,
+      model: 'gpt-4.1-2025-04-14'
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+    if (!aiResponse.success) {
+      throw new Error('AI-analys misslyckades: ' + aiResponse.error);
     }
 
-    const data = await response.json();
-    const analysisText = data.choices[0]?.message?.content;
+    const analysisText = aiResponse.content;
     
     if (analysisText) {
       try {
@@ -675,7 +664,8 @@ Vänligen returnera en JSON-struktur med:
           sentiment_score: 0,
           sentiment_summary: analysisText.substring(0, 200),
           raw_analysis: analysisText,
-          data_quality: "Analystext kunde inte parsas som JSON"
+          data_quality: "Analystext kunde inte parsas som JSON",
+          ai_model_used: aiResponse.model
         };
       }
     }

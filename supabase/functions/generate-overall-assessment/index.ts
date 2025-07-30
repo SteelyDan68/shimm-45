@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { aiService } from '../_shared/ai-service.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,12 +19,17 @@ serve(async (req) => {
   }
 
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    // Kontrollera AI-tillgänglighet
+    const availability = await aiService.checkAvailability();
+    if (!availability.openai && !availability.gemini) {
+      throw new Error('Inga AI-tjänster tillgängliga');
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!openAIApiKey || !supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing required environment variables');
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing required Supabase environment variables');
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -118,36 +124,25 @@ Din uppgift:
 
 Håll tonen varm, insiktsfull och framåtblickande.`;
 
-    console.log('Sending prompt to OpenAI...');
+    console.log('Sending prompt to AI service...');
 
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'Du är en erfaren mentor och coach för offentliga personer. Du ger insiktsfulla, varm och konstruktiva analyser baserat på självskattningar.' 
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
+    // Call AI service with fallback
+    const systemPrompt = 'Du är en erfaren mentor och coach för offentliga personer. Du ger insiktsfulla, varm och konstruktiva analyser baserat på självskattningar.';
+
+    const aiResponse = await aiService.generateResponse([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: prompt }
+    ], {
+      maxTokens: 1000,
+      temperature: 0.7,
+      model: 'gpt-4o-mini'
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} ${errorData}`);
+    if (!aiResponse.success) {
+      throw new Error('AI-analys misslyckades: ' + aiResponse.error);
     }
 
-    const aiResponse = await response.json();
-    const analysis = aiResponse.choices[0].message.content;
+    const analysis = aiResponse.content;
 
     console.log('Generated overall assessment successfully');
 

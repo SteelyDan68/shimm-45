@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { aiService } from '../_shared/ai-service.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -39,29 +40,20 @@ serve(async (req) => {
     - Konkret och hjälpsamt
     - Anpassat till coaching-miljön`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: messageContent }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      }),
+    const aiResponse = await aiService.generateResponse([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: messageContent }
+    ], {
+      maxTokens: 500,
+      temperature: 0.7,
+      model: 'gpt-4o-mini'
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+    if (!aiResponse.success) {
+      throw new Error('AI-tjänst misslyckades: ' + aiResponse.error);
     }
 
-    const data = await response.json();
-    const aiSuggestion = data.choices[0].message.content;
+    const aiSuggestion = aiResponse.content;
 
     return new Response(JSON.stringify({ aiSuggestion }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
