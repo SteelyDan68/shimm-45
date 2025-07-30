@@ -99,28 +99,20 @@ export function buildLovableAIPrompt(clientContext: any, assessmentData: string,
 
   const promptTemplate = `${baseSystemPrompt}
 
-Klienten du analyserar är en offentlig person med följande profil:
-
+Här är klientens profil:
 - Primär roll: ${primaryRole}
 - Sekundär roll: ${secondaryRole}
 - Nisch: ${niche}
 - Kreativa styrkor: ${strengths}
-- Upplevda svagheter: ${challenges}
+- Upplevda svårigheter: ${challenges}
 - Aktiva plattformar: ${platforms}
 - Ålder: ${age}
 - Särskilda behov: ${specialNeeds}
 - Ort: ${location}
 - Pågående livsförändringar: ${ongoingChanges}
 
-Utifrån detta ska du tolka följande självskattning:
-
-${assessmentData}
-
-Gör:
-1. En reflektion över vad som framstår som mest akut
-2. Identifiera mönster
-3. Skapa ett åtgärdsförslag i 2–3 konkreta steg
-4. Använd en varm, professionell och personlig ton`;
+Här är deras självskattning:
+${assessmentData}`;
 
   return promptTemplate;
 }

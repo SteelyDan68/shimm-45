@@ -45,12 +45,12 @@ ${assessmentText}
 
 ${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.comments}` : ''}`;
 
-    // Build AI prompt using Lovable template
+    // Build AI prompt using Lovable template with the new coaching prompt
     const systemPrompt = await buildAIPromptWithLovableTemplate(
       assessmentData.client_id,
       supabase,
       fullAssessmentData,
-      'Du är en professionell mentor som hjälper offentliga personer att identifiera och övervinna hinder. Du ger konkreta, genomförbara råd med en varm och stödjande ton.'
+      'Du är mentor åt en offentlig person. Klienten har gjort en självskattning där de visar hinder i sitt liv. Ta hänsyn till klientens yrkesroll, plattformar, styrkor och utmaningar när du svarar.\n\nGör följande:\n1. Reflektera över klientens aktuella situation.\n2. Identifiera 2–3 hinder som framstår som viktiga att arbeta med.\n3. Ge en konkret, handlingsbar åtgärdsplan i 2–3 steg.\n4. Håll tonen varm, empatisk och professionell.'
     );
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
