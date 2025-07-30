@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ClientProfileEditor } from "./ClientProfileEditor";
+import { ClientStatsOverview } from "./ClientStatsOverview";
 
 interface Client {
   id: string;
@@ -166,6 +167,9 @@ export function ClientList() {
 
   return (
     <div className="space-y-6">
+      {/* Stats overview */}
+      <ClientStatsOverview />
+      
       {/* Header with stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
