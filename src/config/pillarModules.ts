@@ -171,61 +171,60 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
     color: '#8B5CF6',
     questions: [
       {
-        key: 'unique_strengths',
-        text: 'Hur väl känner du dina unika styrkor?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.5
-      },
-      {
-        key: 'passion_alignment',
-        text: 'Hur väl matchar ditt arbete dina passioner?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'drive_and_focus',
+        text: 'Jag har stark drivkraft och fokus.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.4
       },
       {
-        key: 'natural_abilities',
-        text: 'Hur väl utnyttjar du dina naturliga talanger?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'creativity_ideas',
+        text: 'Jag är kreativ och kommer på nya idéer.',
+        type: 'slider',
+        min: 0,
+        max: 100,
+        weight: 1.5
+      },
+      {
+        key: 'idea_to_action',
+        text: 'Jag kan snabbt omsätta idéer i handling.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.3
       },
       {
-        key: 'flow_state',
-        text: 'Hur ofta hamnar du i flow när du arbetar?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'unique_voice',
+        text: 'Jag har en unik röst eller stil.',
+        type: 'slider',
+        min: 0,
+        max: 100,
         weight: 1.2
       },
       {
-        key: 'talent_recognition',
-        text: 'Hur väl erkänns dina talanger av andra?',
-        type: 'scale',
-        min: 1,
-        max: 10,
+        key: 'creativity_usage',
+        text: 'Hur använder du din kreativitet idag?',
+        type: 'text',
         weight: 1.0
       }
     ],
     scoreCalculation: (answers) => {
       const weights = {
-        unique_strengths: 1.5,
-        passion_alignment: 1.4,
-        natural_abilities: 1.3,
-        flow_state: 1.2,
-        talent_recognition: 1.0
+        drive_and_focus: 1.4,
+        creativity_ideas: 1.5,
+        idea_to_action: 1.3,
+        unique_voice: 1.2
       };
 
       let totalScore = 0;
       let totalWeight = 0;
 
       Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined) {
-          totalScore += answers[key] * weight;
+        if (answers[key] !== undefined && typeof answers[key] === 'number') {
+          // Convert 0-100 slider to 1-10 scale
+          const scaledScore = (answers[key] / 100) * 10;
+          totalScore += scaledScore * weight;
           totalWeight += weight;
         }
       });
@@ -233,9 +232,15 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
       return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
     },
     insightGeneration: (answers, score) => ({
-      untapped_potential: Object.entries(answers).filter(([_, value]) => value <= 5).map(([key]) => key),
+      talent_strengths: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value >= 80)
+        .map(([key]) => key),
+      development_areas: Object.entries(answers)
+        .filter(([key, value]) => typeof value === 'number' && value <= 50)
+        .map(([key]) => key),
       talent_utilization: score >= 7 ? 'high' : score >= 5 ? 'moderate' : 'low',
-      alignment_score: answers.passion_alignment || 0
+      creativity_application: answers.creativity_usage || '',
+      overall_talent_level: score >= 8 ? 'exceptional' : score >= 6 ? 'strong' : score >= 4 ? 'developing' : 'emerging'
     })
   },
 
