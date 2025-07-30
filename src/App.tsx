@@ -10,6 +10,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
 import { Administration } from "./pages/Administration";
+import { CoachDashboardPage } from "./pages/CoachDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/clients" element={<AllClients />} />
+        <Route path="/coach" element={<CoachDashboardPage />} />
         <Route path="/client/:clientId" element={<ClientProfile />} />
         <Route path="/admin" element={<Administration />} />
         <Route path="/auth" element={<Auth />} />

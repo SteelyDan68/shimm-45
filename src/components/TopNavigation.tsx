@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Klienter", url: "/clients", icon: Users },
-  { title: "Analys", url: "/analytics", icon: TrendingUp },
+  { title: "Coach", url: "/coach", icon: TrendingUp },
   { title: "Rapporter", url: "/reports", icon: FileText },
 ];
 
