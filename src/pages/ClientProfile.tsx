@@ -25,6 +25,7 @@ import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessm
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
+import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
 
 interface Client {
   id: string;
@@ -224,8 +225,9 @@ export const ClientProfile = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Översikt</TabsTrigger>
+          <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
           <TabsTrigger value="data">Data & Insights</TabsTrigger>
           <TabsTrigger value="tasks">Uppgifter</TabsTrigger>
           <TabsTrigger value="development">Utveckling</TabsTrigger>
@@ -334,6 +336,15 @@ export const ClientProfile = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Five Pillars Tab */}
+        <TabsContent value="pillars" className="space-y-6">
+          <ModularPillarDashboard 
+            clientId={clientId!} 
+            clientName={client.name} 
+            isCoachView={true}
+          />
         </TabsContent>
 
         {/* Data & Insights Tab */}

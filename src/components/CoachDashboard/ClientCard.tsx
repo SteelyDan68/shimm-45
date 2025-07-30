@@ -11,12 +11,14 @@ import {
   ArrowRight,
   Brain,
   Target,
-  Calendar
+  Calendar,
+  Star
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import type { ClientPriority, ClientIssue } from '@/hooks/useCoachDashboard';
 import { CapacityBarometer } from '@/components/CapacityBarometer';
+import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 
 interface ClientCardProps {
   client: ClientPriority;
@@ -55,6 +57,10 @@ const getVelocityColor = (rank: number) => {
 
 export function ClientCard({ client }: ClientCardProps) {
   const navigate = useNavigate();
+  const { getActivatedPillars, generateHeatmapData } = useFivePillarsModular(client.id);
+  
+  const activatedPillars = getActivatedPillars();
+  const heatmapData = generateHeatmapData();
 
   const highestSeverityIssue = client.issues.reduce((highest, issue) => {
     const severityOrder = { low: 1, medium: 2, high: 3 };
@@ -175,6 +181,32 @@ export function ClientCard({ client }: ClientCardProps) {
                     <span className="text-xs font-medium w-8">{score}/10</span>
                   </div>
                 ))}
+            </div>
+          </div>
+        )}
+
+        {/* Five Pillars Status */}
+        {activatedPillars.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium flex items-center gap-1">
+              <Star className="h-3 w-3" />
+              Five Pillars ({activatedPillars.length}/5 aktiva)
+            </h4>
+            <div className="grid grid-cols-2 gap-1">
+              {heatmapData.slice(0, 4).map((pillar) => (
+                <div key={pillar.pillar_key} className="flex items-center gap-1 text-xs">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: pillar.color_code }} />
+                  <span className="flex-1 truncate">{pillar.name}</span>
+                  {pillar.score > 0 && (
+                    <span className="font-medium">{pillar.score.toFixed(1)}</span>
+                  )}
+                </div>
+              ))}
+              {heatmapData.length > 4 && (
+                <div className="text-xs text-muted-foreground col-span-2 text-center">
+                  +{heatmapData.length - 4} fler...
+                </div>
+              )}
             </div>
           </div>
         )}

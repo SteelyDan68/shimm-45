@@ -202,7 +202,13 @@ export const useFivePillarsModular = (clientId?: string) => {
             title: `${pillarKey} Assessment AI-Analys`,
             details: aiResponse.analysis,
             ai_generated: true,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            metadata: {
+              pillar_type: pillarKey,
+              pillar_name: pillarKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              assessment_score: calculatedScore,
+              assessment_id: assessmentResult.id
+            }
           });
       }
       
