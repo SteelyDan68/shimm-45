@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ArrowLeft } from 'lucide-react';
 import { PillarKey } from '@/types/fivePillarsModular';
 import { PILLAR_MODULES } from '@/config/pillarModules';
@@ -35,6 +36,8 @@ export const ModularPillarAssessment = ({
     pillarConfig.questions.forEach(q => {
       if (q.type === 'scale' || q.type === 'slider') {
         defaultAnswers[q.key] = Math.ceil(((q.max || 10) + (q.min || 1)) / 2);
+      } else if (q.type === 'multiple_choice' && q.options) {
+        defaultAnswers[q.key] = q.options[0];
       } else {
         defaultAnswers[q.key] = '';
       }
@@ -134,6 +137,38 @@ export const ModularPillarAssessment = ({
                     {question.type === 'slider' ? `${question.max || 100}%` : `Hög (${question.max || 10})`}
                   </span>
                 </div>
+                {/* Visa beskrivande text för hinder (self_care) */}
+                {pillarKey === 'self_care' && question.max === 10 && (
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Inget hinder</span>
+                    <span>Stort hinder</span>
+                  </div>
+                )}
+                {/* Visa beskrivande text för möjligheter (self_care) */}
+                {pillarKey === 'self_care' && question.max === 5 && (
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Mycket svårt</span>
+                    <span>Enkelt & naturligt</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {question.type === 'multiple_choice' && question.options && (
+              <div className="space-y-2">
+                <RadioGroup
+                  value={answers[question.key] || question.options[0]}
+                  onValueChange={(value) => handleAnswerChange(question.key, value)}
+                >
+                  {question.options.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option} id={`${question.key}-${option}`} />
+                      <Label htmlFor={`${question.key}-${option}`} className="capitalize">
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
               </div>
             )}
 

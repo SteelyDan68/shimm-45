@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAssessmentEngine } from '@/hooks/useAssessmentEngine';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 import { DynamicAssessmentForm } from '@/components/AssessmentEngine/DynamicAssessmentForm';
-import { ModularInsightAssessment } from './ModularInsightAssessment';
+
 import { ArrowLeft, TrendingUp, Clock } from 'lucide-react';
 
 interface PillarDashboardProps {
@@ -18,20 +18,10 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
   const { formDefinitions, assignments, assessmentRounds, getLatestAssessment } = useAssessmentEngine(clientId);
   const { pillarDefinitions, getActivatedPillars } = useFivePillarsModular(clientId);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
-  const [showSelfCareAssessment, setShowSelfCareAssessment] = useState(false);
+  
   const activatedPillars = getActivatedPillars();
   const selfCarePillar = pillarDefinitions.find(p => p.pillar_key === 'self_care');
   
-  // Show self-care assessment if selected
-  if (showSelfCareAssessment) {
-    return (
-      <ModularInsightAssessment
-        clientId={clientId}
-        clientName={clientName}
-        onBack={() => setShowSelfCareAssessment(false)}
-      />
-    );
-  }
   
   if (selectedForm) {
     const formDefinition = formDefinitions.find(f => f.id === selectedForm);
@@ -86,12 +76,9 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
             <p className="text-sm text-muted-foreground">{selfCarePillar.description}</p>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={() => setShowSelfCareAssessment(true)}
-              className="w-full"
-            >
-              Gör självskattning
-            </Button>
+            <p className="text-sm text-muted-foreground mb-2">
+              Den nya självskattningen är nu integrerad i Five Pillars-systemet. Gå till Five Pillars för att göra din självskattning.
+            </p>
           </CardContent>
         </Card>
       )}

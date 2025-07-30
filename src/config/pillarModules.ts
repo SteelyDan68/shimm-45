@@ -1,95 +1,119 @@
 import { PillarModuleConfig, PillarKey } from '@/types/fivePillarsModular';
 
-// Prioriteringsordning för pillars (Skills först, Self Care sist)
+// Prioriteringsordning för pillars (Self Care först för att visa självskattning direkt)
 export const PILLAR_PRIORITY_ORDER: PillarKey[] = [
+  'self_care',
   'skills',
   'talent', 
   'brand',
-  'economy',
-  'self_care'
+  'economy'
 ];
 
 // Define questions and scoring logic for each pillar module
 export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
   self_care: {
     key: 'self_care',
-    name: 'Self Care',
-    description: 'Fysisk och mental hälsa, vila och återhämtning',
-    icon: '💆‍♀️',
+    name: 'Självskattning med AI-analys',
+    description: 'Bedöm dina hinder inom 13 områden och få personlig AI-coaching baserat på dina svar. Inkluderar hinder, funktionstillgång, möjligheter och relationsstöd.',
+    icon: '🧠',
     color: '#10B981',
     questions: [
-      {
-        key: 'sleep_quality',
-        text: 'Hur väl sover du nattetid?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.2
-      },
-      {
-        key: 'stress_level',
-        text: 'Hur stressad känner du dig i vardagen?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.3
-      },
-      {
-        key: 'exercise_frequency',
-        text: 'Hur ofta motionerar du per vecka?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.0
-      },
-      {
-        key: 'nutrition_quality',
-        text: 'Hur nöjd är du med dina matvanor?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.0
-      },
-      {
-        key: 'work_life_balance',
-        text: 'Hur balanserat känns ditt liv mellan arbete och vila?',
-        type: 'scale',
-        min: 1,
-        max: 10,
-        weight: 1.5
-      }
+      // Hinder (slider 1-10)
+      { key: 'mediestress', text: 'Mediestress', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'social_media_press', text: 'Sociala medier-press', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'kritik_hat', text: 'Kritik och hat', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'prestationsangest', text: 'Prestationsångest', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'tidsbrist', text: 'Tidsbrist', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'balans_arbete_privatliv', text: 'Balans arbete/privatliv', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'ekonomisk_oro', text: 'Ekonomisk oro', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'relationsproblem', text: 'Relationsproblem', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'halsoproblem', text: 'Hälsoproblem', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'sjalvkansla', text: 'Självkänsla', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'perfektionism', text: 'Perfektionism', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'kontrollbehov', text: 'Kontrollbehov', type: 'slider', min: 1, max: 10, weight: 1 },
+      { key: 'ensamhet', text: 'Ensamhet', type: 'slider', min: 1, max: 10, weight: 1 },
+      
+      // Funktionell tillgång (multiple_choice: ja/nej/ibland)
+      { key: 'mat_access', text: 'Kan du laga eller äta bra mat?', type: 'multiple_choice', options: ['ja', 'nej', 'ibland'], weight: 0.75 },
+      { key: 'sovplats_access', text: 'Har du en trygg plats att sova?', type: 'multiple_choice', options: ['ja', 'nej', 'ibland'], weight: 0.75 },
+      { key: 'hygien_access', text: 'Har du tillgång till dusch eller bad?', type: 'multiple_choice', options: ['ja', 'nej', 'ibland'], weight: 0.75 },
+      { key: 'kommunikation_access', text: 'Har du tillgång till internet och telefon?', type: 'multiple_choice', options: ['ja', 'nej', 'ibland'], weight: 0.75 },
+      
+      // Subjektiva möjligheter (slider 1-5)
+      { key: 'be_om_hjalp', text: 'Hur lätt är det för dig att be om hjälp?', type: 'slider', min: 1, max: 5, weight: 0.5 },
+      { key: 'traning_rorelse', text: 'Hur ofta kan du träna eller röra på dig?', type: 'slider', min: 1, max: 5, weight: 0.5 },
+      { key: 'energi_meddelanden', text: 'Hur ofta har du energi att svara på meddelanden eller mejl?', type: 'slider', min: 1, max: 5, weight: 0.5 },
+      { key: 'lasa_information', text: 'Hur ofta har du möjlighet att läsa eller ta in längre information?', type: 'slider', min: 1, max: 5, weight: 0.5 },
+      
+      // Relationer (multiple_choice: ja/nej)
+      { key: 'prata_regelbundet', text: 'Har du någon du kan prata med regelbundet?', type: 'multiple_choice', options: ['ja', 'nej'], weight: 0.25 },
+      { key: 'familj_vanner', text: 'Har du kontakt med någon familjemedlem eller nära vän?', type: 'multiple_choice', options: ['ja', 'nej'], weight: 0.25 },
+      
+      // Kommentarer
+      { key: 'comments', text: 'Kommentarer (valfritt)', type: 'text', weight: 0 }
     ],
     scoreCalculation: (answers) => {
-      const weights = {
-        sleep_quality: 1.2,
-        stress_level: 1.3, // Inverted score (high stress = low score)
-        exercise_frequency: 1.0,
-        nutrition_quality: 1.0,
-        work_life_balance: 1.5
-      };
-
       let totalScore = 0;
       let totalWeight = 0;
 
-      Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined) {
-          let score = answers[key];
-          // Invert stress level (high stress = low wellness)
-          if (key === 'stress_level') {
-            score = 11 - score;
-          }
-          totalScore += score * weight;
-          totalWeight += weight;
+      // Hinder score (lägre är bättre, så vi inverterar)
+      const hinderKeys = ['mediestress', 'social_media_press', 'kritik_hat', 'prestationsangest', 'tidsbrist', 'balans_arbete_privatliv', 'ekonomisk_oro', 'relationsproblem', 'halsoproblem', 'sjalvkansla', 'perfektionism', 'kontrollbehov', 'ensamhet'];
+      const hinderScores = hinderKeys.map(key => typeof answers[key] === 'number' ? answers[key] : 5);
+      if (hinderScores.length > 0) {
+        const avgHinder = hinderScores.reduce((a, b) => a + b, 0) / hinderScores.length;
+        const hinderScore = (10 - avgHinder) / 10;
+        totalScore += hinderScore * 0.4;
+        totalWeight += 0.4;
+      }
+
+      // Functional access score
+      const functionalKeys = ['mat_access', 'sovplats_access', 'hygien_access', 'kommunikation_access'];
+      const functionalValues = functionalKeys.map(key => answers[key] || 'ja');
+      const yesCount = functionalValues.filter(v => v === 'ja').length;
+      const functionalScore = yesCount / functionalValues.length;
+      totalScore += functionalScore * 0.3;
+      totalWeight += 0.3;
+
+      // Opportunities score
+      const oppKeys = ['be_om_hjalp', 'traning_rorelse', 'energi_meddelanden', 'lasa_information'];
+      const oppValues = oppKeys.map(key => typeof answers[key] === 'number' ? answers[key] : 3);
+      if (oppValues.length > 0) {
+        const avgOpp = oppValues.reduce((a, b) => a + b, 0) / oppValues.length;
+        const oppScore = avgOpp / 5;
+        totalScore += oppScore * 0.2;
+        totalWeight += 0.2;
+      }
+
+      // Relationship support score
+      const relKeys = ['prata_regelbundet', 'familj_vanner'];
+      const relValues = relKeys.map(key => answers[key] || 'ja');
+      const relYesCount = relValues.filter(v => v === 'ja').length;
+      const relScore = relYesCount / relValues.length;
+      totalScore += relScore * 0.1;
+      totalWeight += 0.1;
+
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) : 5;
+    },
+    insightGeneration: (answers, score) => {
+      const criticalAreas = [];
+      const strongAreas = [];
+      
+      // Analysera hinder
+      const hinderKeys = ['mediestress', 'social_media_press', 'kritik_hat', 'prestationsangest', 'tidsbrist', 'balans_arbete_privatliv', 'ekonomisk_oro', 'relationsproblem', 'halsoproblem', 'sjalvkansla', 'perfektionism', 'kontrollbehov', 'ensamhet'];
+      hinderKeys.forEach(key => {
+        const value = answers[key];
+        if (typeof value === 'number') {
+          if (value >= 8) criticalAreas.push(key);
+          if (value <= 3) strongAreas.push(key);
         }
       });
-
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
-    },
-    insightGeneration: (answers, score) => ({
-      critical_areas: Object.entries(answers).filter(([_, value]) => value <= 3).map(([key]) => key),
-      strong_areas: Object.entries(answers).filter(([_, value]) => value >= 8).map(([key]) => key),
-      overall_wellness: score >= 7 ? 'strong' : score >= 5 ? 'moderate' : 'needs_attention'
-    })
+      
+      return {
+        criticalAreas,
+        strongAreas,
+        overallStatus: score >= 7 ? 'strong' : score >= 5 ? 'moderate' : 'needs_attention'
+      };
+    }
   },
 
   skills: {
