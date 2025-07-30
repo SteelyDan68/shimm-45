@@ -21,6 +21,8 @@ import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
+import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
+import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
 
 interface Client {
   id: string;
@@ -300,6 +302,12 @@ export const ClientProfile = () => {
 
       {/* Client Path Timeline */}
       <PathTimeline clientId={clientId!} clientName={client.name} />
+
+      {/* Client Tasks */}
+      <ClientTaskList clientId={clientId!} clientName={client.name} />
+
+      {/* Task Scheduler for Coaches */}
+      <TaskScheduler clientId={clientId!} clientName={client.name} />
 
       {/* Summary Stats */}
       <Card>

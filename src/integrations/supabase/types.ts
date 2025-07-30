@@ -103,6 +103,7 @@ export type Database = {
           tiktok_handle: string | null
           updated_at: string
           user_id: string
+          velocity_score: number | null
           youtube_channel: string | null
         }
         Insert: {
@@ -127,6 +128,7 @@ export type Database = {
           tiktok_handle?: string | null
           updated_at?: string
           user_id: string
+          velocity_score?: number | null
           youtube_channel?: string | null
         }
         Update: {
@@ -151,6 +153,7 @@ export type Database = {
           tiktok_handle?: string | null
           updated_at?: string
           user_id?: string
+          velocity_score?: number | null
           youtube_channel?: string | null
         }
         Relationships: []
@@ -366,6 +369,76 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      tasks: {
+        Row: {
+          ai_generated: boolean
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          deadline: string | null
+          description: string | null
+          id: string
+          priority: string
+          source_path_entry_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          priority?: string
+          source_path_entry_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          priority?: string
+          source_path_entry_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_source_path_entry_id_fkey"
+            columns: ["source_path_entry_id"]
+            isOneToOne: false
+            referencedRelation: "path_entries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
