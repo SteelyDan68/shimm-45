@@ -27,6 +27,7 @@ import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
+import { CalendarModule } from '@/components/Calendar/CalendarModule';
 
 interface Client {
   id: string;
@@ -226,8 +227,9 @@ export const ClientProfile = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Översikt</TabsTrigger>
+          <TabsTrigger value="calendar">Kalender</TabsTrigger>
           <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
           <TabsTrigger value="data">Data & Insights</TabsTrigger>
           <TabsTrigger value="tasks">Uppgifter</TabsTrigger>
@@ -337,6 +339,16 @@ export const ClientProfile = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Calendar Tab */}
+        <TabsContent value="calendar" className="space-y-6">
+          <CalendarModule 
+            clientId={clientId!} 
+            clientName={client.name} 
+            isCoachView={true}
+            showNotifications={true}
+          />
         </TabsContent>
 
         {/* Five Pillars Tab */}
