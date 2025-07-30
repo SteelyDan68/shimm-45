@@ -27,7 +27,8 @@ export const ModularPillarDashboard = ({
     pillarDefinitions, 
     getActivatedPillars, 
     getLatestAssessment, 
-    generateHeatmapData 
+    generateHeatmapData,
+    refreshData
   } = useFivePillarsModular(clientId);
   
   const [selectedPillar, setSelectedPillar] = useState<PillarKey | null>(null);
@@ -43,7 +44,10 @@ export const ModularPillarDashboard = ({
         <ModularPillarAssessment
           clientId={clientId}
           pillarKey={selectedPillar}
-          onComplete={() => setSelectedPillar(null)}
+          onComplete={() => {
+            refreshData(); // Refresh heatmap data after assessment
+            setSelectedPillar(null);
+          }}
           onBack={() => setSelectedPillar(null)}
         />
       </div>
@@ -171,10 +175,27 @@ export const ModularPillarDashboard = ({
 
                         {/* AI Analysis Preview */}
                         {latestAssessment.ai_analysis && (
-                          <div className="p-3 bg-muted rounded text-sm">
+                          <div 
+                            className="p-3 bg-muted rounded text-sm cursor-pointer hover:bg-muted/80 transition-colors"
+                            onClick={() => {
+                              // Open dialog or expand to show full text
+                              const dialog = document.createElement('div');
+                              dialog.innerHTML = `
+                                <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="this.remove()">
+                                  <div class="bg-white rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
+                                    <h3 class="text-lg font-semibold mb-4">AI-analys för ${pillarConfig.name}</h3>
+                                    <div class="text-sm whitespace-pre-wrap">${latestAssessment.ai_analysis}</div>
+                                    <button onclick="this.closest('.fixed').remove()" class="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90">Stäng</button>
+                                  </div>
+                                </div>
+                              `;
+                              document.body.appendChild(dialog);
+                            }}
+                          >
                             <p className="line-clamp-3">
                               {latestAssessment.ai_analysis.substring(0, 150)}...
                             </p>
+                            <p className="text-xs text-muted-foreground mt-1">Klicka för att läsa hela analysen</p>
                           </div>
                         )}
                       </div>

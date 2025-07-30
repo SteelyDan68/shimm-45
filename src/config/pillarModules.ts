@@ -13,9 +13,9 @@ export const PILLAR_PRIORITY_ORDER: PillarKey[] = [
 export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
   self_care: {
     key: 'self_care',
-    name: 'Självskattning med AI-analys',
+    name: 'Self Care',
     description: 'Bedöm dina hinder inom 13 områden och få personlig AI-coaching baserat på dina svar. Inkluderar hinder, funktionstillgång, möjligheter och relationsstöd.',
-    icon: '🧠',
+    icon: '💚',
     color: '#10B981',
     questions: [
       // Hinder (slider 1-10)
