@@ -7,37 +7,24 @@ import { useToast } from '@/components/ui/use-toast';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { toast } = useToast();
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        toast({
-          title: "Registrering lyckades",
-          description: "Kontrollera din e-post för verifieringslänk",
-        });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        toast({
-          title: "Inloggning lyckades",
-          description: "Välkommen tillbaka!",
-        });
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      toast({
+        title: "Inloggning lyckades",
+        description: "Välkommen tillbaka!",
+      });
     } catch (error: any) {
       toast({
         title: "Fel",
@@ -52,16 +39,13 @@ export const AuthForm = () => {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>{isSignUp ? 'Registrera konto' : 'Logga in'}</CardTitle>
+        <CardTitle>Logga in</CardTitle>
         <CardDescription>
-          {isSignUp 
-            ? 'Skapa ett nytt konto för att komma igång' 
-            : 'Logga in på ditt konto'
-          }
+          Logga in på ditt konto
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <Input
             type="email"
             placeholder="E-post"
@@ -77,15 +61,7 @@ export const AuthForm = () => {
             required
           />
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Laddar...' : (isSignUp ? 'Registrera' : 'Logga in')}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full"
-            onClick={() => setIsSignUp(!isSignUp)}
-          >
-            {isSignUp ? 'Har redan konto? Logga in' : 'Skapa nytt konto'}
+            {isLoading ? 'Laddar...' : 'Logga in'}
           </Button>
         </form>
       </CardContent>

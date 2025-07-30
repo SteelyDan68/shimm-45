@@ -14,7 +14,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
-  UserPlus, 
   Building2, 
   Shield, 
   Edit3, 
@@ -25,6 +24,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AdminUserCreation } from "./AdminUserCreation";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
 interface Organization {
@@ -228,10 +228,7 @@ export function UserManagement() {
           <h2 className="text-2xl font-bold">Användarhantering</h2>
           <p className="text-muted-foreground">Hantera användare, roller och organisationer</p>
         </div>
-        <Button>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Lägg till användare
-        </Button>
+        <AdminUserCreation onUserCreated={fetchUsers} />
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
