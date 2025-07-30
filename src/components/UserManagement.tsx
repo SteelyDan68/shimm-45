@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AdminUserCreation } from "./AdminUserCreation";
+import { ClientList } from "./ClientManagement/ClientList";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
 interface Organization {
@@ -237,6 +238,10 @@ export function UserManagement() {
             <Users className="h-4 w-4" />
             Användare ({users.length})
           </TabsTrigger>
+          <TabsTrigger value="clients" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Klienter
+          </TabsTrigger>
           <TabsTrigger value="organizations" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             Organisationer ({organizations.length})
@@ -348,6 +353,11 @@ export function UserManagement() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Clients Tab */}
+        <TabsContent value="clients">
+          <ClientList />
         </TabsContent>
 
         {/* Organizations Tab */}
