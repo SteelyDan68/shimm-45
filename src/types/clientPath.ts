@@ -1,4 +1,4 @@
-export type PathEntryType = 'assessment' | 'recommendation' | 'task_completed' | 'check-in' | 'summary' | 'action' | 'note';
+export type PathEntryType = 'assessment' | 'recommendation' | 'task_completed' | 'check-in' | 'summary' | 'action' | 'note' | 'manual_note';
 export type PathEntryStatus = 'planned' | 'in_progress' | 'completed';
 export type PillarType = 'self_care' | 'skills' | 'talent' | 'brand' | 'economy';
 
@@ -10,9 +10,12 @@ export interface PathEntry {
   type: PathEntryType;
   title: string;
   details?: string;
+  content?: string;
   status: PathEntryStatus;
   linked_task_id?: string;
   ai_generated: boolean;
+  visible_to_client?: boolean;
+  created_by_role?: string;
   created_at: string;
   updated_at: string;
   metadata?: {
@@ -40,9 +43,12 @@ export interface CreatePathEntryData {
   type: PathEntryType;
   title: string;
   details?: string;
+  content?: string;
   status?: PathEntryStatus;
   linked_task_id?: string;
   ai_generated?: boolean;
+  visible_to_client?: boolean;
+  created_by_role?: string;
   metadata?: Record<string, any>;
 }
 

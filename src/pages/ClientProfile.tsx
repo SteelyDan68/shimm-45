@@ -21,6 +21,7 @@ import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
 import { DataCollectorWidget } from '@/components/DataCollectorWidget';
 import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
+import { ManualNoteForm } from '@/components/ClientPath/ManualNoteForm';
 import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
@@ -39,7 +40,7 @@ interface Client {
 export const ClientProfile = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, canManageUsers } = useAuth();
   const { toast } = useToast();
   
   const [client, setClient] = useState<Client | null>(null);
@@ -379,6 +380,13 @@ export const ClientProfile = () => {
 
         {/* Development Tab */}
         <TabsContent value="development" className="space-y-6">
+          {/* Manual Note Form for Admins/Managers */}
+          {canManageUsers() && (
+            <div className="mb-4">
+              <ManualNoteForm clientId={clientId!} />
+            </div>
+          )}
+          
           {/* Client Path Timeline */}
           <ClientPathTimeline clientId={clientId!} clientName={client.name} isCoachView={true} />
         </TabsContent>

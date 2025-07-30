@@ -66,7 +66,9 @@ export const useClientPath = (clientId?: string) => {
           created_by: user.id,
           timestamp: entryData.timestamp || new Date().toISOString(),
           status: entryData.status || 'planned',
-          ai_generated: entryData.ai_generated || false
+          ai_generated: entryData.ai_generated || false,
+          visible_to_client: entryData.visible_to_client || false,
+          created_by_role: entryData.created_by_role || 'user'
         }])
         .select()
         .single();

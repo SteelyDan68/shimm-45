@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Calendar, Clock, Filter, User, Brain, Target, Award, Building, DollarSign } from 'lucide-react';
+import { Calendar, Clock, Filter, User, Brain, Target, Award, Building, DollarSign, Shield, Eye } from 'lucide-react';
 import { useClientPath } from '@/hooks/useClientPath';
+import { useAuth } from '@/hooks/useAuth';
 import { PathEntry, TimelineEntry, PillarType, PathEntryType } from '@/types/clientPath';
 import { TimelineFilters } from './TimelineFilters';
 import { format } from 'date-fns';
@@ -32,6 +33,7 @@ const TYPE_CONFIG = {
   summary: { name: 'Summering', color: 'hsl(var(--border))' },
   action: { name: 'Åtgärd', color: 'hsl(var(--primary))' },
   note: { name: 'Anteckning', color: 'hsl(var(--muted))' },
+  manual_note: { name: 'Journalanteckning', color: 'hsl(var(--chart-1))' },
 };
 
 export const ClientPathTimeline = ({ 
@@ -40,11 +42,27 @@ export const ClientPathTimeline = ({
   isCoachView = false 
 }: ClientPathTimelineProps) => {
   const { entries, loading, filters, setFilters } = useClientPath(clientId);
+  const { canManageUsers } = useAuth();
   const [selectedEntry, setSelectedEntry] = useState<TimelineEntry | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   // Transform entries to timeline entries with pillar info and excerpts
-  const timelineEntries: TimelineEntry[] = entries.map(entry => {
+  // Filter based on user role and visibility settings
+  const filteredEntries = entries.filter(entry => {
+    // For manual notes, check visibility
+    if (entry.type === 'manual_note') {
+      // Admin/Manager can see all manual notes
+      if (canManageUsers()) {
+        return true;
+      }
+      // Client can only see notes marked as visible to client
+      return entry.visible_to_client === true;
+    }
+    // All other entry types are visible to everyone
+    return true;
+  });
+
+  const timelineEntries: TimelineEntry[] = filteredEntries.map(entry => {
     const pillarType = entry.metadata?.pillar_type as PillarType;
     const pillarInfo = pillarType ? {
       type: pillarType,
@@ -53,11 +71,12 @@ export const ClientPathTimeline = ({
       icon: PILLAR_CONFIG[pillarType]?.icon || '📋'
     } : undefined;
 
-    // Create short excerpt (80-100 chars)
-    const shortExcerpt = entry.details 
-      ? entry.details.length > 100 
-        ? entry.details.substring(0, 97) + '...'
-        : entry.details
+    // Create short excerpt (80-100 chars) - prefer content over details for manual notes
+    const textContent = entry.type === 'manual_note' ? entry.content || entry.details : entry.details;
+    const shortExcerpt = textContent 
+      ? textContent.length > 100 
+        ? textContent.substring(0, 97) + '...'
+        : textContent
       : 'Ingen beskrivning tillgänglig';
 
     return {
@@ -200,13 +219,33 @@ export const ClientPathTimeline = ({
                             {TYPE_CONFIG[entry.type]?.name || entry.type}
                           </Badge>
                           
-                          {/* AI generated indicator */}
-                          {entry.ai_generated && (
-                            <Badge variant="secondary" className="text-xs">
-                              <Brain className="h-3 w-3 mr-1" />
-                              AI
-                            </Badge>
-                          )}
+                           {/* AI generated indicator */}
+                           {entry.ai_generated && (
+                             <Badge variant="secondary" className="text-xs">
+                               <Brain className="h-3 w-3 mr-1" />
+                               AI
+                             </Badge>
+                           )}
+                           
+                           {/* Manual note visibility indicator */}
+                           {entry.type === 'manual_note' && canManageUsers() && (
+                             <Badge 
+                               variant={entry.visible_to_client ? "default" : "secondary"} 
+                               className="text-xs"
+                             >
+                               {entry.visible_to_client ? (
+                                 <>
+                                   <Eye className="h-3 w-3 mr-1" />
+                                   Delad
+                                 </>
+                               ) : (
+                                 <>
+                                   <Shield className="h-3 w-3 mr-1" />
+                                   Intern
+                                 </>
+                               )}
+                             </Badge>
+                           )}
                         </div>
                         
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -260,12 +299,29 @@ export const ClientPathTimeline = ({
                 <Badge variant="outline">
                   {TYPE_CONFIG[selectedEntry.type]?.name || selectedEntry.type}
                 </Badge>
-                {selectedEntry.ai_generated && (
-                  <Badge variant="secondary">
-                    <Brain className="h-3 w-3 mr-1" />
-                    AI-genererad
-                  </Badge>
-                )}
+                 {selectedEntry.ai_generated && (
+                   <Badge variant="secondary">
+                     <Brain className="h-3 w-3 mr-1" />
+                     AI-genererad
+                   </Badge>
+                 )}
+                 {selectedEntry.type === 'manual_note' && canManageUsers() && (
+                   <Badge 
+                     variant={selectedEntry.visible_to_client ? "default" : "secondary"}
+                   >
+                     {selectedEntry.visible_to_client ? (
+                       <>
+                         <Eye className="h-3 w-3 mr-1" />
+                         Synlig för klient
+                       </>
+                     ) : (
+                       <>
+                         <Shield className="h-3 w-3 mr-1" />
+                         Endast intern
+                       </>
+                     )}
+                   </Badge>
+                 )}
               </div>
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -281,13 +337,13 @@ export const ClientPathTimeline = ({
                 )}
               </div>
 
-              {selectedEntry.details && (
-                <div className="prose prose-sm max-w-none">
-                  <div className="whitespace-pre-wrap text-sm">
-                    {selectedEntry.details}
-                  </div>
-                </div>
-              )}
+               {(selectedEntry.content || selectedEntry.details) && (
+                 <div className="prose prose-sm max-w-none">
+                   <div className="whitespace-pre-wrap text-sm">
+                     {selectedEntry.content || selectedEntry.details}
+                   </div>
+                 </div>
+               )}
             </div>
           )}
         </DialogContent>

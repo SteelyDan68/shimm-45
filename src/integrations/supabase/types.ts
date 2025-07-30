@@ -580,8 +580,10 @@ export type Database = {
         Row: {
           ai_generated: boolean
           client_id: string
+          content: string | null
           created_at: string
           created_by: string
+          created_by_role: string | null
           details: string | null
           id: string
           linked_task_id: string | null
@@ -591,12 +593,15 @@ export type Database = {
           title: string
           type: string
           updated_at: string
+          visible_to_client: boolean
         }
         Insert: {
           ai_generated?: boolean
           client_id: string
+          content?: string | null
           created_at?: string
           created_by: string
+          created_by_role?: string | null
           details?: string | null
           id?: string
           linked_task_id?: string | null
@@ -606,12 +611,15 @@ export type Database = {
           title: string
           type: string
           updated_at?: string
+          visible_to_client?: boolean
         }
         Update: {
           ai_generated?: boolean
           client_id?: string
+          content?: string | null
           created_at?: string
           created_by?: string
+          created_by_role?: string | null
           details?: string | null
           id?: string
           linked_task_id?: string | null
@@ -621,6 +629,7 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          visible_to_client?: boolean
         }
         Relationships: [
           {

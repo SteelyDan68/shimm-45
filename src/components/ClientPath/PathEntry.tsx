@@ -35,7 +35,8 @@ const typeIcons: Record<PathEntryType, any> = {
   'check-in': Users,
   summary: Target,
   action: Target,
-  note: MessageSquare
+  note: MessageSquare,
+  manual_note: Edit3
 };
 
 const typeLabels: Record<PathEntryType, string> = {
@@ -45,7 +46,8 @@ const typeLabels: Record<PathEntryType, string> = {
   'check-in': 'Check-in',
   summary: 'Summering',
   action: 'Åtgärd',
-  note: 'Anteckning'
+  note: 'Anteckning',
+  manual_note: 'Journalanteckning'
 };
 
 const statusLabels: Record<PathEntryStatus, string> = {
