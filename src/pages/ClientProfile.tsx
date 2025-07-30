@@ -23,6 +23,7 @@ import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
+import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 
 interface Client {
   id: string;
@@ -308,6 +309,14 @@ export const ClientProfile = () => {
 
       {/* Task Scheduler for Coaches */}
       <TaskScheduler clientId={clientId!} clientName={client.name} />
+
+      {/* Analytics Dashboard */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Utvecklingsanalys</h2>
+        </div>
+        <AnalyticsDashboard clientId={clientId!} />
+      </div>
 
       {/* Summary Stats */}
       <Card>
