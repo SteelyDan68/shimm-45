@@ -12,6 +12,7 @@ import { Upload, FileText, File, Trash2, Plus, Brain } from 'lucide-react';
 import { useStefanTrainingData, TrainingDataFormData } from '@/hooks/useStefanTrainingData';
 import { useForm } from 'react-hook-form';
 import StefanTextAnalyzer from './StefanTextAnalyzer';
+import StefanKnowledgeBase from './StefanKnowledgeBase';
 
 const StefanTrainingData: React.FC = () => {
   const { data, loading, uploading, fetchTrainingData, addTrainingData, deleteTrainingData } = useStefanTrainingData();
@@ -102,10 +103,11 @@ const StefanTrainingData: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="add" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="add">Lägg till data</TabsTrigger>
               <TabsTrigger value="manage">Hantera data</TabsTrigger>
               <TabsTrigger value="analyze">Analysera</TabsTrigger>
+              <TabsTrigger value="knowledge">Kunskapsbas</TabsTrigger>
             </TabsList>
             
             <TabsContent value="add" className="space-y-4">
@@ -284,6 +286,10 @@ const StefanTrainingData: React.FC = () => {
 
             <TabsContent value="analyze">
               <StefanTextAnalyzer data={data} onAnalysisComplete={fetchTrainingData} />
+            </TabsContent>
+
+            <TabsContent value="knowledge">
+              <StefanKnowledgeBase />
             </TabsContent>
           </Tabs>
         </CardContent>
