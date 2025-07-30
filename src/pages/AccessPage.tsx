@@ -54,11 +54,13 @@ export const AccessPage = () => {
 
       toast({
         title: "Kod godkänd",
-        description: "Du har nu tillgång till registreringssidan.",
+        description: "Du omdirigeras till registreringssidan...",
       });
 
-      // Navigate to auth page
-      navigate('/auth');
+      // Force page reload to update access control
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1000);
     } catch (error: any) {
       console.error('Access code verification error:', error);
       toast({
