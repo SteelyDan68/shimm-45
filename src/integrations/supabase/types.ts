@@ -913,6 +913,60 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_email_logs: {
+        Row: {
+          client_email: string
+          client_id: string | null
+          created_at: string | null
+          email_id: string | null
+          error_message: string | null
+          id: string
+          sent_at: string | null
+          status: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Insert: {
+          client_email: string
+          client_id?: string | null
+          created_at?: string | null
+          email_id?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Update: {
+          client_email?: string
+          client_id?: string | null
+          created_at?: string | null
+          email_id?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          week_end_date?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_email_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "weekly_email_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       client_analytics_summary: {
