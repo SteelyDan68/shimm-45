@@ -100,13 +100,23 @@ export const ClientProfile = () => {
         .select('*')
         .eq('id', clientId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (clientError) {
         console.error('Error loading client:', clientError);
         toast({
           title: "Fel",
           description: "Kunde inte ladda klientdata",
+          variant: "destructive",
+        });
+        navigate('/');
+        return;
+      }
+
+      if (!clientData) {
+        toast({
+          title: "Klient hittades inte",
+          description: "Du har inte behörighet att se denna klient",
           variant: "destructive",
         });
         navigate('/');
