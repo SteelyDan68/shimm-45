@@ -24,6 +24,8 @@ import { CalendarEvent } from './CalendarEvent';
 import { AddEventForm } from './AddEventForm';
 import { NotificationSettings } from './NotificationSettings';
 import { CalendarExportImport } from './CalendarExportImport';
+import { AIPlanningDialog } from './AIPlanningDialog';
+import { useAIPlanning } from '@/hooks/useAIPlanning';
 
 export interface CalendarEventData {
   id: string;
@@ -75,6 +77,14 @@ export const CalendarModule = ({
   const [showAddForm, setShowAddForm] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showExportImport, setShowExportImport] = useState(false);
+  
+  // AI Planning integration
+  const { 
+    lastRecommendation, 
+    showPlanningDialog, 
+    dismissPlanningDialog, 
+    handlePlanCreated 
+  } = useAIPlanning(clientId);
 
   // Generate calendar dates for current view
   const calendarDates = useMemo(() => {
@@ -380,6 +390,18 @@ export const CalendarModule = ({
           onClose={() => setShowExportImport(false)}
           events={events}
           clientName={clientName}
+        />
+      )}
+
+      {/* AI Planning Dialog */}
+      {lastRecommendation && (
+        <AIPlanningDialog
+          isOpen={showPlanningDialog}
+          onClose={dismissPlanningDialog}
+          recommendation={lastRecommendation}
+          clientId={clientId!}
+          clientName={clientName || 'Klient'}
+          onPlanCreated={handlePlanCreated}
         />
       )}
     </div>
