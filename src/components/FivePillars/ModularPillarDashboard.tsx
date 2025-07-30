@@ -215,13 +215,16 @@ export const ModularPillarDashboard = ({
         </Card>
       )}
 
-      {/* Client Manager (for clients to see their activated pillars) */}
+      {/* Timeline Integration */}
       {!isCoachView && activatedPillars.length > 0 && (
-        <ModularPillarManager 
-          clientId={clientId} 
-          clientName={clientName} 
-          isCoachView={false}
-        />
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Min utvecklingsresa</h2>
+          <div className="bg-muted/30 rounded-lg p-1">
+            <p className="text-sm text-muted-foreground text-center py-2">
+              Detaljerad tidslinjevy finns under "Min resa" i huvudmenyn
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

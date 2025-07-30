@@ -1,5 +1,6 @@
-export type PathEntryType = 'assessment' | 'recommendation' | 'action' | 'note' | 'check-in';
+export type PathEntryType = 'assessment' | 'recommendation' | 'task_completed' | 'check-in' | 'summary' | 'action' | 'note';
 export type PathEntryStatus = 'planned' | 'in_progress' | 'completed';
+export type PillarType = 'self_care' | 'skills' | 'talent' | 'brand' | 'economy';
 
 export interface PathEntry {
   id: string;
@@ -14,14 +15,23 @@ export interface PathEntry {
   ai_generated: boolean;
   created_at: string;
   updated_at: string;
+  metadata?: {
+    pillar_type?: PillarType;
+    pillar_name?: string;
+    assessment_score?: number;
+    assessment_id?: string;
+    [key: string]: any;
+  };
 }
 
 export interface PathFilters {
   type?: PathEntryType[];
   status?: PathEntryStatus[];
+  pillar?: PillarType[];
   startDate?: Date;
   endDate?: Date;
   aiGenerated?: boolean;
+  daysPeriod?: number; // För senaste X dagar
 }
 
 export interface CreatePathEntryData {
@@ -33,4 +43,15 @@ export interface CreatePathEntryData {
   status?: PathEntryStatus;
   linked_task_id?: string;
   ai_generated?: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface TimelineEntry extends PathEntry {
+  pillarInfo?: {
+    type: PillarType;
+    name: string;
+    color: string;
+    icon: string;
+  };
+  shortExcerpt: string;
 }

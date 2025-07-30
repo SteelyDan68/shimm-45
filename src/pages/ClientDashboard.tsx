@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
-import { PathTimeline } from '@/components/ClientPath/PathTimeline';
+import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { CapacityBarometer } from '@/components/CapacityBarometer';
 import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
@@ -320,9 +320,9 @@ export const ClientDashboard = () => {
       <Tabs defaultValue="pillars" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
+          <TabsTrigger value="journey">Min resa</TabsTrigger>
           <TabsTrigger value="tasks">Mina Uppgifter</TabsTrigger>
           <TabsTrigger value="assessment">Self Assessment</TabsTrigger>
-          <TabsTrigger value="progress">Min Utveckling</TabsTrigger>
           <TabsTrigger value="analytics">Analys</TabsTrigger>
         </TabsList>
 
@@ -331,6 +331,16 @@ export const ClientDashboard = () => {
           <ModularPillarDashboard 
             clientId={clientProfile.id} 
             clientName={clientProfile.name} 
+            isCoachView={false}
+          />
+        </TabsContent>
+
+        
+        {/* Journey Tab */}
+        <TabsContent value="journey" className="space-y-6">
+          <ClientPathTimeline 
+            clientId={clientProfile.id} 
+            clientName={clientProfile.name}
             isCoachView={false}
           />
         </TabsContent>
@@ -405,11 +415,6 @@ export const ClientDashboard = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Progress Tab */}
-        <TabsContent value="progress" className="space-y-6">
-          <PathTimeline clientId={clientProfile.id} clientName={clientProfile.name} />
         </TabsContent>
 
         {/* Analytics Tab */}

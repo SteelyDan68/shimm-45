@@ -31,17 +31,21 @@ interface PathEntryProps {
 const typeIcons: Record<PathEntryType, any> = {
   assessment: FileText,
   recommendation: Brain,
+  task_completed: CheckCircle2,
+  'check-in': Users,
+  summary: Target,
   action: Target,
-  note: MessageSquare,
-  'check-in': Users
+  note: MessageSquare
 };
 
 const typeLabels: Record<PathEntryType, string> = {
   assessment: 'Bedömning',
   recommendation: 'Rekommendation',
+  task_completed: 'Genomfört',
+  'check-in': 'Check-in',
+  summary: 'Summering',
   action: 'Åtgärd',
-  note: 'Anteckning',
-  'check-in': 'Check-in'
+  note: 'Anteckning'
 };
 
 const statusLabels: Record<PathEntryStatus, string> = {
