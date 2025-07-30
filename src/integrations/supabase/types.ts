@@ -452,6 +452,123 @@ export type Database = {
         }
         Relationships: []
       }
+      data_deletion_requests: {
+        Row: {
+          admin_notes: string | null
+          approved_by: string | null
+          approved_date: string | null
+          completed_date: string | null
+          created_at: string | null
+          id: string
+          reason: string | null
+          request_date: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_by?: string | null
+          approved_date?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_by?: string | null
+          approved_date?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      data_export_requests: {
+        Row: {
+          completed_date: string | null
+          created_at: string | null
+          download_url: string | null
+          error_message: string | null
+          expires_at: string | null
+          file_size_bytes: number | null
+          id: string
+          request_date: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_date?: string | null
+          created_at?: string | null
+          download_url?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_date?: string | null
+          created_at?: string | null
+          download_url?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      gdpr_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          timestamp: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       message_preferences: {
         Row: {
           auto_ai_assistance: boolean
@@ -809,8 +926,11 @@ export type Database = {
           address: Json | null
           avatar_url: string | null
           bio: string | null
+          consent_timestamp: string | null
           created_at: string | null
+          data_retention_until: string | null
           date_of_birth: string | null
+          deletion_requested_at: string | null
           department: string | null
           email: string | null
           first_name: string | null
@@ -830,8 +950,11 @@ export type Database = {
           address?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          consent_timestamp?: string | null
           created_at?: string | null
+          data_retention_until?: string | null
           date_of_birth?: string | null
+          deletion_requested_at?: string | null
           department?: string | null
           email?: string | null
           first_name?: string | null
@@ -851,8 +974,11 @@ export type Database = {
           address?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          consent_timestamp?: string | null
           created_at?: string | null
+          data_retention_until?: string | null
           date_of_birth?: string | null
+          deletion_requested_at?: string | null
           department?: string | null
           email?: string | null
           first_name?: string | null
@@ -939,6 +1065,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_consent_records: {
+        Row: {
+          consent_given: boolean
+          consent_source: string
+          consent_timestamp: string | null
+          consent_type: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          ip_address: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          consent_given: boolean
+          consent_source: string
+          consent_timestamp?: string | null
+          consent_type: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          consent_given?: boolean
+          consent_source?: string
+          consent_timestamp?: string | null
+          consent_type?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
