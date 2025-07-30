@@ -69,7 +69,7 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
             <div className="flex justify-center gap-2 mt-2">
               <Badge variant="outline" className="text-xs">Instagram</Badge>
               <Badge variant="outline" className="text-xs">TikTok</Badge>
-              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700">YouTube (API-problem)</Badge>
+              <Badge variant="outline" className="text-xs">YouTube (Manuell)</Badge>
               <Badge variant="outline" className="text-xs">Facebook</Badge>
             </div>
           </div>
@@ -155,21 +155,11 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
             posts = stats?.uploads || daily?.uploads || 0;
             likes = stats?.likes || daily?.likes || 0;
             following = stats?.following || daily?.following || 0;
-          } else if (platform === 'youtube' && rawData) {
-            // YouTube data has different structure from fetchYouTubeData
-            if (rawData.statistics) {
-              // Direct YouTube API data
-              followers = parseInt(rawData.statistics.subscriberCount || '0');
-              posts = parseInt(rawData.statistics.videoCount || '0');
-              views = parseInt(rawData.statistics.viewCount || '0');
-            } else if (rawData.data?.statistics) {
-              // Social Blade YouTube data
-              const stats = rawData.data.statistics.total;
-              const daily = rawData.data.daily?.[0];
-              followers = stats?.subscribers || daily?.subscribers || 0;
-              posts = stats?.videos || daily?.videos || 0;
-              likes = stats?.likes || daily?.likes || 0;
-            }
+          } else if (platform === 'youtube') {
+            // YouTube data will only be manual input - no API processing
+            followers = data.subscribers || 0;
+            posts = data.videos || 0;
+            views = data.views || 0;
             following = 0; // YouTube doesn't have following concept
           }
           

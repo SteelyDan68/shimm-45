@@ -21,10 +21,6 @@ export const useDataCollector = () => {
     setIsCollecting(true);
     
     try {
-      console.log('Starting data collection for client:', clientId);
-      
-      console.log('Calling data-collector edge function...');
-      
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Request timeout efter 2 minuter')), 120000); // 2 minutes
@@ -35,27 +31,20 @@ export const useDataCollector = () => {
       });
       
       const { data, error } = await Promise.race([requestPromise, timeoutPromise]) as any;
-      console.log('Data collector response:', { data, error });
 
       if (error) {
-        console.error('Edge function error:', error);
         throw new Error(`Data collection fel: ${error.message}`);
       }
 
-      console.log('Checking data.success:', data?.success);
       if (!data?.success) {
-        console.error('Data collection failed:', data?.error);
         throw new Error(data?.error || 'Okänt fel vid datainsamling');
       }
 
       const result = data.result;
-      console.log('Data collection result:', result);
       
       const totalItems = (result?.collected_data?.news?.length || 0) + 
                         (result?.collected_data?.social_metrics?.length || 0) + 
                         (result?.collected_data?.web_scraping?.length || 0);
-      
-      console.log('Total items collected:', totalItems);
 
       toast({
         title: "Datainsamling klar",
@@ -63,7 +52,6 @@ export const useDataCollector = () => {
       });
 
       if (result?.errors?.length > 0) {
-        console.warn('Collection completed with errors:', result.errors);
         toast({
           title: "Varningar",
           description: `${result.errors.length} fel inträffade under insamlingen`,
@@ -74,12 +62,6 @@ export const useDataCollector = () => {
       return result;
 
     } catch (error: any) {
-      console.error('Error in data collection:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
       toast({
         title: "Fel vid datainsamling",
         description: error.message,

@@ -11,9 +11,7 @@ import {
   Brain,
   Search,
   Share2,
-  AlertTriangle,
-  Youtube,
-  Twitter
+  AlertTriangle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,8 +29,6 @@ export const ApiStatusChecker = () => {
   const [apis, setApis] = useState<ApiStatus[]>([
     { name: 'OpenAI API', icon: Brain, status: 'pending', message: 'Inte testad än' },
     { name: 'Gemini API', icon: Brain, status: 'pending', message: 'Inte testad än' },
-    { name: 'YouTube Data API', icon: Youtube, status: 'pending', message: 'Inte testad än' },
-    // { name: 'Twitter API', icon: Twitter, status: 'pending', message: 'Inte testad än' }, // REMOVED
     { name: 'Firecrawl API', icon: Globe, status: 'pending', message: 'Inte testad än' },
     { name: 'Google Search API', icon: Search, status: 'pending', message: 'Inte testad än' },
     { name: 'Social Blade API', icon: Share2, status: 'pending', message: 'Inte testad än' }
@@ -60,7 +56,7 @@ export const ApiStatusChecker = () => {
       // Test Gemini API via edge function
       await testGeminiApi();
       
-      // Test Data Collector APIs (includes Firecrawl, Google Search, Social Blade, YouTube)
+      // Test Data Collector APIs (includes Firecrawl, Google Search, Social Blade)
       await testDataCollectorApis();
       
     } catch (error) {
@@ -137,8 +133,6 @@ export const ApiStatusChecker = () => {
         updateApiStatus('Firecrawl API', 'error', `Fel: ${error.message}`, responseTime);
         updateApiStatus('Google Search API', 'error', `Fel: ${error.message}`, responseTime);
         updateApiStatus('Social Blade API', 'error', `Fel: ${error.message}`, responseTime);
-        updateApiStatus('YouTube Data API', 'error', `Fel: ${error.message}`, responseTime);
-        // updateApiStatus('Twitter API', 'error', `Fel: ${error.message}`, responseTime); // REMOVED
       } else if (data?.test_results) {
         // Update each API based on individual test results
         const results = data.test_results;
@@ -160,23 +154,15 @@ export const ApiStatusChecker = () => {
           results.social_blade?.message || 'Okänt fel', 
           responseTime
         );
-
-        updateApiStatus('YouTube Data API',
-          results.youtube_api?.success ? 'success' : 'error',
-          results.youtube_api?.message || 'Okänt fel',
-          responseTime
-        );
       } else {
         updateApiStatus('Firecrawl API', 'error', 'Oväntad respons från API', responseTime);
         updateApiStatus('Google Search API', 'error', 'Oväntad respons från API', responseTime);
         updateApiStatus('Social Blade API', 'error', 'Oväntad respons från API', responseTime);
-        updateApiStatus('YouTube Data API', 'error', 'Oväntad respons från API', responseTime);
       }
     } catch (error: any) {
       updateApiStatus('Firecrawl API', 'error', `Nätverksfel: ${error.message}`);
       updateApiStatus('Google Search API', 'error', `Nätverksfel: ${error.message}`);
       updateApiStatus('Social Blade API', 'error', `Nätverksfel: ${error.message}`);
-      updateApiStatus('YouTube Data API', 'error', `Nätverksfel: ${error.message}`);
     }
   };
 

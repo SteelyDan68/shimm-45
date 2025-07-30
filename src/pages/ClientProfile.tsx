@@ -46,10 +46,8 @@ export const ClientProfile = () => {
   const newsItems = getNewsMentions(cacheData);
   const socialMetrics = getSocialMetrics(cacheData);
   const sentimentData = cacheData?.filter(item => {
-    console.log('Checking cache item:', item.data_type, item.metadata?.original_data_type);
     return item.data_type === 'ai_analysis' && item.metadata?.original_data_type === 'sentiment_analysis';
   }) || [];
-  console.log('Filtered sentiment data:', sentimentData.length, sentimentData);
 
   useEffect(() => {
     if (clientId && user) {
@@ -67,7 +65,7 @@ export const ClientProfile = () => {
             filter: `client_id=eq.${clientId}`
           },
           (payload) => {
-            console.log('New cache data inserted:', payload);
+            
             // Reload data when new cache items are added
             loadClientData();
           }
@@ -107,10 +105,7 @@ export const ClientProfile = () => {
       setClient(clientData);
 
       // Load cache data
-      console.log('Loading cache data for client:', clientId);
       const cache = await getClientCacheData(clientId);
-      console.log('Loaded cache data:', cache.length, 'items');
-      console.log('Cache data types:', cache.map(item => ({ type: item.data_type, metadata: item.metadata?.original_data_type })));
       setCacheData(cache);
 
     } catch (error) {
@@ -134,11 +129,8 @@ export const ClientProfile = () => {
     }
   };
 
-  const collectData = async (clientId: string) => {
-    console.log('collectData called - reloading client data...');
-    // This will trigger the data collection via DataCollectorWidget
+  const collectData = async () => {
     await loadClientData();
-    console.log('Client data reloaded, cache data length:', cacheData.length);
   };
 
 
@@ -299,7 +291,7 @@ export const ClientProfile = () => {
         <SocialWidget socialMetrics={socialMetrics} />
         
         {/* Business Intelligence & Sentiment Analysis */}
-        <SentimentAnalysisWidget sentimentData={sentimentData} onCollectData={() => collectData(clientId!)} />
+        <SentimentAnalysisWidget sentimentData={sentimentData} onCollectData={collectData} />
       </div>
 
       {/* Summary Stats */}

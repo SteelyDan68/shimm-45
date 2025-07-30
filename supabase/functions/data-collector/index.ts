@@ -44,30 +44,6 @@ serve(async (req) => {
     if (test_mode) {
       console.log('Running API tests...');
       
-      // YouTube API specific test
-      if (platform === 'youtube' && url) {
-        console.log('YouTube API test mode for URL:', url);
-        
-        let handle = url;
-        if (url.includes('youtube.com/@')) {
-          handle = url.split('@')[1];
-        } else if (url.includes('youtube.com/channel/')) {
-          handle = url.split('/channel/')[1];
-        } else if (url.includes('youtube.com/c/')) {
-          handle = url.split('/c/')[1];
-        }
-        
-        const youtubeData = await fetchYouTubeData(handle);
-        
-        return new Response(JSON.stringify({
-          success: !!youtubeData,
-          data: youtubeData,
-          error: youtubeData ? null : 'Failed to fetch YouTube data'
-        }), {
-          status: youtubeData ? 200 : 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
       
       // Twitter API test - DISABLED
       if (platform === 'twitter') {
@@ -88,7 +64,7 @@ serve(async (req) => {
         firecrawl: await testFirecrawlApi(firecrawlApiKey),
         google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
         social_blade: await testSocialBladeApi(socialBladeApiKey),
-        youtube_api: await testYouTubeDataApi()
+        
         // twitter_api removed due to authentication issues
       };
 
@@ -357,21 +333,12 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
     if (client.tiktok_handle) {
       platforms.push({ platform: 'tiktok', handle: client.tiktok_handle });
     }
-    if (client.youtube_channel) {
-      platforms.push({ platform: 'youtube', handle: client.youtube_channel });
-    }
     if (client.facebook_page) {
       platforms.push({ platform: 'facebook', handle: client.facebook_page });
     }
 
     if (platforms.length === 0) {
-      console.warn('No social handles found for client, trying to find YouTube automatically');
-      // Try to find YouTube data even without handle
-      const youtubeData = await fetchYouTubeData(client.name, client.name);
-      if (youtubeData) {
-        result.collected_data.social_metrics.push(youtubeData);
-        console.log('Found YouTube data automatically for:', client.name);
-      }
+      console.log('No social handles found for client');
       return;
     }
 
@@ -383,14 +350,6 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
           console.log(`Successfully collected ${platform} data for:`, handle);
         } else {
           console.warn(`No data found for ${platform}:`, handle);
-          // If YouTube fails, try with client name
-          if (platform === 'youtube') {
-            const fallbackData = await fetchYouTubeData(client.name, client.name);
-            if (fallbackData) {
-              result.collected_data.social_metrics.push(fallbackData);
-              console.log('Found YouTube data via fallback search for:', client.name);
-            }
-          }
         }
         
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -489,7 +448,7 @@ async function collectMissingSocialProfiles(client: any, result: DataCollectionR
     if (!client.facebook_page) missingPlatforms.push('facebook');
     if (!client.instagram_handle) missingPlatforms.push('instagram');
     if (!client.tiktok_handle) missingPlatforms.push('tiktok');
-    if (!client.youtube_channel) missingPlatforms.push('youtube');
+    
     
     if (missingPlatforms.length === 0) {
       console.log('All social platforms already configured');
@@ -513,7 +472,7 @@ async function collectMissingSocialProfiles(client: any, result: DataCollectionR
             notes: `Automatically discovered ${platform} profile for ${client.name}`,
             verification_needed: true,
             suggested_update: {
-              field: `${platform}_${platform === 'youtube' ? 'channel' : platform === 'facebook' ? 'page' : 'handle'}`,
+              field: `${platform}_${platform === 'facebook' ? 'page' : 'handle'}`,
               value: foundProfile.handle || foundProfile.url
             }
           });
@@ -861,19 +820,6 @@ function extractSocialHandle(url: string, platform: string, title: string) {
           return pathParts[0]?.startsWith('@') ? pathParts[0].substring(1) : pathParts[0] || null;
         }
         break;
-        
-      case 'youtube':
-        if (urlObj.hostname.includes('youtube.com')) {
-          const pathParts = urlObj.pathname.split('/').filter(Boolean);
-          if (pathParts[0] === 'channel' || pathParts[0] === 'c' || pathParts[0] === 'user') {
-            return pathParts[1] || null;
-          }
-          if (pathParts[0]?.startsWith('@')) {
-            return pathParts[0].substring(1) || null;
-          }
-          return pathParts[0] || null;
-        }
-        break;
     }
     
     return null;
@@ -958,222 +904,15 @@ async function fetchRealSocialData(platform: string, handle: string, apiKey: str
   console.log(`Fetching real ${platform} data for handle: ${handle}`);
   
   try {
-    if (platform === 'youtube') {
-      return await fetchYouTubeData(handle, clientName);
-    } else {
-      return await fetchSocialBladeData(platform, handle, apiKey);
-    }
+    return await fetchSocialBladeData(platform, handle, apiKey);
   } catch (error) {
     console.error(`Error fetching ${platform} data:`, error);
     return null;
   }
 }
 
-async function fetchYouTubeData(handle: string, clientName?: string) {
-  const youtubeApiKey = Deno.env.get('YOUTUBE_DATA_API_KEY');
-  
-  if (!youtubeApiKey) {
-    console.log('YouTube Data API key missing, falling back to Social Blade');
-    const socialBladeApiKey = Deno.env.get('SOCIAL_BLADE_API_KEY');
-    if (socialBladeApiKey) {
-      return await fetchSocialBladeData('youtube', handle, socialBladeApiKey);
-    }
-    return null;
-  }
 
-  try {
-    let channelId = null;
-    
-    if (handle.startsWith('UC') && handle.length === 24) {
-      channelId = handle;
-    } else if (handle.includes('youtube.com')) {
-      if (clientName) {
-        const intelligentResult = await findYouTubeChannelWithIntelligentSearch(handle, clientName, youtubeApiKey);
-        if (intelligentResult) {
-          channelId = intelligentResult.id;
-        }
-      }
-    } else {
-      try {
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(handle)}&key=${youtubeApiKey}&maxResults=5`;
-        const searchResponse = await fetch(searchUrl);
-        
-        if (searchResponse.ok) {
-          const searchData = await searchResponse.json();
-          if (searchData.items && searchData.items.length > 0) {
-            // Find best match by title similarity
-            let bestMatch = searchData.items[0];
-            if (clientName) {
-              for (const item of searchData.items) {
-                if (item.snippet.title.toLowerCase().includes(clientName.toLowerCase()) ||
-                    clientName.toLowerCase().includes(item.snippet.title.toLowerCase())) {
-                  bestMatch = item;
-                  break;
-                }
-              }
-            }
-            channelId = bestMatch.snippet.channelId;
-            console.log('Found YouTube channel via search:', bestMatch.snippet.title);
-          }
-        }
-      } catch (searchError) {
-        console.error('YouTube search error:', searchError);
-      }
-    }
 
-    if (!channelId) {
-      console.log('YouTube channel not found, falling back to Social Blade');
-      const socialBladeApiKey = Deno.env.get('SOCIAL_BLADE_API_KEY');
-      if (socialBladeApiKey) {
-        return await fetchSocialBladeData('youtube', handle, socialBladeApiKey);
-      }
-      return null;
-    }
-
-    const channelsUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${youtubeApiKey}`;
-    const response = await fetch(channelsUrl);
-    
-    if (!response.ok) {
-      throw new Error(`YouTube API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.items && data.items.length > 0) {
-      const channel = data.items[0];
-      return {
-        id: `youtube-${Date.now()}`,
-        data_type: 'social_metrics',
-        platform: 'youtube',
-        source: 'youtube_data_api',
-        title: channel.snippet.title,
-        url: `https://youtube.com/channel/${channel.id}`,
-        data: {
-          channel_id: channel.id,
-          title: channel.snippet.title,
-          description: channel.snippet.description,
-          subscriber_count: parseInt(channel.statistics.subscriberCount || '0'),
-          video_count: parseInt(channel.statistics.videoCount || '0'),
-          view_count: parseInt(channel.statistics.viewCount || '0'),
-          published_at: channel.snippet.publishedAt,
-          thumbnails: channel.snippet.thumbnails,
-          handle: handle
-        },
-        metadata: {
-          followers: parseInt(channel.statistics.subscriberCount || '0'),
-          total_views: parseInt(channel.statistics.viewCount || '0'),
-          video_count: parseInt(channel.statistics.videoCount || '0')
-        },
-        created_at: new Date().toISOString()
-      };
-    }
-
-    return null;
-
-  } catch (error) {
-    console.error('YouTube Data API error:', error);
-    
-    const socialBladeApiKey = Deno.env.get('SOCIAL_BLADE_API_KEY');
-    if (socialBladeApiKey) {
-      console.log('Falling back to Social Blade for YouTube data');
-      return await fetchSocialBladeData('youtube', handle, socialBladeApiKey);
-    }
-    
-    return null;
-  }
-}
-
-async function findYouTubeChannelWithIntelligentSearch(handle: string, clientName: string, apiKey: string) {
-  console.log(`Intelligent YouTube search for handle: "${handle}", client: "${clientName}"`);
-  
-  const searchStrategies = [
-    {
-      name: 'Direct handle search',
-      queries: [
-        `"@${handle.replace('@', '')}"`,
-        `"${handle.replace('@', '')}"`,
-        handle.replace('@', ''),
-        `@${handle.replace('@', '')}`
-      ]
-    },
-    {
-      name: 'Client name search', 
-      queries: Array.from(new Set([
-        `"${clientName}"`,
-        `"${clientName} Family"`,
-        `"Family ${clientName}"`,
-        `"${clientName} Family"`,
-        `"${clientName} Family"`,
-        `"Family ${clientName}"`
-      ]))
-    },
-    {
-      name: 'Fuzzy search',
-      queries: [
-        clientName.split(' ')[0],
-        `${clientName.split(' ')[0]} vlogs`,
-        `${clientName.split(' ')[0]} gaming`,
-        `${clientName.split(' ')[0]} lifestyle`
-      ]
-    }
-  ];
-
-  for (const strategy of searchStrategies) {
-    try {
-      const results = await searchYouTubeChannels(strategy.queries, apiKey, strategy.name);
-      
-      if (results.length > 0) {
-        const bestMatch = results[0];
-        console.log(`Found YouTube channel via ${strategy.name}:`, bestMatch.snippet.title);
-        return bestMatch;
-      }
-      
-    } catch (error) {
-      console.error(`Error in strategy ${strategy.name}:`, error);
-    }
-  }
-
-  console.log('No YouTube channel found after all search strategies');
-  return null;
-}
-
-async function searchYouTubeChannels(queries: string[], apiKey: string, strategy: string) {
-  const allResults = [];
-  console.log(`${strategy}: Trying ${queries.length} search queries`);
-  
-  for (let i = 0; i < queries.length; i++) {
-    const query = queries[i];
-    console.log(`  Query ${i + 1}: "${query}"`);
-    
-    try {
-      const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&key=${apiKey}&maxResults=5`;
-      const response = await fetch(searchUrl);
-      
-      if (!response.ok) {
-        console.error(`Search error for "${query}": ${response.status}`);
-        continue;
-      }
-      
-      const data = await response.json();
-      
-      if (data.items && data.items.length > 0) {
-        for (const item of data.items) {
-          if (!allResults.find(r => r.snippet.channelId === item.snippet.channelId)) {
-            allResults.push(item);
-          }
-        }
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-    } catch (error) {
-      console.error(`Search error for "${query}":`, error);
-    }
-  }
-  
-  console.log(`${strategy}: Found ${allResults.length} unique channels`);
-  return allResults;
-}
 
 async function fetchSocialBladeData(platform: string, handle: string, apiKey: string) {
   const socialBladeClientId = Deno.env.get('SOCIAL_BLADE_CLIENT_ID');
@@ -1319,31 +1058,5 @@ async function storeDataInCache(clientId: string, result: DataCollectionResult) 
   } catch (error) {
     console.error('Error in cache storage:', error);
     result.errors.push(`Cache storage error: ${error.message}`);
-  }
-}
-
-async function testYouTubeDataApi() {
-  const youtubeApiKey = Deno.env.get('YOUTUBE_DATA_API_KEY');
-  
-  if (!youtubeApiKey) {
-    return { 
-      success: false, 
-      message: 'YouTube Data API key saknas' 
-    };
-  }
-  
-  try {
-    const testUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=test&key=${youtubeApiKey}&maxResults=1`;
-    const response = await fetch(testUrl);
-    
-    return { 
-      success: response.ok, 
-      message: response.ok ? 'API fungerar' : `Fel: ${response.status}` 
-    };
-  } catch (error) {
-    return { 
-      success: false, 
-      message: `YouTube Data API fel: ${error.message}` 
-    };
   }
 }
