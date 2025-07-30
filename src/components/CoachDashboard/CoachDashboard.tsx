@@ -1,4 +1,5 @@
 import { ClientCard } from './ClientCard';
+import { ClientLogView } from '@/components/ClientPath/ClientLogView';
 import { DashboardFilters } from './DashboardFilters';
 import { useCoachDashboard } from '@/hooks/useCoachDashboard';
 import { Card, CardContent } from '@/components/ui/card';
