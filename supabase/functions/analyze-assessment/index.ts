@@ -1,7 +1,14 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { buildAIPromptWithContext } from '../_shared/client-context.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+// Create Supabase client
+const supabase = createClient(supabaseUrl, supabaseServiceKey || '');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +16,7 @@ const corsHeaders = {
 };
 
 interface AssessmentData {
+  client_id: string;
   client_name: string;
   assessment_scores: Record<string, number>;
   comments?: string;
@@ -26,14 +34,13 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Format assessment data for OpenAI
+    // Format assessment data for AI
     const assessmentText = Object.entries(assessmentData.assessment_scores)
       .map(([area, score]) => `${area}: ${score}/10`)
       .join('\n');
 
-    const prompt = `Du är mentor till en offentlig person. Personen har skattat hinder på 13 områden. Sammanfatta kort vad du ser. Identifiera 2–3 tydliga hinder, och skapa ett första enkelt åtgärdsförslag. Tonen ska vara varm och professionell.
-
-Klient: ${assessmentData.client_name}
+    // Build user message with assessment data
+    const userMessage = `Klient: ${assessmentData.client_name}
 
 Självskattning (1-10 där 10 = stort hinder):
 ${assessmentText}
@@ -41,6 +48,16 @@ ${assessmentText}
 ${assessmentData.comments ? `Kommentarer från klienten: ${assessmentData.comments}` : ''}
 
 Ge en kort analys och konkreta åtgärdsförslag:`;
+
+    // Build AI prompt with client context
+    const baseSystemPrompt = 'Du är en professionell mentor som hjälper offentliga personer att identifiera och övervinna hinder. Du ger konkreta, genomförbara råd med en varm och stödjande ton. Analysera självskattningen och ge personliga rekommendationer som passar klientens situation.';
+    
+    const { systemPrompt } = await buildAIPromptWithContext(
+      assessmentData.client_id,
+      supabase,
+      baseSystemPrompt,
+      userMessage
+    );
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -53,11 +70,11 @@ Ge en kort analys och konkreta åtgärdsförslag:`;
         messages: [
           {
             role: 'system',
-            content: 'Du är en professionell mentor som hjälper offentliga personer att identifiera och övervinna hinder. Du ger konkreta, genomförbara råd med en varm och stödjande ton.'
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: prompt
+            content: userMessage
           }
         ],
         max_tokens: 800,

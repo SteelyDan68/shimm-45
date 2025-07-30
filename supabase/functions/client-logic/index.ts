@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { buildAIPromptWithContext } from '../_shared/client-context.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
@@ -121,7 +122,7 @@ serve(async (req) => {
     console.log('Velocity rank:', velocityRank);
 
     // 4. Generate AI recommendation
-    const aiRecommendation = await generateAIRecommendation(metrics, velocityRank, cacheData || []);
+    const aiRecommendation = await generateAIRecommendation(metrics, velocityRank, cacheData || [], client_id);
     console.log('AI recommendation generated');
 
     // 5. Update client logic_state
@@ -232,12 +233,13 @@ function calculateVelocityRank(metrics: VelocityMetrics): string {
 async function generateAIRecommendation(
   metrics: VelocityMetrics, 
   velocityRank: string, 
-  cacheData: CacheData[]
+  cacheData: CacheData[],
+  clientId: string
 ): Promise<{ recommendation: string; tone: string }> {
   console.log('Generating AI recommendation...');
 
-  const prompt = `
-Du är en expert på influencer marketing och social media strategi. Analysera följande data och ge en konkret rekommendation på svenska.
+  // Build base user message with metrics data
+  const userMessage = `Analysera följande data och ge en konkret rekommendation:
 
 METRICS:
 - Följartillväxt: ${metrics.followerGrowth.toFixed(1)}%
@@ -251,8 +253,9 @@ ${cacheData.slice(0, 3).map(d => `- ${d.data_type}: ${JSON.stringify(d.data).sub
 
 Ge en 2-3 meningar lång rekommendation som är:
 1. Konkret och actionable
-2. Baserad på datan ovan
+2. Baserad på datan ovan  
 3. Fokuserad på förbättring
+4. Anpassad till klientens professionella roll och situation
 
 Bestäm också tonen som antingen "encouraging", "strategic", eller "urgent" baserat på prestationen.
 
@@ -260,8 +263,17 @@ Svara i JSON format:
 {
   "recommendation": "Din rekommendation här...",
   "tone": "strategic"
-}
-`;
+}`;
+
+  // Build AI prompt with client context
+  const baseSystemPrompt = 'Du är en expert på influencer marketing och social media strategi. Du analyserar data och ger personliga rekommendationer som är anpassade till klientens unika situation, roll och behov. Svara alltid i JSON format på svenska.';
+  
+  const { systemPrompt } = await buildAIPromptWithContext(
+    clientId,
+    supabase,
+    baseSystemPrompt,
+    userMessage
+  );
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -271,13 +283,13 @@ Svara i JSON format:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { 
             role: 'system', 
-            content: 'Du är en expert på influencer marketing. Svara alltid i JSON format på svenska.' 
+            content: systemPrompt
           },
-          { role: 'user', content: prompt }
+          { role: 'user', content: userMessage }
         ],
         temperature: 0.7,
         max_tokens: 300,

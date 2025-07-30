@@ -24,7 +24,8 @@ export const useInsightAssessment = (clientId: string) => {
 
   const submitAssessment = async (
     assessmentData: AssessmentData,
-    clientName: string
+    clientName: string,
+    clientId?: string
   ): Promise<AssessmentResult | null> => {
     setIsSubmitting(true);
 
@@ -34,6 +35,7 @@ export const useInsightAssessment = (clientId: string) => {
         'analyze-assessment',
         {
           body: {
+            client_id: clientId,
             client_name: clientName,
             assessment_scores: assessmentData.scores,
             comments: assessmentData.comments

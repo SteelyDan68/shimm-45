@@ -51,7 +51,8 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
   const handleSubmit = async () => {
     const result = await submitAssessment(
       { scores, comments },
-      clientName
+      clientName,
+      clientId
     );
 
     if (result) {
