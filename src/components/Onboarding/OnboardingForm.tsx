@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,8 @@ import type { OnboardingData } from '@/types/onboarding';
 interface OnboardingFormProps {
   onComplete: (data: OnboardingData) => void;
   isLoading?: boolean;
+  initialData?: OnboardingData | null;
+  isEditMode?: boolean;
 }
 
 const primaryRoles = [
@@ -53,7 +55,7 @@ const platforms = [
   'Spotify'
 ];
 
-export function OnboardingForm({ onComplete, isLoading = false }: OnboardingFormProps) {
+export function OnboardingForm({ onComplete, isLoading = false, initialData = null, isEditMode = false }: OnboardingFormProps) {
   const [currentSection, setCurrentSection] = useState(1);
   const [formData, setFormData] = useState<OnboardingData>({
     generalInfo: {
@@ -87,6 +89,13 @@ export function OnboardingForm({ onComplete, isLoading = false }: OnboardingForm
       pastCrises: ''
     }
   });
+
+  // Sätt initial data om den finns (för edit-mode)
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const updateGeneralInfo = (field: string, value: string) => {
     setFormData(prev => ({
@@ -527,9 +536,14 @@ export function OnboardingForm({ onComplete, isLoading = false }: OnboardingForm
   return (
     <div className="max-w-2xl mx-auto p-6">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Starta här! 🚀</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {isEditMode ? 'Redigera din profil ✏️' : 'Starta här! 🚀'}
+        </h1>
         <p className="text-muted-foreground">
-          Berätta om dig själv så vi kan ge dig personlig rådgivning från dag ett
+          {isEditMode 
+            ? 'Uppdatera din information när du vill' 
+            : 'Berätta om dig själv så vi kan ge dig personlig rådgivning från dag ett'
+          }
         </p>
       </div>
 
@@ -583,7 +597,7 @@ export function OnboardingForm({ onComplete, isLoading = false }: OnboardingForm
             className="flex items-center gap-2"
           >
             {currentSection === 3 ? (
-              isLoading ? 'Sparar...' : 'Slutför & fortsätt'
+              isLoading ? 'Sparar...' : (isEditMode ? 'Spara ändringar' : 'Slutför & fortsätt')
             ) : (
               <>
                 Nästa

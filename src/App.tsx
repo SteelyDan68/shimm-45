@@ -11,6 +11,7 @@ import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
 import { ClientDashboard } from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
+import { EditProfilePage } from "./pages/EditProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
 import { Administration } from "./pages/Administration";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/edit-profile" element={<EditProfilePage />} />
         <Route path="/client-assessment/:clientId" element={<ClientAssessmentPage />} />
         <Route path="/clients" element={<AllClients />} />
         <Route path="/coach" element={<CoachDashboardPage />} />

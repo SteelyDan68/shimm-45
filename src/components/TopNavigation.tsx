@@ -28,7 +28,7 @@ const coachItems = [
 
 const clientItems = [
   { title: "Min Dashboard", url: "/client-dashboard", icon: Home },
-  { title: "Min Profil", url: "/client-dashboard", icon: User },
+  { title: "Redigera Profil", url: "/edit-profile", icon: User },
 ];
 
 export function TopNavigation() {
