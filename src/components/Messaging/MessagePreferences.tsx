@@ -4,10 +4,12 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useMessages } from '@/hooks/useMessages';
+import { useAuth } from '@/hooks/useAuth';
 import { Separator } from '@/components/ui/separator';
 
 export const MessagePreferences = () => {
   const { preferences, updatePreferences } = useMessages();
+  const { canManageUsers } = useAuth();
   const [localPrefs, setLocalPrefs] = useState({
     email_notifications: true,
     internal_notifications: true,
@@ -77,21 +79,26 @@ export const MessagePreferences = () => {
             />
           </div>
 
-          <Separator />
+          {/* AI-assistans sektion - endast synlig för coaches och administrativa roller */}
+          {canManageUsers() && (
+            <>
+              <Separator />
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="auto-ai-assistance">Automatisk AI-assistans</Label>
-              <p className="text-sm text-muted-foreground">
-                Aktivera automatiska AI-förslag för svar (endast för coaches)
-              </p>
-            </div>
-            <Switch
-              id="auto-ai-assistance"
-              checked={localPrefs.auto_ai_assistance}
-              onCheckedChange={(value) => handleChange('auto_ai_assistance', value)}
-            />
-          </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="auto-ai-assistance">Automatisk AI-assistans</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Aktivera automatiska AI-förslag för svar (endast för coaches)
+                  </p>
+                </div>
+                <Switch
+                  id="auto-ai-assistance"
+                  checked={localPrefs.auto_ai_assistance}
+                  onCheckedChange={(value) => handleChange('auto_ai_assistance', value)}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {hasChanges && (
