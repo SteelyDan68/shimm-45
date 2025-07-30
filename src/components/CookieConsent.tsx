@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Cookie, X } from 'lucide-react';
+import { useGDPR } from '@/hooks/useGDPR';
 
 interface CookieConsent {
   necessary: boolean;
@@ -12,6 +13,7 @@ interface CookieConsent {
 }
 
 export const CookieConsent = () => {
+  const { saveConsent } = useGDPR();
   const [isVisible, setIsVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [consent, setConsent] = useState<CookieConsent>({
@@ -28,7 +30,7 @@ export const CookieConsent = () => {
     }
   }, []);
 
-  const handleAcceptAll = () => {
+  const handleAcceptAll = async () => {
     const fullConsent = {
       necessary: true,
       analytics: true,
@@ -36,19 +38,29 @@ export const CookieConsent = () => {
       timestamp: new Date().toISOString()
     };
     localStorage.setItem('cookie-consent', JSON.stringify(fullConsent));
+    
+    // Spara samtycken i GDPR-systemet
+    await saveConsent('analytics', true, 'cookie_banner');
+    await saveConsent('marketing', true, 'cookie_banner');
+    
     setIsVisible(false);
   };
 
-  const handleAcceptSelected = () => {
+  const handleAcceptSelected = async () => {
     const selectedConsent = {
       ...consent,
       timestamp: new Date().toISOString()
     };
     localStorage.setItem('cookie-consent', JSON.stringify(selectedConsent));
+    
+    // Spara individulella samtycken
+    await saveConsent('analytics', consent.analytics, 'cookie_banner');
+    await saveConsent('marketing', consent.marketing, 'cookie_banner');
+    
     setIsVisible(false);
   };
 
-  const handleDeclineAll = () => {
+  const handleDeclineAll = async () => {
     const minimalConsent = {
       necessary: true,
       analytics: false,
@@ -56,6 +68,11 @@ export const CookieConsent = () => {
       timestamp: new Date().toISOString()
     };
     localStorage.setItem('cookie-consent', JSON.stringify(minimalConsent));
+    
+    // Spara avvisade samtycken
+    await saveConsent('analytics', false, 'cookie_banner');
+    await saveConsent('marketing', false, 'cookie_banner');
+    
     setIsVisible(false);
   };
 

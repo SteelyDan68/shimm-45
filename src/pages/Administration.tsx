@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UserManagement } from "@/components/UserManagement";
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
+import { DataRightsCenter } from "@/components/DataRightsCenter";
 
 export function Administration() {
   const { user } = useAuth();
@@ -122,7 +123,7 @@ export function Administration() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profil</span>
@@ -142,6 +143,10 @@ export function Administration() {
           <TabsTrigger value="data" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
             <span className="hidden sm:inline">Data</span>
+          </TabsTrigger>
+          <TabsTrigger value="gdpr" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">GDPR</span>
           </TabsTrigger>
         </TabsList>
 
@@ -455,6 +460,11 @@ export function Administration() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* GDPR Tab */}
+        <TabsContent value="gdpr">
+          <DataRightsCenter />
         </TabsContent>
       </Tabs>
     </div>

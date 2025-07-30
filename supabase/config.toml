@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.data-collector]
 verify_jwt = false
+
+[functions.gdpr-processor]
+verify_jwt = false
