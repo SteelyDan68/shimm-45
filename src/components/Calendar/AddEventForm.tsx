@@ -21,14 +21,12 @@ interface AddEventFormProps {
 }
 
 const EVENT_CATEGORIES = [
-  { value: 'meeting', label: 'Möte' },
-  { value: 'appointment', label: 'Bokning' },
+  { value: 'samtal', label: 'Samtal' },
+  { value: 'mote', label: 'Möte' },
   { value: 'deadline', label: 'Deadline' },
-  { value: 'reminder', label: 'Påminnelse' },
-  { value: 'personal', label: 'Personligt' },
-  { value: 'work', label: 'Arbete' },
-  { value: 'health', label: 'Hälsa' },
-  { value: 'education', label: 'Utbildning' }
+  { value: 'lansering', label: 'Lansering' },
+  { value: 'paminnelse', label: 'Påminnelse' },
+  { value: 'annat', label: 'Annat' }
 ];
 
 const PRIORITIES = [
@@ -63,6 +61,7 @@ export const AddEventForm = ({
     category: string;
     priority: 'low' | 'medium' | 'high';
     duration: number;
+    visibleToClient: boolean;
   }>({
     title: '',
     description: '',
@@ -70,7 +69,8 @@ export const AddEventForm = ({
     time: '09:00',
     category: '',
     priority: 'medium',
-    duration: 60
+    duration: 60,
+    visibleToClient: false
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -90,7 +90,11 @@ export const AddEventForm = ({
       category: formData.category || undefined,
       priority: formData.priority,
       duration: formData.duration,
-      client_id: clientId
+      client_id: clientId,
+      metadata: {
+        visible_to_client: formData.visibleToClient,
+        created_by_role: 'admin' // Should get from auth context
+      }
     };
 
     onAdd(eventData);
@@ -103,7 +107,8 @@ export const AddEventForm = ({
       time: '09:00',
       category: '',
       priority: 'medium',
-      duration: 60
+      duration: 60,
+      visibleToClient: false
     });
     
     onClose();
@@ -117,7 +122,8 @@ export const AddEventForm = ({
       time: '09:00',
       category: '',
       priority: 'medium',
-      duration: 60
+      duration: 60,
+      visibleToClient: false
     });
     onClose();
   };
@@ -239,7 +245,26 @@ export const AddEventForm = ({
             </div>
           </div>
 
-          {/* Duration */}
+          {/* Visibility checkbox */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="visibleToClient"
+              checked={formData.visibleToClient}
+              onChange={(e) => setFormData(prev => ({ ...prev, visibleToClient: e.target.checked }))}
+              className="rounded border-input"
+            />
+            <label htmlFor="visibleToClient" className="text-sm font-medium">
+              Visa även för klienten?
+            </label>
+          </div>
+
+          <div className="bg-muted/50 p-3 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>Information:</strong> Händelsen sparas som standard som intern och är endast synlig för administratörer och managers. 
+              Markera checkboxen ovan om klienten också ska kunna se denna händelse.
+            </p>
+          </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Varaktighet</label>
             <Select 

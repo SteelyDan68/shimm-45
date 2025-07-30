@@ -200,6 +200,48 @@ export type Database = {
           },
         ]
       }
+      calendar_events: {
+        Row: {
+          category: string
+          client_id: string
+          created_at: string
+          created_by: string
+          created_by_role: string
+          description: string | null
+          event_date: string
+          id: string
+          title: string
+          updated_at: string
+          visible_to_client: boolean
+        }
+        Insert: {
+          category: string
+          client_id: string
+          created_at?: string
+          created_by: string
+          created_by_role: string
+          description?: string | null
+          event_date: string
+          id?: string
+          title: string
+          updated_at?: string
+          visible_to_client?: boolean
+        }
+        Update: {
+          category?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          created_by_role?: string
+          description?: string | null
+          event_date?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          visible_to_client?: boolean
+        }
+        Relationships: []
+      }
       client_data_cache: {
         Row: {
           author: string | null
