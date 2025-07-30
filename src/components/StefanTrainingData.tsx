@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, FileText, File, Trash2, Plus } from 'lucide-react';
+import { Upload, FileText, File, Trash2, Plus, Brain } from 'lucide-react';
 import { useStefanTrainingData, TrainingDataFormData } from '@/hooks/useStefanTrainingData';
 import { useForm } from 'react-hook-form';
+import StefanTextAnalyzer from './StefanTextAnalyzer';
 
 const StefanTrainingData: React.FC = () => {
   const { data, loading, uploading, fetchTrainingData, addTrainingData, deleteTrainingData } = useStefanTrainingData();
@@ -101,9 +102,10 @@ const StefanTrainingData: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="add" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="add">Lägg till data</TabsTrigger>
               <TabsTrigger value="manage">Hantera data</TabsTrigger>
+              <TabsTrigger value="analyze">Analysera</TabsTrigger>
             </TabsList>
             
             <TabsContent value="add" className="space-y-4">
@@ -278,6 +280,10 @@ const StefanTrainingData: React.FC = () => {
                   )}
                 </ScrollArea>
               </div>
+            </TabsContent>
+
+            <TabsContent value="analyze">
+              <StefanTextAnalyzer data={data} onAnalysisComplete={fetchTrainingData} />
             </TabsContent>
           </Tabs>
         </CardContent>
