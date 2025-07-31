@@ -2,7 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 import { aiService } from '../_shared/ai-service.ts';
-import { buildAIPromptWithLovableTemplate } from '../_shared/client-context.ts';
+import { resolveUserClient, buildAIPromptWithUniversalTemplate } from '../_shared/user-client-resolver.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
@@ -39,7 +39,7 @@ serve(async (req) => {
   }
 
   try {
-    const { client_id, test_mode } = await req.json();
+    const { client_id, user_id, test_mode } = await req.json();
     
     // Test mode - check OpenAI API connectivity
     if (test_mode) {
@@ -94,17 +94,24 @@ serve(async (req) => {
       }
     }
 
-    console.log('Processing logic for client:', client_id);
+    console.log('Processing logic for client/user:', { client_id, user_id });
 
-    if (!client_id) {
-      throw new Error('client_id is required');
+    // Validate input - require either user_id or client_id
+    if (!user_id && !client_id) {
+      throw new Error('Either user_id or client_id is required');
     }
 
-    // 1. Fetch client data from cache
+    // Resolve user/client data
+    const userData = await resolveUserClient({ user_id, client_id }, supabase);
+    if (!userData) {
+      throw new Error('User/client not found');
+    }
+
+    // 1. Fetch client data from cache using the resolved client_id
     const { data: cacheData, error: cacheError } = await supabase
       .from('client_data_cache')
       .select('*')
-      .eq('client_id', client_id)
+      .eq('client_id', userData.client_id)
       .order('created_at', { ascending: false });
 
     if (cacheError) {
@@ -122,8 +129,8 @@ serve(async (req) => {
     const velocityRank = calculateVelocityRank(metrics);
     console.log('Velocity rank:', velocityRank);
 
-    // 4. Generate AI recommendation
-    const aiRecommendation = await generateAIRecommendation(metrics, velocityRank, cacheData || [], client_id);
+    // 4. Generate AI recommendation using universal template
+    const aiRecommendation = await generateAIRecommendation(metrics, velocityRank, cacheData || [], userData);
     console.log('AI recommendation generated');
 
     // 5. Update client logic_state
@@ -138,7 +145,7 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from('clients')
       .update({ logic_state: logicState })
-      .eq('id', client_id);
+      .eq('id', userData.client_id);
 
     if (updateError) {
       console.error('Error updating logic state:', updateError);
@@ -149,7 +156,9 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      logic_state: logicState 
+      logic_state: logicState,
+      user_id: userData.user_id,
+      client_id: userData.client_id
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -235,7 +244,7 @@ async function generateAIRecommendation(
   metrics: VelocityMetrics, 
   velocityRank: string, 
   cacheData: CacheData[],
-  clientId: string
+  userData: any
 ): Promise<{ recommendation: string; tone: string }> {
   console.log('Generating AI recommendation...');
 
@@ -259,9 +268,9 @@ Svara i JSON format:
   "tone": "strategic"
 }`;
 
-  // Build AI prompt using Lovable template for strategic recommendations
-  const systemPrompt = await buildAIPromptWithLovableTemplate(
-    clientId,
+  // Build AI prompt using Universal template for strategic recommendations
+  const systemPrompt = await buildAIPromptWithUniversalTemplate(
+    { user_id: userData.user_id, client_id: userData.client_id },
     supabase,
     metricsData,
     'Du är en expert på influencer marketing och social media strategi. Du analyserar performance data och ger strategiska rekommendationer anpassade till klientens unika situation och roll. Svara alltid i JSON format på svenska.'

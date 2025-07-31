@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { aiService } from '../_shared/ai-service.ts';
+import { resolveUserClient } from '../_shared/user-client-resolver.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +13,8 @@ interface PillarAssessmentData {
   pillar_type: string;
   scores: Record<string, number>;
   comments?: string;
-  client_id: string;
+  client_id?: string; // Backward compatibility
+  user_id?: string;   // New user-centric approach
 }
 
 serve(async (req) => {
@@ -43,12 +45,30 @@ serve(async (req) => {
     const assessmentData: PillarAssessmentData = await req.json();
     console.log('Analyzing pillar assessment:', assessmentData);
 
-    // Get client profile for context
-    const { data: clientData } = await supabase
-      .from('clients')
-      .select('name, profile_metadata')
-      .eq('id', assessmentData.client_id)
-      .single();
+    // Validate input - require either user_id or client_id
+    if (!assessmentData.user_id && !assessmentData.client_id) {
+      return new Response(JSON.stringify({
+        error: 'Either user_id or client_id is required'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Resolve user/client data using universal resolver
+    const userData = await resolveUserClient({
+      user_id: assessmentData.user_id,
+      client_id: assessmentData.client_id
+    }, supabase);
+
+    if (!userData) {
+      return new Response(JSON.stringify({
+        error: 'User/client not found'
+      }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Create AI prompt based on pillar type
     const pillarPrompts = {
@@ -67,8 +87,8 @@ serve(async (req) => {
 
     const userPrompt = `Du är mentor åt en offentlig person med ett starkt personligt varumärke.
 
-Klient: ${clientData?.name || 'Okänd'}
-Bakgrund: ${JSON.stringify(clientData?.profile_metadata || {})}
+Klient: ${userData.name}
+Bakgrund: ${JSON.stringify(userData.profile_metadata || {})}
 
 ${assessmentData.pillar_type.toUpperCase()} BEDÖMNING:
 Poäng: ${scoresText}
@@ -102,7 +122,8 @@ Ge en konkret handlingsplan i 2-3 steg. Håll tonen varm, konkret och profession
     return new Response(JSON.stringify({
       analysis: aiResponse.content,
       pillar_type: assessmentData.pillar_type,
-      client_id: assessmentData.client_id,
+      user_id: userData.user_id,
+      client_id: userData.client_id, // Include both for compatibility
       ai_model_used: aiResponse.model
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
