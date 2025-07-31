@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -308,6 +308,10 @@ export function UnifiedUserManager() {
             <Mail className="h-4 w-4" />
             Inbjudningar
           </TabsTrigger>
+          <TabsTrigger value="organizations" className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            Organisationer
+          </TabsTrigger>
           {canAccessGamification && (
             <TabsTrigger value="gamification" className="flex items-center gap-2">
               <Trophy className="h-4 w-4" />
@@ -358,6 +362,48 @@ export function UnifiedUserManager() {
             <SendInvitationForm />
             <InvitationList />
           </div>
+        </TabsContent>
+
+        {/* Organizations Tab */}
+        <TabsContent value="organizations">
+          <Card>
+            <CardHeader>
+              <CardTitle>Organisationer</CardTitle>
+              <CardDescription>
+                Hantera organisationer och deras medlemmar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Här kan du hantera organisationer och tilldela användare till dem.
+                </p>
+                
+                {/* List unique organizations from users */}
+                <div className="grid gap-3">
+                  {Object.entries(stats.byOrganization).map(([org, count]) => (
+                    <div key={org} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Building2 className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <h4 className="font-medium">{org}</h4>
+                          <p className="text-sm text-muted-foreground">{count} användare</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">{count}</Badge>
+                    </div>
+                  ))}
+                </div>
+
+                {Object.keys(stats.byOrganization).length === 0 && (
+                  <div className="text-center py-8">
+                    <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Inga organisationer registrerade ännu</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Gamification Tab */}
