@@ -38,6 +38,7 @@ import { AdminGamificationPanel } from "./Admin/AdminGamificationPanel";
 import { OnboardingWorkflow } from "./Admin/OnboardingWorkflow";
 import { PasswordManagement } from "./UserManagement/PasswordManagement";
 import { UserTable } from "./UserManagement/UserTable";
+import { MultiRoleManager } from "./UserManagement/MultiRoleManager";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
 interface Organization {
@@ -480,22 +481,13 @@ export function UserManagement() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="role">Roll</Label>
-                <Select 
-                  defaultValue={selectedUser.roles?.[0]} 
-                  onValueChange={(value) => handleRoleChange(selectedUser.id, value as AppRole)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Välj roll" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-md">
-                    {Object.entries(roleLabels).map(([role, label]) => (
-                      <SelectItem key={role} value={role}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="role">Roller</Label>
+                <MultiRoleManager
+                  userId={selectedUser.id}
+                  currentRoles={selectedUser.roles}
+                  onRolesUpdated={fetchUsers}
+                  disabled={updatingRoleUserId === selectedUser.id}
+                />
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>

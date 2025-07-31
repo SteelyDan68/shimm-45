@@ -59,7 +59,7 @@ export const useOrganizations = () => {
         `);
 
       if (error) throw error;
-      setMembers(data || []);
+      setMembers(data as any || []);
     } catch (error: any) {
       console.error('Error fetching members:', error);
     }
