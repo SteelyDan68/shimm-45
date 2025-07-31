@@ -37,6 +37,7 @@ import { InvitationList } from "./InvitationSystem/InvitationList";
 import { AdminGamificationPanel } from "./Admin/AdminGamificationPanel";
 import { OnboardingWorkflow } from "./Admin/OnboardingWorkflow";
 import { PasswordManagement } from "./UserManagement/PasswordManagement";
+import { UserTable } from "./UserManagement/UserTable";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
 interface Organization {
@@ -103,6 +104,12 @@ export function UserManagement() {
 
       if (profileError) throw profileError;
 
+      console.log('Fetched profiles:', profiles?.length, profiles?.map(p => ({
+        name: `${p.first_name} ${p.last_name}`,
+        email: p.email,
+        id: p.id
+      })));
+
       // Fetch user roles
       const { data: userRoles, error: rolesError } = await supabase
         .from('user_roles')
@@ -110,13 +117,25 @@ export function UserManagement() {
 
       if (rolesError) throw rolesError;
 
-      // Combine users with their roles - filter out invalid roles
-      const usersWithRoles = profiles?.map(profile => ({
-        ...profile,
-        roles: userRoles?.filter(role => role.user_id === profile.id)
+      console.log('Fetched user roles:', userRoles?.length, userRoles);
+
+      // Combine users with their roles - DON'T filter out users without roles
+      const usersWithRoles = profiles?.map(profile => {
+        const userRolesList = userRoles?.filter(role => role.user_id === profile.id)
           .map(role => role.role)
-          .filter(role => role !== 'user') as AppRole[] || []
-      })) || [];
+          .filter(role => role !== 'user') as AppRole[] || [];
+        
+        return {
+          ...profile,
+          roles: userRolesList
+        };
+      }) || [];
+
+      console.log('Users with roles:', usersWithRoles.length, usersWithRoles.map(u => ({
+        name: `${u.first_name} ${u.last_name}`,
+        email: u.email,
+        roles: u.roles
+      })));
 
       setUsers(usersWithRoles);
     } catch (error: any) {
@@ -296,118 +315,17 @@ export function UserManagement() {
 
         {/* Users Tab */}
         <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle>Användare</CardTitle>
-              <CardDescription>
-                Hantera användarkonton och deras roller i systemet
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Användare</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Roller</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Senaste inloggning</TableHead>
-                    <TableHead>Åtgärder</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                              {(user.first_name?.[0] || '') + (user.last_name?.[0] || '')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">
-                              {user.first_name} {user.last_name}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {user.organization}
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {user.roles?.map((role) => (
-                            <Badge 
-                              key={role} 
-                              variant="secondary"
-                              className={`text-white ${roleColors[role]}`}
-                            >
-                              {roleLabels[role]}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                          {user.status === 'active' ? 'Aktiv' : 'Inaktiv'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {user.last_login_at 
-                          ? new Date(user.last_login_at).toLocaleDateString('sv-SE')
-                          : 'Aldrig'
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" disabled={deletingUserId === user.id || updatingRoleUserId === user.id}>
-                            {(deletingUserId === user.id || updatingRoleUserId === user.id) ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                            ) : (
-                              <MoreHorizontal className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
-                            <DropdownMenuItem onClick={() => openFullProfileDialog(user)}>
-                              <User className="h-4 w-4 mr-2" />
-                              Visa fullständig profil
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openEditDialog(user)}>
-                              <Edit3 className="h-4 w-4 mr-2" />
-                              Redigera grundinfo
-                            </DropdownMenuItem>
-                            {(isAdmin || isSuperAdmin) && (
-                              <DropdownMenuItem className="p-0">
-                                <PasswordManagement 
-                                  userId={user.id}
-                                  userEmail={user.email}
-                                  userName={`${user.first_name} ${user.last_name}`}
-                                />
-                              </DropdownMenuItem>
-                            )}
-                            {(isAdmin || isSuperAdmin) && (
-                              <DropdownMenuItem 
-                                onClick={() => deleteUser(user.id)}
-                                className="text-red-600 focus:text-red-600"
-                                disabled={deletingUserId === user.id}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                {deletingUserId === user.id ? 'Tar bort...' : 'Ta bort'}
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <UserTable
+            users={users}
+            isAdmin={isAdmin()}
+            isSuperAdmin={isSuperAdmin}
+            onEditUser={openEditDialog}
+            onViewProfile={openFullProfileDialog}
+            onDeleteUser={deleteUser}
+            onRoleChange={handleRoleChange}
+            deletingUserId={deletingUserId}
+            updatingRoleUserId={updatingRoleUserId}
+          />
         </TabsContent>
 
 
