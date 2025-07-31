@@ -53,7 +53,7 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
 
     const existingEmails = new Set(existingProfiles?.map(p => p.email) || []);
 
-    // 3. Migrate each client by creating auth users first
+    // 3. Migrate each client directly to profiles (they can create auth accounts later)
     for (const client of legacyClients) {
       try {
         // Skip if profile already exists
@@ -65,61 +65,47 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
 
         console.log(`🔄 Migrating ${client.name} (${client.email})`);
 
-        // First, create auth user with temporary password
-        const tempPassword = crypto.randomUUID().substring(0, 12) + "!A1";
+        // Generate a unique ID for the profile
+        const profileId = crypto.randomUUID();
         
-        const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+        // Create profile entry directly (user can activate account later)
+        const profileData = {
+          id: profileId,
           email: client.email,
-          password: tempPassword,
-          email_confirm: true,
-          user_metadata: {
-            first_name: client.name?.split(' ')[0] || '',
-            last_name: client.name?.split(' ').slice(1).join(' ') || '',
-            migrated_from_legacy: true,
-            legacy_client_id: client.id
+          first_name: client.name?.split(' ')[0] || '',
+          last_name: client.name?.split(' ').slice(1).join(' ') || '',
+          status: 'inactive', // Set as inactive until they activate their account
+          organization: client.category || null,
+          preferences: {
+            legacy_client_data: {
+              original_id: client.id,
+              user_id: client.user_id,
+              category: client.category,
+              instagram_handle: client.instagram_handle,
+              profile_metadata: client.profile_metadata,
+              logic_state: client.logic_state,
+              velocity_score: client.velocity_score,
+              custom_fields: client.custom_fields,
+              migrated_at: new Date().toISOString(),
+              needs_activation: true
+            }
           }
+        };
+
+        // Use edge function to bypass RLS
+        const response = await fetch('/functions/v1/admin-create-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({ profile_data: profileData })
         });
 
-        if (authError) {
-          console.error(`Failed to create auth user for ${client.name}:`, authError);
-          result.errors.push(`Failed to create auth user for ${client.name}: ${authError.message}`);
-          continue;
-        }
-
-        if (!authUser.user) {
-          result.errors.push(`No user returned for ${client.name}`);
-          continue;
-        }
-
-        console.log(`✅ Created auth user for ${client.name} with ID: ${authUser.user.id}`);
-
-        // Now update the profile that was automatically created
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
-            first_name: client.name?.split(' ')[0] || '',
-            last_name: client.name?.split(' ').slice(1).join(' ') || '',
-            status: client.status || 'active',
-            organization: client.category || null,
-            preferences: {
-              legacy_client_data: {
-                original_id: client.id,
-                user_id: client.user_id,
-                category: client.category,
-                instagram_handle: client.instagram_handle,
-                profile_metadata: client.profile_metadata,
-                logic_state: client.logic_state,
-                velocity_score: client.velocity_score,
-                custom_fields: client.custom_fields,
-                migrated_at: new Date().toISOString()
-              }
-            }
-          })
-          .eq('id', authUser.user.id);
-
-        if (updateError) {
-          console.error(`Failed to update profile for ${client.name}:`, updateError);
-          result.errors.push(`Failed to update profile for ${client.name}: ${updateError.message}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error(`Failed to create profile for ${client.name}:`, errorData);
+          result.errors.push(`Failed to create profile for ${client.name}: ${errorData.error || 'Unknown error'}`);
           continue;
         }
 
@@ -127,7 +113,7 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
-            user_id: authUser.user.id,
+            user_id: profileId,
             role: 'client'
           });
 
@@ -137,7 +123,7 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
           continue;
         }
 
-        console.log(`✅ Successfully migrated ${client.name} to profiles system`);
+        console.log(`✅ Successfully migrated ${client.name} to profiles system (inactive - needs activation)`);
         result.migrated++;
 
       } catch (error: any) {
