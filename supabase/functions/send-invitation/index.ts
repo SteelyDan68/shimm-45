@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send invitation email
     const { data: emailResult, error: emailError } = await resend.emails.send({
-      from: "SHIMM <noreply@yourapp.com>",
+      from: "SHIMM <onboarding@resend.dev>", // Using Resend's verified domain for testing
       to: [email],
       subject: `Inbjudan till SHIMM från ${inviterName || 'teamet'}`,
       html: `
