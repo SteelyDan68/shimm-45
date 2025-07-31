@@ -101,10 +101,14 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log('Admin check passed, proceeding to parse request body...');
+
     // Parse and validate request body
     let requestBody;
     try {
+      console.log('Attempting to parse request body...');
       requestBody = await req.json();
+      console.log('Request body parsed successfully:', { email: requestBody?.email, role: requestBody?.role });
     } catch (parseError) {
       console.error('Failed to parse request body:', parseError);
       return new Response(
@@ -113,10 +117,14 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log('Extracting fields from request body...');
     const { email, password, firstName, lastName, role }: CreateUserRequest = requestBody;
+    console.log('Fields extracted:', { email, firstName, lastName, role, hasPassword: !!password });
 
     // Input validation
+    console.log('Performing input validation...');
     if (!email || !password || !firstName || !lastName || !role) {
+      console.error('Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName, role: !!role });
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
