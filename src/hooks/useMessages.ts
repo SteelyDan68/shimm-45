@@ -106,6 +106,48 @@ export const useMessages = () => {
 
       if (error) throw error;
 
+      // Get receiver info to check if they want email notifications
+      const { data: receiverProfile } = await supabase
+        .from('profiles')
+        .select('email, first_name, last_name')
+        .eq('id', receiverId)
+        .single();
+
+      const { data: receiverPrefs } = await supabase
+        .from('message_preferences')
+        .select('email_notifications')
+        .eq('user_id', receiverId)
+        .single();
+
+      // Send email notification if user has opted in (default is true)
+      if (receiverProfile?.email && (receiverPrefs?.email_notifications !== false)) {
+        // Get sender name
+        const { data: senderProfile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user.id)
+          .single();
+
+        const senderName = senderProfile 
+          ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() || user.email
+          : user.email;
+
+        // Send notification email via edge function
+        try {
+          await supabase.functions.invoke('send-message-notification', {
+            body: {
+              receiverEmail: receiverProfile.email,
+              senderName,
+              subject,
+              messageContent: content,
+            }
+          });
+        } catch (emailError) {
+          console.error('Failed to send email notification:', emailError);
+          // Don't fail the message sending if email fails
+        }
+      }
+
       toast({
         title: "Meddelande skickat",
         description: "Ditt meddelande har skickats framgångsrikt"

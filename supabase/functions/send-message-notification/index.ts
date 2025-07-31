@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
-import { InvitationEmail } from './_templates/invitation-email.tsx';
+import { MessageNotification } from './_templates/message-notification.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -13,14 +13,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface SendInvitationRequest {
-  email: string;
-  role: string;
-  invitedBy: string;
+interface SendMessageNotificationRequest {
+  receiverEmail: string;
+  senderName: string;
+  subject?: string;
+  messageContent: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log('Send invitation request received');
+  console.log('Send message notification request received');
 
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -28,46 +29,31 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const { receiverEmail, senderName, subject, messageContent }: SendMessageNotificationRequest = await req.json();
+    console.log(`Sending message notification to ${receiverEmail} from ${senderName}`);
 
-    const { email, role, invitedBy }: SendInvitationRequest = await req.json();
-    console.log(`Sending invitation to ${email} for role ${role} from ${invitedBy}`);
-
-    // Get the invitation from database to get the token
-    const { data: invitation, error: invitationError } = await supabaseClient
-      .from('invitations')
-      .select('token')
-      .eq('email', email)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (invitationError || !invitation) {
-      console.error('No pending invitation found:', invitationError);
-      throw new Error('Ingen väntande inbjudan hittades');
-    }
+    // Truncate message content for preview
+    const messagePreview = messageContent.length > 150 
+      ? messageContent.substring(0, 150) + '...' 
+      : messageContent;
 
     const appUrl = Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://your-app.com';
 
     // Render the email template
     const html = await renderAsync(
-      React.createElement(InvitationEmail, {
-        invitedBy,
-        invitationToken: invitation.token,
-        role: role === 'client' ? 'klient' : role === 'admin' ? 'administratör' : 'användare',
+      React.createElement(MessageNotification, {
+        senderName,
+        subject,
+        messagePreview,
         appUrl,
       })
     );
 
     // Send the email
     const emailResponse = await resend.emails.send({
-      from: "Plattformen <onboarding@resend.dev>",
-      to: [email],
-      subject: `Inbjudan till plattformen från ${invitedBy}`,
+      from: "Plattformen <notifications@resend.dev>",
+      to: [receiverEmail],
+      subject: `Nytt meddelande från ${senderName}${subject ? ` - ${subject}` : ''}`,
       html,
     });
 
@@ -76,11 +62,11 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to send email: ${emailResponse.error.message}`);
     }
 
-    console.log("Invitation email sent successfully:", emailResponse);
+    console.log("Message notification sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Inbjudan skickad via e-post",
+      message: "Meddelandenotifiering skickad",
       emailId: emailResponse.data?.id 
     }), {
       status: 200,
@@ -90,10 +76,10 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error in send-invitation function:", error);
+    console.error("Error in send-message-notification function:", error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || "Ett fel uppstod vid skickandet av inbjudan"
+        error: error.message || "Ett fel uppstod vid skickandet av notifiering"
       }),
       {
         status: 500,
