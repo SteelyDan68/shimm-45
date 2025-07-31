@@ -315,17 +315,14 @@ export function UserManagement() {
 
         {/* Users Tab */}
         <TabsContent value="users">
-          <UserTable
-            users={users}
-            isAdmin={isAdmin()}
-            isSuperAdmin={isSuperAdmin}
-            onEditUser={openEditDialog}
-            onViewProfile={openFullProfileDialog}
-            onDeleteUser={deleteUser}
-            onRoleChange={handleRoleChange}
-            deletingUserId={deletingUserId}
-            updatingRoleUserId={updatingRoleUserId}
-          />
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">
+              Användarhantering har konsoliderats till det nya Enhetliga Användarsystemet.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Alla användare och funktioner finns nu centraliserat i Administration.
+            </p>
+          </div>
         </TabsContent>
 
 
