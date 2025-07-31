@@ -108,10 +108,32 @@ export function UnifiedUserManager() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-10">
-          <div className="text-center">
+          <div className="text-center space-y-4">
             <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Ingen behörighet</h3>
             <p className="text-muted-foreground">Du har inte behörighet att hantera användare.</p>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                const { emergencySuperadminSetup } = await import('@/utils/emergencySetup');
+                const success = await emergencySuperadminSetup();
+                if (success) {
+                  toast({
+                    title: "✅ Superadmin aktiverad",
+                    description: "Du har nu superadmin-behörigheter"
+                  });
+                  window.location.reload(); // Force full reload to update permissions
+                } else {
+                  toast({
+                    title: "❌ Fel",
+                    description: "Kunde inte aktivera superadmin",
+                    variant: "destructive"
+                  });
+                }
+              }}
+            >
+              🚨 Aktivera Superadmin
+            </Button>
           </div>
         </CardContent>
       </Card>
