@@ -12,7 +12,7 @@ export const useOnboarding = () => {
     try {
       console.log('Saving onboarding data:', { clientId, data });
       
-      // Skapa en strukturerad profile_metadata med nested properties
+      // Skapa en strukturerad profile_metadata med nested properties för backup
       const profileMetadata = {
         generalInfo: data.generalInfo,
         publicRole: data.publicRole,
@@ -24,16 +24,45 @@ export const useOnboarding = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
+          // Store structured data in preferences as backup
           preferences: profileMetadata,
-          // Update name from onboarding data
+          
+          // General info in dedicated columns
           first_name: data.generalInfo.name?.split(' ')[0] || undefined,
           last_name: data.generalInfo.name?.split(' ').slice(1).join(' ') || undefined,
-          // Store social media links in social_links JSON field
-          social_links: {
-            instagram: data.publicRole.instagramHandle || null,
-            youtube: data.publicRole.youtubeHandle || null,
-            tiktok: data.publicRole.tiktokHandle || null
-          }
+          age: data.generalInfo.age ? parseInt(data.generalInfo.age) : null,
+          gender: data.generalInfo.gender || null,
+          height: data.generalInfo.height || null,
+          weight: data.generalInfo.weight || null,
+          physical_limitations: data.generalInfo.physicalLimitations || null,
+          neurodiversity: data.generalInfo.neurodiversity || null,
+          
+          // Public role in dedicated columns
+          primary_role: data.publicRole.primaryRole || null,
+          secondary_role: data.publicRole.secondaryRole || null,
+          niche: data.publicRole.niche || null,
+          creative_strengths: data.publicRole.creativeStrengths || null,
+          platforms: data.publicRole.platforms || [],
+          challenges: data.publicRole.challenges || null,
+          
+          // Social media handles in dedicated columns
+          instagram_handle: data.publicRole.instagramHandle || null,
+          youtube_handle: data.publicRole.youtubeHandle || null,
+          tiktok_handle: data.publicRole.tiktokHandle || null,
+          snapchat_handle: data.publicRole.snapchatHandle || null,
+          facebook_handle: data.publicRole.facebookHandle || null,
+          twitter_handle: data.publicRole.twitterHandle || null,
+          
+          // Life map in dedicated columns
+          location: data.lifeMap.location || null,
+          living_with: data.lifeMap.livingWith || null,
+          has_children: data.lifeMap.hasChildren || null,
+          ongoing_changes: data.lifeMap.ongoingChanges || null,
+          past_crises: data.lifeMap.pastCrises || null,
+          
+          // Onboarding tracking
+          onboarding_completed: true,
+          onboarding_completed_at: new Date().toISOString()
         })
         .eq('id', clientId);
 
@@ -67,13 +96,56 @@ export const useOnboarding = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('preferences') // Use preferences instead of profile_metadata
+        .select(`
+          first_name, last_name, age, gender, height, weight, physical_limitations, neurodiversity,
+          primary_role, secondary_role, niche, creative_strengths, platforms, challenges,
+          instagram_handle, youtube_handle, tiktok_handle, snapchat_handle, facebook_handle, twitter_handle,
+          location, living_with, has_children, ongoing_changes, past_crises,
+          onboarding_completed, onboarding_completed_at
+        `)
         .eq('id', clientId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) return null;
 
-      return (data?.preferences as unknown as OnboardingData) || null;
+      // Convert database columns back to OnboardingData format
+      const onboardingData: OnboardingData = {
+        generalInfo: {
+          name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
+          age: data.age?.toString() || '',
+          gender: data.gender || '',
+          height: data.height || '',
+          weight: data.weight || '',
+          physicalLimitations: data.physical_limitations || '',
+          neurodiversity: data.neurodiversity || ''
+        },
+        publicRole: {
+          primaryRole: data.primary_role || '',
+          secondaryRole: data.secondary_role || '',
+          niche: data.niche || '',
+          creativeStrengths: data.creative_strengths || '',
+          platforms: Array.isArray(data.platforms) ? data.platforms.filter((p): p is string => typeof p === 'string') : [],
+          challenges: data.challenges || '',
+          instagramHandle: data.instagram_handle || '',
+          youtubeHandle: data.youtube_handle || '',
+          tiktokHandle: data.tiktok_handle || '',
+          snapchatHandle: data.snapchat_handle || '',
+          facebookHandle: data.facebook_handle || '',
+          twitterHandle: data.twitter_handle || ''
+        },
+        lifeMap: {
+          location: data.location || '',
+          livingWith: data.living_with || '',
+          hasChildren: data.has_children || '',
+          ongoingChanges: data.ongoing_changes || '',
+          pastCrises: data.past_crises || ''
+        },
+        onboardingCompleted: data.onboarding_completed || false,
+        onboardingCompletedAt: data.onboarding_completed_at || undefined
+      };
+
+      return onboardingData;
     } catch (error) {
       console.error('Error getting onboarding data:', error);
       return null;
@@ -81,9 +153,22 @@ export const useOnboarding = () => {
   };
 
   const hasCompletedOnboarding = async (clientId: string): Promise<boolean> => {
-    const data = await getOnboardingData(clientId);
-    // Förbättrad kontroll - kolla både på flagga och på att alla nödvändiga fält finns
-    return !!(data?.onboardingCompleted || (data?.generalInfo?.name && data?.publicRole?.primaryRole && data?.lifeMap?.location));
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('onboarding_completed, first_name, primary_role, location')
+        .eq('id', clientId)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) return false;
+
+      // Check onboarding_completed flag or presence of required fields
+      return !!(data.onboarding_completed || (data.first_name && data.primary_role && data.location));
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+      return false;
+    }
   };
 
   return {

@@ -963,75 +963,150 @@ export type Database = {
       profiles: {
         Row: {
           address: Json | null
+          age: number | null
           avatar_url: string | null
           bio: string | null
+          challenges: string | null
           consent_timestamp: string | null
           created_at: string | null
+          creative_strengths: string | null
           data_retention_until: string | null
           date_of_birth: string | null
           deletion_requested_at: string | null
           department: string | null
           email: string | null
+          facebook_handle: string | null
           first_name: string | null
+          gender: string | null
+          has_children: string | null
+          height: string | null
           id: string
+          instagram_handle: string | null
           job_title: string | null
           last_login_at: string | null
           last_name: string | null
+          living_with: string | null
+          location: string | null
+          neurodiversity: string | null
+          niche: string | null
+          onboarding_completed: boolean | null
+          onboarding_completed_at: string | null
+          ongoing_changes: string | null
           organization: string | null
+          past_crises: string | null
           phone: string | null
+          physical_limitations: string | null
+          platforms: Json | null
           preferences: Json | null
+          primary_role: string | null
           profile_extended: Json | null
+          secondary_role: string | null
+          snapchat_handle: string | null
           social_links: Json | null
           status: string | null
+          tiktok_handle: string | null
+          twitter_handle: string | null
           updated_at: string | null
+          weight: string | null
+          youtube_handle: string | null
         }
         Insert: {
           address?: Json | null
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
+          challenges?: string | null
           consent_timestamp?: string | null
           created_at?: string | null
+          creative_strengths?: string | null
           data_retention_until?: string | null
           date_of_birth?: string | null
           deletion_requested_at?: string | null
           department?: string | null
           email?: string | null
+          facebook_handle?: string | null
           first_name?: string | null
+          gender?: string | null
+          has_children?: string | null
+          height?: string | null
           id: string
+          instagram_handle?: string | null
           job_title?: string | null
           last_login_at?: string | null
           last_name?: string | null
+          living_with?: string | null
+          location?: string | null
+          neurodiversity?: string | null
+          niche?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          ongoing_changes?: string | null
           organization?: string | null
+          past_crises?: string | null
           phone?: string | null
+          physical_limitations?: string | null
+          platforms?: Json | null
           preferences?: Json | null
+          primary_role?: string | null
           profile_extended?: Json | null
+          secondary_role?: string | null
+          snapchat_handle?: string | null
           social_links?: Json | null
           status?: string | null
+          tiktok_handle?: string | null
+          twitter_handle?: string | null
           updated_at?: string | null
+          weight?: string | null
+          youtube_handle?: string | null
         }
         Update: {
           address?: Json | null
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
+          challenges?: string | null
           consent_timestamp?: string | null
           created_at?: string | null
+          creative_strengths?: string | null
           data_retention_until?: string | null
           date_of_birth?: string | null
           deletion_requested_at?: string | null
           department?: string | null
           email?: string | null
+          facebook_handle?: string | null
           first_name?: string | null
+          gender?: string | null
+          has_children?: string | null
+          height?: string | null
           id?: string
+          instagram_handle?: string | null
           job_title?: string | null
           last_login_at?: string | null
           last_name?: string | null
+          living_with?: string | null
+          location?: string | null
+          neurodiversity?: string | null
+          niche?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          ongoing_changes?: string | null
           organization?: string | null
+          past_crises?: string | null
           phone?: string | null
+          physical_limitations?: string | null
+          platforms?: Json | null
           preferences?: Json | null
+          primary_role?: string | null
           profile_extended?: Json | null
+          secondary_role?: string | null
+          snapchat_handle?: string | null
           social_links?: Json | null
           status?: string | null
+          tiktok_handle?: string | null
+          twitter_handle?: string | null
           updated_at?: string | null
+          weight?: string | null
+          youtube_handle?: string | null
         }
         Relationships: []
       }

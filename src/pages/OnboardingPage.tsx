@@ -48,11 +48,10 @@ export const OnboardingPage = () => {
 
       setClientProfile(clientData);
 
-      // Check if onboarding is already complete using preferences
-      const metadata = (clientData.preferences as any);
+      // Check if onboarding is already complete using database columns
       const hasOnboardingData = !!(
-        metadata?.onboardingCompleted || 
-        (metadata?.generalInfo?.name && metadata?.publicRole?.primaryRole && metadata?.lifeMap?.location)
+        clientData.onboarding_completed || 
+        (clientData.first_name && clientData.primary_role && clientData.location)
       );
       
       if (hasOnboardingData) {
