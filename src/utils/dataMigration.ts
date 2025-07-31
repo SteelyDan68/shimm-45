@@ -24,6 +24,8 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
     const { data: legacyClients, error: legacyError } = await supabase
       .from('clients')
       .select('*');
+    
+    console.log('Legacy clients found:', legacyClients);
 
     if (legacyError) {
       result.errors.push(`Failed to fetch legacy clients: ${legacyError.message}`);
@@ -41,6 +43,8 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
     const { data: existingProfiles, error: profilesError } = await supabase
       .from('profiles')
       .select('email, id');
+    
+    console.log('Existing profiles:', existingProfiles);
 
     if (profilesError) {
       result.errors.push(`Failed to fetch existing profiles: ${profilesError.message}`);
