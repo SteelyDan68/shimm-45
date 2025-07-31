@@ -12,7 +12,8 @@ import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 
 interface ModularPillarAssessmentProps {
-  clientId: string;
+  clientId?: string;
+  userId?: string;
   pillarKey: PillarKey;
   onComplete?: () => void;
   onBack?: () => void;
@@ -20,11 +21,14 @@ interface ModularPillarAssessmentProps {
 
 export const ModularPillarAssessment = ({ 
   clientId, 
+  userId,
   pillarKey, 
   onComplete, 
   onBack 
 }: ModularPillarAssessmentProps) => {
-  const { submitPillarAssessment, loading } = useFivePillarsModular(clientId);
+  // Use the appropriate ID (userId for new architecture, clientId for backward compatibility)
+  const targetId = userId || clientId;
+  const { submitPillarAssessment, loading } = useFivePillarsModular(targetId!);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [comments, setComments] = useState('');
 

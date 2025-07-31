@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { PillarKey } from '@/types/fivePillarsModular';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useUserPillars } from '@/hooks/useUserPillars';
 import { PillarHeatmap } from './PillarHeatmap';
 import { ModularPillarAssessment } from './ModularPillarAssessment';
 import { ModularPillarManager } from './ModularPillarManager';
@@ -13,24 +13,25 @@ import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 import { AnalysisActions } from '@/components/ui/analysis-actions';
 
-interface ModularPillarDashboardProps {
+interface UserPillarDashboardProps {
   userId: string;
   userName: string;
   isCoachView?: boolean;
 }
 
-export const ModularPillarDashboard = ({ 
+export const UserPillarDashboard = ({ 
   userId, 
   userName, 
   isCoachView = false 
-}: ModularPillarDashboardProps) => {
+}: UserPillarDashboardProps) => {
   const { 
-    pillarDefinitions, 
-    getActivatedPillars, 
-    getLatestAssessment, 
-    generateHeatmapData,
-    refreshData
-  } = useFivePillarsModular(userId);
+    activations,
+    assessments,
+    loading,
+    getActivatedPillars,
+    getLatestAssessment,
+    refetch
+  } = useUserPillars(userId);
   
   const [selectedPillar, setSelectedPillar] = useState<PillarKey | null>(null);
   const [showManager, setShowManager] = useState(false);
@@ -41,6 +42,23 @@ export const ModularPillarDashboard = ({
   } | null>(null);
 
   const activatedPillars = getActivatedPillars();
+
+  // Generate heatmap data from user assessments
+  const generateHeatmapData = () => {
+    return activatedPillars.map(pillarKey => {
+      const assessment = getLatestAssessment(pillarKey);
+      const pillarConfig = PILLAR_MODULES[pillarKey];
+      
+      return {
+        pillar_key: pillarKey,
+        score: assessment?.calculated_score || 0,
+        color: pillarConfig.color,
+        name: pillarConfig.name,
+        last_assessment: assessment?.created_at || null
+      };
+    });
+  };
+
   const heatmapData = generateHeatmapData();
 
   // If in assessment mode
@@ -51,7 +69,7 @@ export const ModularPillarDashboard = ({
           userId={userId}
           pillarKey={selectedPillar}
           onComplete={() => {
-            refreshData(); // Refresh heatmap data after assessment
+            refetch(); // Refresh data after assessment
             setSelectedPillar(null);
           }}
           onBack={() => setSelectedPillar(null)}
@@ -77,6 +95,16 @@ export const ModularPillarDashboard = ({
           userName={userName} 
           isCoachView={true}
         />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-lg">Laddar dina pelare...</div>
+        </div>
       </div>
     );
   }
@@ -129,7 +157,6 @@ export const ModularPillarDashboard = ({
               if (!activatedPillars.includes(pillarKey)) return null;
               
               const pillarConfig = PILLAR_MODULES[pillarKey];
-              const pillarDefinition = pillarDefinitions.find(p => p.pillar_key === pillarKey);
               const latestAssessment = getLatestAssessment(pillarKey);
               const heatmapEntry = heatmapData.find(h => h.pillar_key === pillarKey);
               
@@ -137,7 +164,7 @@ export const ModularPillarDashboard = ({
                 <Card 
                   key={pillarKey} 
                   className="hover:shadow-lg transition-shadow cursor-pointer"
-                  style={{ borderColor: `${pillarDefinition?.color_code}20` }}
+                  style={{ borderColor: `${pillarConfig.color}20` }}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -171,7 +198,7 @@ export const ModularPillarDashboard = ({
                           <div className="flex items-center gap-2">
                             <span 
                               className="text-lg font-bold"
-                              style={{ color: pillarDefinition?.color_code }}
+                              style={{ color: pillarConfig.color }}
                             >
                               {latestAssessment.calculated_score?.toFixed(1) || '—'}
                             </span>
@@ -211,7 +238,7 @@ export const ModularPillarDashboard = ({
                         onClick={() => setSelectedPillar(pillarKey)}
                         className="w-full"
                         variant={latestAssessment ? "outline" : "default"}
-                        style={latestAssessment ? {} : { backgroundColor: pillarDefinition?.color_code }}
+                        style={latestAssessment ? {} : { backgroundColor: pillarConfig.color }}
                       >
                         {latestAssessment ? "Uppdatera bedömning" : "Gör bedömning"}
                       </Button>
@@ -237,7 +264,7 @@ export const ModularPillarDashboard = ({
             </h2>
             <p className="text-muted-foreground">
               {isCoachView 
-                ? "Aktivera pelare för klienten genom att klicka på 'Hantera pelare'" 
+                ? "Aktivera pelare för användaren genom att klicka på 'Hantera pelare'" 
                 : "Din coach har inte aktiverat några utvecklingspelare än."
               }
             </p>

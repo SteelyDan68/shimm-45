@@ -9,12 +9,24 @@ import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 
 interface ModularPillarManagerProps {
-  clientId: string;
-  clientName: string;
+  clientId?: string;
+  userId?: string;
+  clientName?: string;
+  userName?: string;
   isCoachView?: boolean;
 }
 
-export const ModularPillarManager = ({ clientId, clientName, isCoachView = true }: ModularPillarManagerProps) => {
+export const ModularPillarManager = ({ 
+  clientId, 
+  userId, 
+  clientName, 
+  userName, 
+  isCoachView = true 
+}: ModularPillarManagerProps) => {
+  // Use the appropriate ID and name for enterprise architecture
+  const targetId = userId || clientId;
+  const targetName = userName || clientName;
+  
   const { 
     pillarDefinitions, 
     activations, 
@@ -23,7 +35,7 @@ export const ModularPillarManager = ({ clientId, clientName, isCoachView = true 
     loading,
     getActivatedPillars,
     generateHeatmapData
-  } = useFivePillarsModular(clientId);
+  } = useFivePillarsModular(targetId!);
 
   const activatedPillars = getActivatedPillars();
   const heatmapData = generateHeatmapData();

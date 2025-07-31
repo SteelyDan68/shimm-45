@@ -346,8 +346,8 @@ export const ClientDashboard = () => {
         {/* Five Pillars Tab */}
         <TabsContent value="pillars" className="space-y-6">
           <ModularPillarDashboard 
-            clientId={clientProfile.id} 
-            clientName={clientProfile.name} 
+            userId={clientProfile.id} 
+            userName={clientProfile.name} 
             isCoachView={false}
           />
         </TabsContent>
@@ -369,7 +369,7 @@ export const ClientDashboard = () => {
 
         {/* Assessment Tab */}
         <TabsContent value="assessment" className="space-y-6">
-          <PillarDashboard clientId={clientProfile.id} clientName={clientProfile.name} />
+          <PillarDashboard userId={clientProfile.id} userName={clientProfile.name} />
         </TabsContent>
 
         {/* Analytics Tab */}

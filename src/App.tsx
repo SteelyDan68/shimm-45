@@ -12,6 +12,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
 import { UserProfile } from "./pages/UserProfile";
+import { UserDashboard } from "./pages/UserDashboard";
 import { ClientDashboard } from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { EditProfilePage } from "./pages/EditProfilePage";
@@ -49,6 +50,7 @@ const AppRoutes = () => {
               <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/user/:userId" element={<UserProfile />} />
+              <Route path="/user/:userId/dashboard" element={<UserDashboard />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/administration" element={<Administration />} />
               <Route path="/auth" element={<Auth />} />

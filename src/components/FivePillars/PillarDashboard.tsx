@@ -10,13 +10,14 @@ import { DynamicAssessmentForm } from '@/components/AssessmentEngine/DynamicAsse
 import { ArrowLeft, TrendingUp, Clock } from 'lucide-react';
 
 interface PillarDashboardProps {
-  clientId: string;
-  clientName: string;
+  userId: string;
+  userName: string;
 }
 
-export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) => {
-  const { formDefinitions, assignments, assessmentRounds, getLatestAssessment } = useAssessmentEngine(clientId);
-  const { pillarDefinitions, getActivatedPillars } = useFivePillarsModular(clientId);
+export const PillarDashboard = ({ userId, userName }: PillarDashboardProps) => {
+  // Use user-centric hooks for enterprise architecture
+  const { formDefinitions, assignments, assessmentRounds, getLatestAssessment } = useAssessmentEngine(userId);
+  const { pillarDefinitions, getActivatedPillars } = useFivePillarsModular(userId);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   
   const activatedPillars = getActivatedPillars();
@@ -36,7 +37,7 @@ export const PillarDashboard = ({ clientId, clientName }: PillarDashboardProps) 
           Tillbaka till översikt
         </Button>
         <DynamicAssessmentForm
-          clientId={clientId}
+          userId={userId}
           formDefinitionId={selectedForm}
           formName={formDefinition?.name || 'Assessment'}
           formDescription={formDefinition?.description}

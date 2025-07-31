@@ -12,6 +12,7 @@ interface PillarHeatmapProps {
   title?: string;
   showInactive?: boolean;
   clientId?: string;
+  userId?: string;
   isCoachView?: boolean;
 }
 
