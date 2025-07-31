@@ -140,6 +140,17 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Email result details:", JSON.stringify(emailResult, null, 2));
     console.log("Email error details:", JSON.stringify(emailError, null, 2));
     
+    // Prepare debug information
+    const debugInfo = {
+      hasApiKey: !!resendApiKey,
+      keyLength: resendApiKey?.length || 0,
+      keyStartsWithRe: resendApiKey?.startsWith('re_'),
+      emailResult: emailResult ? JSON.stringify(emailResult) : null,
+      emailError: emailError ? JSON.stringify(emailError) : null,
+      targetEmail: email,
+      sender: "SHIMM <onboarding@resend.dev>"
+    };
+    
     if (emailError) {
       console.error("Failed to send invitation email:", emailError);
       
@@ -149,7 +160,16 @@ const handler = async (req: Request): Promise<Response> => {
         .delete()
         .eq('id', invitation.id);
         
-      throw new Error(`Email sending failed: ${emailError.message || JSON.stringify(emailError)}`);
+      return new Response(
+        JSON.stringify({ 
+          error: `Email sending failed: ${emailError.message || JSON.stringify(emailError)}`,
+          debugInfo
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     if (!emailResult || !emailResult.id) {
@@ -161,7 +181,16 @@ const handler = async (req: Request): Promise<Response> => {
         .delete()
         .eq('id', invitation.id);
         
-      throw new Error('Email sending failed: No result returned from email service');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Email sending failed: No result returned from email service',
+          debugInfo
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     console.log("Invitation email sent successfully:", emailResult);
@@ -171,7 +200,8 @@ const handler = async (req: Request): Promise<Response> => {
         success: true, 
         invitationId: invitation.id,
         invitationUrl,
-        emailId: emailResult.id
+        emailId: emailResult.id,
+        debugInfo
       }),
       {
         status: 200,
