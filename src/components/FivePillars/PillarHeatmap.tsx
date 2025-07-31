@@ -14,6 +14,8 @@ interface PillarHeatmapProps {
   clientId?: string;
   userId?: string;
   isCoachView?: boolean;
+  showDetails?: boolean;
+  onPillarClick?: (pillarKey: string) => void;
 }
 
 export const PillarHeatmap = ({ 
@@ -21,7 +23,9 @@ export const PillarHeatmap = ({
   title = "Five Pillars Heatmap", 
   showInactive = false,
   clientId,
-  isCoachView = false
+  isCoachView = false,
+  showDetails = false,
+  onPillarClick
 }: PillarHeatmapProps) => {
   const navigate = useNavigate();
 
@@ -48,14 +52,17 @@ export const PillarHeatmap = ({
   };
 
   const handlePillarClick = (pillar: PillarHeatmapData) => {
-    if (pillar.score === 0 || !clientId) return;
+    if (pillar.score === 0) return;
     
-    // Navigera till klientprofil med Five Pillars tab öppen
-    if (isCoachView) {
+    // Use custom callback if provided
+    if (onPillarClick) {
+      onPillarClick(pillar.pillar_key);
+      return;
+    }
+    
+    // Default navigation for coach view
+    if (isCoachView && clientId) {
       navigate(`/client/${clientId}?tab=pillars&pillar=${pillar.pillar_key}`);
-    } else {
-      // För klientvy, bara fokusera på pelaren i nuvarande vy
-      // Focus on pillar logic would go here
     }
   };
 

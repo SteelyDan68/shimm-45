@@ -21,7 +21,7 @@ export const useClientData = () => {
       const { data, error } = await supabase
         .from('client_data_cache')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .order('created_at', { ascending: false });
 
       if (error) {

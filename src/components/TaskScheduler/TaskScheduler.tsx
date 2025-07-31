@@ -33,7 +33,7 @@ export function TaskScheduler({ clientId, clientName }: TaskSchedulerProps) {
       const { data, error } = await supabase
         .from('path_entries')
         .select('id, details, timestamp')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('type', 'recommendation')
         .eq('ai_generated', true)
         .order('timestamp', { ascending: false })
