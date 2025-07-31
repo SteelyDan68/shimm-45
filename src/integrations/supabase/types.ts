@@ -25,6 +25,7 @@ export type Database = {
           is_active: boolean
           reminder_sent: boolean
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           assigned_at?: string
@@ -36,6 +37,7 @@ export type Database = {
           is_active?: boolean
           reminder_sent?: boolean
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           assigned_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           is_active?: boolean
           reminder_sent?: boolean
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -163,6 +166,7 @@ export type Database = {
           pillar_type: string
           scores: Json
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           ai_analysis?: string | null
@@ -176,6 +180,7 @@ export type Database = {
           pillar_type: string
           scores?: Json
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           ai_analysis?: string | null
@@ -189,6 +194,7 @@ export type Database = {
           pillar_type?: string
           scores?: Json
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -212,6 +218,7 @@ export type Database = {
           id: string
           title: string
           updated_at: string
+          user_id: string | null
           visible_to_client: boolean
         }
         Insert: {
@@ -225,6 +232,7 @@ export type Database = {
           id?: string
           title: string
           updated_at?: string
+          user_id?: string | null
           visible_to_client?: boolean
         }
         Update: {
@@ -238,6 +246,7 @@ export type Database = {
           id?: string
           title?: string
           updated_at?: string
+          user_id?: string | null
           visible_to_client?: boolean
         }
         Relationships: []
@@ -258,6 +267,7 @@ export type Database = {
           source: string
           title: string | null
           url: string | null
+          user_id: string | null
         }
         Insert: {
           author?: string | null
@@ -274,6 +284,7 @@ export type Database = {
           source: string
           title?: string | null
           url?: string | null
+          user_id?: string | null
         }
         Update: {
           author?: string | null
@@ -290,6 +301,7 @@ export type Database = {
           source?: string
           title?: string | null
           url?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -297,6 +309,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_data_cache_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_user_mapping"
             referencedColumns: ["client_id"]
           },
           {
@@ -317,6 +336,7 @@ export type Database = {
           id: string
           metadata: Json | null
           updated_at: string
+          user_id: string | null
           version: number
           xml_content: unknown
         }
@@ -328,6 +348,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           updated_at?: string
+          user_id?: string | null
           version?: number
           xml_content: unknown
         }
@@ -339,6 +360,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           updated_at?: string
+          user_id?: string | null
           version?: number
           xml_content?: unknown
         }
@@ -348,6 +370,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "fk_client_data_containers_client"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_user_mapping"
             referencedColumns: ["client_id"]
           },
           {
@@ -369,6 +398,7 @@ export type Database = {
           is_active: boolean
           pillar_key: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           activated_at?: string
@@ -379,6 +409,7 @@ export type Database = {
           is_active?: boolean
           pillar_key: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           activated_at?: string
@@ -389,6 +420,7 @@ export type Database = {
           is_active?: boolean
           pillar_key?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -401,6 +433,7 @@ export type Database = {
           is_active: boolean
           pillar_type: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           assigned_at?: string
@@ -410,6 +443,7 @@ export type Database = {
           is_active?: boolean
           pillar_type: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           assigned_at?: string
@@ -419,6 +453,7 @@ export type Database = {
           is_active?: boolean
           pillar_type?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -842,6 +877,7 @@ export type Database = {
           title: string
           type: string
           updated_at: string
+          user_id: string | null
           visible_to_client: boolean
         }
         Insert: {
@@ -860,6 +896,7 @@ export type Database = {
           title: string
           type: string
           updated_at?: string
+          user_id?: string | null
           visible_to_client?: boolean
         }
         Update: {
@@ -878,6 +915,7 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          user_id?: string | null
           visible_to_client?: boolean
         }
         Relationships: [
@@ -886,6 +924,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "path_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_user_mapping"
             referencedColumns: ["client_id"]
           },
           {
@@ -909,6 +954,7 @@ export type Database = {
           insights: Json | null
           pillar_key: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           ai_analysis?: string | null
@@ -921,6 +967,7 @@ export type Database = {
           insights?: Json | null
           pillar_key: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           ai_analysis?: string | null
@@ -933,6 +980,7 @@ export type Database = {
           insights?: Json | null
           pillar_key?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -990,6 +1038,7 @@ export type Database = {
           id: string
           metadata: Json | null
           pillar_key: string
+          user_id: string | null
         }
         Insert: {
           client_id: string
@@ -999,6 +1048,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           pillar_key: string
+          user_id?: string | null
         }
         Update: {
           client_id?: string
@@ -1008,6 +1058,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           pillar_key?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1215,6 +1266,7 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           ai_generated?: boolean
@@ -1230,6 +1282,7 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           ai_generated?: boolean
@@ -1245,6 +1298,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1252,6 +1306,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_user_mapping"
             referencedColumns: ["client_id"]
           },
           {
@@ -1497,6 +1558,13 @@ export type Database = {
             foreignKeyName: "weekly_email_logs_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_user_mapping"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "weekly_email_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -1518,10 +1586,29 @@ export type Database = {
         }
         Relationships: []
       }
+      client_user_mapping: {
+        Row: {
+          client_id: string | null
+          display_name: string | null
+          email: string | null
+          first_name: string | null
+          last_name: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_client_id_from_user_id: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
+      get_user_id_from_client_id: {
+        Args: { client_uuid: string }
         Returns: string
       }
       get_user_organization_ids: {
