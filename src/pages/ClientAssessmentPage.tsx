@@ -25,12 +25,30 @@ export const ClientAssessmentPage = () => {
     if (!user || !clientId) return;
     
     try {
-      const { data: clientData, error: clientError } = await supabase
-        .from('profiles')
+      // First try to find client by the provided clientId
+      let { data: clientData, error: clientError } = await supabase
+        .from('clients')
         .select('*')
         .eq('id', clientId)
-        .eq('email', user.email) // Ensure user owns this profile
+        .eq('email', user.email)
         .maybeSingle();
+
+      // If not found and clientId matches user.id, find the user's client profile
+      if (!clientData && clientId === user.id) {
+        const { data: userClientData, error: userClientError } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (userClientError) throw userClientError;
+        
+        if (userClientData) {
+          // Redirect to the correct client assessment URL
+          navigate(`/client-assessment/${userClientData.id}`, { replace: true });
+          return;
+        }
+      }
 
       if (clientError) throw clientError;
 
