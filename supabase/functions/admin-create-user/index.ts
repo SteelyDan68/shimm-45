@@ -63,8 +63,8 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check if the requesting user has admin privileges
-    const { data: userRoles, error: roleError } = await supabase
+    // Check if the requesting user has admin privileges using admin client (bypasses RLS)
+    const { data: userRoles, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
@@ -77,7 +77,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log('User roles found:', userRoles);
     const hasAdminRole = userRoles?.some(r => ['superadmin', 'admin'].includes(r.role));
+    console.log('Has admin role:', hasAdminRole, 'for user:', user.id);
+    
     if (!hasAdminRole) {
       console.error('Unauthorized user creation attempt by user:', user.id);
       return new Response(
