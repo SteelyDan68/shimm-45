@@ -1161,6 +1161,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stefan_interactions: {
+        Row: {
+          ai_analysis: string | null
+          context_data: Json | null
+          created_at: string
+          id: string
+          interaction_type: string
+          message_content: string | null
+          stefan_persona: string
+          user_id: string
+          user_response: string | null
+        }
+        Insert: {
+          ai_analysis?: string | null
+          context_data?: Json | null
+          created_at?: string
+          id?: string
+          interaction_type: string
+          message_content?: string | null
+          stefan_persona?: string
+          user_id: string
+          user_response?: string | null
+        }
+        Update: {
+          ai_analysis?: string | null
+          context_data?: Json | null
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          message_content?: string | null
+          stefan_persona?: string
+          user_id?: string
+          user_response?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           ai_generated: boolean
@@ -1310,6 +1346,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_journey_states: {
+        Row: {
+          completed_assessments: Json | null
+          created_at: string
+          current_phase: string
+          id: string
+          journey_progress: number | null
+          last_activity_at: string | null
+          metadata: Json | null
+          next_recommended_assessment: string | null
+          stefan_interventions_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_assessments?: Json | null
+          created_at?: string
+          current_phase?: string
+          id?: string
+          journey_progress?: number | null
+          last_activity_at?: string | null
+          metadata?: Json | null
+          next_recommended_assessment?: string | null
+          stefan_interventions_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_assessments?: Json | null
+          created_at?: string
+          current_phase?: string
+          id?: string
+          journey_progress?: number | null
+          last_activity_at?: string | null
+          metadata?: Json | null
+          next_recommended_assessment?: string | null
+          stefan_interventions_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_relationships: {
         Row: {
           assigned_at: string | null
@@ -1448,6 +1526,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      welcome_assessments: {
+        Row: {
+          adaptive_questions: Json
+          ai_analysis: string | null
+          created_at: string
+          created_by: string
+          free_text_responses: Json
+          id: string
+          overall_score: number | null
+          quick_wins: Json
+          recommendations: Json | null
+          updated_at: string
+          user_id: string
+          wheel_of_life_scores: Json
+        }
+        Insert: {
+          adaptive_questions?: Json
+          ai_analysis?: string | null
+          created_at?: string
+          created_by: string
+          free_text_responses?: Json
+          id?: string
+          overall_score?: number | null
+          quick_wins?: Json
+          recommendations?: Json | null
+          updated_at?: string
+          user_id: string
+          wheel_of_life_scores?: Json
+        }
+        Update: {
+          adaptive_questions?: Json
+          ai_analysis?: string | null
+          created_at?: string
+          created_by?: string
+          free_text_responses?: Json
+          id?: string
+          overall_score?: number | null
+          quick_wins?: Json
+          recommendations?: Json | null
+          updated_at?: string
+          user_id?: string
+          wheel_of_life_scores?: Json
+        }
+        Relationships: []
       }
     }
     Views: {
