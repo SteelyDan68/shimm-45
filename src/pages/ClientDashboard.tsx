@@ -24,6 +24,8 @@ import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { CapacityBarometer } from '@/components/CapacityBarometer';
 import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
 import { EnhancedDashboard } from '@/components/Dashboard/EnhancedDashboard';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 
 interface ClientProfile {
   id: string;
@@ -250,7 +252,10 @@ export const ClientDashboard = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Genomförda Uppgifter</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-1">
+              Genomförda Uppgifter
+              <HelpTooltip content={helpTexts.dashboard.completedTasks} />
+            </CardTitle>
             <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -261,7 +266,10 @@ export const ClientDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Väntande Uppgifter</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-1">
+              Väntande Uppgifter
+              <HelpTooltip content={helpTexts.dashboard.pendingTasks} />
+            </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -272,7 +280,10 @@ export const ClientDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utvecklingssteg</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-1">
+              Utvecklingssteg
+              <HelpTooltip content={helpTexts.dashboard.pathEntries} />
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -283,7 +294,10 @@ export const ClientDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Velocity Score</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-1">
+              Velocity Score
+              <HelpTooltip content={helpTexts.dashboard.velocityScore} />
+            </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -298,7 +312,10 @@ export const ClientDashboard = () => {
       {/* Kapacitetsbarometer - Efter stats-kort */}
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <h2 className="text-xl font-semibold mb-4">Din nuvarande kapacitet</h2>
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            Din nuvarande kapacitet
+            <HelpTooltip content={helpTexts.dashboard.capacityBarometer} />
+          </h2>
           <CapacityBarometer clientId={clientProfile.id} />
         </div>
         

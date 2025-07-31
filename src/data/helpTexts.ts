@@ -5,7 +5,33 @@ export const helpTexts = {
     welcomeMessage: "Detta är din huvudöversikt där du kan se viktig information och snabbåtkomst till funktioner.",
     clientCount: "Antal aktiva klienter som du hanterar för närvarande.",
     recentActivity: "De senaste aktiviteterna och uppdateringarna för dina klienter.",
-    quickActions: "Snabbknappar för de mest använda funktionerna."
+    quickActions: "Snabbknappar för de mest använda funktionerna.",
+    velocityScore: "Din personliga utvecklingshastighet baserat på aktivitet och framsteg. Uppdateras automatiskt baserat på dina assessments och uppgifter.",
+    completedTasks: "Antal uppgifter du har slutfört framgångsrikt. Visar din produktivitet och måluppfyllelse.",
+    pendingTasks: "Uppgifter som väntar på att genomföras. Håll denna siffra låg för bäst flöde.",
+    pathEntries: "Antal dokumenterade steg i din utvecklingsresa. Varje bedömning, AI-rekommendation och viktigt moment sparas här.",
+    capacityBarometer: "Mäter din nuvarande kapacitet att ta sig an nya utmaningar baserat på stress, energi och befintlig arbetsbelastning.",
+    nextSteps: "AI-genererade förslag på vad du bör fokusera på härnäst för optimal utveckling."
+  },
+
+  // Enhanced Dashboard
+  enhancedDashboard: {
+    journeyProgress: "Din totala utvecklingsresa mätt i procent. Baserat på genomförda assessments och aktiverade pillar-områden.",
+    currentPhase: "Vilken fas av utvecklingsresan du befinner dig i just nu. Varje fas har olika fokusområden och mål.",
+    stefanWidget: "Stefan är din AI-coach som ger personliga råd och uppmuntran baserat på din specifika situation.",
+    quickOverview: "Snabböversikt över dina viktigaste mätvärden och framsteg.",
+    pillarStatus: "Status för alla dina Five Pillars-områden. Färgkodning visar styrkor (grönt), utmaningar (orange) och kritiska områden (rött)."
+  },
+
+  // Stefan AI
+  stefan: {
+    introduction: "Stefan är din personliga AI-utvecklingscoach med fyra olika personligheter som anpassar sig efter dina behov.",
+    mentor: "Stefan Mentorn - Ger vägledning, vishetsord och strategiska råd för långsiktig utveckling.",
+    cheerleader: "Stefan Hejarklacksledaren - Uppmuntrar, motiverar och firar dina framsteg med entusiasm.",
+    strategist: "Stefan Strategen - Analyserar data och ger konkreta, genomtänkta handlingsplaner.",
+    friend: "Stefan Vännen - Erbjuder emotionellt stöd, empati och vardagliga råd i en avslappnad ton.",
+    proactiveMessages: "Stefan skickar automatiska meddelanden baserat på din aktivitet, tid sedan senaste inloggning och utvecklingsfas.",
+    contextualTips: "Tips och råd som anpassas efter vilken del av systemet du använder just nu."
   },
 
   // Client Profile
@@ -25,16 +51,42 @@ export const helpTexts = {
 
   // Five Pillars
   fivePillars: {
-    pillarsOrder: "Pillarnas prioriteringsordning: Skills (färdigheter) → Talent (talang) → Brand (varumärke) → Economy (ekonomi) → Self Care (välmående). Skills kommer först för enklare start.",
-    selfCare: "Välmående och hälsa - grundläggande för hållbar prestanda och kreativitet. Kommer sist i bedömningsordningen för att vara mindre överväldigande.",
-    skills: "Färdigheter och tekniska kunskaper - kontinuerlig utveckling och kompetensutveckling. Första pillar i bedömningssekvensen för enkel start.",
+    systemOverview: "Five Pillars är ett utvecklingssystem med fem grundpelare för hållbar framgång och välmående.",
+    pillarsOrder: "Pillarnas prioriteringsordning: Self Care (välmående) aktiveras automatiskt först, sedan Skills → Talent → Brand → Economy enligt behov.",
+    selfCare: "Välmående och hälsa - grundläggande för hållbar prestanda och kreativitet. Aktiveras automatiskt för alla nya användare.",
+    skills: "Färdigheter och tekniska kunskaper - kontinuerlig utveckling och kompetensutveckling.",
     talent: "Naturlig begåvning och kreativitet - identifiera och utveckla unika styrkor.",
     brand: "Personligt varumärke och synlighet - hur du uppfattas och presenterar dig.",
     economy: "Ekonomi och affärsverksamhet - intäkter, investeringar och finansiell hållbarhet.",
     overallScore: "Genomsnittlig poäng baserat på alla aktiverade pelare för denna klient.",
-    pillarScore: "Poäng för denna specifika pelare baserat på senaste bedömningen.",
+    pillarScore: "Poäng för denna specifika pelare baserat på senaste bedömningen (1-10 skala).",
     lastAssessment: "Datum för den senaste bedömningen av denna pelare.",
-    pillarTrend: "Utvecklingstrend: Uppåtgående (förbättring), Nedåtgående (försämring), Stabil (oförändrad)."
+    pillarTrend: "Utvecklingstrend: Uppåtgående (förbättring), Nedåtgående (försämring), Stabil (oförändrad).",
+    assessment: "Bedömning består av 20 frågor (15 skala-frågor + 5 textfrågor) som analyseras av AI för personliga rekommendationer.",
+    heatmap: "Visuell översikt över alla pillar-områden med färgkodning: Grön (stark), Orange (utmaning), Röd (kritisk), Grå (obearbetad).",
+    aiAnalysis: "AI analyserar dina svar och ger skräddarsydda råd, handlingsplaner och förbättringsförslag.",
+    activePillars: "Endast aktiverade pelare visas i din översikt. Din coach bestämmer vilka områden som är relevanta för dig."
+  },
+
+  // Journey & Progress
+  journey: {
+    welcomePhase: "Upptäck var du står idag - genomför välkomstbedömningen för att få en helhetsbild av din situation.",
+    pillarSelectionPhase: "Fördjupa dig inom viktiga livsområden - fokusera på de pillar-områden som är mest relevanta för dig.",
+    deepDivePhase: "Utveckla specifika områden - arbeta intensivt med utvalda utvecklingsområden.",
+    maintenancePhase: "Håll momentum och fortsätt växa - bibehåll framsteg och upptäck nya möjligheter.",
+    journeyProgress: "Din utvecklingsresa mätt i procent baserat på genomförda assessments och aktiverade områden.",
+    recommendedAssessments: "AI föreslår vilka bedömningar du bör göra härnäst baserat på din utvecklingsfas och tidigare resultat.",
+    smartGuide: "Intelligent guide som visar din nuvarande position och ger förslag på nästa steg i utvecklingsresan."
+  },
+
+  // Welcome Assessment
+  welcomeAssessment: {
+    overview: "Omfattande välkomstbedömning som kartlägger din nuvarande livssituation och identifierar utvecklingsområden.",
+    wheelOfLife: "Livets hjul - bedöm 8 viktiga livsområden på en skala 1-10 för att få en helhetsbild av din balans.",
+    adaptiveQuestions: "Intelligenta frågor som anpassar sig baserat på dina tidigare svar för mer personliga insikter.",
+    freeTextSection: "Möjlighet att beskriva din situation med egna ord för djupare AI-analys.",
+    quickWins: "Identifiera områden där du snabbt kan göra positiva förändringar för omedelbar motivation.",
+    aiAnalysis: "Omfattande AI-analys som skapar en personlig utvecklingsplan baserat på alla dina svar."
   },
 
   // Tasks
@@ -44,7 +96,9 @@ export const helpTexts = {
     deadline: "Slutdatum för när uppgiften ska vara färdig.",
     aiGenerated: "Uppgiften skapades automatiskt av AI baserat på klientdata och behov.",
     linkedPathEntry: "Kopplad till en specifik händelse i klientens utvecklingsresa.",
-    taskProgress: "Visar hur många uppgifter som är slutförda jämfört med totalt antal."
+    taskProgress: "Visar hur många uppgifter som är slutförda jämfört med totalt antal.",
+    manualTasks: "Uppgifter som du eller din coach har skapat manuellt.",
+    scheduler: "Intelligent schemaläggning som föreslår optimal timing för olika uppgifter."
   },
 
   // Messages
@@ -53,17 +107,21 @@ export const helpTexts = {
     messageThread: "Konversationstråd med alla relaterade meddelanden i kronologisk ordning.",
     aiAssisted: "Meddelandet innehåller AI-genererade förslag eller innehåll.",
     readStatus: "Visar om meddelandet har lästs av mottagaren.",
-    messagePreferences: "Inställningar för hur du vill få notifikationer och hantera meddelanden."
+    messagePreferences: "Inställningar för hur du vill få notifikationer och hantera meddelanden.",
+    notifications: "Automatiska notifikationer för nya meddelanden och viktiga uppdateringar."
   },
 
   // Analytics
   analytics: {
+    overview: "Detaljerad analys av din utveckling och framsteg över tid med AI-genererade insikter.",
     sentimentTrend: "Utveckling av allmän sentiment och känslor över tid baserat på innehåll och kommentarer.",
     engagementRate: "Procent av följare som aktivt interagerar med innehåll (likes, kommentarer, delningar).",
     growthRate: "Tillväxttakt för följare och engagement över specificerad tidsperiod.",
     contentPerformance: "Hur väl olika typer av innehåll presterar jämfört med varandra.",
     platformComparison: "Jämförelse av prestanda mellan olika sociala medier-plattformar.",
-    aiInsightsGenerated: "Antal AI-genererade insikter och rekommendationer baserat på data."
+    aiInsightsGenerated: "Antal AI-genererade insikter och rekommendationer baserat på data.",
+    pillarAnalytics: "Analys av dina Five Pillars framsteg och utvecklingstrender över tid.",
+    filters: "Anpassa tidsperiod och datatyper för mer specifik analys."
   },
 
   // Administration
@@ -93,5 +151,13 @@ export const helpTexts = {
     rightToBeForgotten: "Begär att all din data raderas permanent från våra system.",
     consentHistory: "Historik över alla samtycken du gett eller återkallat över tid.",
     auditTrail: "Spårningslogg som visar alla åtgärder som vidtagits med din data."
+  },
+
+  // Navigation
+  navigation: {
+    breadcrumbs: "Visar din nuvarande position i systemet och ger snabb åtkomst till föregående sidor.",
+    backButton: "Gå tillbaka till föregående sida eller vy.",
+    homeButton: "Snabb åtkomst till din huvud-dashboard.",
+    tabs: "Växla mellan olika vyer och funktioner inom samma område."
   }
 } as const;

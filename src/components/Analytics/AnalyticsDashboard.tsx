@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useFivePillarsModular } from "@/hooks/useFivePillarsModular";
 import { useNavigate } from "react-router-dom";
+import { HelpTooltip } from "@/components/HelpTooltip";
+import { helpTexts } from "@/data/helpTexts";
 
 interface AnalyticsDashboardProps {
   clientId?: string;
@@ -68,7 +70,10 @@ export function AnalyticsDashboard({ clientId, showClientName = false, onBack }:
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               )}
-              <CardTitle>Detaljerad Analys</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                Detaljerad Analys
+                <HelpTooltip content={helpTexts.analytics.overview} />
+              </CardTitle>
             </div>
             <div className="flex items-center gap-2">
               <Button 
@@ -87,7 +92,10 @@ export function AnalyticsDashboard({ clientId, showClientName = false, onBack }:
       {heatmapData && heatmapData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Five Pillars Status</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Five Pillars Status
+              <HelpTooltip content={helpTexts.analytics.pillarAnalytics} />
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <PillarHeatmap 

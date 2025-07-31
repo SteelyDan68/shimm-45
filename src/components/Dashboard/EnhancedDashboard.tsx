@@ -13,6 +13,8 @@ import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { useUserJourney } from '@/hooks/useUserJourney';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 import { useAuth } from '@/hooks/useAuth';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 import { 
   User, 
   Brain, 
@@ -80,18 +82,21 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
                 {getPhaseIcon()}
               </div>
               <div>
-                <CardTitle className="text-xl">
+                <CardTitle className="text-xl flex items-center gap-2">
                   {getWelcomeMessage()}
+                  <HelpTooltip content={helpTexts.enhancedDashboard.journeyProgress} />
                 </CardTitle>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground flex items-center gap-1">
                   {getCurrentPhaseDescription()}
+                  <HelpTooltip content={helpTexts.enhancedDashboard.currentPhase} />
                 </p>
               </div>
             </div>
             
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-bold text-blue-600 flex items-center gap-1">
                 {journeyProgress}%
+                <HelpTooltip content={helpTexts.enhancedDashboard.journeyProgress} side="left" />
               </div>
               <p className="text-sm text-muted-foreground">Framsteg</p>
             </div>
@@ -143,8 +148,9 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
                 <div className="text-2xl font-bold">
                   {activatedPillars.length}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   Aktiva områden
+                  <HelpTooltip content={helpTexts.fivePillars.activePillars} />
                 </div>
               </CardContent>
             </Card>
@@ -155,8 +161,9 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
                 <div className="text-2xl font-bold">
                   {journeyState?.completed_assessments?.length || 0}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   Bedömningar
+                  <HelpTooltip content={helpTexts.journey.recommendedAssessments} />
                 </div>
               </CardContent>
             </Card>
@@ -170,8 +177,9 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
                     : '0.0'
                   }
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   Genomsnitt
+                  <HelpTooltip content={helpTexts.fivePillars.overallScore} />
                 </div>
               </CardContent>
             </Card>
@@ -182,8 +190,9 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
                 <div className="text-2xl font-bold">
                   {journeyState?.stefan_interventions_count || 0}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   Stefan-tips
+                  <HelpTooltip content={helpTexts.stefan.proactiveMessages} />
                 </div>
               </CardContent>
             </Card>
@@ -193,7 +202,16 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
             userId={userId}
             heatmapData={heatmapData}
             showDetails={true}
+            title="Five Pillars Status"
+            onPillarClick={() => {}}
           />
+          <div className="text-center">
+            <HelpTooltip content={helpTexts.fivePillars.heatmap}>
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                Vad betyder färgerna? <span className="ml-1">💡</span>
+              </Button>
+            </HelpTooltip>
+          </div>
         </TabsContent>
 
         {/* Tasks Tab */}
@@ -217,7 +235,10 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="font-medium">Nästa steg</h4>
+              <h4 className="font-medium flex items-center gap-1">
+                Nästa steg
+                <HelpTooltip content={helpTexts.dashboard.nextSteps} />
+              </h4>
               <p className="text-sm text-muted-foreground">
                 {journeyState?.next_recommended_assessment 
                   ? `Rekommenderat: ${journeyState.next_recommended_assessment} bedömning`

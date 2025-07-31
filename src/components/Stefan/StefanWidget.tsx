@@ -7,6 +7,8 @@ import { StefanInteraction } from '@/types/welcomeAssessment';
 import { useStefanPersonality } from '@/hooks/useStefanPersonality';
 import { STEFAN_PERSONAS } from '@/config/stefanPersonas';
 import { useUserJourney } from '@/hooks/useUserJourney';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 import { 
   MessageCircle, 
   Heart, 
@@ -118,6 +120,7 @@ export const StefanWidget = ({ userId }: StefanWidgetProps) => {
               <CardTitle className="text-lg flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-blue-600" />
                 Möt Stefan
+                <HelpTooltip content={helpTexts.stefan.introduction} />
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Din personliga utvecklingscoach
