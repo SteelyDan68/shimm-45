@@ -118,324 +118,260 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
 
   skills: {
     key: 'skills',
-    name: 'Skills',
-    description: 'Färdigheter och kompetenser för karriärutveckling',
+    name: 'Färdigheter & Utveckling',
+    description: 'Dina kompetenser och färdigheter inom ditt fokusområde',
     icon: '🎯',
     color: '#3B82F6',
     questions: [
-      {
-        key: 'skill_training_regularity',
-        text: 'Jag tränar regelbundet på min färdighet.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.2
-      },
-      {
-        key: 'feedback_quality',
-        text: 'Jag får rätt feedback från andra.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.3
-      },
-      {
-        key: 'technical_improvement_time',
-        text: 'Jag använder tid på att förbättra mina tekniska färdigheter.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.4
-      },
-      {
-        key: 'development_feeling',
-        text: 'Jag känner att jag utvecklas.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.5
-      },
-      {
-        key: 'skill_improvement_needs',
-        text: 'Vad skulle hjälpa dig förbättra dina färdigheter just nu?',
-        type: 'text',
-        weight: 1.0
-      }
+      { key: 'skill_confidence', text: 'Hur säker känner du dig på dina huvudfärdigheter?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'learning_pace', text: 'Hur nöjd är du med din utvecklingstakt?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'feedback_seeking', text: 'Hur ofta söker du feedback på ditt arbete?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'skill_practice', text: 'Hur regelbundet tränar du dina färdigheter?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'technical_knowledge', text: 'Hur bra är din tekniska kunskap inom ditt område?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'problem_solving', text: 'Hur bra är du på att lösa komplexa problem?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'mentorship_access', text: 'Har du tillgång till mentorer eller erfarna kollegor?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'resource_utilization', text: 'Utnyttjar du tillgängliga verktyg och resurser effektivt?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'skill_gaps_awareness', text: 'Är du medveten om vilka färdigheter du behöver utveckla?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'continuous_improvement', text: 'Arbetar du aktivt med kontinuerlig förbättring?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'industry_trends', text: 'Följer du trender och utveckling inom ditt område?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      { key: 'skill_documentation', text: 'Dokumenterar du din kunskapsutveckling?', type: 'slider', weight: 0.8, min: 1, max: 10 },
+      { key: 'goal_setting', text: 'Sätter du tydliga mål för din kompetensutveckling?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'creativity_innovation', text: 'Utvecklar du kreativa lösningar och innovationer?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'collaboration_skills', text: 'Hur bra är du på att samarbeta med andra?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'main_focus_area', text: 'Beskriv ditt huvudfokusområde och vad du vill bli bättre på inom detta område', type: 'text', weight: 0.5 },
+      { key: 'missing_tools_knowledge', text: 'Vilka verktyg, kunskaper eller färdigheter saknar du för att utvecklas snabbare inom ditt område?', type: 'text', weight: 0.5 },
+      { key: 'breakthrough_experience', text: 'Berätta om ett genombrott eller framsteg du haft i din färdighetsutveckling', type: 'text', weight: 0.5 },
+      { key: 'development_obstacles', text: 'Vad är ditt största hinder för att utvecklas inom detta område?', type: 'text', weight: 0.5 },
+      { key: 'current_training_methods', text: 'Hur tränar du för närvarande och vad fungerar bäst för dig?', type: 'text', weight: 0.5 },
     ],
-    scoreCalculation: (answers) => {
-      const weights = {
-        skill_training_regularity: 1.2,
-        feedback_quality: 1.3,
-        technical_improvement_time: 1.4,
-        development_feeling: 1.5
-      };
-
+    scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
-
-      Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined && typeof answers[key] === 'number') {
-          // Convert 0-100 slider to 1-10 scale
-          const scaledScore = (answers[key] / 100) * 10;
-          totalScore += scaledScore * weight;
-          totalWeight += weight;
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        const question = PILLAR_MODULES.skills.questions.find(q => q.key === key);
+        if (question && question.type === 'slider' && typeof value === 'number') {
+          totalScore += value * (question.weight || 1);
+          totalWeight += (question.weight || 1);
         }
       });
-
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
+      
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
     },
-    insightGeneration: (answers, score) => ({
-      development_priorities: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value <= 40)
-        .map(([key]) => key),
-      strong_areas: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value >= 80)
-        .map(([key]) => key),
-      skill_level: score >= 8 ? 'expert' : score >= 6 ? 'proficient' : score >= 4 ? 'developing' : 'beginner',
-      improvement_text: answers.skill_improvement_needs || ''
-    })
+    insightGeneration: (answers: Record<string, any>, score: number) => {
+      const insights: Record<string, any> = {
+        overallScore: score,
+        focusArea: answers.main_focus_area || '',
+        missingSkills: answers.missing_tools_knowledge || '',
+        strengths: [],
+        developmentAreas: [],
+        recommendations: []
+      };
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          if (value >= 8) insights.strengths.push(key);
+          if (value <= 4) insights.developmentAreas.push(key);
+        }
+      });
+      
+      return insights;
+    }
   },
 
   talent: {
     key: 'talent',
-    name: 'Talent',
-    description: 'Naturliga begåvningar och unika styrkor',
+    name: 'Talang & Styrkor',
+    description: 'Dina naturliga förutsättningar och styrkor',
     icon: '⭐',
-    color: '#8B5CF6',
+    color: '#F59E0B',
     questions: [
-      {
-        key: 'drive_and_focus',
-        text: 'Jag har stark drivkraft och fokus.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.4
-      },
-      {
-        key: 'creativity_ideas',
-        text: 'Jag är kreativ och kommer på nya idéer.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.5
-      },
-      {
-        key: 'idea_to_action',
-        text: 'Jag kan snabbt omsätta idéer i handling.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.3
-      },
-      {
-        key: 'unique_voice',
-        text: 'Jag har en unik röst eller stil.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.2
-      },
-      {
-        key: 'creativity_usage',
-        text: 'Hur använder du din kreativitet idag?',
-        type: 'text',
-        weight: 1.0
-      }
+      { key: 'natural_abilities', text: 'Känner du igen dina naturliga förmågor och talanger?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'talent_utilization', text: 'Använder du dina talanger fullt ut i ditt arbete?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'flow_experiences', text: 'Hur ofta upplever du "flow" när du arbetar?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'passion_alignment', text: 'Hur väl stämmer ditt arbete överens med dina passioner?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'creative_expression', text: 'Får du uttrycka din kreativitet i det du gör?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'talent_recognition', text: 'Får du erkännande för dina unika styrkor?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'strength_development', text: 'Arbetar du aktivt med att utveckla dina styrkor?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'unique_value', text: 'Är du medveten om ditt unika värde?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'talent_feedback', text: 'Får du feedback som hjälper dig förstå dina talanger?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'natural_motivation', text: 'Känner du dig naturligt motiverad av dina huvuduppgifter?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'talent_confidence', text: 'Har du själförtroende för dina naturliga förmågor?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'strength_refinement', text: 'Förfinar du kontinuerligt dina talanger?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'talent_discovery', text: 'Upptäcker du regelbundet nya sidor av dina talanger?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      { key: 'authentic_expression', text: 'Känner du dig autentisk när du använder dina talanger?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'talent_impact', text: 'Märker du att dina talanger gör skillnad för andra?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'natural_strengths', text: 'Vad säger andra att du är naturligt bra på? Beskriv dina starkaste talanger', type: 'text', weight: 0.5 },
+      { key: 'flow_experiences_detail', text: 'Beskriv ett projekt eller situation där du kände dig helt i ditt element', type: 'text', weight: 0.5 },
+      { key: 'underutilized_talents', text: 'Vilka talanger har du som du inte använder fullt ut idag?', type: 'text', weight: 0.5 },
+      { key: 'motivation_drivers', text: 'Vad driver dig mest och ger dig energi i ditt arbete?', type: 'text', weight: 0.5 },
+      { key: 'ideal_creative_project', text: 'Hur skulle ditt ideala kreativa projekt se ut där du kan använda alla dina talanger?', type: 'text', weight: 0.5 },
     ],
-    scoreCalculation: (answers) => {
-      const weights = {
-        drive_and_focus: 1.4,
-        creativity_ideas: 1.5,
-        idea_to_action: 1.3,
-        unique_voice: 1.2
-      };
-
+    scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
-
-      Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined && typeof answers[key] === 'number') {
-          // Convert 0-100 slider to 1-10 scale
-          const scaledScore = (answers[key] / 100) * 10;
-          totalScore += scaledScore * weight;
-          totalWeight += weight;
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        const question = PILLAR_MODULES.talent.questions.find(q => q.key === key);
+        if (question && question.type === 'slider' && typeof value === 'number') {
+          totalScore += value * (question.weight || 1);
+          totalWeight += (question.weight || 1);
         }
       });
-
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
+      
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
     },
-    insightGeneration: (answers, score) => ({
-      talent_strengths: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value >= 80)
-        .map(([key]) => key),
-      development_areas: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value <= 50)
-        .map(([key]) => key),
-      talent_utilization: score >= 7 ? 'high' : score >= 5 ? 'moderate' : 'low',
-      creativity_application: answers.creativity_usage || '',
-      overall_talent_level: score >= 8 ? 'exceptional' : score >= 6 ? 'strong' : score >= 4 ? 'developing' : 'emerging'
-    })
+    insightGeneration: (answers: Record<string, any>, score: number) => {
+      const insights: Record<string, any> = {
+        overallScore: score,
+        naturalStrengths: answers.natural_strengths || '',
+        flowExperiences: answers.flow_experiences_detail || '',
+        underutilizedTalents: answers.underutilized_talents || '',
+        strengths: [],
+        developmentAreas: [],
+        recommendations: []
+      };
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          if (value >= 8) insights.strengths.push(key);
+          if (value <= 4) insights.developmentAreas.push(key);
+        }
+      });
+      
+      return insights;
+    }
   },
 
   brand: {
     key: 'brand',
-    name: 'Brand',
-    description: 'Personligt varumärke och synlighet',
+    name: 'Varumärke & Position',
+    description: 'Hur du vill uppfattas och positionerar dig',
     icon: '🎨',
-    color: '#F59E0B',
+    color: '#8B5CF6',
     questions: [
-      {
-        key: 'brand_clarity',
-        text: 'Mitt varumärke känns tydligt och igenkännbart.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.5
-      },
-      {
-        key: 'platform_messaging',
-        text: 'Jag signalerar rätt saker på mina plattformar.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.4
-      },
-      {
-        key: 'message_reach',
-        text: 'Jag når fram med det jag vill säga.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.3
-      },
-      {
-        key: 'credibility',
-        text: 'Jag uppfattas som trovärdig.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.2
-      },
-      {
-        key: 'brand_aspiration',
-        text: 'Hur vill du att ditt varumärke ska uppfattas?',
-        type: 'text',
-        weight: 1.0
-      }
+      { key: 'brand_clarity', text: 'Hur tydlig är din varumärkesidentitet?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'message_consistency', text: 'Hur konsekvent är ditt budskap över olika kanaler?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'target_audience_understanding', text: 'Hur väl förstår du din målgrupp?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'differentiation', text: 'Hur tydligt skiljer du dig från konkurrenterna?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'brand_authenticity', text: 'Känns ditt varumärke äkta och autentiskt?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'visual_identity', text: 'Har du en stark visuell identitet?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'brand_storytelling', text: 'Berättar du din historia på ett engagerande sätt?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'reputation_management', text: 'Arbetar du aktivt med ditt rykte?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'brand_visibility', text: 'Är ditt varumärke synligt för din målgrupp?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'brand_trust', text: 'Bygger du förtroende genom ditt varumärke?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'brand_evolution', text: 'Utvecklar du ditt varumärke kontinuerligt?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'brand_measurement', text: 'Mäter du hur ditt varumärke uppfattas?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      { key: 'brand_positioning', text: 'Har du en tydlig positionering på marknaden?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'brand_engagement', text: 'Engagerar ditt varumärke din målgrupp?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'brand_consistency', text: 'Är du konsekvent i hur du presenterar dig?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'desired_perception', text: 'Hur vill du att människor ska uppfatta dig och ditt varumärke? Vad ska de tänka och känna?', type: 'text', weight: 0.5 },
+      { key: 'current_signaling', text: 'Vad signalerar du till andra just nu genom ditt sätt att framträda? Vad tror du andra ser?', type: 'text', weight: 0.5 },
+      { key: 'target_audience_detail', text: 'Beskriv din drömpublik i detalj - vem är de och vad behöver de?', type: 'text', weight: 0.5 },
+      { key: 'core_values', text: 'Vilka värderingar är absolut centrala för ditt varumärke och får inte kompromissas?', type: 'text', weight: 0.5 },
+      { key: 'unique_selling_point', text: 'Vad gör dig unik jämfört med andra inom ditt område? Vad är din superkraft?', type: 'text', weight: 0.5 },
     ],
-    scoreCalculation: (answers) => {
-      const weights = {
-        brand_clarity: 1.5,
-        platform_messaging: 1.4,
-        message_reach: 1.3,
-        credibility: 1.2
-      };
-
+    scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
-
-      Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined && typeof answers[key] === 'number') {
-          // Convert 0-100 slider to 1-10 scale
-          const scaledScore = (answers[key] / 100) * 10;
-          totalScore += scaledScore * weight;
-          totalWeight += weight;
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        const question = PILLAR_MODULES.brand.questions.find(q => q.key === key);
+        if (question && question.type === 'slider' && typeof value === 'number') {
+          totalScore += value * (question.weight || 1);
+          totalWeight += (question.weight || 1);
         }
       });
-
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
+      
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
     },
-    insightGeneration: (answers, score) => ({
-      brand_strength: score >= 7 ? 'strong' : score >= 5 ? 'developing' : 'needs_attention',
-      strong_areas: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value >= 80)
-        .map(([key]) => key),
-      improvement_areas: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value <= 50)
-        .map(([key]) => key),
-      brand_vision: answers.brand_aspiration || '',
-      overall_brand_maturity: score >= 8 ? 'mature' : score >= 6 ? 'growing' : score >= 4 ? 'emerging' : 'undefined'
-    })
+    insightGeneration: (answers: Record<string, any>, score: number) => {
+      const insights: Record<string, any> = {
+        overallScore: score,
+        desiredPerception: answers.desired_perception || '',
+        currentSignaling: answers.current_signaling || '',
+        targetAudience: answers.target_audience_detail || '',
+        coreValues: answers.core_values || '',
+        uniqueSellingPoint: answers.unique_selling_point || '',
+        strengths: [],
+        developmentAreas: [],
+        recommendations: []
+      };
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          if (value >= 8) insights.strengths.push(key);
+          if (value <= 4) insights.developmentAreas.push(key);
+        }
+      });
+      
+      return insights;
+    }
   },
 
   economy: {
     key: 'economy',
-    name: 'Economy',
-    description: 'Ekonomisk stabilitet och tillväxt',
+    name: 'Ekonomi & Tillväxt',
+    description: 'Din ekonomiska utveckling och tillväxtmöjligheter',
     icon: '💰',
     color: '#EF4444',
     questions: [
-      {
-        key: 'financial_security',
-        text: 'Jag känner mig ekonomiskt trygg i min nuvarande situation.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.5
-      },
-      {
-        key: 'clear_income_sources',
-        text: 'Jag har tydliga intäktskällor kopplade till mitt arbete.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.4
-      },
-      {
-        key: 'new_income_opportunities',
-        text: 'Jag ser nya möjligheter att tjäna pengar på mitt varumärke.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.3
-      },
-      {
-        key: 'cost_control',
-        text: 'Jag har kontroll över mina kostnader.',
-        type: 'slider',
-        min: 0,
-        max: 100,
-        weight: 1.2
-      },
-      {
-        key: 'economic_improvement_ideas',
-        text: 'Vad skulle öka din ekonomiska trygghet och intäkter?',
-        type: 'text',
-        weight: 1.0
-      }
+      { key: 'financial_security', text: 'Hur trygg känner du dig ekonomiskt?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      { key: 'income_diversification', text: 'Har du diversifierade inkomstkällor?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'savings_habits', text: 'Hur bra är dina sparrutiner?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'investment_knowledge', text: 'Hur bra är din kunskap om investeringar?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'passive_income_awareness', text: 'Känner du till möjligheter för passiva inkomster?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'financial_planning', text: 'Planerar du din ekonomi långsiktigt?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'expense_control', text: 'Har du kontroll över dina utgifter?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'business_opportunities', text: 'Ser du affärsmöjligheter inom ditt område?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'financial_education', text: 'Utvecklar du kontinuerligt din finansiella kunskap?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'income_potential', text: 'Arbetar du aktivt för att öka din inkomstpotential?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'debt_management', text: 'Hanterar du skulder och krediter på ett bra sätt?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'emergency_fund', text: 'Har du en ekonomisk buffert för oväntade utgifter?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'financial_goals', text: 'Har du tydliga ekonomiska mål?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'money_mindset', text: 'Har du en hälsosam relation till pengar?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      { key: 'financial_freedom_progress', text: 'Arbetar du mot ekonomisk frihet?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      { key: 'current_financial_situation', text: 'Beskriv din nuvarande ekonomiska situation och dina huvudsakliga intäktskällor', type: 'text', weight: 0.5 },
+      { key: 'income_opportunities', text: 'Vilka möjligheter ser du för att öka dina inkomster inom ditt område?', type: 'text', weight: 0.5 },
+      { key: 'savings_and_goals', text: 'Hur sparar du idag och vad är dina ekonomiska mål på kort och lång sikt?', type: 'text', weight: 0.5 },
+      { key: 'financial_obstacles', text: 'Vad hindrar dig från att förbättra din ekonomi just nu? Vilka är dina största utmaningar?', type: 'text', weight: 0.5 },
+      { key: 'alternative_income_living', text: 'Kan du tänka dig alternativa sätt att leva billigare, tjäna extra eller skapa passiva inkomster?', type: 'text', weight: 0.5 },
     ],
-    scoreCalculation: (answers) => {
-      const weights = {
-        financial_security: 1.5,
-        clear_income_sources: 1.4,
-        new_income_opportunities: 1.3,
-        cost_control: 1.2
-      };
-
+    scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
-
-      Object.entries(weights).forEach(([key, weight]) => {
-        if (answers[key] !== undefined && typeof answers[key] === 'number') {
-          // Convert 0-100 slider to 1-10 scale
-          const scaledScore = (answers[key] / 100) * 10;
-          totalScore += scaledScore * weight;
-          totalWeight += weight;
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        const question = PILLAR_MODULES.economy.questions.find(q => q.key === key);
+        if (question && question.type === 'slider' && typeof value === 'number') {
+          totalScore += value * (question.weight || 1);
+          totalWeight += (question.weight || 1);
         }
       });
-
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 100) / 100 : 0;
+      
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
     },
-    insightGeneration: (answers, score) => ({
-      financial_health: score >= 7 ? 'strong' : score >= 5 ? 'stable' : 'vulnerable',
-      strong_areas: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value >= 80)
-        .map(([key]) => key),
-      priority_areas: Object.entries(answers)
-        .filter(([key, value]) => typeof value === 'number' && value <= 50)
-        .map(([key]) => key),
-      improvement_ideas: answers.economic_improvement_ideas || '',
-      financial_stability: score >= 8 ? 'very_stable' : score >= 6 ? 'stable' : score >= 4 ? 'developing' : 'unstable'
-    })
+    insightGeneration: (answers: Record<string, any>, score: number) => {
+      const insights: Record<string, any> = {
+        overallScore: score,
+        currentSituation: answers.current_financial_situation || '',
+        incomeOpportunities: answers.income_opportunities || '',
+        savingsAndGoals: answers.savings_and_goals || '',
+        obstacles: answers.financial_obstacles || '',
+        alternativeStrategies: answers.alternative_income_living || '',
+        strengths: [],
+        developmentAreas: [],
+        recommendations: []
+      };
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          if (value >= 8) insights.strengths.push(key);
+          if (value <= 4) insights.developmentAreas.push(key);
+        }
+      });
+      
+      return insights;
+    }
   }
 };

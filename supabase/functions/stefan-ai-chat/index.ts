@@ -42,49 +42,106 @@ serve(async (req) => {
   }
 
   try {
-    const { message, clientId, context } = await req.json();
+    const { 
+      message, 
+      context, 
+      user_id, 
+      persona = 'mentor', 
+      interaction_type = 'chat',
+      context_data = {},
+      journey_state = null,
+      recent_interactions = []
+    } = await req.json();
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Initialize Supabase client to get additional context if clientId is provided
+    // Initialize Supabase client to get training data context if user_id is provided
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    let clientContext = '';
+    let trainingContext = '';
     
-    if (clientId && supabaseUrl && supabaseServiceKey) {
+    if (user_id && supabaseUrl && supabaseServiceKey) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
       
       try {
-        // Get client info
-        const { data: client } = await supabase
-          .from('clients')
-          .select('name, profile_metadata')
-          .eq('id', clientId)
-          .single();
+        // Get training data for context
+        const { data: trainingData } = await supabase
+          .from('training_data_stefan')
+          .select('content, subject, tone, client_name')
+          .eq('user_id', user_id)
+          .order('created_at', { ascending: false })
+          .limit(5);
           
-        if (client) {
-          clientContext = `\n\nKLIENTKONTEXT:\nKlient: ${client.name}\n`;
-          
-          if (client.profile_metadata) {
-            const metadata = client.profile_metadata as any;
-            if (metadata.primär_roll) clientContext += `Primär roll: ${metadata.primär_roll}\n`;
-            if (metadata.sekundär_roll) clientContext += `Sekundär roll: ${metadata.sekundär_roll}\n`;
-            if (metadata.nisch) clientContext += `Nisch: ${metadata.nisch}\n`;
-            if (metadata.styrkor) clientContext += `Styrkor: ${metadata.styrkor}\n`;
-            if (metadata.svagheter) clientContext += `Svagheter: ${metadata.svagheter}\n`;
-          }
+        if (trainingData && trainingData.length > 0) {
+          trainingContext = '\n\nTRÄNINGSDATA KONTEXT:\n' + 
+            trainingData.map(data => `Ämne: ${data.subject}, Ton: ${data.tone}, Innehåll: ${data.content.substring(0, 200)}...`).join('\n');
         }
       } catch (error) {
-        console.log('Could not fetch client context:', error);
+        console.log('Could not fetch training data context:', error);
       }
     }
 
-    const fullPrompt = STEFAN_SYSTEM_PROMPT + clientContext + (context ? `\n\nYtterligare kontext: ${context}` : '');
+    // Get Stefan personas and context
+    const stefanPersonas = {
+      mentor: {
+        role: 'Visionsguide & Strategisk Coach',
+        style: 'Djup, reflekterande, ställer utmanande frågor, fokuserar på långsiktig vision och värderingar',
+        greeting: 'Hej! Jag har reflekterat över din utveckling och har några tankar att dela...'
+      },
+      cheerleader: {
+        role: 'Motivator & Uppmuntrare',
+        style: 'Entusiastisk, uppmuntrande, fokuserar på framsteg och positiva aspekter, bygger självförtroende',
+        greeting: 'Fantastiskt jobbat! Jag såg dina framsteg - det här förtjänar vi att fira!'
+      },
+      strategist: {
+        role: 'Affärsrådgivare & Utvecklingsstrateg',
+        style: 'Analytisk, praktisk, affärsorienterad, fokuserar på konkreta strategier och handlingsplaner',
+        greeting: 'Hej! Jag har analyserat din situation och ser några intressanta möjligheter...'
+      },
+      friend: {
+        role: 'Vardagscoach & Emotionellt Stöd',
+        style: 'Varm, empatisk, närvarande, fokuserar på välmående och balans i vardagen',
+        greeting: 'Hej där! Hur har din dag varit? Jag tänkte bara kolla läget...'
+      }
+    };
 
+    const currentPersona = stefanPersonas[persona as keyof typeof stefanPersonas] || stefanPersonas.mentor;
+
+    // Build context for Stefan
+    let stefanContext = `${STEFAN_SYSTEM_PROMPT}
+
+AKTUELL PERSONA: ${currentPersona.role}
+COACHING-STIL: ${currentPersona.style}
+
+TRÄNINGSDATA KONTEXT:
+${trainingContext}
+
+ANVÄNDARKONTEXT:
+${journey_state ? `Användarens resa: ${journey_state.current_phase}, ${journey_state.journey_progress}% klar` : ''}
+${context_data ? `Situationsdata: ${JSON.stringify(context_data)}` : ''}
+${recent_interactions.length > 0 ? `Senaste interaktioner: ${recent_interactions.map((i: any) => i.message_content).join('; ')}` : ''}
+
+INSTRUKTIONER:
+- Svara alltid på svenska
+- Använd ${persona}-personan konsekvent
+- Var personlig och stöttande
+- Ge konkreta, actionable råd
+- Referera till tidigare interaktioner när relevant
+- Anpassa längden baserat på interaktionstyp (${interaction_type})`;
+
+    // Determine message based on interaction type
+    let userMessage = message;
+    if (interaction_type === 'proactive' && !message) {
+      userMessage = `Skapa ett proaktivt meddelande baserat på kontext: ${context}`;
+    } else if (interaction_type === 'assessment_completion') {
+      userMessage = `Användaren har slutfört en bedömning. Ge feedback och nästa steg baserat på resultaten.`;
+    }
+
+    // Call OpenAI with enhanced context
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -92,19 +149,19 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: fullPrompt
+            content: stefanContext
           },
           {
             role: 'user',
-            content: message
+            content: userMessage
           }
         ],
-        temperature: 0.8,
-        max_tokens: 500,
+        max_tokens: interaction_type === 'proactive' ? 200 : 500,
+        temperature: 0.7,
       }),
     });
 
@@ -116,7 +173,7 @@ serve(async (req) => {
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
 
-    return new Response(JSON.stringify({ response: aiResponse }), {
+    return new Response(JSON.stringify({ message: aiResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
