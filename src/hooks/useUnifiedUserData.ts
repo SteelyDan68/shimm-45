@@ -184,19 +184,38 @@ export const useUnifiedUserData = () => {
 
   const deleteUser = useCallback(async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
+      // Find the user to get their identifier for deletion
+      const userToDelete = users.find(u => u.id === userId);
+      if (!userToDelete) {
+        toast({
+          title: "Fel",
+          description: "Användare kunde inte hittas",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      if (error) throw error;
+      const identifier = userToDelete.email || `${userToDelete.first_name} ${userToDelete.last_name}`;
+      
+      // Use the comprehensive deletion function
+      const { deleteUserCompletely } = await import('@/utils/userDeletion');
+      const result = await deleteUserCompletely(identifier);
+
+      if (result.errors.length > 0) {
+        console.error('Deletion errors:', result.errors);
+        toast({
+          title: "Delvis fel vid borttagning",
+          description: `Vissa data kunde inte tas bort: ${result.errors.join(', ')}`,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Användare borttagen",
+          description: `Användaren och all relaterad data har tagits bort från systemet`
+        });
+      }
 
       await fetchAllUsers(); // Refresh data
-      
-      toast({
-        title: "Användare borttagen",
-        description: "Användaren har tagits bort från systemet"
-      });
     } catch (error: any) {
       console.error('Error deleting user:', error);
       toast({

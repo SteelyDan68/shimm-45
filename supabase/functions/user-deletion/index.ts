@@ -1,6 +1,11 @@
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
-export interface UserDeletionResult {
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface UserDeletionResult {
   user_found: boolean;
   deleted_profile: boolean;
   deleted_roles: number;
@@ -11,23 +16,43 @@ export interface UserDeletionResult {
   errors: string[];
 }
 
-/**
- * Delete a specific user and all their data from the system
- */
-export async function deleteUserCompletely(identifier: string): Promise<UserDeletionResult> {
-  const result: UserDeletionResult = {
-    user_found: false,
-    deleted_profile: false,
-    deleted_roles: 0,
-    deleted_assessments: 0,
-    deleted_tasks: 0,
-    deleted_messages: 0,
-    deleted_other_data: 0,
-    errors: []
-  };
+Deno.serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
   try {
-    console.log(`🔍 Looking for user: ${identifier}`);
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { identifier, admin_user_id } = await req.json();
+
+    if (!identifier) {
+      return new Response(
+        JSON.stringify({ error: 'Identifier (email or name) is required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log(`🔍 Starting comprehensive user deletion for: ${identifier}`);
+    console.log(`🔐 Initiated by admin: ${admin_user_id}`);
+
+    const result: UserDeletionResult = {
+      user_found: false,
+      deleted_profile: false,
+      deleted_roles: 0,
+      deleted_assessments: 0,
+      deleted_tasks: 0,
+      deleted_messages: 0,
+      deleted_other_data: 0,
+      errors: []
+    };
 
     // 1. Find the user by name or email
     const { data: user, error: findError } = await supabase
@@ -39,7 +64,13 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
     if (findError || !user) {
       console.log(`❌ User not found: ${identifier}`);
       result.errors.push(`User not found: ${identifier}`);
-      return result;
+      return new Response(
+        JSON.stringify(result),
+        { 
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     result.user_found = true;
@@ -47,6 +78,20 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
     const userName = `${user.first_name} ${user.last_name}`;
     
     console.log(`✅ Found user: ${userName} (${user.email}) - ID: ${userId}`);
+
+    // Log the deletion request for GDPR compliance
+    await supabase
+      .from('gdpr_audit_log')
+      .insert({
+        action: 'user_deletion_initiated',
+        user_id: userId,
+        details: {
+          initiated_by: admin_user_id,
+          target_user: userName,
+          target_email: user.email,
+          deletion_reason: 'Administrative deletion via system interface'
+        }
+      });
 
     // 2. Delete all related data in the correct order to respect foreign key constraints
 
@@ -115,45 +160,6 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
       console.log(`🗑️ Deleted ${clientDataContainersCount} client data containers for ${userName}`);
     }
 
-    // Delete client pillar activations
-    const { count: pillarActivationsCount, error: pillarActivationsError } = await supabase
-      .from('client_pillar_activations')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (pillarActivationsError) {
-      result.errors.push(`Failed to delete client pillar activations: ${pillarActivationsError.message}`);
-    } else {
-      result.deleted_other_data += pillarActivationsCount || 0;
-      console.log(`🗑️ Deleted ${pillarActivationsCount} client pillar activations for ${userName}`);
-    }
-
-    // Delete client pillar assignments
-    const { count: pillarAssignmentsCount, error: pillarAssignmentsError } = await supabase
-      .from('client_pillar_assignments')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (pillarAssignmentsError) {
-      result.errors.push(`Failed to delete client pillar assignments: ${pillarAssignmentsError.message}`);
-    } else {
-      result.deleted_other_data += pillarAssignmentsCount || 0;
-      console.log(`🗑️ Deleted ${pillarAssignmentsCount} client pillar assignments for ${userName}`);
-    }
-
-    // Delete pillar visualization data
-    const { count: pillarVisualizationCount, error: pillarVisualizationError } = await supabase
-      .from('pillar_visualization_data')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (pillarVisualizationError) {
-      result.errors.push(`Failed to delete pillar visualization data: ${pillarVisualizationError.message}`);
-    } else {
-      result.deleted_other_data += pillarVisualizationCount || 0;
-      console.log(`🗑️ Deleted ${pillarVisualizationCount} pillar visualization data entries for ${userName}`);
-    }
-
     // Delete path entries
     const { count: pathEntriesCount, error: pathEntriesError } = await supabase
       .from('path_entries')
@@ -206,32 +212,6 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
       console.log(`🗑️ Deleted ${messagesCount} messages for ${userName}`);
     }
 
-    // Delete message preferences
-    const { count: messagePreferencesCount, error: messagePreferencesError } = await supabase
-      .from('message_preferences')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (messagePreferencesError) {
-      result.errors.push(`Failed to delete message preferences: ${messagePreferencesError.message}`);
-    } else {
-      result.deleted_other_data += messagePreferencesCount || 0;
-      console.log(`🗑️ Deleted ${messagePreferencesCount} message preferences for ${userName}`);
-    }
-
-    // Delete invitations (sent by user)
-    const { count: invitationsCount, error: invitationsError } = await supabase
-      .from('invitations')
-      .delete({ count: 'exact' })
-      .eq('invited_by', userId);
-    
-    if (invitationsError) {
-      result.errors.push(`Failed to delete invitations: ${invitationsError.message}`);
-    } else {
-      result.deleted_other_data += invitationsCount || 0;
-      console.log(`🗑️ Deleted ${invitationsCount} invitations for ${userName}`);
-    }
-
     // Delete user relationships (as coach or client)
     const { count: relationshipsCount, error: relationshipsError } = await supabase
       .from('user_relationships')
@@ -245,56 +225,17 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
       console.log(`🗑️ Deleted ${relationshipsCount} user relationships for ${userName}`);
     }
 
-    // Delete organization memberships
-    const { count: orgMembershipsCount, error: orgMembershipsError } = await supabase
-      .from('organization_members')
+    // Delete invitations (sent by user)
+    const { count: invitationsCount, error: invitationsError } = await supabase
+      .from('invitations')
       .delete({ count: 'exact' })
-      .eq('user_id', userId);
+      .eq('invited_by', userId);
     
-    if (orgMembershipsError) {
-      result.errors.push(`Failed to delete organization memberships: ${orgMembershipsError.message}`);
+    if (invitationsError) {
+      result.errors.push(`Failed to delete invitations: ${invitationsError.message}`);
     } else {
-      result.deleted_other_data += orgMembershipsCount || 0;
-      console.log(`🗑️ Deleted ${orgMembershipsCount} organization memberships for ${userName}`);
-    }
-
-    // Delete user consent records
-    const { count: consentRecordsCount, error: consentRecordsError } = await supabase
-      .from('user_consent_records')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (consentRecordsError) {
-      result.errors.push(`Failed to delete user consent records: ${consentRecordsError.message}`);
-    } else {
-      result.deleted_other_data += consentRecordsCount || 0;
-      console.log(`🗑️ Deleted ${consentRecordsCount} user consent records for ${userName}`);
-    }
-
-    // Delete data export requests
-    const { count: exportRequestsCount, error: exportRequestsError } = await supabase
-      .from('data_export_requests')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (exportRequestsError) {
-      result.errors.push(`Failed to delete data export requests: ${exportRequestsError.message}`);
-    } else {
-      result.deleted_other_data += exportRequestsCount || 0;
-      console.log(`🗑️ Deleted ${exportRequestsCount} data export requests for ${userName}`);
-    }
-
-    // Delete data deletion requests
-    const { count: deletionRequestsCount, error: deletionRequestsError } = await supabase
-      .from('data_deletion_requests')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (deletionRequestsError) {
-      result.errors.push(`Failed to delete data deletion requests: ${deletionRequestsError.message}`);
-    } else {
-      result.deleted_other_data += deletionRequestsCount || 0;
-      console.log(`🗑️ Deleted ${deletionRequestsCount} data deletion requests for ${userName}`);
+      result.deleted_other_data += invitationsCount || 0;
+      console.log(`🗑️ Deleted ${invitationsCount} invitations for ${userName}`);
     }
 
     // Delete training data
@@ -362,17 +303,49 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
       console.log(`🗑️ Deleted profile for ${userName}`);
     }
 
-    console.log(`🎉 Successfully deleted all data for ${userName}`);
-    
-    if (result.errors.length > 0) {
-      console.error('❌ Some deletion errors occurred:', result.errors);
-    }
+    // Log completion
+    await supabase
+      .from('gdpr_audit_log')
+      .insert({
+        action: 'user_deletion_completed',
+        user_id: admin_user_id, // Log against admin since user is deleted
+        details: {
+          target_user: userName,
+          target_email: user.email,
+          deletion_result: result,
+          completion_status: result.errors.length === 0 ? 'success' : 'partial_failure'
+        }
+      });
 
-    return result;
+    console.log(`🎉 User deletion completed for ${userName}. Errors: ${result.errors.length}`);
+
+    return new Response(
+      JSON.stringify(result),
+      { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
 
   } catch (error: any) {
-    result.errors.push(`Deletion failed: ${error.message}`);
     console.error('User deletion failed:', error);
-    return result;
+    return new Response(
+      JSON.stringify({ 
+        error: 'User deletion failed', 
+        details: error.message,
+        user_found: false,
+        deleted_profile: false,
+        deleted_roles: 0,
+        deleted_assessments: 0,
+        deleted_tasks: 0,
+        deleted_messages: 0,
+        deleted_other_data: 0,
+        errors: [error.message]
+      }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
-}
+});

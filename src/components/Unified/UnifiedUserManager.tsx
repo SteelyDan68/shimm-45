@@ -85,13 +85,51 @@ export function UnifiedUserManager() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!window.confirm('Är du säker på att du vill ta bort denna användare? Denna åtgärd kan inte ångras.')) {
+    // Find the user to get their identifier for deletion
+    const userToDelete = users.find(u => u.id === userId);
+    if (!userToDelete) {
+      toast({
+        title: "Fel",
+        description: "Användare kunde inte hittas",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const identifier = userToDelete.email || `${userToDelete.first_name} ${userToDelete.last_name}`;
+    
+    if (!window.confirm(`Är du säker på att du vill ta bort användaren ${identifier}? Denna åtgärd raderar all relaterad data inklusive klientprofiler, uppgifter, meddelanden och bedömningar. Denna åtgärd kan inte ångras.`)) {
       return;
     }
 
     setDeletingUserId(userId);
     try {
-      await deleteUser(userId);
+      // Use the comprehensive deletion function
+      const { deleteUserCompletely } = await import('@/utils/userDeletion');
+      const result = await deleteUserCompletely(identifier);
+
+      if (result.errors.length > 0) {
+        console.error('Deletion errors:', result.errors);
+        toast({
+          title: "Delvis fel vid borttagning",
+          description: `Vissa data kunde inte tas bort: ${result.errors.join(', ')}`,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Användare borttagen",
+          description: `Användaren och all relaterad data har tagits bort från systemet`
+        });
+      }
+
+      refetch(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort användare: " + error.message,
+        variant: "destructive"
+      });
     } finally {
       setDeletingUserId(null);
     }

@@ -68,6 +68,9 @@ template = "Your code is {{ .Code }}"
 [functions.auth-webhook]
 verify_jwt = false
 
+[functions.user-deletion]
+verify_jwt = true
+
 [edge_runtime]
 policy = "per_worker"
 inspector_port = 8083
