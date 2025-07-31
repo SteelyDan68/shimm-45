@@ -141,6 +141,38 @@ export function UnifiedUserManager() {
         </div>
         <div className="flex gap-2">
           <Button
+            variant="destructive"
+            onClick={async () => {
+              if (!window.confirm('⚠️ VARNING: Detta kommer att radera ALLA användare utom Superadmin och ALL deras data permanent. Är du säker?')) {
+                return;
+              }
+              
+              if (!window.confirm('🚨 SISTA CHANSEN: Detta kan inte ångras! All klientdata, assessments, meddelanden etc. försvinner permanent. Fortsätt?')) {
+                return;
+              }
+
+              const { cleanupAllUsersExceptSuperadmin } = await import('@/utils/systemCleanup');
+              const result = await cleanupAllUsersExceptSuperadmin();
+              
+              if (result.errors.length === 0) {
+                toast({
+                  title: "🧹 Systemrensning slutförd",
+                  description: `${result.deleted_profiles} profiler, ${result.deleted_roles} roller, ${result.deleted_assessments} assessments raderade`
+                });
+              } else {
+                toast({
+                  title: "⚠️ Rensning delvis slutförd",
+                  description: `${result.deleted_profiles} profiler raderade, ${result.errors.length} fel uppstod`,
+                  variant: "destructive"
+                });
+              }
+              
+              await refetch(); // Refresh data
+            }}
+          >
+            🧹 Rensa ALLA användare (behåll bara Superadmin)
+          </Button>
+          <Button
             variant="outline"
             onClick={async () => {
               const { migrateClientsToProfiles } = await import('@/utils/dataMigration');
