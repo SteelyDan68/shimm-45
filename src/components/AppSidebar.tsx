@@ -28,6 +28,7 @@ interface Client {
   name: string;
   category: string;
   status: string;
+  user_id?: string; // Add user_id for new user-centric navigation
 }
 
 // Navigationsmenyer baserat på roll
@@ -88,7 +89,8 @@ export function AppSidebar() {
         id: client.id,
         name: client.name,
         category: client.category || 'general',
-        status: client.status
+        status: client.status,
+        user_id: client.id // Use client.id as user_id for user-centric navigation
       }));
       
       console.log('Clients loaded (AppSidebar):', mappedClients.length, mappedClients.map(c => c.name));
@@ -130,7 +132,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={client.id}>
                     <SidebarMenuButton asChild>
                       <NavLink 
-                        to={`/client/${client.id}`} 
+                        to={`/user/${client.user_id || client.id}`} 
                         className={getNavCls}
                       >
                         <User className="h-4 w-4" />

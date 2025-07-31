@@ -11,6 +11,7 @@ import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
 import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
+import { UserProfile } from "./pages/UserProfile";
 import { ClientDashboard } from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { EditProfilePage } from "./pages/EditProfilePage";
@@ -47,6 +48,7 @@ const AppRoutes = () => {
               <Route path="/clients" element={<AllClients />} />
               <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />
+              <Route path="/user/:userId" element={<UserProfile />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/administration" element={<Administration />} />
               <Route path="/auth" element={<Auth />} />
