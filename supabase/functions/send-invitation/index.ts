@@ -36,19 +36,24 @@ const handler = async (req: Request): Promise<Response> => {
     const { email, role, invitedBy }: SendInvitationRequest = await req.json();
     console.log(`Sending invitation to ${email} for role ${role} from ${invitedBy}`);
 
-    // Get the invitation from database to get the token
+    // Get the invitation from database to get the token - try both pending and accepted
     const { data: invitation, error: invitationError } = await supabaseClient
       .from('invitations')
       .select('token')
       .eq('email', email)
-      .eq('status', 'pending')
+      .in('status', ['pending', 'accepted'])
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (invitationError || !invitation) {
-      console.error('No pending invitation found:', invitationError);
-      throw new Error('Ingen väntande inbjudan hittades');
+    if (invitationError) {
+      console.error('Database error when fetching invitation:', invitationError);
+      throw new Error('Databasfel vid hämtning av inbjudan');
+    }
+
+    if (!invitation || !invitation.token) {
+      console.error('No invitation found or token missing for email:', email);
+      throw new Error('Inbjudan hittades inte eller saknar token');
     }
 
     const appUrl = Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://your-app.com';
