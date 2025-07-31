@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
     const invitationUrl = `${baseUrl}/invitation/${invitation.token}`;
 
     // Send invitation email
-    const emailResponse = await resend.emails.send({
+    const { data: emailResult, error: emailError } = await resend.emails.send({
       from: "SHIMM <noreply@yourapp.com>",
       to: [email],
       subject: `Inbjudan till SHIMM från ${inviterName || 'teamet'}`,
@@ -99,18 +99,19 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    if (emailResponse.error) {
-      console.error("Failed to send invitation email:", emailResponse.error);
-      throw new Error(`Email sending failed: ${emailResponse.error.message}`);
+    if (emailError) {
+      console.error("Failed to send invitation email:", emailError);
+      throw new Error(`Email sending failed: ${emailError.message}`);
     }
 
-    console.log("Invitation email sent successfully:", emailResponse);
+    console.log("Invitation email sent successfully:", emailResult);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         invitationId: invitation.id,
-        invitationUrl 
+        invitationUrl,
+        emailId: emailResult.id
       }),
       {
         status: 200,
