@@ -143,38 +143,13 @@ export function UnifiedUserManager() {
           <Button
             variant="outline"
             onClick={async () => {
-              try {
-                const response = await fetch('/functions/v1/migrate-legacy-clients', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-                  }
-                });
-                
-                const result = await response.json();
-                
-                if (result.error) {
-                  toast({
-                    title: "Migreringsfel",
-                    description: result.error,
-                    variant: "destructive"
-                  });
-                } else {
-                  toast({
-                    title: "Migration slutförd",
-                    description: `${result.migrated} användare migrerade, ${result.skipped} hoppade över${result.errors.length > 0 ? `. ${result.errors.length} fel.` : ''}`
-                  });
-                }
-                
-                await refetch(); // Refresh data
-              } catch (error: any) {
-                toast({
-                  title: "Migreringsfel", 
-                  description: "Kunde inte köra migration: " + error.message,
-                  variant: "destructive"
-                });
-              }
+              const { migrateClientsToProfiles } = await import('@/utils/dataMigration');
+              const result = await migrateClientsToProfiles();
+              toast({
+                title: "Migration slutförd",
+                description: `${result.migrated} användare migrerade, ${result.skipped} hoppade över${result.errors.length > 0 ? `. ${result.errors.length} fel - se konsolen för detaljer.` : ''}`
+              });
+              await refetch(); // Refresh data
             }}
           >
             🔄 Migrera gamla klienter
