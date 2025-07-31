@@ -92,40 +92,49 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Attempting to send email to:", email);
     console.log("Using sender:", "SHIMM <onboarding@resend.dev>");
+    console.log("Resend initialized with key starting with:", resendApiKey?.substring(0, 8) + "...");
     
     // Send invitation email
-    const { data: emailResult, error: emailError } = await resend.emails.send({
-      from: "SHIMM <onboarding@resend.dev>", // Using Resend's verified domain for testing
-      to: [email],
-      subject: `Inbjudan till SHIMM från ${inviterName || 'teamet'}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #3B82F6;">Välkommen till SHIMM!</h1>
-          
-          <p>Hej!</p>
-          
-          <p>Du har bjudits in att gå med i SHIMM av ${inviterName || 'teamet'}. För att komma igång, klicka på länken nedan för att skapa ditt konto:</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${invitationUrl}" 
-               style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
-              Skapa konto
-            </a>
+    let emailResult, emailError;
+    try {
+      const sendResult = await resend.emails.send({
+        from: "SHIMM <onboarding@resend.dev>", // Using Resend's verified domain for testing
+        to: [email],
+        subject: `Inbjudan till SHIMM från ${inviterName || 'teamet'}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #3B82F6;">Välkommen till SHIMM!</h1>
+            
+            <p>Hej!</p>
+            
+            <p>Du har bjudits in att gå med i SHIMM av ${inviterName || 'teamet'}. För att komma igång, klicka på länken nedan för att skapa ditt konto:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${invitationUrl}" 
+                 style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+                Skapa konto
+              </a>
+            </div>
+            
+            <p>Eller kopiera och klistra in denna länk i din webbläsare:</p>
+            <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">
+              ${invitationUrl}
+            </p>
+            
+            <p><strong>Obs:</strong> Denna inbjudan är giltig i 7 dagar.</p>
+            
+            <p>Vi ser fram emot att ha dig med i teamet!</p>
+            
+            <p>Vänliga hälsningar,<br>SHIMM-teamet</p>
           </div>
-          
-          <p>Eller kopiera och klistra in denna länk i din webbläsare:</p>
-          <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">
-            ${invitationUrl}
-          </p>
-          
-          <p><strong>Obs:</strong> Denna inbjudan är giltig i 7 dagar.</p>
-          
-          <p>Vi ser fram emot att ha dig med i teamet!</p>
-          
-          <p>Vänliga hälsningar,<br>SHIMM-teamet</p>
-        </div>
-      `,
-    });
+        `,
+      });
+      emailResult = sendResult.data;
+      emailError = sendResult.error;
+    } catch (error) {
+      emailError = error;
+      console.error("Exception during email send:", error);
+    }
 
     console.log("Email send response:", { emailResult, emailError });
     console.log("Email result details:", JSON.stringify(emailResult, null, 2));
