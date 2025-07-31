@@ -183,10 +183,11 @@ export function UserTable({
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium truncate">
-            {user.first_name} {user.last_name}
-          </h3>
-          <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+           <h3 className="font-medium truncate">
+             {user.first_name} {user.last_name}
+           </h3>
+           <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+           <p className="text-xs text-muted-foreground font-mono truncate">ID: {user.id}</p>
           <div className="flex gap-1 mt-2 flex-wrap">
             {user.roles?.map((role) => (
               <Badge 
@@ -421,14 +422,17 @@ export function UserTable({
                             {(user.first_name?.[0] || '') + (user.last_name?.[0] || '')}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <div className="font-medium">
-                            {user.first_name} {user.last_name}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {user.organization}
-                          </div>
-                        </div>
+                         <div>
+                           <div className="font-medium">
+                             {user.first_name} {user.last_name}
+                           </div>
+                           <div className="text-sm text-muted-foreground">
+                             {user.organization}
+                           </div>
+                           <div className="text-xs text-muted-foreground font-mono">
+                             ID: {user.id}
+                           </div>
+                         </div>
                       </div>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
