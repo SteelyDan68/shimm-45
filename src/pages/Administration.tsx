@@ -323,7 +323,6 @@ export function Administration() {
                 <AdminPillarManagement />
               </CardContent>
             </Card>
-
           </div>
         </TabsContent>
 
