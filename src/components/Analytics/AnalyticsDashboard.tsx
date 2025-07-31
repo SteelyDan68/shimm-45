@@ -1,3 +1,6 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { AnalyticsFilters } from "./AnalyticsFilters";
 import { AnalyticsSummary } from "./AnalyticsSummary";
 import { BarrierTrendsChart } from "./BarrierTrendsChart";
@@ -6,16 +9,24 @@ import { VelocityTrendChart } from "./VelocityTrendChart";
 import { SentimentTrendChart } from "./SentimentTrendChart";
 import { ProblemAreasChart } from "./ProblemAreasChart";
 import { FunctionalResourcesChart } from "./FunctionalResourcesChart";
+import { PillarHeatmap } from "@/components/FivePillars/PillarHeatmap";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useFivePillarsModular } from "@/hooks/useFivePillarsModular";
+import { useNavigate } from "react-router-dom";
 
 interface AnalyticsDashboardProps {
   clientId?: string;
   showClientName?: boolean;
+  onBack?: () => void;
 }
 
-export function AnalyticsDashboard({ clientId, showClientName = false }: AnalyticsDashboardProps) {
+export function AnalyticsDashboard({ clientId, showClientName = false, onBack }: AnalyticsDashboardProps) {
   const { data, loading, filters, setFilters, refreshData } = useAnalytics(clientId);
+  const { generateHeatmapData } = useFivePillarsModular(clientId || '');
+  const navigate = useNavigate();
+  
+  const heatmapData = generateHeatmapData();
 
   if (loading) {
     return (
@@ -47,6 +58,48 @@ export function AnalyticsDashboard({ clientId, showClientName = false }: Analyti
 
   return (
     <div className="space-y-6">
+      {/* Header with Navigation */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {onBack && (
+                <Button variant="ghost" size="sm" onClick={onBack}>
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+              <CardTitle>Detaljerad Analys</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/client-dashboard')}
+              >
+                Till Dashboard
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Pillar Analysis Integration */}
+      {heatmapData && heatmapData.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Five Pillars Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PillarHeatmap 
+              heatmapData={heatmapData}
+              title="Bedömningsresultat"
+              showDetails={true}
+              userId={clientId}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filters */}
       <AnalyticsFilters
         filters={filters}

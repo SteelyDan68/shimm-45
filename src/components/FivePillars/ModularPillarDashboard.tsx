@@ -112,6 +112,12 @@ export const ModularPillarDashboard = ({
         showInactive={isCoachView}
         userId={userId}
         isCoachView={isCoachView}
+        showDetails={true}
+        onPillarClick={(pillarKey) => {
+          if (!isCoachView) {
+            setSelectedPillar(pillarKey as PillarKey);
+          }
+        }}
       />
 
       {/* Activated Pillars Details */}

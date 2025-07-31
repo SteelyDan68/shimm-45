@@ -6,10 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home } from 'lucide-react';
 import { PillarKey } from '@/types/fivePillarsModular';
 import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { BreadcrumbNavigation } from '@/components/Navigation/BreadcrumbNavigation';
+import { useNavigate } from 'react-router-dom';
 
 interface ModularPillarAssessmentProps {
   clientId?: string;
@@ -31,6 +33,7 @@ export const ModularPillarAssessment = ({
   const { submitPillarAssessment, loading } = useFivePillarsModular(targetId!);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [comments, setComments] = useState('');
+  const navigate = useNavigate();
 
   const pillarConfig = PILLAR_MODULES[pillarKey];
 
@@ -78,22 +81,28 @@ export const ModularPillarAssessment = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          {onBack && (
-            <Button variant="ghost" size="sm" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          )}
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{pillarConfig.icon}</span>
-            <div>
-              <CardTitle>{pillarConfig.name} Assessment</CardTitle>
-              <p className="text-sm text-muted-foreground">{pillarConfig.description}</p>
+    <div className="space-y-4">
+      {/* Navigation */}
+      <BreadcrumbNavigation 
+        onBack={onBack}
+        customPath={[
+          { label: 'Dashboard', path: '/client-dashboard' },
+          { label: 'Five Pillars', path: '/client-dashboard?tab=pillars' },
+          { label: `${pillarConfig.name} Bedömning` }
+        ]}
+      />
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{pillarConfig.icon}</span>
+              <div>
+                <CardTitle>{pillarConfig.name} Assessment</CardTitle>
+                <p className="text-sm text-muted-foreground">{pillarConfig.description}</p>
+              </div>
             </div>
           </div>
-        </div>
         
         {/* Live Score Preview */}
         <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
@@ -219,5 +228,6 @@ export const ModularPillarAssessment = ({
         </Button>
       </CardContent>
     </Card>
+    </div>
   );
 };

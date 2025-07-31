@@ -23,6 +23,7 @@ import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { CapacityBarometer } from '@/components/CapacityBarometer';
 import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
+import { EnhancedDashboard } from '@/components/Dashboard/EnhancedDashboard';
 
 interface ClientProfile {
   id: string;
@@ -334,13 +335,22 @@ export const ClientDashboard = () => {
       )}
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="pillars" className="space-y-6">
+      <Tabs defaultValue="enhanced" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="enhanced">Översikt</TabsTrigger>
           <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
           <TabsTrigger value="journey">Min resa</TabsTrigger>
           <TabsTrigger value="tasks">Mina Uppgifter</TabsTrigger>
           <TabsTrigger value="analytics">Analys</TabsTrigger>
         </TabsList>
+
+        {/* Enhanced Dashboard - Main Overview */}
+        <TabsContent value="enhanced" className="space-y-6">
+          <EnhancedDashboard 
+            userId={clientProfile.id} 
+            userName={clientProfile.name} 
+          />
+        </TabsContent>
 
         {/* Five Pillars Tab */}
         <TabsContent value="pillars" className="space-y-6">
@@ -368,7 +378,10 @@ export const ClientDashboard = () => {
 
         {/* Analytics Tab */}
         <TabsContent value="analytics" className="space-y-6">
-          <AnalyticsDashboard clientId={clientProfile.id} />
+          <AnalyticsDashboard 
+            clientId={clientProfile.id} 
+            onBack={() => window.history.back()}
+          />
         </TabsContent>
       </Tabs>
     </div>
