@@ -1,16 +1,1 @@
 project_id = "gcoorbcglxczmukzcmqs"
-
-[functions.admin-create-user]
-verify_jwt = false
-
-[functions.client-logic]
-verify_jwt = false
-
-[functions.gemini-research]
-verify_jwt = false
-
-[functions.data-collector]
-verify_jwt = false
-
-[functions.gdpr-processor]
-verify_jwt = false
