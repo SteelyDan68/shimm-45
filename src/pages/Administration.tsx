@@ -34,7 +34,7 @@ import StefanTrainingData from "@/components/StefanTrainingData";
 
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { helpTexts } from "@/data/helpTexts";
-import { EmergencyAdminSetup } from "@/components/EmergencyAdminSetup";
+
 
 export function Administration() {
   const { user, session } = useAuth();
@@ -205,7 +205,7 @@ export function Administration() {
         </p>
       </div>
 
-      <EmergencyAdminSetup />
+      
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="grid w-full grid-cols-8">

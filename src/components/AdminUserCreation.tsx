@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus } from 'lucide-react';
 import type { AppRole } from '@/hooks/useAuth';
+import { validateEmail, validatePasswordStrength, sanitizeText } from '@/utils/inputSanitization';
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -34,12 +35,28 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
   const { toast } = useToast();
 
   const generatePassword = () => {
-    const length = 12;
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let password = "";
-    for (let i = 0; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    // Generate secure password with guaranteed character diversity
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    
+    let password = '';
+    // Ensure at least one character from each category
+    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    password += symbols.charAt(Math.floor(Math.random() * symbols.length));
+    
+    // Fill remaining length with random characters from all categories
+    const allChars = uppercase + lowercase + numbers + symbols;
+    for (let i = 4; i < 16; i++) {
+      password += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
+    
+    // Shuffle the password to avoid predictable patterns
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+    
     setFormData(prev => ({ ...prev, password }));
   };
 
@@ -48,13 +65,23 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
     setIsLoading(true);
 
     try {
+      // Validate and sanitize inputs
+      if (!validateEmail(formData.email)) {
+        throw new Error('Ogiltig e-postadress');
+      }
+
+      const passwordValidation = validatePasswordStrength(formData.password);
+      if (!passwordValidation.isValid) {
+        throw new Error(`Lösenordet uppfyller inte kraven: ${passwordValidation.errors.join(', ')}`);
+      }
+
       // Create user through secure Edge Function
       const { data, error } = await supabase.functions.invoke('admin-create-user', {
         body: {
-          email: formData.email,
+          email: sanitizeText(formData.email.toLowerCase().trim()),
           password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          firstName: sanitizeText(formData.firstName.trim()),
+          lastName: sanitizeText(formData.lastName.trim()),
           role: formData.role
         }
       });
@@ -157,7 +184,7 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              Lösenordet måste vara minst 8 tecken långt
+              Lösenordet måste vara minst 8 tecken långt och innehålla stora bokstäver, små bokstäver, siffror och symboler
             </p>
           </div>
 

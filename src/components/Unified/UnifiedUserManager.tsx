@@ -29,7 +29,7 @@ import { SendInvitationForm } from "../InvitationSystem/SendInvitationForm";
 import { InvitationList } from "../InvitationSystem/InvitationList";
 import type { AppRole } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { autoSetupStefan } from "@/utils/emergencySetup";
+
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -73,18 +73,6 @@ export function UnifiedUserManager() {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
 
-  // Auto-setup Stefan Hallgren on component mount
-  useEffect(() => {
-    const setupStefan = async () => {
-      try {
-        await autoSetupStefan();
-      } catch (error) {
-        console.error('Auto-setup Stefan failed:', error);
-      }
-    };
-    
-    setupStefan();
-  }, []);
 
   const openEditDialog = (user: UnifiedUser) => {
     setSelectedUser(user);
@@ -126,28 +114,6 @@ export function UnifiedUserManager() {
             <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Ingen behörighet</h3>
             <p className="text-muted-foreground">Du har inte behörighet att hantera användare.</p>
-            <Button
-              variant="outline"
-              onClick={async () => {
-                const { emergencySuperadminSetup } = await import('@/utils/emergencySetup');
-                const success = await emergencySuperadminSetup();
-                if (success) {
-                  toast({
-                    title: "✅ Superadmin aktiverad",
-                    description: "Du har nu superadmin-behörigheter"
-                  });
-                  window.location.reload(); // Force full reload to update permissions
-                } else {
-                  toast({
-                    title: "❌ Fel",
-                    description: "Kunde inte aktivera superadmin",
-                    variant: "destructive"
-                  });
-                }
-              }}
-            >
-              🚨 Aktivera Superadmin
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -175,28 +141,6 @@ export function UnifiedUserManager() {
           <p className="text-muted-foreground">Centraliserad hantering av alla användare och funktioner</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={async () => {
-              const { emergencySuperadminSetup } = await import('@/utils/emergencySetup');
-              const success = await emergencySuperadminSetup();
-              if (success) {
-                toast({
-                  title: "✅ Superadmin aktiverad",
-                  description: "Du har nu superadmin-behörigheter"
-                });
-                await refetch();
-              } else {
-                toast({
-                  title: "❌ Fel",
-                  description: "Kunde inte aktivera superadmin",
-                  variant: "destructive"
-                });
-              }
-            }}
-          >
-            🚨 Aktivera Superadmin
-          </Button>
           <Button
             variant="destructive"
             onClick={async () => {

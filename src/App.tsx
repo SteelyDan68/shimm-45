@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
 import { CookieConsent } from "@/components/CookieConsent";
+import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
 import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
@@ -63,14 +64,16 @@ const AppRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppRoutes />
-        <CookieConsent />
-      </BrowserRouter>
-    </TooltipProvider>
+    <SecurityHeadersProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppRoutes />
+          <CookieConsent />
+        </BrowserRouter>
+      </TooltipProvider>
+    </SecurityHeadersProvider>
   </QueryClientProvider>
 );
 
