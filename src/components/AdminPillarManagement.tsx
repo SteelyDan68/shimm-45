@@ -81,13 +81,21 @@ export const AdminPillarManagement = () => {
   const loadClients = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, email, category, status')
-        .order('name');
-
-      if (error) throw error;
-      setClients(data || []);
+      // Use unified client fetching
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const unifiedClients = await fetchUnifiedClients();
+      
+      // Map to expected format
+      const mappedClients = unifiedClients.map(client => ({
+        id: client.id,
+        name: client.name,
+        email: client.email,
+        category: client.category || 'general',
+        status: client.status
+      }));
+      
+      console.log('Clients loaded (AdminPillarManagement):', mappedClients.length, mappedClients.map(c => c.name));
+      setClients(mappedClients);
     } catch (error: any) {
       toast({
         title: "Fel",

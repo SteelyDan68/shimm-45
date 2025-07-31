@@ -47,31 +47,25 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
 
   const loadClients = async () => {
     try {
-      // Fetch all users with client role from profiles
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Use the unified client fetching function
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const unifiedClients = await fetchUnifiedClients();
+      
+      // Map to the expected format for this component
+      const clientProfiles = unifiedClients.map(client => ({
+        id: client.id,
+        first_name: client.first_name,
+        last_name: client.last_name,
+        email: client.email,
+        status: client.status,
+        created_at: client.created_at,
+        roles: ['client'], // Since these are already filtered as clients
+        onboarding_completed: false, // TODO: Get from actual data
+        assessment_completed: false, // TODO: Get from actual data
+        habits_active: 0 // TODO: Get from actual data
+      }));
 
-      if (profileError) throw profileError;
-
-      // Fetch user roles to filter clients
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('*');
-
-      if (rolesError) throw rolesError;
-
-      // Filter users with client role
-      const clientProfiles = profiles?.filter(profile => 
-        userRoles?.some(role => role.user_id === profile.id && role.role === 'client')
-      ).map(profile => ({
-        ...profile,
-        roles: userRoles?.filter(role => role.user_id === profile.id).map(role => role.role) || []
-      })) || [];
-
-      console.log('Client profiles loaded:', clientProfiles.length, clientProfiles.map(c => `${c.first_name} ${c.last_name}`));
-
+      console.log('Client profiles loaded (OnboardingWorkflow):', clientProfiles.length, clientProfiles.map(c => `${c.first_name} ${c.last_name}`));
       setClients(clientProfiles);
     } catch (error: any) {
       console.error('Error loading clients:', error);

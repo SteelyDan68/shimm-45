@@ -79,14 +79,20 @@ export function AppSidebar() {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, category, status')
-        .eq('user_id', user.id)
-        .order('name');
-
-      if (error) throw error;
-      setClients(data || []);
+      // Use unified client fetching
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const unifiedClients = await fetchUnifiedClients();
+      
+      // Map to expected format for sidebar
+      const mappedClients = unifiedClients.map(client => ({
+        id: client.id,
+        name: client.name,
+        category: client.category || 'general',
+        status: client.status
+      }));
+      
+      console.log('Clients loaded (AppSidebar):', mappedClients.length, mappedClients.map(c => c.name));
+      setClients(mappedClients);
     } catch (error) {
       console.error('Error loading clients:', error);
     }

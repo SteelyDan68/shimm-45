@@ -40,14 +40,24 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setClients(data || []);
+      // Use unified client fetching - for now get all clients since coach assignment isn't implemented
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const unifiedClients = await fetchUnifiedClients();
+      
+      // Map to expected Client format
+      const mappedClients = unifiedClients.map(client => ({
+        id: client.id,
+        name: client.name,
+        email: client.email || '',
+        category: client.category || 'general',
+        status: client.status,
+        user_id: client.user_id || user.id, // Temporary: assign to current user
+        created_at: client.created_at,
+        updated_at: client.created_at
+      }));
+      
+      console.log('Clients loaded (ClientList):', mappedClients.length, mappedClients.map(c => c.name));
+      setClients(mappedClients);
     } catch (error: any) {
       toast({
         title: "Fel",
