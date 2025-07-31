@@ -24,13 +24,16 @@ export const useOnboarding = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          preferences: profileMetadata, // Store in preferences instead
+          preferences: profileMetadata,
           // Update name from onboarding data
           first_name: data.generalInfo.name?.split(' ')[0] || undefined,
           last_name: data.generalInfo.name?.split(' ').slice(1).join(' ') || undefined,
-          instagram_handle: data.publicRole.instagramHandle || null,
-          youtube_channel: data.publicRole.youtubeHandle || null,
-          tiktok_handle: data.publicRole.tiktokHandle || null
+          // Store social media links in social_links JSON field
+          social_links: {
+            instagram: data.publicRole.instagramHandle || null,
+            youtube: data.publicRole.youtubeHandle || null,
+            tiktok: data.publicRole.tiktokHandle || null
+          }
         })
         .eq('id', clientId);
 
