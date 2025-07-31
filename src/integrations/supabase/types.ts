@@ -308,6 +308,57 @@ export type Database = {
           },
         ]
       }
+      client_data_containers: {
+        Row: {
+          client_id: string
+          container_type: string
+          created_at: string
+          created_by: string
+          id: string
+          metadata: Json | null
+          updated_at: string
+          version: number
+          xml_content: unknown
+        }
+        Insert: {
+          client_id: string
+          container_type: string
+          created_at?: string
+          created_by: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string
+          version?: number
+          xml_content: unknown
+        }
+        Update: {
+          client_id?: string
+          container_type?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string
+          version?: number
+          xml_content?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_client_data_containers_client"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "fk_client_data_containers_client"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_pillar_activations: {
         Row: {
           activated_at: string
