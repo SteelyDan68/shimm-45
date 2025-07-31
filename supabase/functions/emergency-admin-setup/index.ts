@@ -15,7 +15,33 @@ export async function emergencyAdminSetup(userId: string): Promise<{ success: bo
   try {
     console.log(`🚨 Emergency admin setup for user: ${userId}`)
 
-    // First, remove any existing roles for this user
+    // First, ensure the user has a profile (especially for Stefan)
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .upsert({
+        id: userId,
+        email: 'stefan.hallgren@gmail.com',
+        first_name: 'Stefan',
+        last_name: 'Hallgren',
+        organization: 'Stefan Hallgren Consulting',
+        job_title: 'Superadmin & Systemutvecklare',
+        bio: 'Grundare och huvudutvecklare av systemet. Ansvarig för teknisk utveckling och systemadministration.',
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'id'
+      })
+      .select()
+
+    if (profileError) {
+      console.error('Error creating/updating profile:', profileError)
+      return { success: false, error: profileError.message }
+    }
+
+    console.log('✅ Profile created/updated:', profile)
+
+    // Remove any existing roles for this user
     const { error: deleteError } = await supabaseAdmin
       .from('user_roles')
       .delete()
@@ -30,12 +56,32 @@ export async function emergencyAdminSetup(userId: string): Promise<{ success: bo
       .from('user_roles')
       .insert({
         user_id: userId,
-        role: 'superadmin'
+        role: 'superadmin',
+        assigned_by: userId,
+        assigned_at: new Date().toISOString()
       })
 
     if (insertError) {
       console.error('Error inserting superadmin role:', insertError)
       return { success: false, error: insertError.message }
+    }
+
+    // Ensure message preferences exist
+    const { error: prefsError } = await supabaseAdmin
+      .from('message_preferences')
+      .upsert({
+        user_id: userId,
+        email_notifications: true,
+        internal_notifications: true,
+        auto_ai_assistance: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      })
+
+    if (prefsError) {
+      console.log('Warning: Could not create message preferences:', prefsError)
     }
 
     console.log('✅ Superadmin role successfully created')
