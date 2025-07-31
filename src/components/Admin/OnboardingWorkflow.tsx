@@ -125,16 +125,22 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
   };
 
   const startOnboarding = (client: ClientProfile) => {
+    console.log('startOnboarding called for client:', client);
     setSelectedClient(client);
     if (!client.onboarding_completed) {
+      console.log('Setting step to onboard');
       setCurrentStep('onboard');
     } else if (!client.assessment_completed) {
+      console.log('Setting step to assess');
       setCurrentStep('assess');
     } else if ((client.habits_active || 0) === 0) {
+      console.log('Setting step to habits');
       setCurrentStep('habits');
     } else {
+      console.log('Setting step to complete');
       setCurrentStep('complete');
     }
+    console.log('Current step after update:', currentStep);
   };
 
   const handleStepComplete = async (step: string) => {
@@ -415,7 +421,10 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                             {status}
                           </Badge>
                           <Button 
-                            onClick={() => startOnboarding(client)}
+                            onClick={() => {
+                              console.log('Button clicked for client:', client);
+                              startOnboarding(client);
+                            }}
                             variant={status === 'Komplett' ? 'outline' : 'default'}
                             size="sm"
                           >
