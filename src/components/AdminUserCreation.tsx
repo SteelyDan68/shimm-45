@@ -14,9 +14,6 @@ const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
   admin: "Administratör", 
   coach: "Coach",
-  manager: "Manager",
-  editor: "Redaktör",
-  organization: "Organisation",
   client: "Klient"
 };
 

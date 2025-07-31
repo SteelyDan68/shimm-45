@@ -60,11 +60,8 @@ interface ExtendedProfile extends Profile {
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
-  admin: "Administratör",
+  admin: "Administratör", 
   coach: "Coach",
-  manager: "Manager",
-  editor: "Redaktör",
-  organization: "Organisation",
   client: "Klient"
 };
 
@@ -72,9 +69,6 @@ const roleColors: Record<AppRole, string> = {
   superadmin: "bg-red-500",
   admin: "bg-orange-500",
   coach: "bg-teal-500",
-  manager: "bg-blue-500",
-  editor: "bg-green-500",
-  organization: "bg-purple-500",
   client: "bg-yellow-500"
 };
 
@@ -266,17 +260,13 @@ export function UserManagement() {
 
       <Tabs defaultValue="users" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="users" className="flex items-center gap-2">
+            <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Användare ({users.length})
+            Användarhantering ({users.length})
           </TabsTrigger>
-          <TabsTrigger value="clients" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Klienter
-          </TabsTrigger>
-          <TabsTrigger value="groups" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Grupper
+          <TabsTrigger value="onboarding" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            Onboarding Workflow
           </TabsTrigger>
           <TabsTrigger value="invitations" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
@@ -285,10 +275,6 @@ export function UserManagement() {
           <TabsTrigger value="gamification" className="flex items-center gap-2">
             <Trophy className="h-4 w-4" />
             Gamification
-          </TabsTrigger>
-          <TabsTrigger value="habits" className="flex items-center gap-2">
-            <Brain className="h-4 w-4" />
-            Onboarding Workflow
           </TabsTrigger>
           <TabsTrigger value="organizations" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
@@ -412,15 +398,6 @@ export function UserManagement() {
           </Card>
         </TabsContent>
 
-        {/* Clients Tab */}
-        <TabsContent value="clients">
-          <ClientList />
-        </TabsContent>
-
-        {/* Groups Tab */}
-        <TabsContent value="groups">
-          <ClientGroupManager />
-        </TabsContent>
 
         {/* Organizations Tab */}
         <TabsContent value="organizations">
@@ -481,9 +458,6 @@ export function UserManagement() {
                   <CardDescription>
                     {role === 'superadmin' && 'Full systemåtkomst och kontroll'}
                     {role === 'admin' && 'Administrativ åtkomst och användarhantering'}
-                    {role === 'manager' && 'Hantera team och projekt'}
-                    {role === 'editor' && 'Redigera och moderera innehåll'}
-                    {role === 'organization' && 'Organisationshantering'}
                      {role === 'client' && 'Klientåtkomst och rapporter'}
                      {role === 'coach' && 'Coach och vägledning av klienter'}
                   </CardDescription>
@@ -512,9 +486,10 @@ export function UserManagement() {
           <AdminGamificationPanel />
         </TabsContent>
 
-        <TabsContent value="habits" className="space-y-6">
+        <TabsContent value="onboarding" className="space-y-6">
           <OnboardingWorkflow />
         </TabsContent>
+
       </Tabs>
 
       {/* Edit User Dialog */}

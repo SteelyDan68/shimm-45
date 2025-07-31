@@ -24,7 +24,7 @@ export interface Profile {
   updated_at: string;
 }
 
-export type AppRole = 'superadmin' | 'admin' | 'coach' | 'manager' | 'editor' | 'organization' | 'client';
+export type AppRole = 'superadmin' | 'admin' | 'coach' | 'client';
 
 export interface UserRole {
   id: string;
@@ -289,7 +289,7 @@ export const useAuth = () => {
   }, [roles, hasAnyRole]);
 
   const canManageUsers = useCallback((): boolean => {
-    return hasAnyRole(['superadmin', 'admin', 'manager']);
+    return hasAnyRole(['superadmin', 'admin', 'coach']);
   }, [roles, hasAnyRole]);
 
   return {

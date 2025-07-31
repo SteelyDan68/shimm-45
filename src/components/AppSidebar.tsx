@@ -30,19 +30,39 @@ interface Client {
   status: string;
 }
 
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Alla Klienter", url: "/clients", icon: Users },
-  { title: "Analys", url: "/analytics", icon: TrendingUp },
-  { title: "Datainsamling", url: "/data-collection", icon: Database },
-  { title: "Administration", url: "/administration", icon: Settings },
-];
+// Navigationsmenyer baserat på roll
+const getMainItems = (hasRole: (role: string) => boolean) => {
+  const items = [
+    { title: "Dashboard", url: "/", icon: Home },
+  ];
+
+  // Lägg till menyalternativ baserat på roll
+  if (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) {
+    items.push(
+      { title: "Alla Klienter", url: "/clients", icon: Users },
+      { title: "Analys", url: "/analytics", icon: TrendingUp },
+      { title: "Datainsamling", url: "/data-collection", icon: Database }
+    );
+  }
+
+  // Administration synlig för alla utom klienter som har coach/admin behörigheter
+  if (hasRole('superadmin') || hasRole('admin')) {
+    items.push({ title: "Administration", url: "/administration", icon: Settings });
+  } else if (hasRole('coach')) {
+    // Coach får begränsad administration (utan Säkerhet, Automatisering, Data, Stefandata, GDPR)
+    items.push({ title: "Administration", url: "/administration", icon: Settings });
+  }
+
+  return items;
+};
 
 export function AppSidebar() {
   const { open, openMobile } = useSidebar();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
+  
+  const mainItems = getMainItems(hasRole);
   
   const currentPath = location.pathname;
   const isActive = (path: string) => currentPath === path;

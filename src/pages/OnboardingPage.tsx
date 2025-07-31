@@ -37,7 +37,7 @@ export const OnboardingPage = () => {
 
       if (!clientData) {
         // Kontrollera om användaren är admin/coach - då ska de inte vara här
-        if (hasRole('superadmin') || hasRole('admin') || hasRole('manager')) {
+        if (hasRole('superadmin') || hasRole('admin') || hasRole('coach')) {
           navigate('/admin');
           return;
         }
