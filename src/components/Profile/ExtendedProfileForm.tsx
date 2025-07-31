@@ -1,182 +1,344 @@
 import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/components/ui/use-toast';
-import { User, Edit3 } from 'lucide-react';
-import type { UnifiedUser } from '@/hooks/useUnifiedUserData';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Upload, Camera, Save, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import type { ExtendedProfileData, PRIMARY_ROLES, PLATFORMS, COUNTRIES } from '@/types/extendedProfile';
 
 interface ExtendedProfileFormProps {
-  user: UnifiedUser;
-  onSave: (updates: Partial<UnifiedUser>) => Promise<void>;
+  onComplete: (data: ExtendedProfileData) => Promise<void>;
+  onUploadProfilePicture: (file: File) => Promise<string>;
+  isLoading: boolean;
+  initialData: ExtendedProfileData | null;
 }
 
-export function ExtendedProfileForm({ user, onSave }: ExtendedProfileFormProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    first_name: user.first_name || '',
-    last_name: user.last_name || '',
-    phone: user.phone || '',
-    organization: user.organization || '',
-    department: user.department || '',
-    job_title: user.job_title || '',
-    bio: user.bio || '',
-    date_of_birth: user.date_of_birth || '',
-  });
+export function ExtendedProfileForm({ 
+  onComplete, 
+  onUploadProfilePicture, 
+  isLoading, 
+  initialData 
+}: ExtendedProfileFormProps) {
   const { toast } = useToast();
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState<ExtendedProfileData>(
+    initialData || {
+      basicInfo: {
+        fullName: '',
+        username: '',
+        gender: '',
+        dateOfBirth: '',
+        profilePicture: '',
+        bio: ''
+      },
+      contactInfo: {
+        email: '',
+        phone: '',
+        address: {
+          street: '',
+          postalCode: '',
+          city: '',
+          country: ''
+        }
+      },
+      digitalPresence: {
+        instagram: '',
+        youtube: '',
+        tiktok: '',
+        facebook: '',
+        twitter: '',
+        linkedin: '',
+        website: ''
+      },
+      workProfile: {
+        primaryRole: '',
+        secondaryRole: '',
+        niche: '',
+        creativeStrengths: '',
+        challenges: '',
+        activePlatforms: []
+      },
+      healthInfo: {
+        diagnoses: '',
+        physicalVariations: '',
+        generalHealth: ''
+      },
+      systemSettings: {
+        notificationPreferences: {
+          email: true,
+          sms: false,
+          inApp: true
+        },
+        allowAiAnalysis: true,
+        userRole: ''
+      }
+    }
+  );
 
-  const handleSave = async () => {
-    setLoading(true);
+  const handleInputChange = (section: keyof ExtendedProfileData, field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleNestedInputChange = (section: keyof ExtendedProfileData, subsection: string, field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [subsection]: {
+          ...(prev[section] as any)[subsection],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
     try {
-      await onSave(formData);
-      setIsOpen(false);
+      const imageUrl = await onUploadProfilePicture(file);
+      handleInputChange('basicInfo', 'profilePicture', imageUrl);
       toast({
-        title: "Profil uppdaterad",
-        description: "Användarens profil har sparats"
+        title: "Profilbild uppladdad",
+        description: "Din profilbild har uppdaterats"
       });
     } catch (error) {
       toast({
         title: "Fel",
-        description: "Kunde inte spara profilen",
+        description: "Kunde inte ladda upp profilbild",
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await onComplete(formData);
+      toast({
+        title: "Profil sparad",
+        description: "Din utökade profil har sparats"
+      });
+    } catch (error) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara profil",
+        variant: "destructive"
+      });
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Edit3 className="h-4 w-4 mr-2" />
-          Redigera profil
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Redigera profil - {user.first_name} {user.last_name}
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Grundläggande information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">Förnamn</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.first_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
-                  />
+    <div className="space-y-6">
+      {/* Grundinformation */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Grundinformation</CardTitle>
+          <CardDescription>
+            Grundläggande information om dig
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              {formData.basicInfo.profilePicture ? (
+                <img 
+                  src={formData.basicInfo.profilePicture} 
+                  alt="Profil" 
+                  className="w-20 h-20 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+                  <Camera className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <div>
-                  <Label htmlFor="lastName">Efternamn</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.last_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
-                  />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                disabled={uploading}
+              />
+              {uploading && (
+                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="phone">Telefonnummer</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+46 70 123 45 67"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="dateOfBirth">Födelsedatum</Label>
-                <Input
-                  id="dateOfBirth"
-                  type="date"
-                  value={formData.date_of_birth}
-                  onChange={(e) => setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Arbete & Organisation</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="organization">Organisation</Label>
-                <Input
-                  id="organization"
-                  value={formData.organization}
-                  onChange={(e) => setFormData(prev => ({ ...prev, organization: e.target.value }))}
-                  placeholder="Företag eller organisation"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="department">Avdelning</Label>
-                <Input
-                  id="department"
-                  value={formData.department}
-                  onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                  placeholder="Avdelning eller team"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="jobTitle">Jobbtitel</Label>
-                <Input
-                  id="jobTitle"
-                  value={formData.job_title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, job_title: e.target.value }))}
-                  placeholder="Din roll eller titel"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Om dig</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <Label htmlFor="bio">Biografi</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                  placeholder="Berätta lite om dig själv..."
-                  rows={4}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Avbryt
-            </Button>
-            <Button onClick={handleSave} disabled={loading}>
-              {loading ? 'Sparar...' : 'Spara ändringar'}
-            </Button>
+              )}
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="fullName">Fullständigt namn</Label>
+              <Input
+                id="fullName"
+                value={formData.basicInfo.fullName}
+                onChange={(e) => handleInputChange('basicInfo', 'fullName', e.target.value)}
+                placeholder="För- och efternamn"
+              />
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="username">Användarnamn</Label>
+              <Input
+                id="username"
+                value={formData.basicInfo.username}
+                onChange={(e) => handleInputChange('basicInfo', 'username', e.target.value)}
+                placeholder="Användarnamn"
+              />
+            </div>
+            <div>
+              <Label htmlFor="dateOfBirth">Födelsedatum</Label>
+              <Input
+                id="dateOfBirth"
+                type="date"
+                value={formData.basicInfo.dateOfBirth}
+                onChange={(e) => handleInputChange('basicInfo', 'dateOfBirth', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="bio">Biografi</Label>
+            <Textarea
+              id="bio"
+              value={formData.basicInfo.bio}
+              onChange={(e) => handleInputChange('basicInfo', 'bio', e.target.value)}
+              placeholder="Berätta kort om dig själv..."
+              rows={3}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Kontaktuppgifter */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Kontaktuppgifter</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="email">E-post</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.contactInfo.email}
+                onChange={(e) => handleInputChange('contactInfo', 'email', e.target.value)}
+                placeholder="din@email.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Telefon</Label>
+              <Input
+                id="phone"
+                value={formData.contactInfo.phone}
+                onChange={(e) => handleInputChange('contactInfo', 'phone', e.target.value)}
+                placeholder="+46 70 123 45 67"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city">Stad</Label>
+              <Input
+                id="city"
+                value={formData.contactInfo.address?.city}
+                onChange={(e) => handleNestedInputChange('contactInfo', 'address', 'city', e.target.value)}
+                placeholder="Stockholm"
+              />
+            </div>
+            <div>
+              <Label htmlFor="country">Land</Label>
+              <Input
+                id="country"
+                value={formData.contactInfo.address?.country}
+                onChange={(e) => handleNestedInputChange('contactInfo', 'address', 'country', e.target.value)}
+                placeholder="Sverige"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Systeminställningar */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Inställningar</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <Label>Notifikationsinställningar</Label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="emailNotifications"
+                  checked={formData.systemSettings.notificationPreferences.email}
+                  onCheckedChange={(checked) => 
+                    handleNestedInputChange('systemSettings', 'notificationPreferences', 'email', checked)
+                  }
+                />
+                <Label htmlFor="emailNotifications">E-postnotifikationer</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="inAppNotifications"
+                  checked={formData.systemSettings.notificationPreferences.inApp}
+                  onCheckedChange={(checked) => 
+                    handleNestedInputChange('systemSettings', 'notificationPreferences', 'inApp', checked)
+                  }
+                />
+                <Label htmlFor="inAppNotifications">Notifikationer i appen</Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="allowAiAnalysis"
+              checked={formData.systemSettings.allowAiAnalysis}
+              onCheckedChange={(checked) => 
+                handleInputChange('systemSettings', 'allowAiAnalysis', checked)
+              }
+            />
+            <Label htmlFor="allowAiAnalysis">Tillåt AI-analys av mitt innehåll</Label>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSubmit} 
+          disabled={isLoading}
+          className="min-w-32"
+        >
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              Sparar...
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Save className="h-4 w-4" />
+              Spara profil
+            </div>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }

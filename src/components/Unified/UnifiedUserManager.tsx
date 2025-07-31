@@ -575,35 +575,32 @@ export function UnifiedUserManager() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Redigera användarinfo</DialogTitle>
+            <DialogTitle>Redigera grundläggande användarinfo</DialogTitle>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Grundläggande användarredigering. Fullständig profilredigering kommer snart.
-              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="firstName">Förnamn</Label>
+                  <Label htmlFor="editFirstName">Förnamn</Label>
                   <Input 
-                    id="firstName" 
+                    id="editFirstName" 
                     defaultValue={selectedUser.first_name || ''} 
                     placeholder="Förnamn"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lastName">Efternamn</Label>
+                  <Label htmlFor="editLastName">Efternamn</Label>
                   <Input 
-                    id="lastName" 
+                    id="editLastName" 
                     defaultValue={selectedUser.last_name || ''} 
                     placeholder="Efternamn"
                   />
                 </div>
               </div>
               <div>
-                <Label htmlFor="organization">Organisation</Label>
+                <Label htmlFor="editOrganization">Organisation</Label>
                 <Input 
-                  id="organization" 
+                  id="editOrganization" 
                   defaultValue={selectedUser.organization || ''} 
                   placeholder="Organisation"
                 />
@@ -612,10 +609,7 @@ export function UnifiedUserManager() {
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                   Avbryt
                 </Button>
-                <Button onClick={() => {
-                  // TODO: Implement actual save functionality
-                  setIsEditDialogOpen(false);
-                }}>
+                <Button onClick={() => setIsEditDialogOpen(false)}>
                   Spara (kommer snart)
                 </Button>
               </div>
