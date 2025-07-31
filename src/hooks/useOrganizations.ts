@@ -81,14 +81,27 @@ export const useOrganizations = () => {
     }
 
     try {
+      if (!orgData.name || !orgData.slug) {
+        throw new Error('Name and slug are required');
+      }
+
       const { data, error } = await supabase
         .from('organizations')
-        .insert([{
-          ...orgData,
+        .insert({
+          name: orgData.name,
+          slug: orgData.slug,
+          description: orgData.description,
+          website: orgData.website,
+          logo_url: orgData.logo_url,
+          contact_email: orgData.contact_email,
+          contact_phone: orgData.contact_phone,
+          address: orgData.address,
+          settings: orgData.settings,
+          status: orgData.status || 'active',
           created_by: user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }])
+        })
         .select()
         .single();
 
@@ -192,7 +205,7 @@ export const useOrganizations = () => {
     }
   }, [isAdmin, fetchOrganizations, fetchMembers, toast]);
 
-  const addMember = useCallback(async (organizationId: string, userId: string, role: OrganizationMember['role'] = 'member') => {
+  const addMember = useCallback(async (organizationId: string, userId: string, role: OrganizationMember['role'] = 'user') => {
     if (!isAdmin()) {
       toast({
         title: "Ingen behörighet",

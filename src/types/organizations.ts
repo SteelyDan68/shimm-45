@@ -2,37 +2,27 @@ export interface Organization {
   id: string;
   name: string;
   slug: string;
-  description?: string;
-  website?: string;
-  logo_url?: string;
-  contact_email?: string;
-  contact_phone?: string;
-  address?: {
-    street?: string;
-    city?: string;
-    postal_code?: string;
-    country?: string;
-  };
-  settings?: {
-    industry?: string;
-    size?: string;
-    founded?: string;
-    [key: string]: any;
-  };
-  status: 'active' | 'inactive' | 'prospect';
-  created_by?: string;
-  created_at: string;
-  updated_at: string;
+  description?: string | null;
+  website?: string | null;
+  logo_url?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  address?: any;
+  settings?: any;
+  status?: string | null;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface OrganizationMember {
   id: string;
-  organization_id: string;
-  user_id: string;
-  role: 'owner' | 'admin' | 'member';
+  organization_id?: string | null;
+  user_id?: string | null;
+  role?: 'superadmin' | 'admin' | 'client' | 'user' | 'manager' | 'editor' | 'organization' | null;
   permissions?: any;
-  invited_by?: string;
-  joined_at: string;
+  invited_by?: string | null;
+  joined_at?: string | null;
 }
 
 export interface OrganizationFilters {

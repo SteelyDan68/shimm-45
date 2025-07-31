@@ -27,7 +27,7 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
   const { allUsers } = useUnifiedUserData();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'owner' | 'admin' | 'member'>('member');
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'user' | 'manager'>('user');
   const [searchTerm, setSearchTerm] = useState('');
 
   const members = getOrganizationMembers(organizationId);
@@ -51,7 +51,7 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
     if (success) {
       setIsAddDialogOpen(false);
       setSelectedUserId('');
-      setSelectedRole('member');
+      setSelectedRole('user');
     }
   };
 
@@ -65,25 +65,28 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'owner': return <Crown className="h-4 w-4" />;
+      case 'superadmin': return <Crown className="h-4 w-4" />;
       case 'admin': return <Shield className="h-4 w-4" />;
+      case 'manager': return <Shield className="h-4 w-4" />;
       default: return <User className="h-4 w-4" />;
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'owner': return 'bg-yellow-500';
+      case 'superadmin': return 'bg-yellow-500';
       case 'admin': return 'bg-blue-500';
+      case 'manager': return 'bg-green-500';
       default: return 'bg-gray-500';
     }
   };
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'owner': return 'Ägare';
+      case 'superadmin': return 'Superadmin';
       case 'admin': return 'Administratör';
-      default: return 'Medlem';
+      case 'manager': return 'Manager';
+      default: return 'Användare';
     }
   };
 
@@ -221,10 +224,10 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">
+                  <SelectItem value="user">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Medlem
+                      Användare
                     </div>
                   </SelectItem>
                   <SelectItem value="admin">
@@ -233,10 +236,10 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
                       Administratör
                     </div>
                   </SelectItem>
-                  <SelectItem value="owner">
+                  <SelectItem value="manager">
                     <div className="flex items-center gap-2">
-                      <Crown className="h-4 w-4" />
-                      Ägare
+                      <Shield className="h-4 w-4" />
+                      Manager
                     </div>
                   </SelectItem>
                 </SelectContent>
