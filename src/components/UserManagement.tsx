@@ -78,6 +78,7 @@ export function UserManagement() {
   const { toast } = useToast();
   const { isAdmin, canManageUsers, roles } = useAuth();
   const isSuperAdmin = roles.includes('superadmin');
+  const adminStatus = isAdmin();
   const [users, setUsers] = useState<ExtendedProfile[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -315,14 +316,27 @@ export function UserManagement() {
 
         {/* Users Tab */}
         <TabsContent value="users">
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
-              Användarhantering har konsoliderats till det nya Enhetliga Användarsystemet.
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Alla användare och funktioner finns nu centraliserat i Administration.
-            </p>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Alla användare</CardTitle>
+              <CardDescription>
+                Visa och hantera alla användare i systemet
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UserTable
+                users={users}
+                isAdmin={adminStatus}
+                isSuperAdmin={isSuperAdmin}
+                onEditUser={openEditDialog}
+                onViewProfile={openFullProfileDialog}
+                onDeleteUser={deleteUser}
+                onRoleChange={handleRoleChange}
+                deletingUserId={deletingUserId}
+                updatingRoleUserId={updatingRoleUserId}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
 
@@ -537,7 +551,7 @@ export function UserManagement() {
               </Card>
 
               {/* Lösenordshantering för admin/superadmin */}
-              {(isAdmin || isSuperAdmin) && (
+              {(adminStatus || isSuperAdmin) && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">

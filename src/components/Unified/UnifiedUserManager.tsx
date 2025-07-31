@@ -15,9 +15,12 @@ import {
   User,
   Settings
 } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
 import { useUnifiedUserData, type UnifiedUser } from "@/hooks/useUnifiedUserData";
 import { useUnifiedPermissions } from "@/hooks/useUnifiedPermissions";
 import { UserTable } from "../UserManagement/UserTable";
+import { Input } from "@/components/ui/input";
 import { AdminUserCreation } from "../AdminUserCreation";
 import { PasswordManagement } from "../UserManagement/PasswordManagement";
 import { OnboardingWorkflow } from "../Admin/OnboardingWorkflow";
@@ -213,17 +216,27 @@ export function UnifiedUserManager() {
 
         {/* Users Tab */}
         <TabsContent value="users">
-          <UserTable
-            users={users}
-            isAdmin={isAdmin}
-            isSuperAdmin={isSuperAdmin}
-            onEditUser={openEditDialog}
-            onViewProfile={openFullProfileDialog}
-            onDeleteUser={handleDeleteUser}
-            onRoleChange={handleRoleChange}
-            deletingUserId={deletingUserId}
-            updatingRoleUserId={updatingRoleUserId}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Alla registrerade användare</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Alla användare registrerade i systemet. Användare utan roll kan tilldelas roller av administratörer.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <UserTable
+                users={users}
+                isAdmin={isAdmin}
+                isSuperAdmin={isSuperAdmin}
+                onEditUser={openEditDialog}
+                onViewProfile={openFullProfileDialog}
+                onDeleteUser={handleDeleteUser}
+                onRoleChange={handleRoleChange}
+                deletingUserId={deletingUserId}
+                updatingRoleUserId={updatingRoleUserId}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Onboarding Tab */}
@@ -296,11 +309,19 @@ export function UnifiedUserManager() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarFallback className="text-lg">
+                        {(selectedUser.first_name?.[0] || '') + (selectedUser.last_name?.[0] || '')}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold">
                         {selectedUser.first_name} {selectedUser.last_name}
                       </h3>
                       <p className="text-muted-foreground">{selectedUser.email}</p>
+                      {selectedUser.phone && (
+                        <p className="text-sm text-muted-foreground">📞 {selectedUser.phone}</p>
+                      )}
                       <div className="flex gap-2 mt-2">
                         {selectedUser.roles?.map((role) => (
                           <Badge 
@@ -311,6 +332,9 @@ export function UnifiedUserManager() {
                             {roleLabels[role]}
                           </Badge>
                         ))}
+                        {(!selectedUser.roles || selectedUser.roles.length === 0) && (
+                          <Badge variant="outline">Ingen roll tilldelad</Badge>
+                        )}
                       </div>
                       <div className="flex gap-2 mt-2">
                         <Badge variant={selectedUser.status === 'active' ? 'default' : 'secondary'}>
@@ -318,6 +342,9 @@ export function UnifiedUserManager() {
                         </Badge>
                         {selectedUser.organization && (
                           <Badge variant="outline">{selectedUser.organization}</Badge>
+                        )}
+                        {selectedUser.department && (
+                          <Badge variant="outline">{selectedUser.department}</Badge>
                         )}
                       </div>
                     </div>
@@ -329,6 +356,88 @@ export function UnifiedUserManager() {
                       </p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Basic Profile Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profiluppgifter</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium">Förnamn</Label>
+                      <p className="mt-1">{selectedUser.first_name || 'Ej angivet'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Efternamn</Label>
+                      <p className="mt-1">{selectedUser.last_name || 'Ej angivet'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">E-post</Label>
+                      <p className="mt-1">{selectedUser.email}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Telefon</Label>
+                      <p className="mt-1">{selectedUser.phone || 'Ej angivet'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Organisation</Label>
+                      <p className="mt-1">{selectedUser.organization || 'Ej angivet'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Avdelning</Label>
+                      <p className="mt-1">{selectedUser.department || 'Ej angivet'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Jobbtitel</Label>
+                      <p className="mt-1">{selectedUser.job_title || 'Ej angivet'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Födelsedatum</Label>
+                      <p className="mt-1">{selectedUser.date_of_birth 
+                        ? new Date(selectedUser.date_of_birth).toLocaleDateString('sv-SE')
+                        : 'Ej angivet'}</p>
+                    </div>
+                  </div>
+                  {selectedUser.bio && (
+                    <div className="mt-4">
+                      <Label className="text-sm font-medium">Biografi</Label>
+                      <p className="mt-1 text-sm">{selectedUser.bio}</p>
+                    </div>
+                  )}
+                  {selectedUser.address && (
+                    <div className="mt-4">
+                      <Label className="text-sm font-medium">Adress</Label>
+                      <div className="mt-1 text-sm">
+                        {typeof selectedUser.address === 'object' ? (
+                          <div>
+                            <p>{selectedUser.address.street}</p>
+                            <p>{selectedUser.address.city} {selectedUser.address.postal_code}</p>
+                            <p>{selectedUser.address.country}</p>
+                          </div>
+                        ) : (
+                          <p>{selectedUser.address}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {selectedUser.social_links && (
+                    <div className="mt-4">
+                      <Label className="text-sm font-medium">Sociala länkar</Label>
+                      <div className="mt-1 space-y-1">
+                        {Object.entries(selectedUser.social_links as Record<string, string>).map(([platform, url]) => (
+                          <div key={platform} className="flex justify-between">
+                            <span className="capitalize">{platform}:</span>
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                              {url}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -378,21 +487,62 @@ export function UnifiedUserManager() {
                 </Card>
               )}
 
+              {/* Assessment Progress for clients */}
+              {selectedUser.roles?.includes('client') && selectedUser.pillar_scores && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Assessment Resultat - Five Pillars</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {Object.entries(selectedUser.pillar_scores).map(([pillar, score]) => (
+                        <div key={pillar} className="text-center p-3 bg-muted/20 rounded-lg">
+                          <p className="font-medium capitalize">{pillar.replace('_', ' ')}</p>
+                          <p className="text-2xl font-bold text-primary">{String(score)}/10</p>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div 
+                              className="bg-primary h-2 rounded-full" 
+                              style={{ width: `${(Number(score) / 10) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Password Management for admins */}
               {(isAdmin || isSuperAdmin) && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Settings className="h-4 w-4" />
-                      Hanteringsverktyg
+                      Admin Verktyg
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <PasswordManagement 
                       userId={selectedUser.id}
                       userEmail={selectedUser.email || ''}
                       userName={`${selectedUser.first_name} ${selectedUser.last_name}`}
                     />
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium mb-2">Rollhantering</h4>
+                      <div className="flex gap-2 flex-wrap">
+                        {Object.entries(roleLabels).map(([role, label]) => (
+                          <Button
+                            key={role}
+                            variant={selectedUser.roles?.includes(role as AppRole) ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleRoleChange(selectedUser.id, role as AppRole)}
+                            disabled={updatingRoleUserId === selectedUser.id}
+                          >
+                            {label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -405,7 +555,68 @@ export function UnifiedUserManager() {
                   setIsFullProfileDialogOpen(false);
                   openEditDialog(selectedUser);
                 }}>
-                  Redigera användare
+                  Redigera grundläggande info
+                </Button>
+                {selectedUser.roles?.includes('client') && (
+                  <Button variant="secondary" onClick={() => {
+                    // Future: Open assessment management
+                    alert('Assessment hantering kommer snart...');
+                  }}>
+                    Hantera Assessments
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog - Simple Version */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Redigera användarinfo</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Grundläggande användarredigering. Fullständig profilredigering kommer snart.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">Förnamn</Label>
+                  <Input 
+                    id="firstName" 
+                    defaultValue={selectedUser.first_name || ''} 
+                    placeholder="Förnamn"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Efternamn</Label>
+                  <Input 
+                    id="lastName" 
+                    defaultValue={selectedUser.last_name || ''} 
+                    placeholder="Efternamn"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="organization">Organisation</Label>
+                <Input 
+                  id="organization" 
+                  defaultValue={selectedUser.organization || ''} 
+                  placeholder="Organisation"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Avbryt
+                </Button>
+                <Button onClick={() => {
+                  // TODO: Implement actual save functionality
+                  setIsEditDialogOpen(false);
+                }}>
+                  Spara (kommer snart)
                 </Button>
               </div>
             </div>
