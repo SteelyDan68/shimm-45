@@ -415,11 +415,15 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                       <div 
                         key={client.id}
                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                        style={{ position: 'relative', zIndex: 1 }}
                       >
                         <div className="flex items-center gap-3">
                           <div>
                             <h4 className="font-medium">{getClientDisplayName(client)}</h4>
                             <p className="text-sm text-muted-foreground">{client.email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Debug: onboarding_completed = {String(client.onboarding_completed)}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -427,14 +431,18 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                             {status}
                           </Badge>
                           <Button 
-                            onClick={() => {
-                              console.log('🔥 Button clicked for client:', client);
-                              console.log('🔥 Client status:', { status, nextStep });
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('🚨 BUTTON CLICKED! Event:', e);
+                              console.log('🚨 Button client:', client);
+                              console.log('🚨 Button status:', { status, nextStep });
                               startOnboarding(client);
                             }}
                             variant={status === 'Komplett' ? 'outline' : 'default'}
                             size="sm"
-                            className="bg-primary hover:bg-primary/90"
+                            className="bg-primary hover:bg-primary/90 text-white font-medium px-4 py-2 cursor-pointer"
+                            style={{ pointerEvents: 'auto', zIndex: 10 }}
                           >
                             {nextStep}
                           </Button>
