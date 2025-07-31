@@ -368,21 +368,21 @@ export function UnifiedUserManager() {
         <TabsContent value="organizations">
           <Card>
             <CardHeader>
-              <CardTitle>Organisationer</CardTitle>
+              <CardTitle>Organisationsöversikt</CardTitle>
               <CardDescription>
-                Hantera organisationer och deras medlemmar
+                Visa och hantera organisationer baserat på användardata
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Här kan du hantera organisationer och tilldela användare till dem.
+                  Organisationer baserade på användarnas registrerade organisationer.
                 </p>
                 
                 {/* List unique organizations from users */}
                 <div className="grid gap-3">
                   {Object.entries(stats.byOrganization).map(([org, count]) => (
-                    <div key={org} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={org} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
                       <div className="flex items-center gap-3">
                         <Building2 className="h-5 w-5 text-muted-foreground" />
                         <div>
@@ -390,7 +390,12 @@ export function UnifiedUserManager() {
                           <p className="text-sm text-muted-foreground">{count} användare</p>
                         </div>
                       </div>
-                      <Badge variant="secondary">{count}</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">{count}</Badge>
+                        <Button variant="outline" size="sm" disabled>
+                          Hantera
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -401,6 +406,14 @@ export function UnifiedUserManager() {
                     <p className="text-muted-foreground">Inga organisationer registrerade ännu</p>
                   </div>
                 )}
+
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2">Utveckling pågår</h4>
+                  <p className="text-sm text-blue-700">
+                    Komplett organisationshantering med profilsidor, CRUD-operationer och medlemshantering kommer snart. 
+                    För tillfället visas organisationer baserat på användarnas registrerade organisationer.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
