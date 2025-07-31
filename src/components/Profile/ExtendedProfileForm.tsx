@@ -26,59 +26,102 @@ export function ExtendedProfileForm({
 }: ExtendedProfileFormProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
-  const [formData, setFormData] = useState<ExtendedProfileData>(
-    initialData || {
+  
+  // Safe initialization with proper fallbacks
+  const getDefaultFormData = (): ExtendedProfileData => ({
+    basicInfo: {
+      fullName: '',
+      username: '',
+      gender: '',
+      dateOfBirth: '',
+      profilePicture: '',
+      bio: ''
+    },
+    contactInfo: {
+      email: '',
+      phone: '',
+      address: {
+        street: '',
+        postalCode: '',
+        city: '',
+        country: ''
+      }
+    },
+    digitalPresence: {
+      instagram: '',
+      youtube: '',
+      tiktok: '',
+      facebook: '',
+      twitter: '',
+      linkedin: '',
+      website: ''
+    },
+    workProfile: {
+      primaryRole: '',
+      secondaryRole: '',
+      niche: '',
+      creativeStrengths: '',
+      challenges: '',
+      activePlatforms: []
+    },
+    healthInfo: {
+      diagnoses: '',
+      physicalVariations: '',
+      generalHealth: ''
+    },
+    systemSettings: {
+      notificationPreferences: {
+        email: true,
+        sms: false,
+        inApp: true
+      },
+      allowAiAnalysis: true,
+      userRole: ''
+    }
+  });
+
+  // Safely merge initialData with defaults
+  const initializeFormData = (): ExtendedProfileData => {
+    const defaults = getDefaultFormData();
+    if (!initialData) return defaults;
+
+    return {
       basicInfo: {
-        fullName: '',
-        username: '',
-        gender: '',
-        dateOfBirth: '',
-        profilePicture: '',
-        bio: ''
+        ...defaults.basicInfo,
+        ...initialData.basicInfo
       },
       contactInfo: {
-        email: '',
-        phone: '',
+        ...defaults.contactInfo,
+        ...initialData.contactInfo,
         address: {
-          street: '',
-          postalCode: '',
-          city: '',
-          country: ''
+          ...defaults.contactInfo.address,
+          ...initialData.contactInfo?.address
         }
       },
       digitalPresence: {
-        instagram: '',
-        youtube: '',
-        tiktok: '',
-        facebook: '',
-        twitter: '',
-        linkedin: '',
-        website: ''
+        ...defaults.digitalPresence,
+        ...initialData.digitalPresence
       },
       workProfile: {
-        primaryRole: '',
-        secondaryRole: '',
-        niche: '',
-        creativeStrengths: '',
-        challenges: '',
-        activePlatforms: []
+        ...defaults.workProfile,
+        ...initialData.workProfile
       },
       healthInfo: {
-        diagnoses: '',
-        physicalVariations: '',
-        generalHealth: ''
+        ...defaults.healthInfo,
+        ...initialData.healthInfo
       },
       systemSettings: {
+        ...defaults.systemSettings,
+        ...initialData.systemSettings,
         notificationPreferences: {
-          email: true,
-          sms: false,
-          inApp: true
-        },
-        allowAiAnalysis: true,
-        userRole: ''
+          ...defaults.systemSettings.notificationPreferences,
+          ...initialData.systemSettings?.notificationPreferences
+        }
       }
-    }
-  );
+    };
+  };
+
+  const [formData, setFormData] = useState<ExtendedProfileData>(initializeFormData());
 
   const handleInputChange = (section: keyof ExtendedProfileData, field: string, value: any) => {
     setFormData(prev => ({
