@@ -98,6 +98,31 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (emailResponse.error) {
       console.error('Resend error:', emailResponse.error);
+      
+      // Check if this is a domain verification issue (common in development)
+      if (emailResponse.error.message?.includes('testing emails') || 
+          emailResponse.error.message?.includes('verify a domain') ||
+          emailResponse.error.message?.includes('own email address')) {
+        
+        console.log('Development mode: Invitation created but email restricted');
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: `Inbjudan skapad! (Email kunde inte skickas - Resend kräver domänverifiering för att skicka till andra än ${invitedBy})`,
+          invitation_id: invitation.id,
+          invitation_token: invitation.token,
+          invitation_url: `${appUrl}/invitation-signup?token=${invitation.token}`,
+          dev_mode: true,
+          note: 'För att skicka emails: Verifiera en domän på resend.com/domains'
+        }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        });
+      }
+      
       throw new Error(`Failed to send email: ${emailResponse.error.message}`);
     }
 
