@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Calendar, Clock, Mail, MoreHorizontal, Copy, X } from "lucide-react";
+import { Calendar, Clock, Mail, MoreHorizontal, Copy, X, Send } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -27,6 +27,7 @@ export const InvitationList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
 
   const loadInvitations = async () => {
     try {
@@ -97,6 +98,28 @@ export const InvitationList = () => {
       toast.error('Kunde inte avbryta inbjudan');
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const resendInvitation = async (invitation: Invitation) => {
+    setResendingId(invitation.id);
+    try {
+      const { error } = await supabase.functions.invoke('send-invitation', {
+        body: {
+          email: invitation.email,
+          role: invitation.invited_role,
+          inviterName: 'Admin'
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success('Inbjudan skickades på nytt!');
+    } catch (error: any) {
+      console.error('Error resending invitation:', error);
+      toast.error('Kunde inte skicka inbjudan på nytt');
+    } finally {
+      setResendingId(null);
     }
   };
 
@@ -214,6 +237,15 @@ export const InvitationList = () => {
                       <Copy className="h-4 w-4 mr-2" />
                       Kopiera länk
                     </DropdownMenuItem>
+                    {invitation.status !== 'accepted' && (
+                      <DropdownMenuItem
+                        onClick={() => resendInvitation(invitation)}
+                        disabled={resendingId === invitation.id}
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        {resendingId === invitation.id ? 'Skickar...' : 'Skicka igen'}
+                      </DropdownMenuItem>
+                    )}
                     {invitation.status !== 'accepted' && (
                       <DropdownMenuItem
                         onClick={() => cancelInvitation(invitation.id)}

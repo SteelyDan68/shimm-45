@@ -125,10 +125,31 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email send response:", { emailResult, emailError });
+    console.log("Email result details:", JSON.stringify(emailResult, null, 2));
+    console.log("Email error details:", JSON.stringify(emailError, null, 2));
     
     if (emailError) {
       console.error("Failed to send invitation email:", emailError);
-      throw new Error(`Email sending failed: ${emailError.message}`);
+      
+      // Delete the invitation since email failed
+      await supabase
+        .from('invitations')
+        .delete()
+        .eq('id', invitation.id);
+        
+      throw new Error(`Email sending failed: ${emailError.message || JSON.stringify(emailError)}`);
+    }
+
+    if (!emailResult || !emailResult.id) {
+      console.error("No email result returned:", emailResult);
+      
+      // Delete the invitation since email failed
+      await supabase
+        .from('invitations')
+        .delete()
+        .eq('id', invitation.id);
+        
+      throw new Error('Email sending failed: No result returned from email service');
     }
 
     console.log("Invitation email sent successfully:", emailResult);
