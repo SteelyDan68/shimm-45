@@ -87,7 +87,7 @@ export function AIToTaskConverter({
 
   const handleCreateTasks = async () => {
     const taskData: CreateTaskData[] = parsedTasks.map(task => ({
-      client_id: clientId,
+      user_id: clientId,
       title: task.title,
       description: task.description,
       priority: task.priority,

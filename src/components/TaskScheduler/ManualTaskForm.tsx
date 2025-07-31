@@ -36,7 +36,7 @@ export function ManualTaskForm({ clientId, onCreateTask, onSuccess }: ManualTask
     setIsSubmitting(true);
     try {
       await onCreateTask({
-        client_id: clientId,
+        user_id: clientId,
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
         priority: formData.priority,

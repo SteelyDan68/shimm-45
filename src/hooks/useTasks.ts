@@ -17,7 +17,7 @@ export const useTasks = (clientId?: string) => {
       let query = supabase
         .from('tasks')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .order('deadline', { ascending: true, nullsFirst: false });
 
       // Apply filters
@@ -146,7 +146,7 @@ export const useTasks = (clientId?: string) => {
       const { error: pathError } = await supabase
         .from('path_entries')
         .insert([{
-          client_id: task.client_id,
+          user_id: task.user_id,
           created_by: user.id,
           type: 'check-in',
           title: `Uppgift genomförd: ${task.title}`,
@@ -164,7 +164,7 @@ export const useTasks = (clientId?: string) => {
       const { data: client, error: clientError } = await supabase
         .from('profiles')
         .select('preferences')
-        .eq('id', task.client_id)
+        .eq('id', task.user_id)
         .single();
 
       if (!clientError && client) {
@@ -182,7 +182,7 @@ export const useTasks = (clientId?: string) => {
         await supabase
           .from('profiles')
           .update({ preferences: updatedPreferences })
-          .eq('id', task.client_id);
+          .eq('id', task.user_id);
       }
 
       toast({

@@ -9,7 +9,7 @@ export type ContainerType =
 
 export interface ClientDataContainer {
   id: string;
-  client_id: string;
+  user_id: string;
   container_type: ContainerType;
   xml_content: string;
   metadata: Record<string, any>;
@@ -20,7 +20,7 @@ export interface ClientDataContainer {
 }
 
 export interface CreateContainerData {
-  client_id: string;
+  user_id: string;
   container_type: ContainerType;
   xml_content: string;
   metadata?: Record<string, any>;
