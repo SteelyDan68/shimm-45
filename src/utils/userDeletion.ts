@@ -115,18 +115,30 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
       console.log(`🗑️ Deleted user roles for ${userName}`);
     }
 
-    // Delete from legacy clients table if exists
-    const { error: legacyError } = await supabase
+    // Delete from clients table by user_id (primary relationship)
+    const { count: clientsCount, error: clientsError } = await supabase
       .from('clients')
-      .delete()
+      .delete({ count: 'exact' })
+      .eq('user_id', userId);
+    
+    if (clientsError) {
+      result.errors.push(`Failed to delete clients: ${clientsError.message}`);
+    } else {
+      result.deleted_other_data += clientsCount || 0;
+      console.log(`🗑️ Deleted ${clientsCount} client records for ${userName}`);
+    }
+
+    // Also delete from clients table by email (fallback for legacy data)
+    const { count: legacyClientsCount, error: legacyError } = await supabase
+      .from('clients')
+      .delete({ count: 'exact' })
       .eq('email', user.email);
     
     if (legacyError) {
-      // Don't count as error - table might not exist or user might not be there
-      console.log(`ℹ️ No legacy client data found for ${userName}`);
-    } else {
-      result.deleted_other_data++;
-      console.log(`🗑️ Deleted legacy client data for ${userName}`);
+      console.log(`ℹ️ No legacy client data found by email for ${userName}`);
+    } else if (legacyClientsCount && legacyClientsCount > 0) {
+      result.deleted_other_data += legacyClientsCount;
+      console.log(`🗑️ Deleted ${legacyClientsCount} legacy client records by email for ${userName}`);
     }
 
     // 3. Finally, delete the profile
