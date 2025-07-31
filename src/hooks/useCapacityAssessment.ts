@@ -25,7 +25,7 @@ export const useCapacityAssessment = (clientId: string) => {
       const { data: pillarAssessments, error } = await supabase
         .from('pillar_assessments')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('pillar_key', 'self_care')
         .order('created_at', { ascending: false })
         .limit(1);
