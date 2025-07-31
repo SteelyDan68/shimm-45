@@ -25,6 +25,8 @@ export const InvitationList = () => {
   const { isAdmin } = useAuth();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   const loadInvitations = async () => {
     try {
@@ -58,19 +60,23 @@ export const InvitationList = () => {
   };
 
   const cancelInvitation = async (invitationId: string) => {
+    setCancellingId(invitationId);
     try {
+      // Delete the invitation instead of updating status to avoid constraint issues
       const { error } = await supabase
         .from('invitations')
-        .update({ status: 'expired' })
+        .delete()
         .eq('id', invitationId);
 
       if (error) throw error;
 
-      toast.success('Inbjudan avbruten');
-      loadInvitations();
+      toast.success('Inbjudan avbruten och borttagen');
+      await loadInvitations(); // Refresh the list
     } catch (error: any) {
       console.error('Error canceling invitation:', error);
       toast.error('Kunde inte avbryta inbjudan');
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -90,8 +96,21 @@ export const InvitationList = () => {
     return 'Väntande';
   };
 
+  // Filter and limit invitations display
+  const displayedInvitations = showAll ? invitations : invitations.slice(0, 5);
+  const hasMoreInvitations = invitations.length > 5;
+
   if (isLoading) {
-    return <div className="p-4">Laddar inbjudningar...</div>;
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center p-8">
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            <span>Laddar inbjudningar...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -111,8 +130,23 @@ export const InvitationList = () => {
             Inga inbjudningar har skickats än.
           </p>
         ) : (
-          <div className="space-y-3">
-            {invitations.map((invitation) => (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Visar {displayedInvitations.length} av {invitations.length} inbjudningar
+              </span>
+              {hasMoreInvitations && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAll(!showAll)}
+                >
+                  {showAll ? 'Visa färre' : `Visa alla (${invitations.length})`}
+                </Button>
+              )}
+            </div>
+            <div className="space-y-3">
+            {displayedInvitations.map((invitation) => (
               <div
                 key={invitation.id}
                 className="flex items-center justify-between p-3 border rounded-lg"
@@ -149,11 +183,11 @@ export const InvitationList = () => {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" disabled={cancellingId === invitation.id}>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
                     <DropdownMenuItem
                       onClick={() => copyInvitationLink(invitation.token)}
                     >
@@ -163,16 +197,18 @@ export const InvitationList = () => {
                     {invitation.status === 'pending' && new Date(invitation.expires_at) > new Date() && (
                       <DropdownMenuItem
                         onClick={() => cancelInvitation(invitation.id)}
-                        className="text-red-600"
+                        className="text-red-600 focus:text-red-600"
+                        disabled={cancellingId === invitation.id}
                       >
                         <X className="h-4 w-4 mr-2" />
-                        Avbryt inbjudan
+                        {cancellingId === invitation.id ? 'Avbryter...' : 'Avbryt inbjudan'}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             ))}
+            </div>
           </div>
         )}
       </CardContent>

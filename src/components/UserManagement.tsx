@@ -84,6 +84,8 @@ export function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<ExtendedProfile | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (canManageUsers) {
@@ -149,6 +151,7 @@ export function UserManagement() {
   };
 
   const handleRoleChange = async (userId: string, newRole: AppRole) => {
+    setUpdatingRoleUserId(userId);
     try {
       // Remove existing roles
       const { error: deleteError } = await supabase
@@ -178,10 +181,17 @@ export function UserManagement() {
         description: "Kunde inte uppdatera användarroll",
         variant: "destructive"
       });
+    } finally {
+      setUpdatingRoleUserId(null);
     }
   };
 
   const deleteUser = async (userId: string) => {
+    if (!window.confirm('Är du säker på att du vill ta bort denna användare? Denna åtgärd kan inte ångras.')) {
+      return;
+    }
+
+    setDeletingUserId(userId);
     try {
       const { error } = await supabase
         .from('profiles')
@@ -203,7 +213,14 @@ export function UserManagement() {
         description: "Kunde inte ta bort användare",
         variant: "destructive"
       });
+    } finally {
+      setDeletingUserId(null);
     }
+  };
+
+  const openEditDialog = (user: ExtendedProfile) => {
+    setSelectedUser(user);
+    setIsEditDialogOpen(true);
   };
 
   if (!canManageUsers) {
@@ -224,7 +241,10 @@ export function UserManagement() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-10">
-          <div>Laddar användare...</div>
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            <span>Laddar användare och organisationer...</span>
+          </div>
         </CardContent>
       </Card>
     );
@@ -344,28 +364,28 @@ export function UserManagement() {
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" disabled={deletingUserId === user.id || updatingRoleUserId === user.id}>
+                            {(deletingUserId === user.id || updatingRoleUserId === user.id) ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                            ) : (
                               <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-background border shadow-md">
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setIsEditDialogOpen(true);
-                              }}
-                            >
+                            )}
+                          </Button>
+                        </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
+                            <DropdownMenuItem onClick={() => openEditDialog(user)}>
                               <Edit3 className="h-4 w-4 mr-2" />
                               Redigera
                             </DropdownMenuItem>
                             {isAdmin && (
                               <DropdownMenuItem 
                                 onClick={() => deleteUser(user.id)}
-                                className="text-red-600"
+                                className="text-red-600 focus:text-red-600"
+                                disabled={deletingUserId === user.id}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Ta bort
+                                {deletingUserId === user.id ? 'Tar bort...' : 'Ta bort'}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

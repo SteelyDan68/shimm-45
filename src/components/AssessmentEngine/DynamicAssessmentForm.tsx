@@ -173,8 +173,11 @@ export const DynamicAssessmentForm = ({
   if (questionsLoading) {
     return (
       <Card>
-        <CardContent className="text-center py-8">
-          <p>Laddar frågor...</p>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            <span>Laddar bedömningsformulär...</span>
+          </div>
         </CardContent>
       </Card>
     );
@@ -214,8 +217,16 @@ export const DynamicAssessmentForm = ({
               onClick={handleSubmit}
               disabled={loading}
               className="w-full"
+              size="lg"
             >
-              {loading ? "Sparar..." : "Slutför bedömning"}
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Skickar bedömning...
+                </>
+              ) : (
+                "Slutför bedömning"
+              )}
             </Button>
           </>
         )}
