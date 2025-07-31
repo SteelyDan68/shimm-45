@@ -140,6 +140,28 @@ export function UnifiedUserManager() {
         </div>
         <div className="flex gap-2">
           <Button
+            variant="outline"
+            onClick={async () => {
+              const { emergencySuperadminSetup } = await import('@/utils/emergencySetup');
+              const success = await emergencySuperadminSetup();
+              if (success) {
+                toast({
+                  title: "✅ Superadmin aktiverad",
+                  description: "Du har nu superadmin-behörigheter"
+                });
+                await refetch();
+              } else {
+                toast({
+                  title: "❌ Fel",
+                  description: "Kunde inte aktivera superadmin",
+                  variant: "destructive"
+                });
+              }
+            }}
+          >
+            🚨 Aktivera Superadmin
+          </Button>
+          <Button
             variant="destructive"
             onClick={async () => {
               const userName = prompt('Ange användarnamn eller email för att radera (t.ex. "Börje Sandhill"):');
