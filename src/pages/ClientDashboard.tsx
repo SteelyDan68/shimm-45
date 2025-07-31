@@ -339,7 +339,6 @@ export const ClientDashboard = () => {
           <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
           <TabsTrigger value="journey">Min resa</TabsTrigger>
           <TabsTrigger value="tasks">Mina Uppgifter</TabsTrigger>
-          <TabsTrigger value="assessment">Självskattning</TabsTrigger>
           <TabsTrigger value="analytics">Analys</TabsTrigger>
         </TabsList>
 
@@ -365,11 +364,6 @@ export const ClientDashboard = () => {
         {/* Tasks Tab */}
         <TabsContent value="tasks" className="space-y-6">
           <ClientTaskList clientId={clientProfile.id} clientName={clientProfile.name} />
-        </TabsContent>
-
-        {/* Assessment Tab */}
-        <TabsContent value="assessment" className="space-y-6">
-          <PillarDashboard userId={clientProfile.id} userName={clientProfile.name} />
         </TabsContent>
 
         {/* Analytics Tab */}
