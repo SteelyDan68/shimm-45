@@ -59,7 +59,9 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
   const [currentSection, setCurrentSection] = useState(1);
   const [formData, setFormData] = useState<OnboardingData>({
     generalInfo: {
-      name: '',
+      name: '', // Keep for backward compatibility, will be computed from first_name + last_name
+      first_name: '',
+      last_name: '',
       age: '',
       gender: '',
       height: '',
@@ -133,7 +135,9 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
   };
 
   const isSection1Valid = () => {
-    return formData.generalInfo?.name?.trim() !== '' && formData.generalInfo?.age?.trim() !== '';
+    const hasName = formData.generalInfo?.name?.trim() !== '' || 
+                   (formData.generalInfo?.first_name?.trim() !== '' && formData.generalInfo?.last_name?.trim() !== '');
+    return hasName && formData.generalInfo?.age?.trim() !== '';
   };
 
   const isSection2Valid = () => {
@@ -182,16 +186,28 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
       </div>
 
       <div className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="name" className="flex items-center gap-2">
-              Namn <span className="text-red-500">*</span>
+            <Label htmlFor="first_name" className="flex items-center gap-2">
+              Förnamn <span className="text-red-500">*</span>
             </Label>
             <Input
-              id="name"
-              value={formData.generalInfo.name}
-              onChange={(e) => updateGeneralInfo('name', e.target.value)}
-              placeholder="Ditt fullständiga namn"
+              id="first_name"
+              value={formData.generalInfo.first_name || ''}
+              onChange={(e) => updateGeneralInfo('first_name', e.target.value)}
+              placeholder="Ditt förnamn"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="last_name" className="flex items-center gap-2">
+              Efternamn <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="last_name"
+              value={formData.generalInfo.last_name || ''}
+              onChange={(e) => updateGeneralInfo('last_name', e.target.value)}
+              placeholder="Ditt efternamn"
               required
             />
           </div>

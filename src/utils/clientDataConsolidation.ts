@@ -13,12 +13,12 @@ export interface UnifiedClient {
 }
 
 /**
- * Fetch all users with client role from profiles table
- * This is the consolidated way to get clients across the app
+ * Fetch all users with client role or client_category from unified profiles table
+ * This is the consolidated way to get clients across the app using the new unified architecture
  */
 export async function fetchUnifiedClients(): Promise<UnifiedClient[]> {
   try {
-    // Fetch all users with client role from profiles table (the correct, unified way)
+    // Fetch all profiles with client indicators
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -33,18 +33,19 @@ export async function fetchUnifiedClients(): Promise<UnifiedClient[]> {
 
     if (rolesError) throw rolesError;
 
-    // Filter users with client role and map to unified format
+    // Filter users with client role OR client_category (unified approach)
     const unifiedClients = profiles?.filter(profile => 
-      userRoles?.some(role => role.user_id === profile.id && role.role === 'client')
+      userRoles?.some(role => role.user_id === profile.id && role.role === 'client') ||
+      profile.client_category // Users with client data from legacy clients table
     ).map(profile => ({
       id: profile.id,
       name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unnamed User',
       email: profile.email,
       first_name: profile.first_name,
       last_name: profile.last_name,
-      status: profile.status || 'active',
+      status: profile.client_status || profile.status || 'active',
       created_at: profile.created_at,
-      category: 'unified', // Mark as coming from unified source
+      category: profile.client_category || 'unified',
       user_id: profile.id // For compatibility with legacy code
     })) || [];
 
@@ -57,10 +58,52 @@ export async function fetchUnifiedClients(): Promise<UnifiedClient[]> {
 }
 
 /**
- * Fetch clients for a specific coach/user (legacy compatibility)
+ * Fetch clients for a specific coach using the new unified user relationships
  */
 export async function fetchClientsByCoach(coachId: string): Promise<UnifiedClient[]> {
-  // For now, return all clients since we don't have coach assignments implemented
-  // In the future, this could filter based on coach-client relationships
-  return fetchUnifiedClients();
+  try {
+    // Get coach-client relationships
+    const { data: relationships, error: relationshipsError } = await supabase
+      .from('user_relationships')
+      .select('client_id')
+      .eq('coach_id', coachId)
+      .eq('relationship_type', 'coach_client')
+      .eq('is_active', true);
+
+    if (relationshipsError) throw relationshipsError;
+
+    const clientIds = relationships?.map(rel => rel.client_id) || [];
+    
+    if (clientIds.length === 0) {
+      return [];
+    }
+
+    // Fetch profiles for these client IDs
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', clientIds)
+      .order('created_at', { ascending: false });
+
+    if (profileError) throw profileError;
+
+    // Map to unified client format
+    const unifiedClients = profiles?.map(profile => ({
+      id: profile.id,
+      name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unnamed User',
+      email: profile.email,
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      status: profile.client_status || profile.status || 'active',
+      created_at: profile.created_at,
+      category: profile.client_category || 'unified',
+      user_id: profile.id
+    })) || [];
+
+    console.log(`Clients for coach ${coachId}:`, unifiedClients.length);
+    return unifiedClients;
+  } catch (error) {
+    console.error('Error fetching clients by coach:', error);
+    throw error;
+  }
 }

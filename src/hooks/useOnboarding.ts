@@ -28,8 +28,8 @@ export const useOnboarding = () => {
           preferences: profileMetadata,
           
           // General info in dedicated columns
-          first_name: data.generalInfo.name?.split(' ')[0] || undefined,
-          last_name: data.generalInfo.name?.split(' ').slice(1).join(' ') || undefined,
+          first_name: data.generalInfo.first_name || data.generalInfo.name?.split(' ')[0] || undefined,
+          last_name: data.generalInfo.last_name || data.generalInfo.name?.split(' ').slice(1).join(' ') || undefined,
           age: data.generalInfo.age ? parseInt(data.generalInfo.age) : null,
           gender: data.generalInfo.gender || null,
           height: data.generalInfo.height || null,
@@ -113,6 +113,8 @@ export const useOnboarding = () => {
       const onboardingData: OnboardingData = {
         generalInfo: {
           name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
           age: data.age?.toString() || '',
           gender: data.gender || '',
           height: data.height || '',

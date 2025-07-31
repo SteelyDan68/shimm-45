@@ -1,7 +1,9 @@
 export interface OnboardingData {
   // Sektion 1 - Allmän information
   generalInfo: {
-    name: string;
+    name: string; // Keep for backward compatibility
+    first_name?: string;
+    last_name?: string;
     age: string;
     gender: string;
     height: string;

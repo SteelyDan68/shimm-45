@@ -967,9 +967,12 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           challenges: string | null
+          client_category: string | null
+          client_status: string | null
           consent_timestamp: string | null
           created_at: string | null
           creative_strengths: string | null
+          custom_fields: Json | null
           data_retention_until: string | null
           date_of_birth: string | null
           deletion_requested_at: string | null
@@ -977,6 +980,7 @@ export type Database = {
           email: string | null
           facebook_handle: string | null
           first_name: string | null
+          follower_counts: Json | null
           gender: string | null
           has_children: string | null
           height: string | null
@@ -987,8 +991,12 @@ export type Database = {
           last_name: string | null
           living_with: string | null
           location: string | null
+          logic_state: Json | null
+          manager_email: string | null
+          manager_name: string | null
           neurodiversity: string | null
           niche: string | null
+          notes: string | null
           onboarding_completed: boolean | null
           onboarding_completed_at: string | null
           ongoing_changes: string | null
@@ -998,15 +1006,20 @@ export type Database = {
           physical_limitations: string | null
           platforms: Json | null
           preferences: Json | null
+          primary_contact_email: string | null
+          primary_contact_name: string | null
           primary_role: string | null
           profile_extended: Json | null
+          profile_metadata: Json | null
           secondary_role: string | null
           snapchat_handle: string | null
           social_links: Json | null
           status: string | null
+          tags: string[] | null
           tiktok_handle: string | null
           twitter_handle: string | null
           updated_at: string | null
+          velocity_score: number | null
           weight: string | null
           youtube_handle: string | null
         }
@@ -1016,9 +1029,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           challenges?: string | null
+          client_category?: string | null
+          client_status?: string | null
           consent_timestamp?: string | null
           created_at?: string | null
           creative_strengths?: string | null
+          custom_fields?: Json | null
           data_retention_until?: string | null
           date_of_birth?: string | null
           deletion_requested_at?: string | null
@@ -1026,6 +1042,7 @@ export type Database = {
           email?: string | null
           facebook_handle?: string | null
           first_name?: string | null
+          follower_counts?: Json | null
           gender?: string | null
           has_children?: string | null
           height?: string | null
@@ -1036,8 +1053,12 @@ export type Database = {
           last_name?: string | null
           living_with?: string | null
           location?: string | null
+          logic_state?: Json | null
+          manager_email?: string | null
+          manager_name?: string | null
           neurodiversity?: string | null
           niche?: string | null
+          notes?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           ongoing_changes?: string | null
@@ -1047,15 +1068,20 @@ export type Database = {
           physical_limitations?: string | null
           platforms?: Json | null
           preferences?: Json | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
           primary_role?: string | null
           profile_extended?: Json | null
+          profile_metadata?: Json | null
           secondary_role?: string | null
           snapchat_handle?: string | null
           social_links?: Json | null
           status?: string | null
+          tags?: string[] | null
           tiktok_handle?: string | null
           twitter_handle?: string | null
           updated_at?: string | null
+          velocity_score?: number | null
           weight?: string | null
           youtube_handle?: string | null
         }
@@ -1065,9 +1091,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           challenges?: string | null
+          client_category?: string | null
+          client_status?: string | null
           consent_timestamp?: string | null
           created_at?: string | null
           creative_strengths?: string | null
+          custom_fields?: Json | null
           data_retention_until?: string | null
           date_of_birth?: string | null
           deletion_requested_at?: string | null
@@ -1075,6 +1104,7 @@ export type Database = {
           email?: string | null
           facebook_handle?: string | null
           first_name?: string | null
+          follower_counts?: Json | null
           gender?: string | null
           has_children?: string | null
           height?: string | null
@@ -1085,8 +1115,12 @@ export type Database = {
           last_name?: string | null
           living_with?: string | null
           location?: string | null
+          logic_state?: Json | null
+          manager_email?: string | null
+          manager_name?: string | null
           neurodiversity?: string | null
           niche?: string | null
+          notes?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           ongoing_changes?: string | null
@@ -1096,15 +1130,20 @@ export type Database = {
           physical_limitations?: string | null
           platforms?: Json | null
           preferences?: Json | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
           primary_role?: string | null
           profile_extended?: Json | null
+          profile_metadata?: Json | null
           secondary_role?: string | null
           snapchat_handle?: string | null
           social_links?: Json | null
           status?: string | null
+          tags?: string[] | null
           tiktok_handle?: string | null
           twitter_handle?: string | null
           updated_at?: string | null
+          velocity_score?: number | null
           weight?: string | null
           youtube_handle?: string | null
         }
@@ -1272,6 +1311,64 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      user_relationships: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          client_id: string | null
+          coach_id: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          relationship_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          relationship_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          relationship_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_relationships_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_relationships_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_relationships_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
