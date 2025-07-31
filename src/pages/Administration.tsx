@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { UserManagement } from "@/components/UserManagement";
+import { UnifiedUserManager } from "@/components/Unified/UnifiedUserManager";
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 
@@ -304,7 +304,7 @@ export function Administration() {
         {/* User Management Tab */}
         <TabsContent value="users">
           <div className="space-y-6">
-            <UserManagement />
+            <UnifiedUserManager />
             
             <Card>
               <CardHeader>
