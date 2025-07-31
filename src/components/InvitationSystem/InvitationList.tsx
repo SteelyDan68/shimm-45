@@ -104,7 +104,16 @@ export const InvitationList = () => {
   const resendInvitation = async (invitation: Invitation) => {
     setResendingId(invitation.id);
     try {
-      const { error } = await supabase.functions.invoke('send-invitation', {
+      // First, delete the existing invitation to avoid constraint issues
+      const { error: deleteError } = await supabase
+        .from('invitations')
+        .delete()
+        .eq('id', invitation.id);
+
+      if (deleteError) throw deleteError;
+
+      // Then send a new invitation
+      const { error: sendError } = await supabase.functions.invoke('send-invitation', {
         body: {
           email: invitation.email,
           role: invitation.invited_role,
@@ -112,9 +121,10 @@ export const InvitationList = () => {
         }
       });
 
-      if (error) throw error;
+      if (sendError) throw sendError;
 
       toast.success('Inbjudan skickades på nytt!');
+      await loadInvitations(); // Refresh the list
     } catch (error: any) {
       console.error('Error resending invitation:', error);
       toast.error('Kunde inte skicka inbjudan på nytt');
