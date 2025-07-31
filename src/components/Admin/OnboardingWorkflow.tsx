@@ -47,23 +47,45 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
 
   const loadClients = async () => {
     try {
-      // Use the unified client fetching function
-      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
-      const unifiedClients = await fetchUnifiedClients();
+      // Fetch clients and their profiles directly from database
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          status,
+          created_at,
+          profile_extended
+        `)
+        .eq('status', 'active');
+
+      if (error) throw error;
+
+      // Filter only clients (users with client role)
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .eq('role', 'client');
+
+      if (rolesError) throw rolesError;
+
+      const clientUserIds = new Set(userRoles?.map(ur => ur.user_id) || []);
       
       // Map to the expected format for this component
-      const clientProfiles = unifiedClients.map(client => ({
+      const clientProfiles = profiles?.filter(profile => clientUserIds.has(profile.id)).map(client => ({
         id: client.id,
         first_name: client.first_name,
         last_name: client.last_name,
         email: client.email,
-        status: client.status,
+        status: client.status || 'active',
         created_at: client.created_at,
         roles: ['client'], // Since these are already filtered as clients
-        onboarding_completed: false, // TODO: Get from actual data
-        assessment_completed: false, // TODO: Get from actual data
-        habits_active: 0 // TODO: Get from actual data
-      }));
+        onboarding_completed: (client.profile_extended as any)?.onboarding_completed || false,
+        assessment_completed: (client.profile_extended as any)?.assessment_completed || false,
+        habits_active: (client.profile_extended as any)?.habits_active || 0
+      })) || [];
 
       console.log('Client profiles loaded (OnboardingWorkflow):', clientProfiles.length, clientProfiles.map(c => `${c.first_name} ${c.last_name}`));
       setClients(clientProfiles);
@@ -115,9 +137,13 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
     }
   };
 
-  const handleStepComplete = (step: string) => {
+  const handleStepComplete = async (step: string) => {
     switch (step) {
       case 'onboard':
+        // Mark onboarding as completed in the database
+        if (selectedClient) {
+          await markOnboardingCompleted(selectedClient.id);
+        }
         setCurrentStep('assess');
         loadClients(); // Refresh to update status
         break;
@@ -129,6 +155,35 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
         setCurrentStep('complete');
         loadClients();
         break;
+    }
+  };
+
+  const markOnboardingCompleted = async (clientId: string) => {
+    try {
+      // Update the client's profile to mark onboarding as completed
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          profile_extended: { 
+            onboarding_completed: true,
+            onboarding_completed_at: new Date().toISOString()
+          }
+        })
+        .eq('id', clientId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Onboarding slutförd! 🎉",
+        description: "Klienten kan nu fortsätta till nästa steg.",
+      });
+    } catch (error: any) {
+      console.error('Error marking onboarding completed:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara onboarding-status",
+        variant: "destructive"
+      });
     }
   };
 
@@ -183,7 +238,10 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             </CardHeader>
             <CardContent>
               <OnboardingForm 
-                onComplete={() => handleStepComplete('onboard')}
+                onComplete={(data) => {
+                  console.log('Onboarding completed with data:', data);
+                  handleStepComplete('onboard');
+                }}
               />
             </CardContent>
           </Card>
