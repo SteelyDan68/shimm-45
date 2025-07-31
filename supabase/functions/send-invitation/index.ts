@@ -200,8 +200,14 @@ const handler = async (req: Request): Promise<Response> => {
         success: true, 
         invitationId: invitation.id,
         invitationUrl,
-        emailId: emailResult.id,
-        debugInfo
+        emailId: emailResult?.id || 'no-id',
+        debug: {
+          hasKey: !!resendApiKey,
+          keyLength: resendApiKey?.length || 0,
+          keyValid: resendApiKey?.startsWith('re_') || false,
+          emailResultExists: !!emailResult,
+          emailErrorExists: !!emailError
+        }
       }),
       {
         status: 200,
