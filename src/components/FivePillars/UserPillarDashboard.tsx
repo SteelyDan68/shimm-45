@@ -57,7 +57,7 @@ export const UserPillarDashboard = ({
         name: pillarConfig.name,
         icon: pillarConfig.icon,
         last_assessment: assessment?.created_at || null,
-        trend: 0,
+        trend: "stable" as const,
         is_active: true
       };
     });

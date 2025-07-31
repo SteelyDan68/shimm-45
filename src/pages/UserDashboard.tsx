@@ -309,8 +309,8 @@ export const UserDashboard = () => {
         </div>
       )}
 
-      {/* AI Recommendations */}
-      {profile.logic_state?.recommendation && (
+      {/* AI Recommendations - simplified for now */}
+      {false && (
         <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -320,17 +320,8 @@ export const UserDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="p-4 bg-background/60 rounded-lg border">
-              <p className="text-sm leading-relaxed">{profile.logic_state.recommendation}</p>
+              <p className="text-sm leading-relaxed">AI recommendations will be shown here.</p>
             </div>
-            
-            {profile.logic_state.velocity_rank && (
-              <div className="mt-4 flex items-center gap-2">
-                <span className="font-medium">Velocity-klass:</span>
-                <Badge variant="outline">
-                  Klass {profile.logic_state.velocity_rank}
-                </Badge>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
