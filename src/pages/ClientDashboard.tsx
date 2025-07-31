@@ -124,7 +124,7 @@ export const ClientDashboard = () => {
       const { data: tasks } = await supabase
         .from('tasks')
         .select('status')
-        .eq('client_id', clientId);
+        .eq('user_id', clientId);
 
       const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
       const pendingTasks = tasks?.filter(t => t.status === 'planned').length || 0;
@@ -133,13 +133,13 @@ export const ClientDashboard = () => {
       const { count: pathEntries } = await supabase
         .from('path_entries')
         .select('*', { count: 'exact', head: true })
-        .eq('client_id', clientId);
+        .eq('user_id', clientId);
 
       // Hämta senaste assessment
       const { data: lastAssessment } = await supabase
         .from('path_entries')
         .select('created_at')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('type', 'assessment')
         .order('created_at', { ascending: false })
         .limit(1)
@@ -149,7 +149,7 @@ export const ClientDashboard = () => {
       const { data: lastAnalysis } = await supabase
         .from('path_entries')
         .select('details')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('type', 'recommendation')
         .eq('ai_generated', true)
         .order('created_at', { ascending: false })

@@ -111,11 +111,11 @@ export const Dashboard = () => {
         'last_updated' in c.logic_state
       ).length;
 
-      // Get total data points
+      // Get total data points from path_entries table instead
       const { count: dataPoints } = await supabase
-        .from('client_data_cache')
+        .from('path_entries')
         .select('*', { count: 'exact', head: true })
-        .in('client_id', clientsList.map(c => c.id));
+        .in('user_id', clientsList.map(c => c.id));
 
       setStats({
         totalClients,

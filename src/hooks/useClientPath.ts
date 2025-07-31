@@ -17,7 +17,7 @@ export const useClientPath = (clientId?: string) => {
       let query = supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .order('timestamp', { ascending: false });
 
       // Apply filters

@@ -113,7 +113,7 @@ export const useAnalytics = (clientId?: string) => {
       const { data: pathEntries, error: pathError } = await supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .gte('timestamp', start.toISOString())
         .lte('timestamp', end.toISOString())
         .order('timestamp', { ascending: true });
@@ -124,7 +124,7 @@ export const useAnalytics = (clientId?: string) => {
       const { data: tasks, error: tasksError } = await supabase
         .from('tasks')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString())
         .order('created_at', { ascending: true });

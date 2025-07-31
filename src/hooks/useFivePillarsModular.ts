@@ -67,7 +67,7 @@ export const useFivePillarsModular = (clientId?: string) => {
       const { data, error } = await supabase
         .from('client_pillar_activations')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('is_active', true);
 
       if (error) throw error;
@@ -84,7 +84,7 @@ export const useFivePillarsModular = (clientId?: string) => {
       const { data, error } = await supabase
         .from('pillar_assessments')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -102,7 +102,8 @@ export const useFivePillarsModular = (clientId?: string) => {
       const { error } = await supabase
         .from('client_pillar_activations')
         .upsert({
-          client_id: clientId,
+          user_id: clientId,
+          client_id: clientId, // For backward compatibility
           pillar_key: pillarKey,
           is_active: true,
           activated_by: user.id
@@ -138,7 +139,7 @@ export const useFivePillarsModular = (clientId?: string) => {
           is_active: false,
           deactivated_at: new Date().toISOString()
         })
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('pillar_key', pillarKey);
 
       if (error) throw error;
@@ -174,7 +175,7 @@ export const useFivePillarsModular = (clientId?: string) => {
       const { data: assessmentResult, error: assessmentError } = await supabase
         .from('pillar_assessments')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           pillar_key: pillarKey,
           assessment_data: assessmentData,
           calculated_score: calculatedScore,
@@ -215,7 +216,7 @@ export const useFivePillarsModular = (clientId?: string) => {
         await supabase
           .from('path_entries')
           .insert({
-            client_id: clientId,
+            user_id: clientId,
             created_by: user.id,
             type: 'recommendation',
             title: `${pillarKey} Assessment AI-Analys`,

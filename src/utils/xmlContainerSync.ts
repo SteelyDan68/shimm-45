@@ -97,7 +97,7 @@ export class XmlContainerSync {
       const { data: existingContainer, error: fetchError } = await supabase
         .from('client_data_containers')
         .select('id, version')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('container_type', containerType)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -132,7 +132,7 @@ export class XmlContainerSync {
         const { error: insertError } = await supabase
           .from('client_data_containers')
           .insert({
-            client_id: clientId,
+            user_id: clientId,
             container_type: containerType,
             xml_content: xmlContent,
             metadata: {
@@ -186,7 +186,7 @@ ${Object.entries(data).map(([key, value]) =>
   static async syncAllClients(): Promise<void> {
     try {
       const { data: clients, error } = await supabase
-        .from('clients')
+        .from('profiles')
         .select('id');
 
       if (error) {
