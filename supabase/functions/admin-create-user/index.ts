@@ -149,25 +149,57 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check if user already exists
+    // Check if user already exists in both auth.users and profiles
     console.log('Checking if user already exists with email:', email);
-    const { data: existingUser, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers();
     
+    // Check auth.users table
+    const { data: existingUser, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers();
     if (existingUserError) {
       console.error('Error checking existing users:', existingUserError);
       return new Response(
-        JSON.stringify({ error: 'Failed to check existing users' }),
+        JSON.stringify({ error: 'Kunde inte kontrollera befintliga användare' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userAlreadyExists = existingUser.users.some(u => u.email === email);
-    if (userAlreadyExists) {
-      console.log('User already exists with email:', email);
+    const authUserExists = existingUser.users.some(u => u.email === email);
+    console.log('Auth user exists:', authUserExists);
+
+    // Check profiles table for any leftover profiles
+    const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email')
+      .eq('email', email)
+      .single();
+
+    if (profileCheckError && profileCheckError.code !== 'PGRST116') { // PGRST116 is "not found"
+      console.error('Error checking existing profiles:', profileCheckError);
       return new Response(
-        JSON.stringify({ error: `En användare med email ${email} existerar redan` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Kunde inte kontrollera befintliga profiler' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    const profileExists = existingProfile !== null;
+    console.log('Profile exists:', profileExists);
+
+    if (authUserExists || profileExists) {
+      console.log('User or profile already exists with email:', email);
+      
+      // If profile exists but auth user doesn't, clean up the orphaned profile
+      if (profileExists && !authUserExists) {
+        console.log('Cleaning up orphaned profile for:', email);
+        await supabaseAdmin
+          .from('profiles')
+          .delete()
+          .eq('email', email);
+        console.log('Orphaned profile cleaned up, proceeding with user creation');
+      } else {
+        return new Response(
+          JSON.stringify({ error: `En användare med email ${email} existerar redan` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Create user using admin client
