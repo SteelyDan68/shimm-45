@@ -142,18 +142,35 @@ export function UnifiedUserManager() {
           <Button
             variant="destructive"
             onClick={async () => {
-              if (!window.confirm('⚠️ VARNING: Detta kommer att radera Börje Sandhill (borje.sandhill@gmail.com) och ALL hans data permanent. Är du säker?')) {
+              const userName = prompt('Ange användarnamn eller email för att radera (t.ex. "Börje Sandhill"):');
+              if (!userName) return;
+              
+              if (!window.confirm(`⚠️ VARNING: Detta kommer att radera användaren "${userName}" och ALL deras data permanent. Är du säker?`)) {
                 return;
               }
 
               try {
-                const { deleteBorjeSandhill } = await import('@/utils/deleteSpecificUser');
-                await deleteBorjeSandhill();
+                const { deleteUserCompletely } = await import('@/utils/userDeletion');
+                const result = await deleteUserCompletely(userName);
                 
-                toast({
-                  title: "✅ Börje Sandhill raderad",
-                  description: "Användaren borje.sandhill@gmail.com och all hans data har raderats permanent"
-                });
+                if (result.user_found && result.deleted_profile) {
+                  toast({
+                    title: "✅ Användare raderad",
+                    description: `Användaren och all relaterad data har raderats permanent`
+                  });
+                } else if (!result.user_found) {
+                  toast({
+                    title: "❌ Användare hittades inte",
+                    description: `Ingen användare som matchar "${userName}" kunde hittas`,
+                    variant: "destructive"
+                  });
+                } else {
+                  toast({
+                    title: "⚠️ Delvis raderad",
+                    description: `Vissa data raderades men ${result.errors.length} fel uppstod`,
+                    variant: "destructive"
+                  });
+                }
                 
                 await refetch(); // Refresh data
               } catch (error: any) {
@@ -165,7 +182,7 @@ export function UnifiedUserManager() {
               }
             }}
           >
-            🗑️ Radera Börje Sandhill
+            🗑️ Radera specifik användare
           </Button>
           <AdminUserCreation onUserCreated={refetch} />
         </div>
