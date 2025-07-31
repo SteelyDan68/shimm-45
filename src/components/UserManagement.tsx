@@ -24,7 +24,8 @@ import {
   AlertCircle,
   Mail,
   Trophy,
-  Brain
+  Brain,
+  Key
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AdminUserCreation } from "./AdminUserCreation";
@@ -34,6 +35,7 @@ import { SendInvitationForm } from "./InvitationSystem/SendInvitationForm";
 import { InvitationList } from "./InvitationSystem/InvitationList";
 import { AdminGamificationPanel } from "./Admin/AdminGamificationPanel";
 import { OnboardingWorkflow } from "./Admin/OnboardingWorkflow";
+import { PasswordManagement } from "./UserManagement/PasswordManagement";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
 interface Organization {
@@ -59,21 +61,21 @@ interface ExtendedProfile extends Profile {
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
   admin: "Administratör",
+  coach: "Coach",
   manager: "Manager",
   editor: "Redaktör",
   organization: "Organisation",
-  client: "Klient",
-  user: "Användare"
+  client: "Klient"
 };
 
 const roleColors: Record<AppRole, string> = {
   superadmin: "bg-red-500",
   admin: "bg-orange-500",
+  coach: "bg-teal-500",
   manager: "bg-blue-500",
   editor: "bg-green-500",
   organization: "bg-purple-500",
-  client: "bg-yellow-500",
-  user: "bg-gray-500"
+  client: "bg-yellow-500"
 };
 
 export function UserManagement() {
@@ -111,10 +113,12 @@ export function UserManagement() {
 
       if (rolesError) throw rolesError;
 
-      // Combine users with their roles
+      // Combine users with their roles - filter out invalid roles
       const usersWithRoles = profiles?.map(profile => ({
         ...profile,
-        roles: userRoles?.filter(role => role.user_id === profile.id).map(role => role.role) || []
+        roles: userRoles?.filter(role => role.user_id === profile.id)
+          .map(role => role.role)
+          .filter(role => role !== 'user') as AppRole[] || []
       })) || [];
 
       setUsers(usersWithRoles);
@@ -161,10 +165,10 @@ export function UserManagement() {
 
       if (deleteError) throw deleteError;
 
-      // Add new role
+      // Add new role - cast to any to handle DB enum mismatch temporarily
       const { error: insertError } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role: newRole }]);
+        .insert([{ user_id: userId, role: newRole as any }]);
 
       if (insertError) throw insertError;
 
@@ -379,6 +383,15 @@ export function UserManagement() {
                               Redigera
                             </DropdownMenuItem>
                             {isAdmin && (
+                              <DropdownMenuItem className="p-0">
+                                <PasswordManagement 
+                                  userId={user.id}
+                                  userEmail={user.email}
+                                  userName={`${user.first_name} ${user.last_name}`}
+                                />
+                              </DropdownMenuItem>
+                            )}
+                            {isAdmin && (
                               <DropdownMenuItem 
                                 onClick={() => deleteUser(user.id)}
                                 className="text-red-600 focus:text-red-600"
@@ -471,8 +484,8 @@ export function UserManagement() {
                     {role === 'manager' && 'Hantera team och projekt'}
                     {role === 'editor' && 'Redigera och moderera innehåll'}
                     {role === 'organization' && 'Organisationshantering'}
-                    {role === 'client' && 'Klientåtkomst och rapporter'}
-                    {role === 'user' && 'Grundläggande användaråtkomst'}
+                     {role === 'client' && 'Klientåtkomst och rapporter'}
+                     {role === 'coach' && 'Coach och vägledning av klienter'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

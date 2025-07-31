@@ -31,7 +31,7 @@ interface ClientProfileEditorProps {
   onCancel: () => void;
 }
 
-const categories = ["Influencer", "Företag", "Offentlig person", "Kreativt", "Sport", "Annat"];
+const categories = ["influencer", "creator", "brand", "other"];
 const statuses = ["active", "inactive", "pending", "suspended"];
 
 export function ClientProfileEditor({ client, onSave, onCancel }: ClientProfileEditorProps) {

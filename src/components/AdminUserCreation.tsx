@@ -13,11 +13,11 @@ import type { AppRole } from '@/hooks/useAuth';
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
   admin: "Administratör", 
+  coach: "Coach",
   manager: "Manager",
   editor: "Redaktör",
   organization: "Organisation",
-  client: "Klient",
-  user: "Användare"
+  client: "Klient"
 };
 
 interface AdminUserCreationProps {
@@ -32,7 +32,7 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
     password: '',
     firstName: '',
     lastName: '',
-    role: 'user' as AppRole
+    role: 'client' as AppRole
   });
   const { toast } = useToast();
 
@@ -76,7 +76,7 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
           password: '',
           firstName: '',
           lastName: '',
-          role: 'user'
+          role: 'client'
         });
         setIsOpen(false);
         onUserCreated?.();

@@ -24,7 +24,7 @@ export interface Profile {
   updated_at: string;
 }
 
-export type AppRole = 'superadmin' | 'admin' | 'manager' | 'editor' | 'organization' | 'client' | 'user';
+export type AppRole = 'superadmin' | 'admin' | 'coach' | 'manager' | 'editor' | 'organization' | 'client';
 
 export interface UserRole {
   id: string;
@@ -113,7 +113,8 @@ export const useAuth = () => {
         return;
       }
 
-      const userRoles = data?.map(item => item.role) || [];
+      // Filter out 'user' role and cast to AppRole[]
+      const userRoles = data?.map(item => item.role).filter(role => role !== 'user') as AppRole[] || [];
       setRoles(userRoles);
     } catch (error) {
       console.error('Error in fetchUserRoles:', error);
