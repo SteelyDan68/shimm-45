@@ -194,14 +194,19 @@ export const InvitationList = () => {
                       <Copy className="h-4 w-4 mr-2" />
                       Kopiera länk
                     </DropdownMenuItem>
-                    {invitation.status === 'pending' && new Date(invitation.expires_at) > new Date() && (
+                    {invitation.status !== 'accepted' && (
                       <DropdownMenuItem
                         onClick={() => cancelInvitation(invitation.id)}
                         className="text-red-600 focus:text-red-600"
                         disabled={cancellingId === invitation.id}
                       >
                         <X className="h-4 w-4 mr-2" />
-                        {cancellingId === invitation.id ? 'Avbryter...' : 'Avbryt inbjudan'}
+                        {cancellingId === invitation.id 
+                          ? 'Tar bort...' 
+                          : (invitation.status === 'pending' && new Date(invitation.expires_at) > new Date()) 
+                            ? 'Avbryt inbjudan' 
+                            : 'Ta bort inbjudan'
+                        }
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
