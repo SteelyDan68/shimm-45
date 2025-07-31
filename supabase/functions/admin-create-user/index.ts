@@ -147,6 +147,27 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Check if user already exists
+    console.log('Checking if user already exists with email:', email);
+    const { data: existingUser, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (existingUserError) {
+      console.error('Error checking existing users:', existingUserError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to check existing users' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userAlreadyExists = existingUser.users.some(u => u.email === email);
+    if (userAlreadyExists) {
+      console.log('User already exists with email:', email);
+      return new Response(
+        JSON.stringify({ error: `En användare med email ${email} existerar redan` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Create user using admin client
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
