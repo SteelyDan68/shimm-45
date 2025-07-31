@@ -1,64 +1,69 @@
+// Extended profile data that maps directly to the unified profiles table
 export interface ExtendedProfileData {
-  // 1. Grundinformation
-  basicInfo: {
-    fullName: string;
-    username?: string;
-    gender?: string;
-    dateOfBirth?: string;
-    profilePicture?: string;
-    bio?: string;
-  };
+  // Basic Information (auto-populated from auth/onboarding)
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  avatar_url?: string;
+  bio?: string;
+  date_of_birth?: string;
+  gender?: string;
   
-  // 2. Kontaktuppgifter
-  contactInfo: {
-    email: string;
-    phone?: string;
-    address?: {
-      street?: string;
-      postalCode?: string;
-      city?: string;
-      country?: string;
-    };
+  // Address Information
+  address?: {
+    street?: string;
+    postalCode?: string;
+    city?: string;
+    country?: string;
   };
+  location?: string;
   
-  // 3. Digital närvaro
-  digitalPresence: {
-    instagram?: string;
-    youtube?: string;
-    tiktok?: string;
-    facebook?: string;
-    twitter?: string;
-    linkedin?: string;
-    website?: string;
-  };
+  // Professional Information
+  organization?: string;
+  department?: string;
+  job_title?: string;
+  primary_role?: string;
+  secondary_role?: string;
+  niche?: string;
+  creative_strengths?: string;
+  challenges?: string;
   
-  // 4. Arbetsprofil & AI-kontext
-  workProfile: {
-    primaryRole?: string;
-    secondaryRole?: string;
-    niche?: string;
-    creativeStrengths?: string;
-    challenges?: string;
-    activePlatforms: string[];
-  };
+  // Social Media Handles (direct database fields)
+  instagram_handle?: string;
+  youtube_handle?: string;
+  tiktok_handle?: string;
+  facebook_handle?: string;
+  twitter_handle?: string;
+  snapchat_handle?: string;
   
-  // 5. Hälsa och särskilda behov
-  healthInfo?: {
-    diagnoses?: string;
-    physicalVariations?: string;
-    generalHealth?: string;
-  };
+  // Contact Management
+  manager_name?: string;
+  manager_email?: string;
+  primary_contact_name?: string;
+  primary_contact_email?: string;
   
-  // 6. Systeminställningar
-  systemSettings: {
-    notificationPreferences: {
+  // Health and Accessibility
+  physical_limitations?: string;
+  neurodiversity?: string;
+  
+  // Business Information
+  client_category?: string;
+  client_status?: string;
+  tags?: string[];
+  
+  // System Data (JSONB fields)
+  platforms?: string[];
+  preferences?: {
+    notifications?: {
       email: boolean;
       sms: boolean;
       inApp: boolean;
     };
-    allowAiAnalysis: boolean;
-    userRole?: string; // endast synlig för admin
+    allowAiAnalysis?: boolean;
   };
+  custom_fields?: Record<string, any>;
+  profile_metadata?: Record<string, any>;
 }
 
 export const PRIMARY_ROLES = [
