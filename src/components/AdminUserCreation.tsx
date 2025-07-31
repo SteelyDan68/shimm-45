@@ -150,11 +150,15 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
                 value={formData.password}
                 onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                 required
+                placeholder="Minst 8 tecken"
               />
               <Button type="button" variant="outline" onClick={generatePassword}>
                 Generera
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Lösenordet måste vara minst 8 tecken långt
+            </p>
           </div>
 
           <div>
