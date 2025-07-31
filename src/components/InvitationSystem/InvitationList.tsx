@@ -47,6 +47,26 @@ export const InvitationList = () => {
 
   useEffect(() => {
     loadInvitations();
+
+    // Set up real-time subscription for invitations
+    const subscription = supabase
+      .channel('invitations_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'invitations' 
+        }, 
+        () => {
+          loadInvitations(); // Refresh the list when invitations change
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const copyInvitationLink = async (token: string) => {
