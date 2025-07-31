@@ -35,6 +35,7 @@ const mainItems = [
   { title: "Alla Klienter", url: "/clients", icon: Users },
   { title: "Analys", url: "/analytics", icon: TrendingUp },
   { title: "Datainsamling", url: "/data-collection", icon: Database },
+  { title: "Administration", url: "/administration", icon: Settings },
 ];
 
 export function AppSidebar() {

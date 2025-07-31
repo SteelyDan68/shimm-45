@@ -22,7 +22,9 @@ import {
   Crown,
   Settings,
   AlertCircle,
-  Mail
+  Mail,
+  Trophy,
+  Brain
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AdminUserCreation } from "./AdminUserCreation";
@@ -30,6 +32,8 @@ import { ClientList } from "./ClientManagement/ClientList";
 import { ClientGroupManager } from "./ClientManagement/ClientGroupManager";
 import { SendInvitationForm } from "./InvitationSystem/SendInvitationForm";
 import { InvitationList } from "./InvitationSystem/InvitationList";
+import { AdminGamificationPanel } from "./Admin/AdminGamificationPanel";
+import { OnboardingWorkflow } from "./Admin/OnboardingWorkflow";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
 interface Organization {
@@ -254,6 +258,14 @@ export function UserManagement() {
             <Mail className="h-4 w-4" />
             Inbjudningar
           </TabsTrigger>
+          <TabsTrigger value="gamification" className="flex items-center gap-2">
+            <Trophy className="h-4 w-4" />
+            Gamification
+          </TabsTrigger>
+          <TabsTrigger value="habits" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            Onboarding Workflow
+          </TabsTrigger>
           <TabsTrigger value="organizations" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             Organisationer ({organizations.length})
@@ -461,6 +473,14 @@ export function UserManagement() {
             <SendInvitationForm />
             <InvitationList />
           </div>
+        </TabsContent>
+
+        <TabsContent value="gamification" className="space-y-6">
+          <AdminGamificationPanel />
+        </TabsContent>
+
+        <TabsContent value="habits" className="space-y-6">
+          <OnboardingWorkflow />
         </TabsContent>
       </Tabs>
 
