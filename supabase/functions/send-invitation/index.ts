@@ -3,8 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
 import { Resend } from "npm:resend@4.0.0";
 
 const resendApiKey = Deno.env.get("RESEND_API_KEY");
+console.log("=== RESEND DEBUGGING ===");
 console.log("RESEND_API_KEY exists:", !!resendApiKey);
+console.log("RESEND_API_KEY starts with 're_':", resendApiKey?.startsWith('re_'));
 console.log("RESEND_API_KEY length:", resendApiKey?.length || 0);
+console.log("======================");
 
 if (!resendApiKey) {
   console.error("RESEND_API_KEY environment variable is not set");
