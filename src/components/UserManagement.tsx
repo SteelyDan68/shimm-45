@@ -90,11 +90,16 @@ export function UserManagement() {
   const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('UserManagement - canManageUsers:', canManageUsers);
+    console.log('UserManagement - roles from useAuth:', roles);
+    console.log('UserManagement - isAdmin:', isAdmin());
+    console.log('UserManagement - isSuperAdmin:', isSuperAdmin);
+    
     if (canManageUsers) {
       fetchUsers();
       fetchOrganizations();
     }
-  }, [canManageUsers]);
+  }, [canManageUsers, roles]);
 
   const fetchUsers = async () => {
     try {
