@@ -10,710 +10,1332 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
-      ai_analysis_sessions: {
+      assessment_form_assignments: {
         Row: {
-          ai_insights: Json
-          analysis_type: string
-          approved_by_coach: boolean | null
-          client_id: string | null
-          executed_at: string
-          feedback: string | null
+          assigned_at: string
+          assigned_by: string
+          client_id: string
+          due_date: string | null
+          form_definition_id: string
           id: string
-          input_data: Json
-          recommendations: Json | null
+          is_active: boolean
+          reminder_sent: boolean
+          updated_at: string
         }
         Insert: {
-          ai_insights: Json
-          analysis_type: string
-          approved_by_coach?: boolean | null
-          client_id?: string | null
-          executed_at?: string
-          feedback?: string | null
+          assigned_at?: string
+          assigned_by: string
+          client_id: string
+          due_date?: string | null
+          form_definition_id: string
           id?: string
-          input_data: Json
-          recommendations?: Json | null
+          is_active?: boolean
+          reminder_sent?: boolean
+          updated_at?: string
         }
         Update: {
-          ai_insights?: Json
-          analysis_type?: string
-          approved_by_coach?: boolean | null
-          client_id?: string | null
-          executed_at?: string
-          feedback?: string | null
+          assigned_at?: string
+          assigned_by?: string
+          client_id?: string
+          due_date?: string | null
+          form_definition_id?: string
           id?: string
-          input_data?: Json
-          recommendations?: Json | null
+          is_active?: boolean
+          reminder_sent?: boolean
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "ai_analysis_sessions_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "assessment_form_assignments_form_definition_id_fkey"
+            columns: ["form_definition_id"]
             isOneToOne: false
-            referencedRelation: "client_profiles"
+            referencedRelation: "assessment_form_definitions"
             referencedColumns: ["id"]
           },
         ]
       }
-      client_assignments: {
+      assessment_form_definitions: {
         Row: {
-          assigned_at: string | null
-          assigned_by: string | null
-          client_id: string
+          ai_prompt_template: string
+          assessment_type: string
+          created_at: string
+          created_by: string
+          description: string | null
           id: string
-          is_active: boolean | null
-          user_id: string
+          is_active: boolean
+          name: string
+          updated_at: string
         }
         Insert: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          client_id: string
+          ai_prompt_template: string
+          assessment_type: string
+          created_at?: string
+          created_by: string
+          description?: string | null
           id?: string
-          is_active?: boolean | null
-          user_id: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
         }
         Update: {
-          assigned_at?: string | null
-          assigned_by?: string | null
+          ai_prompt_template?: string
+          assessment_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      assessment_questions: {
+        Row: {
+          created_at: string
+          form_definition_id: string
+          id: string
+          is_required: boolean
+          max_value: number | null
+          min_value: number | null
+          options: Json | null
+          question_key: string
+          question_text: string
+          question_type: string
+          sort_order: number
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          form_definition_id: string
+          id?: string
+          is_required?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          options?: Json | null
+          question_key: string
+          question_text: string
+          question_type: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          form_definition_id?: string
+          id?: string
+          is_required?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          options?: Json | null
+          question_key?: string
+          question_text?: string
+          question_type?: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_questions_form_definition_id_fkey"
+            columns: ["form_definition_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_form_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_rounds: {
+        Row: {
+          ai_analysis: string | null
+          answers: Json
+          client_id: string
+          comments: string | null
+          created_at: string
+          created_by: string
+          form_definition_id: string | null
+          id: string
+          pillar_type: string
+          scores: Json
+          updated_at: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          answers?: Json
+          client_id: string
+          comments?: string | null
+          created_at?: string
+          created_by: string
+          form_definition_id?: string | null
+          id?: string
+          pillar_type: string
+          scores?: Json
+          updated_at?: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          answers?: Json
+          client_id?: string
+          comments?: string | null
+          created_at?: string
+          created_by?: string
+          form_definition_id?: string | null
+          id?: string
+          pillar_type?: string
+          scores?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_rounds_form_definition_id_fkey"
+            columns: ["form_definition_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_form_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendar_events: {
+        Row: {
+          category: string
+          client_id: string
+          created_at: string
+          created_by: string
+          created_by_role: string
+          description: string | null
+          event_date: string
+          id: string
+          title: string
+          updated_at: string
+          visible_to_client: boolean
+        }
+        Insert: {
+          category: string
+          client_id: string
+          created_at?: string
+          created_by: string
+          created_by_role: string
+          description?: string | null
+          event_date: string
+          id?: string
+          title: string
+          updated_at?: string
+          visible_to_client?: boolean
+        }
+        Update: {
+          category?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          created_by_role?: string
+          description?: string | null
+          event_date?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          visible_to_client?: boolean
+        }
+        Relationships: []
+      }
+      client_data_cache: {
+        Row: {
+          author: string | null
+          client_id: string
+          created_at: string
+          data: Json
+          data_type: string
+          expires_at: string | null
+          id: string
+          image: string | null
+          metadata: Json | null
+          platform: string | null
+          snippet: string | null
+          source: string
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          author?: string | null
+          client_id: string
+          created_at?: string
+          data: Json
+          data_type: string
+          expires_at?: string | null
+          id?: string
+          image?: string | null
+          metadata?: Json | null
+          platform?: string | null
+          snippet?: string | null
+          source: string
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          author?: string | null
+          client_id?: string
+          created_at?: string
+          data?: Json
+          data_type?: string
+          expires_at?: string | null
+          id?: string
+          image?: string | null
+          metadata?: Json | null
+          platform?: string | null
+          snippet?: string | null
+          source?: string
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_data_cache_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_data_cache_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_pillar_activations: {
+        Row: {
+          activated_at: string
+          activated_by: string
+          client_id: string
+          deactivated_at: string | null
+          id: string
+          is_active: boolean
+          pillar_key: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string
+          activated_by: string
+          client_id: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          pillar_key: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string
+          client_id?: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          pillar_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      client_pillar_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          client_id: string
+          id: string
+          is_active: boolean
+          pillar_type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          client_id: string
+          id?: string
+          is_active?: boolean
+          pillar_type: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
           client_id?: string
           id?: string
-          is_active?: boolean | null
+          is_active?: boolean
+          pillar_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          category: string
+          created_at: string
+          custom_fields: Json | null
+          email: string | null
+          facebook_page: string | null
+          follower_counts: Json | null
+          id: string
+          instagram_handle: string | null
+          logic_state: Json | null
+          manager_email: string | null
+          manager_name: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          primary_contact_email: string | null
+          primary_contact_name: string | null
+          profile_metadata: Json | null
+          status: string
+          tags: string[] | null
+          tiktok_handle: string | null
+          updated_at: string
+          user_id: string
+          velocity_score: number | null
+          youtube_channel: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          facebook_page?: string | null
+          follower_counts?: Json | null
+          id?: string
+          instagram_handle?: string | null
+          logic_state?: Json | null
+          manager_email?: string | null
+          manager_name?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          profile_metadata?: Json | null
+          status?: string
+          tags?: string[] | null
+          tiktok_handle?: string | null
+          updated_at?: string
+          user_id: string
+          velocity_score?: number | null
+          youtube_channel?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          facebook_page?: string | null
+          follower_counts?: Json | null
+          id?: string
+          instagram_handle?: string | null
+          logic_state?: Json | null
+          manager_email?: string | null
+          manager_name?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          profile_metadata?: Json | null
+          status?: string
+          tags?: string[] | null
+          tiktok_handle?: string | null
+          updated_at?: string
           user_id?: string
+          velocity_score?: number | null
+          youtube_channel?: string | null
+        }
+        Relationships: []
+      }
+      data_deletion_requests: {
+        Row: {
+          admin_notes: string | null
+          approved_by: string | null
+          approved_date: string | null
+          completed_date: string | null
+          created_at: string | null
+          id: string
+          reason: string | null
+          request_date: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_by?: string | null
+          approved_date?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_by?: string | null
+          approved_date?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      data_export_requests: {
+        Row: {
+          completed_date: string | null
+          created_at: string | null
+          download_url: string | null
+          error_message: string | null
+          expires_at: string | null
+          file_size_bytes: number | null
+          id: string
+          request_date: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_date?: string | null
+          created_at?: string | null
+          download_url?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_date?: string | null
+          created_at?: string | null
+          download_url?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          request_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      gdpr_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          timestamp: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          invited_role: string
+          metadata: Json | null
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          invited_role?: string
+          metadata?: Json | null
+          status?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          invited_role?: string
+          metadata?: Json | null
+          status?: string
+          token?: string
+        }
+        Relationships: []
+      }
+      message_preferences: {
+        Row: {
+          auto_ai_assistance: boolean
+          created_at: string
+          email_notifications: boolean
+          id: string
+          internal_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_ai_assistance?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          internal_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_ai_assistance?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          internal_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_ai_assisted: boolean
+          is_read: boolean
+          parent_message_id: string | null
+          receiver_id: string
+          sender_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_ai_assisted?: boolean
+          is_read?: boolean
+          parent_message_id?: string | null
+          receiver_id: string
+          sender_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_ai_assisted?: boolean
+          is_read?: boolean
+          parent_message_id?: string | null
+          receiver_id?: string
+          sender_id?: string
+          subject?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "client_assignments_assigned_by_fkey"
-            columns: ["assigned_by"]
+            foreignKeyName: "messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
             isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_assignments_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_assignments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
       }
-      client_profiles: {
+      organization_members: {
         Row: {
-          backstory: string | null
-          biography: string | null
-          brand_positioning: string | null
-          brand_values: string[] | null
-          career_goals: string | null
-          communication_style: string | null
-          content_style: string | null
-          created_at: string
-          current_projects: string[] | null
-          growth_areas: string[] | null
           id: string
-          last_scraped_at: string | null
-          media_experience: string | null
-          name: string
-          notability_score: number | null
-          personal_traits: Json | null
-          preferences: Json | null
-          risk_tolerance: string | null
-          search_keywords: string[] | null
-          stage_name: string | null
-          status: string | null
-          strengths: string[] | null
-          target_audience: string | null
-          updated_at: string
-          website_url: string | null
+          invited_by: string | null
+          joined_at: string | null
+          organization_id: string | null
+          permissions: Json | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          user_id: string | null
         }
         Insert: {
-          backstory?: string | null
-          biography?: string | null
-          brand_positioning?: string | null
-          brand_values?: string[] | null
-          career_goals?: string | null
-          communication_style?: string | null
-          content_style?: string | null
-          created_at?: string
-          current_projects?: string[] | null
-          growth_areas?: string[] | null
           id?: string
-          last_scraped_at?: string | null
-          media_experience?: string | null
-          name: string
-          notability_score?: number | null
-          personal_traits?: Json | null
-          preferences?: Json | null
-          risk_tolerance?: string | null
-          search_keywords?: string[] | null
-          stage_name?: string | null
-          status?: string | null
-          strengths?: string[] | null
-          target_audience?: string | null
-          updated_at?: string
-          website_url?: string | null
+          invited_by?: string | null
+          joined_at?: string | null
+          organization_id?: string | null
+          permissions?: Json | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
         }
         Update: {
-          backstory?: string | null
-          biography?: string | null
-          brand_positioning?: string | null
-          brand_values?: string[] | null
-          career_goals?: string | null
-          communication_style?: string | null
-          content_style?: string | null
-          created_at?: string
-          current_projects?: string[] | null
-          growth_areas?: string[] | null
           id?: string
-          last_scraped_at?: string | null
-          media_experience?: string | null
+          invited_by?: string | null
+          joined_at?: string | null
+          organization_id?: string | null
+          permissions?: Json | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          address: Json | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          settings: Json | null
+          slug: string
+          status: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: Json | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          settings?: Json | null
+          slug: string
+          status?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: Json | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
           name?: string
-          notability_score?: number | null
-          personal_traits?: Json | null
-          preferences?: Json | null
-          risk_tolerance?: string | null
-          search_keywords?: string[] | null
-          stage_name?: string | null
+          settings?: Json | null
+          slug?: string
           status?: string | null
-          strengths?: string[] | null
-          target_audience?: string | null
-          updated_at?: string
-          website_url?: string | null
+          updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }
-      coaching_methodology: {
+      path_entries: {
         Row: {
-          case_studies: Json | null
+          ai_generated: boolean
+          client_id: string
+          content: string | null
           created_at: string
-          decision_tree: Json | null
-          description: string
-          framework_name: string
+          created_by: string
+          created_by_role: string | null
+          details: string | null
           id: string
-          personality_mappings: Json | null
-          principles: Json
+          linked_task_id: string | null
+          metadata: Json | null
+          status: string
+          timestamp: string
+          title: string
+          type: string
+          updated_at: string
+          visible_to_client: boolean
+        }
+        Insert: {
+          ai_generated?: boolean
+          client_id: string
+          content?: string | null
+          created_at?: string
+          created_by: string
+          created_by_role?: string | null
+          details?: string | null
+          id?: string
+          linked_task_id?: string | null
+          metadata?: Json | null
+          status?: string
+          timestamp?: string
+          title: string
+          type: string
+          updated_at?: string
+          visible_to_client?: boolean
+        }
+        Update: {
+          ai_generated?: boolean
+          client_id?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_role?: string | null
+          details?: string | null
+          id?: string
+          linked_task_id?: string | null
+          metadata?: Json | null
+          status?: string
+          timestamp?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          visible_to_client?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "path_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "path_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pillar_assessments: {
+        Row: {
+          ai_analysis: string | null
+          assessment_data: Json
+          calculated_score: number | null
+          client_id: string
+          created_at: string
+          created_by: string
+          id: string
+          insights: Json | null
+          pillar_key: string
           updated_at: string
         }
         Insert: {
-          case_studies?: Json | null
+          ai_analysis?: string | null
+          assessment_data?: Json
+          calculated_score?: number | null
+          client_id: string
           created_at?: string
-          decision_tree?: Json | null
-          description: string
-          framework_name: string
+          created_by: string
           id?: string
-          personality_mappings?: Json | null
-          principles: Json
+          insights?: Json | null
+          pillar_key: string
           updated_at?: string
         }
         Update: {
-          case_studies?: Json | null
+          ai_analysis?: string | null
+          assessment_data?: Json
+          calculated_score?: number | null
+          client_id?: string
           created_at?: string
-          decision_tree?: Json | null
-          description?: string
-          framework_name?: string
+          created_by?: string
           id?: string
-          personality_mappings?: Json | null
-          principles?: Json
+          insights?: Json | null
+          pillar_key?: string
           updated_at?: string
         }
         Relationships: []
       }
-      management_insights: {
+      pillar_definitions: {
         Row: {
-          action_needed: boolean | null
-          ai_generated: boolean | null
-          client_id: string | null
-          coaching_framework: string | null
-          confidence_score: number | null
+          ai_prompt_template: string
+          color_code: string | null
           created_at: string
-          description: string
-          expected_impact: string | null
+          description: string | null
+          icon: string | null
           id: string
-          implementation_timeline: string | null
-          insight_type: string | null
-          priority: string | null
-          related_news_id: string | null
+          is_active: boolean
+          name: string
+          pillar_key: string
+          scoring_weights: Json | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          ai_prompt_template: string
+          color_code?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          pillar_key: string
+          scoring_weights?: Json | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_prompt_template?: string
+          color_code?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          pillar_key?: string
+          scoring_weights?: Json | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pillar_visualization_data: {
+        Row: {
+          client_id: string
+          created_at: string
+          data_points: Json
+          data_type: string
+          id: string
+          metadata: Json | null
+          pillar_key: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          data_points?: Json
+          data_type: string
+          id?: string
+          metadata?: Json | null
+          pillar_key: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          data_points?: Json
+          data_type?: string
+          id?: string
+          metadata?: Json | null
+          pillar_key?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: Json | null
+          avatar_url: string | null
+          bio: string | null
+          consent_timestamp: string | null
+          created_at: string | null
+          data_retention_until: string | null
+          date_of_birth: string | null
+          deletion_requested_at: string | null
+          department: string | null
+          email: string | null
+          first_name: string | null
+          id: string
+          job_title: string | null
+          last_login_at: string | null
+          last_name: string | null
+          organization: string | null
+          phone: string | null
+          preferences: Json | null
+          profile_extended: Json | null
+          social_links: Json | null
           status: string | null
-          strategy_type: string | null
-          success_metrics: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: Json | null
+          avatar_url?: string | null
+          bio?: string | null
+          consent_timestamp?: string | null
+          created_at?: string | null
+          data_retention_until?: string | null
+          date_of_birth?: string | null
+          deletion_requested_at?: string | null
+          department?: string | null
+          email?: string | null
+          first_name?: string | null
+          id: string
+          job_title?: string | null
+          last_login_at?: string | null
+          last_name?: string | null
+          organization?: string | null
+          phone?: string | null
+          preferences?: Json | null
+          profile_extended?: Json | null
+          social_links?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: Json | null
+          avatar_url?: string | null
+          bio?: string | null
+          consent_timestamp?: string | null
+          created_at?: string | null
+          data_retention_until?: string | null
+          date_of_birth?: string | null
+          deletion_requested_at?: string | null
+          department?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          job_title?: string | null
+          last_login_at?: string | null
+          last_name?: string | null
+          organization?: string | null
+          phone?: string | null
+          preferences?: Json | null
+          profile_extended?: Json | null
+          social_links?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          ai_generated: boolean
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          deadline: string | null
+          description: string | null
+          id: string
+          priority: string
+          source_path_entry_id: string | null
+          status: string
           title: string
           updated_at: string
         }
         Insert: {
-          action_needed?: boolean | null
-          ai_generated?: boolean | null
-          client_id?: string | null
-          coaching_framework?: string | null
-          confidence_score?: number | null
+          ai_generated?: boolean
+          client_id: string
+          completed_at?: string | null
           created_at?: string
-          description: string
-          expected_impact?: string | null
+          created_by: string
+          deadline?: string | null
+          description?: string | null
           id?: string
-          implementation_timeline?: string | null
-          insight_type?: string | null
-          priority?: string | null
-          related_news_id?: string | null
-          status?: string | null
-          strategy_type?: string | null
-          success_metrics?: Json | null
+          priority?: string
+          source_path_entry_id?: string | null
+          status?: string
           title: string
           updated_at?: string
         }
         Update: {
-          action_needed?: boolean | null
-          ai_generated?: boolean | null
-          client_id?: string | null
-          coaching_framework?: string | null
-          confidence_score?: number | null
+          ai_generated?: boolean
+          client_id?: string
+          completed_at?: string | null
           created_at?: string
-          description?: string
-          expected_impact?: string | null
+          created_by?: string
+          deadline?: string | null
+          description?: string | null
           id?: string
-          implementation_timeline?: string | null
-          insight_type?: string | null
-          priority?: string | null
-          related_news_id?: string | null
-          status?: string | null
-          strategy_type?: string | null
-          success_metrics?: Json | null
+          priority?: string
+          source_path_entry_id?: string | null
+          status?: string
           title?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "management_insights_client_id_fkey"
+            foreignKeyName: "tasks_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_profiles"
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "management_insights_related_news_id_fkey"
-            columns: ["related_news_id"]
+            foreignKeyName: "tasks_source_path_entry_id_fkey"
+            columns: ["source_path_entry_id"]
             isOneToOne: false
-            referencedRelation: "news_mentions"
+            referencedRelation: "path_entries"
             referencedColumns: ["id"]
           },
         ]
       }
-      news_mentions: {
+      training_data_stefan: {
         Row: {
-          client_id: string | null
+          client_name: string | null
+          content: string
+          content_type: string
           created_at: string
-          headline: string
+          date_created: string | null
+          file_size_bytes: number | null
+          file_url: string | null
           id: string
-          impact_level: string | null
-          keywords: string[] | null
-          mention_type: string | null
-          published_at: string | null
-          sentiment_score: number | null
-          source: string
-          summary: string | null
-          url: string | null
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          headline: string
-          id?: string
-          impact_level?: string | null
-          keywords?: string[] | null
-          mention_type?: string | null
-          published_at?: string | null
-          sentiment_score?: number | null
-          source: string
-          summary?: string | null
-          url?: string | null
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          headline?: string
-          id?: string
-          impact_level?: string | null
-          keywords?: string[] | null
-          mention_type?: string | null
-          published_at?: string | null
-          sentiment_score?: number | null
-          source?: string
-          summary?: string | null
-          url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "news_mentions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      news_trends: {
-        Row: {
-          client_id: string | null
-          current_intensity: number | null
-          first_seen: string
-          id: string
-          last_updated: string
-          mention_count: number | null
-          peak_intensity: number | null
-          topic: string
-          trend_direction: string | null
-        }
-        Insert: {
-          client_id?: string | null
-          current_intensity?: number | null
-          first_seen?: string
-          id?: string
-          last_updated?: string
-          mention_count?: number | null
-          peak_intensity?: number | null
-          topic: string
-          trend_direction?: string | null
-        }
-        Update: {
-          client_id?: string | null
-          current_intensity?: number | null
-          first_seen?: string
-          id?: string
-          last_updated?: string
-          mention_count?: number | null
-          peak_intensity?: number | null
-          topic?: string
-          trend_direction?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "news_trends_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_signals: {
-        Row: {
-          client_id: string
-          confidence_score: number | null
-          created_at: string
-          description: string | null
-          id: string
-          signal_date: string
-          signal_type: string
-          source_platform: string | null
-          source_url: string | null
-        }
-        Insert: {
-          client_id: string
-          confidence_score?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          signal_date: string
-          signal_type: string
-          source_platform?: string | null
-          source_url?: string | null
-        }
-        Update: {
-          client_id?: string
-          confidence_score?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          signal_date?: string
-          signal_type?: string
-          source_platform?: string | null
-          source_url?: string | null
-        }
-        Relationships: []
-      }
-      social_media_profiles: {
-        Row: {
-          avg_comments: number | null
-          avg_likes: number | null
-          avg_shares: number | null
-          avg_views: number | null
-          bio: string | null
-          client_id: string
-          created_at: string | null
-          engagement_rate: number | null
-          follower_count: number | null
-          following_count: number | null
-          id: string
-          last_updated: string | null
-          platform: string
-          post_count: number | null
-          profile_picture_url: string | null
-          profile_url: string | null
-          updated_at: string | null
-          username: string | null
-          verification_status: boolean | null
-        }
-        Insert: {
-          avg_comments?: number | null
-          avg_likes?: number | null
-          avg_shares?: number | null
-          avg_views?: number | null
-          bio?: string | null
-          client_id: string
-          created_at?: string | null
-          engagement_rate?: number | null
-          follower_count?: number | null
-          following_count?: number | null
-          id?: string
-          last_updated?: string | null
-          platform: string
-          post_count?: number | null
-          profile_picture_url?: string | null
-          profile_url?: string | null
-          updated_at?: string | null
-          username?: string | null
-          verification_status?: boolean | null
-        }
-        Update: {
-          avg_comments?: number | null
-          avg_likes?: number | null
-          avg_shares?: number | null
-          avg_views?: number | null
-          bio?: string | null
-          client_id?: string
-          created_at?: string | null
-          engagement_rate?: number | null
-          follower_count?: number | null
-          following_count?: number | null
-          id?: string
-          last_updated?: string | null
-          platform?: string
-          post_count?: number | null
-          profile_picture_url?: string | null
-          profile_url?: string | null
-          updated_at?: string | null
-          username?: string | null
-          verification_status?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "social_media_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      social_media_weekly_stats: {
-        Row: {
-          client_id: string
-          created_at: string
-          engagement_rate: number | null
-          follower_count: number | null
-          id: string
-          platform: string
-          posts_count: number | null
-          total_comments: number | null
-          total_likes: number | null
-          total_shares: number | null
-          total_views: number | null
+          metadata: Json | null
+          original_filename: string | null
+          subject: string | null
+          tone: string | null
           updated_at: string
-          week_start: string
+          user_id: string
         }
         Insert: {
-          client_id: string
+          client_name?: string | null
+          content: string
+          content_type: string
           created_at?: string
-          engagement_rate?: number | null
-          follower_count?: number | null
+          date_created?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
           id?: string
-          platform: string
-          posts_count?: number | null
-          total_comments?: number | null
-          total_likes?: number | null
-          total_shares?: number | null
-          total_views?: number | null
+          metadata?: Json | null
+          original_filename?: string | null
+          subject?: string | null
+          tone?: string | null
           updated_at?: string
-          week_start: string
+          user_id: string
         }
         Update: {
-          client_id?: string
+          client_name?: string | null
+          content?: string
+          content_type?: string
           created_at?: string
-          engagement_rate?: number | null
-          follower_count?: number | null
+          date_created?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
           id?: string
-          platform?: string
-          posts_count?: number | null
-          total_comments?: number | null
-          total_likes?: number | null
-          total_shares?: number | null
-          total_views?: number | null
+          metadata?: Json | null
+          original_filename?: string | null
+          subject?: string | null
+          tone?: string | null
           updated_at?: string
-          week_start?: string
+          user_id?: string
         }
         Relationships: []
       }
-      user_invitations: {
+      user_consent_records: {
         Row: {
+          consent_given: boolean
+          consent_source: string
+          consent_timestamp: string | null
+          consent_type: string
           created_at: string | null
-          email: string
-          expires_at: string
+          expires_at: string | null
           id: string
-          invited_by: string
-          role: Database["public"]["Enums"]["user_role"]
-          used_at: string | null
+          ip_address: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
         }
         Insert: {
+          consent_given: boolean
+          consent_source: string
+          consent_timestamp?: string | null
+          consent_type: string
           created_at?: string | null
-          email: string
-          expires_at: string
+          expires_at?: string | null
           id?: string
-          invited_by: string
-          role: Database["public"]["Enums"]["user_role"]
-          used_at?: string | null
+          ip_address?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Update: {
+          consent_given?: boolean
+          consent_source?: string
+          consent_timestamp?: string | null
+          consent_type?: string
           created_at?: string | null
-          email?: string
-          expires_at?: string
+          expires_at?: string | null
           id?: string
-          invited_by?: string
-          role?: Database["public"]["Enums"]["user_role"]
-          used_at?: string | null
+          ip_address?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          expires_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          expires_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          expires_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_email_logs: {
+        Row: {
+          client_email: string
+          client_id: string | null
+          created_at: string | null
+          email_id: string | null
+          error_message: string | null
+          id: string
+          sent_at: string | null
+          status: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Insert: {
+          client_email: string
+          client_id?: string | null
+          created_at?: string | null
+          email_id?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Update: {
+          client_email?: string
+          client_id?: string | null
+          created_at?: string | null
+          email_id?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          week_end_date?: string
+          week_start_date?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_invitations_invited_by_fkey"
-            columns: ["invited_by"]
+            foreignKeyName: "weekly_email_logs_client_id_fkey"
+            columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "user_profiles"
+            referencedRelation: "client_analytics_summary"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "weekly_email_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
-      }
-      user_profiles: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          certifications: string[] | null
-          coach_credentials: string | null
-          created_at: string | null
-          display_name: string | null
-          email: string
-          id: string
-          invited_by: string | null
-          is_active: boolean | null
-          phone: string | null
-          preferences: Json | null
-          role: Database["public"]["Enums"]["user_role"]
-          updated_at: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          certifications?: string[] | null
-          coach_credentials?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          email: string
-          id: string
-          invited_by?: string | null
-          is_active?: boolean | null
-          phone?: string | null
-          preferences?: Json | null
-          role?: Database["public"]["Enums"]["user_role"]
-          updated_at?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          certifications?: string[] | null
-          coach_credentials?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          email?: string
-          id?: string
-          invited_by?: string | null
-          is_active?: boolean | null
-          phone?: string | null
-          preferences?: Json | null
-          role?: Database["public"]["Enums"]["user_role"]
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      velocity_metrics: {
-        Row: {
-          calculation_week: string
-          client_id: string
-          content_innovation_score: number | null
-          created_at: string
-          engagement_trend_score: number | null
-          id: string
-          new_projects_score: number | null
-          overall_velocity_score: number | null
-          posting_frequency_score: number | null
-          updated_at: string
-          velocity_grade: string | null
-        }
-        Insert: {
-          calculation_week: string
-          client_id: string
-          content_innovation_score?: number | null
-          created_at?: string
-          engagement_trend_score?: number | null
-          id?: string
-          new_projects_score?: number | null
-          overall_velocity_score?: number | null
-          posting_frequency_score?: number | null
-          updated_at?: string
-          velocity_grade?: string | null
-        }
-        Update: {
-          calculation_week?: string
-          client_id?: string
-          content_innovation_score?: number | null
-          created_at?: string
-          engagement_trend_score?: number | null
-          id?: string
-          new_projects_score?: number | null
-          overall_velocity_score?: number | null
-          posting_frequency_score?: number | null
-          updated_at?: string
-          velocity_grade?: string | null
-        }
-        Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      client_analytics_summary: {
+        Row: {
+          client_id: string | null
+          client_name: string | null
+          instagram_data_count: number | null
+          last_update: string | null
+          news_count: number | null
+          sentiment_count: number | null
+          social_metrics_count: number | null
+          tiktok_data_count: number | null
+          youtube_data_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      can_access_client: {
-        Args: { user_id: string; client_id: string }
-        Returns: boolean
+      generate_invitation_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
-      get_user_role: {
-        Args: { user_id: string }
-        Returns: Database["public"]["Enums"]["user_role"]
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
       }
       has_role: {
         Args: {
-          user_id: string
-          required_role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
       }
+      is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      validate_invitation_token: {
+        Args: { invitation_token: string }
+        Returns: {
+          invitation_id: string
+          email: string
+          invited_role: string
+          expires_at: string
+          is_valid: boolean
+        }[]
+      }
     }
     Enums: {
-      user_role: "admin" | "coach" | "viewer" | "client"
+      app_role:
+        | "superadmin"
+        | "admin"
+        | "manager"
+        | "editor"
+        | "organization"
+        | "client"
+        | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -841,7 +1463,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      user_role: ["admin", "coach", "viewer", "client"],
+      app_role: [
+        "superadmin",
+        "admin",
+        "manager",
+        "editor",
+        "organization",
+        "client",
+        "user",
+      ],
     },
   },
 } as const
