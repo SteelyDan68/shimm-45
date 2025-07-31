@@ -30,7 +30,17 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     // Check if Resend API key is configured
     if (!resendApiKey) {
-      throw new Error('Email service not configured. Please contact administrator.');
+      console.error("RESEND_API_KEY environment variable is not set");
+      return new Response(
+        JSON.stringify({ 
+          error: 'Email service not configured. Please add RESEND_API_KEY to Supabase secrets.',
+          details: 'Contact administrator to set up email service.'
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     const { email, role = 'client', inviterName }: InvitationRequest = await req.json();
