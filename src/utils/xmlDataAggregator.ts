@@ -20,7 +20,7 @@ export class XmlDataAggregator {
       const { data: assessments, error } = await supabase
         .from('assessment_rounds')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -60,12 +60,12 @@ export class XmlDataAggregator {
         supabase
           .from('path_entries')
           .select('*')
-          .eq('client_id', clientId)
+          .eq('user_id', clientId)
           .order('timestamp', { ascending: false }),
         supabase
           .from('tasks')
           .select('*')
-          .eq('client_id', clientId)
+          .eq('user_id', clientId)
           .order('created_at', { ascending: false })
       ]);
 
@@ -99,12 +99,12 @@ export class XmlDataAggregator {
         supabase
           .from('pillar_assessments')
           .select('*')
-          .eq('client_id', clientId)
+          .eq('user_id', clientId)
           .order('created_at', { ascending: false }),
         supabase
           .from('pillar_visualization_data')
           .select('*')
-          .eq('client_id', clientId)
+          .eq('user_id', clientId)
           .order('created_at', { ascending: false })
       ]);
 

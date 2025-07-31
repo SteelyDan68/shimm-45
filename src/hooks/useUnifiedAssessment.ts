@@ -118,7 +118,7 @@ export const useUnifiedAssessment = () => {
         .order('created_at', { ascending: false });
 
       if (userId) {
-        query = query.eq('client_id', userId);
+        query = query.eq('user_id', userId);
       }
 
       const { data, error } = await query;
@@ -127,7 +127,7 @@ export const useUnifiedAssessment = () => {
       // Convert to unified format
       const convertedResults: AssessmentResult[] = (data || []).map(assessment => ({
         id: assessment.id,
-        user_id: assessment.client_id,
+        user_id: assessment.user_id,
         assessment_type: 'pillar',
         pillar_key: assessment.pillar_key,
         responses: [],
@@ -190,7 +190,7 @@ export const useUnifiedAssessment = () => {
       const { data: result, error } = await supabase
         .from('pillar_assessments')
         .insert([{
-          client_id: userId,
+          user_id: userId,
           pillar_key: template.pillar_key || 'universal',
           calculated_score: totalScore,
           insights,
@@ -211,7 +211,7 @@ export const useUnifiedAssessment = () => {
       // Convert to unified format for return
       return {
         id: result.id,
-        user_id: result.client_id,
+        user_id: result.user_id,
         assessment_type: 'pillar',
         pillar_key: result.pillar_key,
         responses,

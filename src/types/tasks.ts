@@ -3,7 +3,7 @@ export type TaskPriority = 'low' | 'medium' | 'high';
 
 export interface Task {
   id: string;
-  client_id: string;
+  user_id: string;
   created_by: string;
   source_path_entry_id?: string;
   title: string;
@@ -18,7 +18,7 @@ export interface Task {
 }
 
 export interface CreateTaskData {
-  client_id: string;
+  user_id: string;
   title: string;
   description?: string;
   priority?: TaskPriority;

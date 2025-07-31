@@ -28,7 +28,7 @@ export interface AssessmentQuestion {
 
 export interface AssessmentFormAssignment {
   id: string;
-  client_id: string;
+  user_id: string;
   form_definition_id: string;
   is_active: boolean;
   assigned_by: string;
@@ -40,7 +40,7 @@ export interface AssessmentFormAssignment {
 
 export interface AssessmentRoundNew {
   id: string;
-  client_id: string;
+  user_id: string;
   form_definition_id?: string;
   pillar_type?: string;
   scores: Record<string, number>;

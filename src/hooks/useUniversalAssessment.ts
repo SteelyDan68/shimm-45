@@ -105,7 +105,7 @@ export const useUniversalAssessment = () => {
       const { error: storeError } = await supabase
         .from('assessment_rounds')
         .insert([{
-          client_id: clientId,
+          user_id: clientId,
           pillar_type: 'universal',
           scores: scores.pillar_scores,
           answers,
@@ -145,7 +145,7 @@ export const useUniversalAssessment = () => {
       const { data, error } = await supabase
         .from('assessment_rounds')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -153,7 +153,7 @@ export const useUniversalAssessment = () => {
       // Convert to AssessmentResponse format
       const responses = (data || []).map(item => ({
         id: item.id,
-        client_id: item.client_id,
+        client_id: item.user_id,
         template_id: 'universal',
         answers: item.answers as Record<string, any>,
         calculated_scores: {

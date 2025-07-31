@@ -54,7 +54,7 @@ export const ManualNoteForm = ({ clientId }: ManualNoteFormProps) => {
     
     try {
       const entryData: CreatePathEntryData = {
-        client_id: clientId,
+        user_id: clientId,
         type: 'manual_note',
         title: formData.title.trim(),
         content: formData.content.trim(),

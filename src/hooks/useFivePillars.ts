@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { PillarType, AssessmentRound, ClientPillarAssignment } from '@/types/fivePillars';
 
-export const useFivePillars = (clientId?: string) => {
+export const useFivePillars = (userId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -12,20 +12,20 @@ export const useFivePillars = (clientId?: string) => {
   const [assessmentRounds, setAssessmentRounds] = useState<AssessmentRound[]>([]);
 
   useEffect(() => {
-    if (clientId && user) {
+    if (userId && user) {
       loadAssignments();
       loadAssessmentRounds();
     }
-  }, [clientId, user]);
+  }, [userId, user]);
 
   const loadAssignments = async () => {
-    if (!clientId) return;
+    if (!userId) return;
     
     try {
       const { data, error } = await supabase
         .from('client_pillar_assignments')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', userId)
         .eq('is_active', true);
 
       if (error) throw error;
@@ -36,13 +36,13 @@ export const useFivePillars = (clientId?: string) => {
   };
 
   const loadAssessmentRounds = async () => {
-    if (!clientId) return;
+    if (!userId) return;
     
     try {
       const { data, error } = await supabase
         .from('assessment_rounds')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -53,17 +53,18 @@ export const useFivePillars = (clientId?: string) => {
   };
 
   const assignPillar = async (pillarType: PillarType) => {
-    if (!clientId || !user) return;
+    if (!userId || !user) return;
 
     try {
       setLoading(true);
       const { error } = await supabase
         .from('client_pillar_assignments')
         .upsert({
-          client_id: clientId,
+          user_id: userId,
           pillar_type: pillarType,
           is_active: true,
-          assigned_by: user.id
+          assigned_by: user.id,
+          client_id: userId // For backward compatibility until fully migrated
         });
 
       if (error) throw error;
@@ -86,14 +87,14 @@ export const useFivePillars = (clientId?: string) => {
   };
 
   const removePillar = async (pillarType: PillarType) => {
-    if (!clientId || !user) return;
+    if (!userId || !user) return;
 
     try {
       setLoading(true);
       const { error } = await supabase
         .from('client_pillar_assignments')
         .update({ is_active: false })
-        .eq('client_id', clientId)
+        .eq('user_id', userId)
         .eq('pillar_type', pillarType);
 
       if (error) throw error;
@@ -120,7 +121,7 @@ export const useFivePillars = (clientId?: string) => {
     scores: Record<string, number>, 
     comments?: string
   ) => {
-    if (!clientId || !user) return null;
+    if (!userId || !user) return null;
 
     try {
       setLoading(true);
@@ -129,7 +130,7 @@ export const useFivePillars = (clientId?: string) => {
       const { data: roundData, error: roundError } = await supabase
         .from('assessment_rounds')
         .insert({
-          client_id: clientId,
+          user_id: userId,
           pillar_type: pillarType,
           scores,
           comments,

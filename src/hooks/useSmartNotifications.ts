@@ -36,7 +36,7 @@ export const useSmartNotifications = (clientId?: string) => {
       const { error } = await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           type: 'action',
           title: `📬 ${title}`,
           details: message,
@@ -88,7 +88,7 @@ export const useSmartNotifications = (clientId?: string) => {
       const { error } = await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           type: 'recommendation',
           title: `🔔 ${title}`,
           details: message,
@@ -132,7 +132,7 @@ export const useSmartNotifications = (clientId?: string) => {
       const { data, error } = await supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('type', 'action')
         .eq('status', 'planned')
         .contains('metadata', { is_notification: true, is_sent: false })
@@ -144,7 +144,7 @@ export const useSmartNotifications = (clientId?: string) => {
         const metadata = entry.metadata as any;
         return {
           id: entry.id,
-          client_id: entry.client_id,
+          client_id: entry.user_id,
           notification_type: metadata?.notification_type,
           title: entry.title.replace('📬 ', ''),
           message: entry.details || '',

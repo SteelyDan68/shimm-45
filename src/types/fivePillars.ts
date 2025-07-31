@@ -2,7 +2,7 @@ export type PillarType = 'self_care' | 'skills' | 'talent' | 'brand' | 'economy'
 
 export interface AssessmentRound {
   id: string;
-  client_id: string;
+  user_id: string;
   pillar_type: PillarType;
   scores: Record<string, number>;
   comments?: string;
@@ -14,7 +14,7 @@ export interface AssessmentRound {
 
 export interface ClientPillarAssignment {
   id: string;
-  client_id: string;
+  user_id: string;
   pillar_type: PillarType;
   is_active: boolean;
   assigned_by: string;

@@ -36,7 +36,7 @@ export function AddPathEntry({ clientId, onAdd, onSuccess }: AddPathEntryProps) 
     setIsLoading(true);
     try {
       await onAdd({
-        client_id: clientId,
+        user_id: clientId,
         type: formData.type,
         title: formData.title.trim(),
         details: formData.details.trim() || undefined,

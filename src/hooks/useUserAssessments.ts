@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 export interface UserAssessmentRound {
   id: string;
   user_id: string;
-  client_id: string;
   pillar_type: string;
   form_definition_id: string | null;
   answers: any;
@@ -20,7 +19,6 @@ export interface UserAssessmentRound {
 export interface UserFormAssignment {
   id: string;
   user_id: string;
-  client_id: string;
   form_definition_id: string;
   assigned_by: string;
   assigned_at: string;
@@ -101,22 +99,10 @@ export const useUserAssessments = (userId: string) => {
     if (!userId) return;
 
     try {
-      // Get client_id for backwards compatibility
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-
-      if (!clientData) {
-        throw new Error('Client not found for user');
-      }
-
       const { data, error } = await supabase
         .from('assessment_rounds')
         .insert({
           ...assessmentData,
-          client_id: clientData.id,
           user_id: userId,
           created_by: userId,
         })

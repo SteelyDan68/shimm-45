@@ -22,7 +22,7 @@ export const useXmlContainers = () => {
       const { data: container, error } = await supabase
         .from('client_data_containers')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           container_type: containerType,
           xml_content: xmlContent,
           metadata: {
@@ -68,7 +68,7 @@ export const useXmlContainers = () => {
       let query = supabase
         .from('client_data_containers')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .order('created_at', { ascending: false });
 
       if (containerType) {

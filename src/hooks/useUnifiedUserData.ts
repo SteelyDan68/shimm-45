@@ -79,7 +79,7 @@ export const useUnifiedUserData = () => {
       // Fetch pillar assessments for progress data
       const { data: pillarData, error: pillarError } = await supabase
         .from('pillar_assessments')
-        .select('client_id, pillar_key, calculated_score, created_at');
+        .select('user_id, pillar_key, calculated_score, created_at');
 
       // Create mock extended data since tables don't exist yet
       const unifiedUsers: UnifiedUser[] = profiles?.map(profile => {
@@ -87,7 +87,7 @@ export const useUnifiedUserData = () => {
           .map(role => role.role)
           .filter(role => role !== 'user') as AppRole[] || [];
 
-        const pillarScores = pillarData?.filter(p => p.client_id === profile.id) || [];
+        const pillarScores = pillarData?.filter(p => p.user_id === profile.id) || [];
 
         return {
           ...profile,

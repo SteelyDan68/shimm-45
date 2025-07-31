@@ -9,7 +9,7 @@ import {
   AssessmentRoundNew 
 } from '@/types/assessmentEngine';
 
-export const useAssessmentEngine = (clientId?: string) => {
+export const useAssessmentEngine = (userId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -19,11 +19,11 @@ export const useAssessmentEngine = (clientId?: string) => {
 
   useEffect(() => {
     loadFormDefinitions();
-    if (clientId && user) {
+    if (userId && user) {
       loadAssignments();
       loadAssessmentRounds();
     }
-  }, [clientId, user]);
+  }, [userId, user]);
 
   const loadFormDefinitions = async () => {
     try {
@@ -41,7 +41,7 @@ export const useAssessmentEngine = (clientId?: string) => {
   };
 
   const loadAssignments = async () => {
-    if (!clientId) return;
+    if (!userId) return;
     
     try {
       const { data, error } = await supabase
@@ -50,7 +50,7 @@ export const useAssessmentEngine = (clientId?: string) => {
           *,
           assessment_form_definitions (*)
         `)
-        .eq('client_id', clientId)
+        .eq('user_id', userId)
         .eq('is_active', true);
 
       if (error) throw error;
@@ -61,7 +61,7 @@ export const useAssessmentEngine = (clientId?: string) => {
   };
 
   const loadAssessmentRounds = async () => {
-    if (!clientId) return;
+    if (!userId) return;
     
     try {
       const { data, error } = await supabase
@@ -70,7 +70,7 @@ export const useAssessmentEngine = (clientId?: string) => {
           *,
           assessment_form_definitions (*)
         `)
-        .eq('client_id', clientId)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -97,14 +97,14 @@ export const useAssessmentEngine = (clientId?: string) => {
   };
 
   const assignForm = async (formDefinitionId: string, dueDate?: Date) => {
-    if (!clientId || !user) return;
+    if (!userId || !user) return;
 
     try {
       setLoading(true);
       const { error } = await supabase
         .from('assessment_form_assignments')
         .upsert({
-          client_id: clientId,
+          user_id: userId,
           form_definition_id: formDefinitionId,
           is_active: true,
           assigned_by: user.id,
@@ -131,14 +131,14 @@ export const useAssessmentEngine = (clientId?: string) => {
   };
 
   const removeAssignment = async (formDefinitionId: string) => {
-    if (!clientId || !user) return;
+    if (!userId || !user) return;
 
     try {
       setLoading(true);
       const { error } = await supabase
         .from('assessment_form_assignments')
         .update({ is_active: false })
-        .eq('client_id', clientId)
+        .eq('user_id', userId)
         .eq('form_definition_id', formDefinitionId);
 
       if (error) throw error;
@@ -165,7 +165,7 @@ export const useAssessmentEngine = (clientId?: string) => {
     answers: Record<string, any>,
     comments?: string
   ) => {
-    if (!clientId || !user) return null;
+    if (!userId || !user) return null;
 
     try {
       setLoading(true);
@@ -182,7 +182,7 @@ export const useAssessmentEngine = (clientId?: string) => {
       const { data: roundData, error: roundError } = await supabase
         .from('assessment_rounds')
         .insert({
-          client_id: clientId,
+          user_id: userId,
           form_definition_id: formDefinitionId,
           pillar_type: 'general', // Default value since we now have form-based assessments
           scores,
@@ -204,7 +204,7 @@ export const useAssessmentEngine = (clientId?: string) => {
             form_definition_id: formDefinitionId,
             answers,
             comments,
-            client_id: clientId
+            user_id: userId
           }
         }
       );
@@ -216,7 +216,7 @@ export const useAssessmentEngine = (clientId?: string) => {
         await supabase
           .from('path_entries')
           .insert({
-            client_id: clientId,
+            user_id: userId,
             created_by: user.id,
             type: 'recommendation',
             title: `AI-analys: ${aiResponse.form_name || 'Assessment'}`,
