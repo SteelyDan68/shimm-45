@@ -125,22 +125,26 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
   };
 
   const startOnboarding = (client: ClientProfile) => {
-    console.log('startOnboarding called for client:', client);
+    console.log('🔥 startOnboarding called for client:', client);
+    console.log('🔥 Client onboarding status:', client.onboarding_completed);
     setSelectedClient(client);
+    
     if (!client.onboarding_completed) {
-      console.log('Setting step to onboard');
+      console.log('🔥 Setting step to onboard');
       setCurrentStep('onboard');
     } else if (!client.assessment_completed) {
-      console.log('Setting step to assess');
+      console.log('🔥 Setting step to assess');
       setCurrentStep('assess');
     } else if ((client.habits_active || 0) === 0) {
-      console.log('Setting step to habits');
+      console.log('🔥 Setting step to habits');
       setCurrentStep('habits');
     } else {
-      console.log('Setting step to complete');
+      console.log('🔥 Setting step to complete');
       setCurrentStep('complete');
     }
-    console.log('Current step after update:', currentStep);
+    
+    console.log('🔥 Selected client after update:', selectedClient);
+    console.log('🔥 Current step after update:', currentStep);
   };
 
   const handleStepComplete = async (step: string) => {
@@ -379,9 +383,11 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
         </div>
       )}
 
-      <Tabs defaultValue="workflow" className="space-y-4">
+      <Tabs value={selectedClient ? "workflow" : "clients"} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="workflow">Onboarding Workflow</TabsTrigger>
+          <TabsTrigger value="workflow">
+            Onboarding Workflow {selectedClient && `(${getClientDisplayName(selectedClient)})`}
+          </TabsTrigger>
           <TabsTrigger value="clients">Klient-användare ({clients.length})</TabsTrigger>
         </TabsList>
 
@@ -422,11 +428,13 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                           </Badge>
                           <Button 
                             onClick={() => {
-                              console.log('Button clicked for client:', client);
+                              console.log('🔥 Button clicked for client:', client);
+                              console.log('🔥 Client status:', { status, nextStep });
                               startOnboarding(client);
                             }}
                             variant={status === 'Komplett' ? 'outline' : 'default'}
                             size="sm"
+                            className="bg-primary hover:bg-primary/90"
                           >
                             {nextStep}
                           </Button>
