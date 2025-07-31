@@ -51,45 +51,23 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
     setIsLoading(true);
 
     try {
-      // Create user through Supabase Admin API
-      const { data, error: signUpError } = await supabase.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        email_confirm: true, // Skip email confirmation
-        user_metadata: {
-          first_name: formData.firstName,
-          last_name: formData.lastName
+      // Create user through secure Edge Function
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: formData.role
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (error) throw error;
 
-      if (data.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{
-            id: data.user.id,
-            email: formData.email,
-            first_name: formData.firstName,
-            last_name: formData.lastName
-          }]);
-
-        if (profileError) throw profileError;
-
-        // Assign role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert([{
-            user_id: data.user.id,
-            role: formData.role
-          }]);
-
-        if (roleError) throw roleError;
-
+      if (data.success) {
         toast({
           title: "Användare skapad",
-          description: `Användare ${formData.email} har skapats med lösenord: ${formData.password}`,
+          description: `Användare ${formData.email} har skapats framgångsrikt.`,
         });
 
         // Reset form
@@ -102,6 +80,8 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
         });
         setIsOpen(false);
         onUserCreated?.();
+      } else {
+        throw new Error(data.error || 'Failed to create user');
       }
     } catch (error: any) {
       console.error('Error creating user:', error);

@@ -1,5 +1,8 @@
 project_id = "gcoorbcglxczmukzcmqs"
 
+[functions.admin-create-user]
+verify_jwt = false
+
 [functions.client-logic]
 verify_jwt = false
 
