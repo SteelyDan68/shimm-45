@@ -29,6 +29,7 @@ import { SendInvitationForm } from "../InvitationSystem/SendInvitationForm";
 import { InvitationList } from "../InvitationSystem/InvitationList";
 import type { AppRole } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -142,13 +143,38 @@ export function UnifiedUserManager() {
           <Button
             variant="outline"
             onClick={async () => {
-              const { migrateClientsToProfiles } = await import('@/utils/dataMigration');
-              const result = await migrateClientsToProfiles();
-              toast({
-                title: "Migration slutförd",
-                description: `${result.migrated} användare migrerade, ${result.skipped} hoppade över`
-              });
-              await refetch(); // Refresh data
+              try {
+                const response = await fetch('/functions/v1/migrate-legacy-clients', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+                  }
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                  toast({
+                    title: "Migreringsfel",
+                    description: result.error,
+                    variant: "destructive"
+                  });
+                } else {
+                  toast({
+                    title: "Migration slutförd",
+                    description: `${result.migrated} användare migrerade, ${result.skipped} hoppade över${result.errors.length > 0 ? `. ${result.errors.length} fel.` : ''}`
+                  });
+                }
+                
+                await refetch(); // Refresh data
+              } catch (error: any) {
+                toast({
+                  title: "Migreringsfel", 
+                  description: "Kunde inte köra migration: " + error.message,
+                  variant: "destructive"
+                });
+              }
             }}
           >
             🔄 Migrera gamla klienter
