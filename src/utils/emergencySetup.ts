@@ -32,9 +32,6 @@ export async function emergencySuperadminSetup(): Promise<boolean> {
     console.log('✅ Emergency superadmin setup complete for:', session.user.email);
     console.log('✅ Setup result:', data);
     
-    // Reload the page to refresh all auth state
-    window.location.reload();
-    
     return true;
   } catch (error: any) {
     console.error('❌ Emergency superadmin setup failed:', error);
@@ -42,8 +39,15 @@ export async function emergencySuperadminSetup(): Promise<boolean> {
   }
 }
 
-// Auto-run emergency setup for Stefan Hallgren
+// Auto-run emergency setup for Stefan Hallgren (once per session)
+let setupCompleted = false;
+
 export async function autoSetupStefan(): Promise<void> {
+  // Avoid running setup multiple times per session
+  if (setupCompleted) {
+    return;
+  }
+  
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user?.email === 'stefan.hallgren@gmail.com') {
@@ -51,6 +55,7 @@ export async function autoSetupStefan(): Promise<void> {
       const success = await emergencySuperadminSetup();
       if (success) {
         console.log('✅ Stefan Hallgren superadmin setup completed automatically');
+        setupCompleted = true;
       }
     }
   } catch (error) {
