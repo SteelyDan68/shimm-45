@@ -18,6 +18,7 @@ export const SendInvitationForm = ({ onSuccess }: SendInvitationFormProps) => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("client");
   const [isLoading, setIsLoading] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +47,23 @@ export const SendInvitationForm = ({ onSuccess }: SendInvitationFormProps) => {
       toast.error(error.message || 'Ett fel uppstod när inbjudan skulle skickas');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const testResend = async () => {
+    setIsTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-resend');
+      
+      if (error) throw error;
+      
+      console.log('Resend test result:', data);
+      toast.success('Test-resultat loggas i konsolen. Kontrollera utvecklarverktyg (F12).');
+    } catch (error: any) {
+      console.error('Resend test error:', error);
+      toast.error(`Test misslyckades: ${error.message}`);
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -88,19 +106,35 @@ export const SendInvitationForm = ({ onSuccess }: SendInvitationFormProps) => {
             </Select>
           </div>
 
-          <Button type="submit" disabled={isLoading || !email} className="w-full">
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Skickar inbjudan...
-              </>
-            ) : (
-              <>
-                <Mail className="h-4 w-4 mr-2" />
-                Skicka inbjudan
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={isLoading || !email} className="flex-1">
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Skickar inbjudan...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Skicka inbjudan
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={testResend}
+              disabled={isTesting}
+              className="flex-shrink-0"
+            >
+              {isTesting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Testa Resend'
+              )}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
