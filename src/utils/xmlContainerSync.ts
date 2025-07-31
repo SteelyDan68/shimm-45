@@ -44,7 +44,7 @@ export class XmlContainerSync {
 
     await this.createOrUpdateContainer(
       clientId,
-      'assessment_bundle',
+      'assessment_record',
       aggregatedData,
       {
         source_table: 'assessment_rounds',

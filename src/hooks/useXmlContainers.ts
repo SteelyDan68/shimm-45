@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ClientDataContainer, ContainerType, ContainerMetadata, XML_SCHEMAS } from '@/types/xmlContainers';
+import { ClientDataContainer, ContainerType, ContainerMetadata } from '@/types/xmlContainers';
 
 export const useXmlContainers = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -153,8 +153,6 @@ export const useXmlContainers = () => {
   };
 
   const generateXmlFromData = (containerType: ContainerType, data: Record<string, any>): string => {
-    // Get base schema template
-    const template = XML_SCHEMAS[containerType];
     
     // For now, create a simple XML structure with the data
     // In the future, this will be more sophisticated with proper XML transformation
