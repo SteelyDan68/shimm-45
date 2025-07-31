@@ -21,6 +21,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log('Admin create user function called at:', new Date().toISOString());
+
   try {
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
