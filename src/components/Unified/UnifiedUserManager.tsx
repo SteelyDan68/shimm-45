@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ import { SendInvitationForm } from "../InvitationSystem/SendInvitationForm";
 import { InvitationList } from "../InvitationSystem/InvitationList";
 import type { AppRole } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { autoSetupStefan } from "@/utils/emergencySetup";
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -71,6 +72,19 @@ export function UnifiedUserManager() {
   const [isFullProfileDialogOpen, setIsFullProfileDialogOpen] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
+
+  // Auto-setup Stefan Hallgren on component mount
+  useEffect(() => {
+    const setupStefan = async () => {
+      try {
+        await autoSetupStefan();
+      } catch (error) {
+        console.error('Auto-setup Stefan failed:', error);
+      }
+    };
+    
+    setupStefan();
+  }, []);
 
   const openEditDialog = (user: UnifiedUser) => {
     setSelectedUser(user);
