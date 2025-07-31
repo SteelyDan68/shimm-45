@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Brain, TrendingUp, Target, Calendar, Clock, Zap, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useHabitFormation } from '@/hooks/useHabitFormation';
-import { useContextualReminders } from '@/hooks/useContextualReminders';
 import type { NeuroplasticityHabit, HabitAnalytics } from '@/types/habitFormation';
 import { toast } from 'sonner';
 
@@ -20,7 +19,6 @@ export const HabitAnalyticsDashboard: React.FC<HabitAnalyticsDashboardProps> = (
   selectedHabit
 }) => {
   const { habits, analytics, activeSetbacks } = useHabitFormation(clientId);
-  const { reminders, optimizeReminders } = useContextualReminders(clientId);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [neuroplasticProgress, setNeuroplasticProgress] = useState<Record<string, number>>({});
 
@@ -145,15 +143,8 @@ export const HabitAnalyticsDashboard: React.FC<HabitAnalyticsDashboardProps> = (
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{reminders.length}</div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={optimizeReminders}
-              className="mt-1 text-xs"
-            >
-              Optimera
-            </Button>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">Kommer snart</p>
           </CardContent>
         </Card>
       </div>

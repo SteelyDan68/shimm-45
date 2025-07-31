@@ -5,6 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 interface HabitPatternRequest {
@@ -193,19 +194,17 @@ function parseAnalysisResponse(analysis: string, habit: any, analysisType: strin
     recommendations: extractRecommendations(analysis),
     risk_factors: extractRiskFactors(analysis),
     next_actions: extractNextActions(analysis),
-    confidence_score: 0.85, // Based on data quality
+    confidence_score: 0.85,
     generated_at: new Date().toISOString()
   };
 }
 
 function extractProgress(text: string): number {
-  // Extract progress percentage from analysis
   const progressMatch = text.match(/(\d+)%.*framsteg|(\d+)%.*progress/i);
   return progressMatch ? parseInt(progressMatch[1] || progressMatch[2]) : 50;
 }
 
 function extractInsights(text: string): string[] {
-  // Extract key insights using pattern matching
   const insights = [];
   const lines = text.split('\n');
   
@@ -215,7 +214,7 @@ function extractInsights(text: string): string[] {
     }
   }
   
-  return insights.slice(0, 5); // Top 5 insights
+  return insights.slice(0, 5);
 }
 
 function extractRecommendations(text: string): string[] {

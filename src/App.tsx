@@ -47,7 +47,7 @@ const AppRoutes = () => {
               <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/messages" element={<Messages />} />
-              <Route path="/admin" element={<Administration />} />
+              <Route path="/administration" element={<Administration />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys</h1><p className="text-muted-foreground">Analytiska insikter om dina klienter finns i varje klientprofil.</p></div>} />
               <Route path="/data-collection" element={<div className="p-6"><h1 className="text-2xl font-bold">Datainsamling</h1><p className="text-muted-foreground">Datainsamlingsverktyg finns integrerade i klientprofilerna.</p></div>} />

@@ -26,8 +26,13 @@ import {
 } from 'lucide-react';
 import type { HabitDifficulty, HabitFrequency, HabitCategory } from '@/types/habitFormation';
 
-export const HabitFormationCenter: React.FC = () => {
+interface HabitFormationCenterProps {
+  clientId?: string;
+}
+
+export const HabitFormationCenter: React.FC<HabitFormationCenterProps> = ({ clientId }) => {
   const { user } = useAuth();
+  const currentClientId = clientId || user?.id;
   const { 
     habits, 
     analytics, 
@@ -36,7 +41,7 @@ export const HabitFormationCenter: React.FC = () => {
     createHabit,
     completeHabit,
     detectSetbacks
-  } = useHabitFormation(user?.id);
+  } = useHabitFormation(currentClientId);
 
   const [activeTab, setActiveTab] = useState('overview');
   const [showCreateForm, setShowCreateForm] = useState(false);

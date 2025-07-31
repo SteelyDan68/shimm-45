@@ -94,7 +94,7 @@ export function TopNavigation() {
               {!hasRole('client') && (
                 <>
                   <DropdownMenuItem asChild>
-                    <NavLink to="/admin" className="flex items-center w-full">
+                    <NavLink to="/administration" className="flex items-center w-full">
                       <Settings className="h-4 w-4 mr-2" />
                       Administration
                     </NavLink>

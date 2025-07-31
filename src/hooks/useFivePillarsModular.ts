@@ -10,6 +10,25 @@ import {
   PillarHeatmapData 
 } from '@/types/fivePillarsModular';
 
+// Helper function to calculate trend based on historical assessments
+function calculateTrend(pillarKey: string, assessments: any[]): 'stable' | 'up' | 'down' {
+  const pillarAssessments = assessments
+    .filter((a: any) => a.pillar_key === pillarKey)
+    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 3); // Get last 3 assessments
+
+  if (pillarAssessments.length < 2) return 'stable';
+
+  const latest = pillarAssessments[0]?.calculated_score || 0;
+  const previous = pillarAssessments[1]?.calculated_score || 0;
+  
+  const difference = latest - previous;
+  
+  if (difference > 0.5) return 'up';
+  if (difference < -0.5) return 'down';
+  return 'stable';
+}
+
 export const useFivePillarsModular = (clientId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -252,7 +271,7 @@ export const useFivePillarsModular = (clientId?: string) => {
         icon: pillar.icon || '',
         color_code: pillar.color_code,
         score: latestAssessment?.calculated_score || 0,
-        trend: 'stable', // TODO: Calculate based on previous assessments
+        trend: calculateTrend(pillar.pillar_key, assessments),
         last_assessment: latestAssessment?.created_at || '',
         is_active: isActive
       };

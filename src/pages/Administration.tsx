@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,7 @@ import { HelpTooltip } from "@/components/HelpTooltip";
 import { helpTexts } from "@/data/helpTexts";
 
 export function Administration() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
   const [profileData, setProfileData] = useState({
     name: "SHIMM Management",
@@ -69,36 +70,106 @@ export function Administration() {
     });
   };
 
-  const handleSaveAutomation = () => {
-    // TODO: Implementera faktisk sparning av automationsinställningar
-    toast({
-      title: "Automationsinställningar sparade", 
-      description: "Dina automationsinställningar har uppdaterats."
-    });
+  const handleSaveAutomation = async () => {
+    try {
+      // Save automation settings to user preferences
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          preferences: { automation: automationSettings }
+        })
+        .eq('id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Automationsinställningar sparade", 
+        description: "Dina automationsinställningar har uppdaterats."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara inställningar: " + error.message,
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleChangePassword = () => {
-    // TODO: Implementera lösenordsändring
-    toast({
-      title: "Lösenordsändring",
-      description: "Funktionen kommer snart. En länk kommer skickas till din e-post."
-    });
+  const handleChangePassword = async () => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        user?.email || '',
+        { redirectTo: `${window.location.origin}/auth` }
+      );
+
+      if (error) throw error;
+
+      toast({
+        title: "Lösenordsändring initierad",
+        description: "En länk för lösenordsändring har skickats till din e-post."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte initiera lösenordsändring: " + error.message,
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleManageSessions = () => {
-    // TODO: Implementera sessionhantering
-    toast({
-      title: "Sessionhantering",
-      description: "Du har för närvarande 1 aktiv session."
-    });
+  const handleManageSessions = async () => {
+    try {
+      // Get user sessions (simplified - in production would be more comprehensive)
+      const sessionCount = session ? 1 : 0;
+      
+      toast({
+        title: "Sessionhantering",
+        description: `Du har för närvarande ${sessionCount} aktiv session. För att avsluta alla sessioner, logga ut och in igen.`
+      });
+    } catch (error) {
+      toast({
+        title: "Fel", 
+        description: "Kunde inte hämta sessionsinformation",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleExportData = async () => {
-    // TODO: Implementera dataexport
-    toast({
-      title: "Dataexport startad",
-      description: "En fil kommer skickas till din e-post inom 24 timmar."
-    });
+    try {
+      // Export user's data as JSON
+      if (!user) return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      const exportData = {
+        profile,
+        exported_at: new Date().toISOString(),
+        export_type: 'user_data'
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `user_data_${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+
+      toast({
+        title: "Dataexport genomförd",
+        description: "Din data har exporterats och laddats ner."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte exportera data: " + error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const handleRequestReport = () => {

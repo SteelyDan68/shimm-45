@@ -21,6 +21,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AdminUserCreation } from '../AdminUserCreation';
+import { OnboardingForm } from '../Onboarding/OnboardingForm';
+import { ModularPillarAssessment } from '../FivePillars/ModularPillarAssessment';
+import { HabitFormationCenter } from '../HabitFormation/HabitFormationCenter';
 
 interface Client {
   id: string;
@@ -193,9 +196,9 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-muted-foreground">
-                Onboarding-formulär kommer att implementeras här
-              </div>
+              <OnboardingForm 
+                onComplete={() => handleStepComplete('onboard')}
+              />
             </CardContent>
           </Card>
         );
@@ -213,9 +216,11 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-muted-foreground">
-                Five Pillars Assessment kommer att implementeras här
-              </div>
+              <ModularPillarAssessment 
+                clientId={selectedClient?.id}
+                pillarKey="self_care"
+                onComplete={() => handleStepComplete('assess')}
+              />
             </CardContent>
           </Card>
         );
@@ -233,9 +238,9 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-muted-foreground">
-                Vanformningscentral kommer att implementeras här
-              </div>
+              <HabitFormationCenter 
+                clientId={selectedClient?.id}
+              />
             </CardContent>
           </Card>
         );
@@ -279,8 +284,9 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                   Skapa nästa klient
                 </Button>
                 <Button variant="outline" onClick={() => {
-                  // Navigate to client dashboard
-                  window.location.href = `/client/${selectedClient?.id}`;
+                  // Use React Router navigation instead of window.location
+                  setSelectedClient(null);
+                  setCurrentStep('complete');
                 }}>
                   Visa klientdashboard
                 </Button>
