@@ -90,21 +90,9 @@ export const useUserPillars = (userId: string) => {
     if (!userId) return;
 
     try {
-      // Get client_id for backwards compatibility
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-
-      if (!clientData) {
-        throw new Error('Client not found for user');
-      }
-
       const { error } = await supabase
         .from('client_pillar_activations')
         .insert({
-          client_id: clientData.id,
           user_id: userId,
           pillar_key: pillarKey,
           is_active: true,

@@ -4,7 +4,7 @@ export type PillarType = 'self_care' | 'skills' | 'talent' | 'brand' | 'economy'
 
 export interface PathEntry {
   id: string;
-  client_id: string;
+  user_id: string;
   created_by: string;
   timestamp: string;
   type: PathEntryType;
@@ -38,7 +38,7 @@ export interface PathFilters {
 }
 
 export interface CreatePathEntryData {
-  client_id: string;
+  user_id: string;
   timestamp?: string;
   type: PathEntryType;
   title: string;

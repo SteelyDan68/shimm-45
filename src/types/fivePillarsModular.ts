@@ -17,7 +17,7 @@ export interface PillarDefinition {
 
 export interface ClientPillarActivation {
   id: string;
-  client_id: string;
+  user_id: string;
   pillar_key: PillarKey;
   is_active: boolean;
   activated_by: string;
@@ -28,7 +28,7 @@ export interface ClientPillarActivation {
 
 export interface PillarAssessment {
   id: string;
-  client_id: string;
+  user_id: string;
   pillar_key: PillarKey;
   assessment_data: Record<string, any>;
   calculated_score?: number; // 1-10 score
@@ -41,7 +41,7 @@ export interface PillarAssessment {
 
 export interface PillarVisualizationData {
   id: string;
-  client_id: string;
+  user_id: string;
   pillar_key: PillarKey;
   data_type: 'trend' | 'breakdown' | 'comparison' | 'progress';
   data_points: any[];
