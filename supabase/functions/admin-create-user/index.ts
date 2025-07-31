@@ -63,16 +63,21 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log('Checking admin privileges for user:', user.id);
+    console.log('Using Supabase admin client for role check');
+    
     // Check if the requesting user has admin privileges using admin client (bypasses RLS)
     const { data: userRoles, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
 
+    console.log('Role query result:', { userRoles, roleError });
+
     if (roleError) {
       console.error('Role check error:', roleError);
       return new Response(
-        JSON.stringify({ error: 'Failed to verify user permissions' }),
+        JSON.stringify({ error: 'Failed to verify user permissions: ' + roleError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -80,11 +85,16 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('User roles found:', userRoles);
     const hasAdminRole = userRoles?.some(r => ['superadmin', 'admin'].includes(r.role));
     console.log('Has admin role:', hasAdminRole, 'for user:', user.id);
+    console.log('Checking roles:', userRoles?.map(r => r.role));
     
     if (!hasAdminRole) {
       console.error('Unauthorized user creation attempt by user:', user.id);
+      console.error('Available roles:', userRoles?.map(r => r.role));
       return new Response(
-        JSON.stringify({ error: 'Insufficient privileges to create users' }),
+        JSON.stringify({ 
+          error: 'Insufficient privileges to create users',
+          debug: `User ${user.id} has roles: ${userRoles?.map(r => r.role).join(', ') || 'none'}`
+        }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
