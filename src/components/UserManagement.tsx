@@ -37,7 +37,7 @@ import { InvitationList } from "./InvitationSystem/InvitationList";
 import { AdminGamificationPanel } from "./Admin/AdminGamificationPanel";
 import { OnboardingWorkflow } from "./Admin/OnboardingWorkflow";
 import { PasswordManagement } from "./UserManagement/PasswordManagement";
-import { UserTable } from "./UserManagement/UserTable";
+import { EnterpriseUserTable } from "./UserManagement/EnterpriseUserTable";
 import { MultiRoleManager } from "./UserManagement/MultiRoleManager";
 import type { Profile, AppRole } from "@/hooks/useAuth";
 
@@ -344,17 +344,7 @@ export function UserManagement() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <UserTable
-                users={users}
-                isAdmin={adminStatus}
-                isSuperAdmin={isSuperAdmin}
-                onEditUser={openEditDialog}
-                onViewProfile={openFullProfileDialog}
-                onDeleteUser={deleteUser}
-                onRoleChange={handleRoleChange}
-                deletingUserId={deletingUserId}
-                updatingRoleUserId={updatingRoleUserId}
-              />
+              <EnterpriseUserTable />
             </CardContent>
           </Card>
         </TabsContent>

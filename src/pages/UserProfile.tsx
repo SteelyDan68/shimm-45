@@ -450,8 +450,8 @@ export const UserProfile = () => {
           <TabsContent value="pillars" className="space-y-6">
             {clientId ? (
               <ModularPillarDashboard 
-                clientId={clientId}
-                clientName={displayName}
+                userId={userId}
+                userName={displayName}
                 isCoachView={!isOwnProfile}
               />
             ) : (

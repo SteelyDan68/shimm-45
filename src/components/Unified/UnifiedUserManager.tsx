@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { useUnifiedUserData, type UnifiedUser } from "@/hooks/useUnifiedUserData";
 import { useUnifiedPermissions } from "@/hooks/useUnifiedPermissions";
-import { UserTable } from "../UserManagement/UserTable";
+import { EnterpriseUserTable } from "../UserManagement/EnterpriseUserTable";
 import { Input } from "@/components/ui/input";
 import { AdminUserCreation } from "../AdminUserCreation";
 import { PasswordManagement } from "../UserManagement/PasswordManagement";
@@ -318,17 +318,7 @@ export function UnifiedUserManager() {
               </p>
             </CardHeader>
             <CardContent>
-              <UserTable
-                users={users}
-                isAdmin={isAdmin}
-                isSuperAdmin={isSuperAdmin}
-                onEditUser={openEditDialog}
-                onViewProfile={openFullProfileDialog}
-                onDeleteUser={handleDeleteUser}
-                onRoleChange={handleRoleChange}
-                deletingUserId={deletingUserId}
-                updatingRoleUserId={updatingRoleUserId}
-              />
+              <EnterpriseUserTable />
             </CardContent>
           </Card>
         </TabsContent>

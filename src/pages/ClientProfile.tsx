@@ -414,8 +414,8 @@ export const ClientProfile = () => {
         {/* Five Pillars Tab */}
         <TabsContent value="pillars" className="space-y-6">
           <ModularPillarDashboard 
-            clientId={clientId!} 
-            clientName={client.name} 
+            userId={clientId!} 
+            userName={client.name} 
             isCoachView={true}
           />
         </TabsContent>

@@ -31,6 +31,11 @@ export interface UserProfile {
   onboarding_completed_at: string | null;
   created_at: string | null;
   updated_at: string | null;
+  // Enterprise-grade additional properties
+  velocity_score: number | null;
+  client_category: string | null;
+  status: string | null;
+  logic_state: any;
 }
 
 export interface UserRole {
@@ -50,11 +55,17 @@ export const useUserData = (userId?: string) => {
 
   const fetchProfile = async () => {
     if (!targetUserId) return;
-
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          velocity_score,
+          client_category,
+          status,
+          logic_state
+        `)
         .eq('id', targetUserId)
         .single();
 
