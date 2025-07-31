@@ -28,6 +28,7 @@ import { AdminGamificationPanel } from "../Admin/AdminGamificationPanel";
 import { SendInvitationForm } from "../InvitationSystem/SendInvitationForm";
 import { InvitationList } from "../InvitationSystem/InvitationList";
 import type { AppRole } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -44,6 +45,8 @@ const roleColors: Record<AppRole, string> = {
 };
 
 export function UnifiedUserManager() {
+  const { toast } = useToast();
+  
   const { 
     users, 
     allUsers, 

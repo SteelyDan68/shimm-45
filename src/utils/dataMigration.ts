@@ -59,15 +59,18 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
           continue;
         }
 
+        // Generate a unique ID for the profile
+        const profileId = crypto.randomUUID();
+        
         // Create profile entry
         const profileData = {
+          id: profileId,
           email: client.email,
           first_name: client.name?.split(' ')[0] || '',
           last_name: client.name?.split(' ').slice(1).join(' ') || '',
           status: client.status || 'active',
           organization: client.category || null,
           preferences: {
-            // Migrate legacy data to preferences
             legacy_client_data: {
               original_id: client.id,
               user_id: client.user_id,
@@ -82,10 +85,10 @@ export async function migrateClientsToProfiles(): Promise<MigrationResult> {
           }
         };
 
-        // Insert into profiles
+        // Insert into profiles  
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
-          .insert([profileData])
+          .insert(profileData)
           .select('id')
           .single();
 
