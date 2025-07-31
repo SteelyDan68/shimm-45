@@ -3,6 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
 import { Resend } from "npm:resend@4.0.0";
 
 const resendApiKey = Deno.env.get("RESEND_API_KEY");
+console.log("RESEND_API_KEY exists:", !!resendApiKey);
+console.log("RESEND_API_KEY length:", resendApiKey?.length || 0);
+
 if (!resendApiKey) {
   console.error("RESEND_API_KEY environment variable is not set");
 }
@@ -74,6 +77,9 @@ const handler = async (req: Request): Promise<Response> => {
     const baseUrl = req.headers.get('origin') || 'https://gcoorbcglxczmukzcmqs.supabase.co';
     const invitationUrl = `${baseUrl}/invitation/${invitation.token}`;
 
+    console.log("Attempting to send email to:", email);
+    console.log("Using sender:", "SHIMM <onboarding@resend.dev>");
+    
     // Send invitation email
     const { data: emailResult, error: emailError } = await resend.emails.send({
       from: "SHIMM <onboarding@resend.dev>", // Using Resend's verified domain for testing
@@ -108,6 +114,8 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
+    console.log("Email send response:", { emailResult, emailError });
+    
     if (emailError) {
       console.error("Failed to send invitation email:", emailError);
       throw new Error(`Email sending failed: ${emailError.message}`);
