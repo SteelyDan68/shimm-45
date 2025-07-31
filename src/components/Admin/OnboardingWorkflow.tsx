@@ -3,10 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Users, 
   UserPlus, 
@@ -25,15 +21,17 @@ import { OnboardingForm } from '../Onboarding/OnboardingForm';
 import { ModularPillarAssessment } from '../FivePillars/ModularPillarAssessment';
 import { HabitFormationCenter } from '../HabitFormation/HabitFormationCenter';
 
-interface Client {
+interface ClientProfile {
   id: string;
-  name: string;
-  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
   status: string;
   created_at: string;
-  onboarding_completed: boolean;
-  assessment_completed: boolean;
-  habits_active: number;
+  roles?: string[];
+  onboarding_completed?: boolean;
+  assessment_completed?: boolean;
+  habits_active?: number;
 }
 
 interface OnboardingWorkflowProps {
@@ -41,57 +39,47 @@ interface OnboardingWorkflowProps {
 }
 
 export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose }) => {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clients, setClients] = useState<ClientProfile[]>([]);
+  const [selectedClient, setSelectedClient] = useState<ClientProfile | null>(null);
   const [currentStep, setCurrentStep] = useState<'create' | 'onboard' | 'assess' | 'habits' | 'complete'>('create');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const loadClients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('clients')
+      // Fetch all users with client role from profiles
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
-      // Check additional status for each client
-      const clientsWithStatus = await Promise.all((data || []).map(async (client) => {
-        // Check onboarding status
-        const { data: onboardingData } = await supabase
-          .from('path_entries')
-          .select('id')
-          .eq('client_id', client.id)
-          .contains('metadata', { is_onboarding_complete: true })
-          .single();
+      // Fetch user roles to filter clients
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*');
 
-        // Check assessment status
-        const { data: assessmentData } = await supabase
-          .from('path_entries')
-          .select('id')
-          .eq('client_id', client.id)
-          .contains('metadata', { is_assessment: true })
-          .single();
+      if (rolesError) throw rolesError;
 
-        // Check active habits
-        const { data: habitsData } = await supabase
-          .from('path_entries')
-          .select('id')
-          .eq('client_id', client.id)
-          .contains('metadata', { is_habit: true });
+      // Filter users with client role
+      const clientProfiles = profiles?.filter(profile => 
+        userRoles?.some(role => role.user_id === profile.id && role.role === 'client')
+      ).map(profile => ({
+        ...profile,
+        roles: userRoles?.filter(role => role.user_id === profile.id).map(role => role.role) || []
+      })) || [];
 
-        return {
-          ...client,
-          onboarding_completed: !!onboardingData,
-          assessment_completed: !!assessmentData,
-          habits_active: habitsData?.length || 0
-        };
-      }));
+      console.log('Client profiles loaded:', clientProfiles.length, clientProfiles.map(c => `${c.first_name} ${c.last_name}`));
 
-      setClients(clientsWithStatus);
-    } catch (error) {
+      setClients(clientProfiles);
+    } catch (error: any) {
       console.error('Error loading clients:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda klienter",
+        variant: "destructive"
+      });
     }
   };
 
@@ -99,14 +87,14 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
     loadClients();
   }, []);
 
-  const getClientStatus = (client: Client): { status: string; nextStep: string; color: string } => {
+  const getClientStatus = (client: ClientProfile): { status: string; nextStep: string; color: string } => {
     if (!client.onboarding_completed) {
       return { status: 'Behöver onboarding', nextStep: 'Genomför onboarding', color: 'bg-orange-500' };
     }
     if (!client.assessment_completed) {
       return { status: 'Behöver assessment', nextStep: 'Genomför Five Pillars', color: 'bg-blue-500' };
     }
-    if (client.habits_active === 0) {
+    if ((client.habits_active || 0) === 0) {
       return { status: 'Behöver vanor', nextStep: 'Skapa vanor', color: 'bg-purple-500' };
     }
     return { status: 'Komplett', nextStep: 'Klar', color: 'bg-green-500' };
@@ -120,13 +108,13 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
     });
   };
 
-  const startOnboarding = (client: Client) => {
+  const startOnboarding = (client: ClientProfile) => {
     setSelectedClient(client);
     if (!client.onboarding_completed) {
       setCurrentStep('onboard');
     } else if (!client.assessment_completed) {
       setCurrentStep('assess');
-    } else if (client.habits_active === 0) {
+    } else if ((client.habits_active || 0) === 0) {
       setCurrentStep('habits');
     } else {
       setCurrentStep('complete');
@@ -161,6 +149,10 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
     }
   };
 
+  const getClientDisplayName = (client: ClientProfile): string => {
+    return `${client.first_name || ''} ${client.last_name || ''}`.trim() || client.email || 'Okänd användare';
+  };
+
   const renderCurrentStep = () => {
     if (!selectedClient && currentStep !== 'create') return null;
 
@@ -171,10 +163,10 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserPlus className="h-5 w-5" />
-                Skapa ny klient
+                Skapa ny klient-användare
               </CardTitle>
               <CardDescription>
-                Börja med att skapa en ny klient i systemet
+                Skapa en ny användare och tilldela rollen "Klient"
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -189,7 +181,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Onboarding för {selectedClient?.name}
+                Onboarding för {getClientDisplayName(selectedClient!)}
               </CardTitle>
               <CardDescription>
                 Samla grundläggande information och sätt upp klientprofilen
@@ -209,7 +201,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Five Pillars Assessment för {selectedClient?.name}
+                Five Pillars Assessment för {getClientDisplayName(selectedClient!)}
               </CardTitle>
               <CardDescription>
                 Genomför den modulära Five Pillars-bedömningen
@@ -231,7 +223,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
-                Vanformning för {selectedClient?.name}
+                Vanformning för {getClientDisplayName(selectedClient!)}
               </CardTitle>
               <CardDescription>
                 Skapa neuroplasticitet-baserade vanor baserat på assessment-resultaten
@@ -251,7 +243,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
-                Onboarding komplett för {selectedClient?.name}! 🎉
+                Onboarding komplett för {getClientDisplayName(selectedClient!)}! 🎉
               </CardTitle>
               <CardDescription>
                 Klienten är nu redo att använda systemet fullt ut
@@ -284,7 +276,6 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                   Skapa nästa klient
                 </Button>
                 <Button variant="outline" onClick={() => {
-                  // Use React Router navigation instead of window.location
                   setSelectedClient(null);
                   setCurrentStep('complete');
                 }}>
@@ -333,7 +324,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
       <Tabs defaultValue="workflow" className="space-y-4">
         <TabsList>
           <TabsTrigger value="workflow">Onboarding Workflow</TabsTrigger>
-          <TabsTrigger value="clients">Alla Klienter ({clients.length})</TabsTrigger>
+          <TabsTrigger value="clients">Klient-användare ({clients.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="workflow" className="space-y-4">
@@ -341,64 +332,56 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
         </TabsContent>
 
         <TabsContent value="clients" className="space-y-4">
-          <div className="grid gap-4">
-            {clients.map((client) => {
-              const { status, nextStep, color } = getClientStatus(client);
-              return (
-                <Card key={client.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5" />
-                        {client.name}
-                      </CardTitle>
-                      <Badge variant="secondary" className={`text-white ${color}`}>
-                        {status}
-                      </Badge>
-                    </div>
-                    <CardDescription>{client.email}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="flex items-center gap-1">
-                          {client.onboarding_completed ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-orange-500" />
-                          )}
-                          Onboarding
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Klient-användare
+              </CardTitle>
+              <CardDescription>
+                Alla användare med rollen "Klient" i systemet
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {clients.length > 0 ? (
+                <div className="space-y-4">
+                  {clients.map((client) => {
+                    const { status, nextStep, color } = getClientStatus(client);
+                    return (
+                      <div 
+                        key={client.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <h4 className="font-medium">{getClientDisplayName(client)}</h4>
+                            <p className="text-sm text-muted-foreground">{client.email}</p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {client.assessment_completed ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-orange-500" />
-                          )}
-                          Assessment
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {client.habits_active > 0 ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-orange-500" />
-                          )}
-                          {client.habits_active} Vanor
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className={`text-white ${color}`}>
+                            {status}
+                          </Badge>
+                          <Button 
+                            onClick={() => startOnboarding(client)}
+                            variant={status === 'Komplett' ? 'outline' : 'default'}
+                            size="sm"
+                          >
+                            {nextStep}
+                          </Button>
                         </div>
                       </div>
-                      <Button 
-                        onClick={() => startOnboarding(client)}
-                        variant={status === 'Komplett' ? 'outline' : 'default'}
-                        size="sm"
-                      >
-                        {nextStep}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Inga klient-användare hittades. Skapa en ny användare med rollen "Klient" för att komma igång.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
