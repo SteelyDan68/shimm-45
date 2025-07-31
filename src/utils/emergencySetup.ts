@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Emergency function to give current user superadmin rights
+ * Emergency function to give current user superadmin rights via backend function
  */
 export async function emergencySuperadminSetup(): Promise<boolean> {
   try {
@@ -10,48 +10,26 @@ export async function emergencySuperadminSetup(): Promise<boolean> {
       throw new Error('No active session');
     }
 
-    // Get or create profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
+    console.log('🚨 Calling emergency admin setup for:', session.user.email);
 
-    if (profileError && profileError.code === 'PGRST116') {
-      // Create profile if it doesn't exist
-      const { error: createError } = await supabase
-        .from('profiles')
-        .insert({
-          id: session.user.id,
-          email: session.user.email,
-          first_name: 'Super',
-          last_name: 'Admin',
-          status: 'active'
-        });
-      
-      if (createError) throw createError;
+    // Call the backend function that can bypass RLS
+    const { data, error } = await supabase.functions.invoke('emergency-admin-setup', {
+      body: { userId: session.user.id }
+    });
+
+    if (error) {
+      console.error('Emergency setup error:', error);
+      throw error;
     }
 
-    // Remove existing roles
-    await supabase
-      .from('user_roles')
-      .delete()
-      .eq('user_id', session.user.id);
+    if (!data?.success) {
+      throw new Error(data?.error || 'Unknown error occurred');
+    }
 
-    // Add superadmin role
-    const { error: roleError } = await supabase
-      .from('user_roles')
-      .insert({
-        user_id: session.user.id,
-        role: 'superadmin'
-      });
-
-    if (roleError) throw roleError;
-
-    console.log('✅ Superadmin setup complete for:', session.user.email);
+    console.log('✅ Emergency superadmin setup complete for:', session.user.email);
     return true;
   } catch (error: any) {
-    console.error('❌ Superadmin setup failed:', error);
+    console.error('❌ Emergency superadmin setup failed:', error);
     return false;
   }
 }
