@@ -29,7 +29,6 @@ import { SendInvitationForm } from "../InvitationSystem/SendInvitationForm";
 import { InvitationList } from "../InvitationSystem/InvitationList";
 import type { AppRole } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -140,52 +139,6 @@ export function UnifiedUserManager() {
           <p className="text-muted-foreground">Centraliserad hantering av alla användare och funktioner</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="destructive"
-            onClick={async () => {
-              if (!window.confirm('⚠️ VARNING: Detta kommer att radera ALLA användare utom Superadmin och ALL deras data permanent. Är du säker?')) {
-                return;
-              }
-              
-              if (!window.confirm('🚨 SISTA CHANSEN: Detta kan inte ångras! All klientdata, assessments, meddelanden etc. försvinner permanent. Fortsätt?')) {
-                return;
-              }
-
-              const { cleanupAllUsersExceptSuperadmin } = await import('@/utils/systemCleanup');
-              const result = await cleanupAllUsersExceptSuperadmin();
-              
-              if (result.errors.length === 0) {
-                toast({
-                  title: "🧹 Systemrensning slutförd",
-                  description: `${result.deleted_profiles} profiler, ${result.deleted_roles} roller, ${result.deleted_assessments} assessments raderade`
-                });
-              } else {
-                toast({
-                  title: "⚠️ Rensning delvis slutförd",
-                  description: `${result.deleted_profiles} profiler raderade, ${result.errors.length} fel uppstod`,
-                  variant: "destructive"
-                });
-              }
-              
-              await refetch(); // Refresh data
-            }}
-          >
-            🧹 Rensa ALLA användare (behåll bara Superadmin)
-          </Button>
-          <Button
-            variant="outline"
-            onClick={async () => {
-              const { migrateClientsToProfiles } = await import('@/utils/dataMigration');
-              const result = await migrateClientsToProfiles();
-              toast({
-                title: "Migration slutförd",
-                description: `${result.migrated} användare migrerade, ${result.skipped} hoppade över${result.errors.length > 0 ? `. ${result.errors.length} fel - se konsolen för detaljer.` : ''}`
-              });
-              await refetch(); // Refresh data
-            }}
-          >
-            🔄 Migrera gamla klienter
-          </Button>
           <AdminUserCreation onUserCreated={refetch} />
         </div>
       </div>
