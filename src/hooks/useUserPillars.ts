@@ -94,9 +94,10 @@ export const useUserPillars = (userId: string) => {
         .from('client_pillar_activations')
         .insert({
           user_id: userId,
+          client_id: userId, // For backward compatibility
           pillar_key: pillarKey,
           is_active: true,
-          activated_by: userId,
+          activated_by: userId
         });
 
       if (error) throw error;

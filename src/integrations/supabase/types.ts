@@ -333,7 +333,7 @@ export type Database = {
         Row: {
           activated_at: string
           activated_by: string
-          client_id: string
+          client_id: string | null
           deactivated_at: string | null
           id: string
           is_active: boolean
@@ -344,7 +344,7 @@ export type Database = {
         Insert: {
           activated_at?: string
           activated_by: string
-          client_id: string
+          client_id?: string | null
           deactivated_at?: string | null
           id?: string
           is_active?: boolean
@@ -355,7 +355,7 @@ export type Database = {
         Update: {
           activated_at?: string
           activated_by?: string
-          client_id?: string
+          client_id?: string | null
           deactivated_at?: string | null
           id?: string
           is_active?: boolean
