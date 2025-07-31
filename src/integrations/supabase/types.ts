@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           assigned_at: string
           assigned_by: string
-          client_id: string
           due_date: string | null
           form_definition_id: string
           id: string
@@ -30,7 +29,6 @@ export type Database = {
         Insert: {
           assigned_at?: string
           assigned_by: string
-          client_id: string
           due_date?: string | null
           form_definition_id: string
           id?: string
@@ -42,7 +40,6 @@ export type Database = {
         Update: {
           assigned_at?: string
           assigned_by?: string
-          client_id?: string
           due_date?: string | null
           form_definition_id?: string
           id?: string
@@ -157,7 +154,6 @@ export type Database = {
         Row: {
           ai_analysis: string | null
           answers: Json
-          client_id: string
           comments: string | null
           created_at: string
           created_by: string
@@ -171,7 +167,6 @@ export type Database = {
         Insert: {
           ai_analysis?: string | null
           answers?: Json
-          client_id: string
           comments?: string | null
           created_at?: string
           created_by: string
@@ -185,7 +180,6 @@ export type Database = {
         Update: {
           ai_analysis?: string | null
           answers?: Json
-          client_id?: string
           comments?: string | null
           created_at?: string
           created_by?: string
@@ -209,7 +203,6 @@ export type Database = {
       calendar_events: {
         Row: {
           category: string
-          client_id: string
           created_at: string
           created_by: string
           created_by_role: string
@@ -223,7 +216,6 @@ export type Database = {
         }
         Insert: {
           category: string
-          client_id: string
           created_at?: string
           created_by: string
           created_by_role: string
@@ -237,7 +229,6 @@ export type Database = {
         }
         Update: {
           category?: string
-          client_id?: string
           created_at?: string
           created_by?: string
           created_by_role?: string
@@ -254,7 +245,6 @@ export type Database = {
       client_data_cache: {
         Row: {
           author: string | null
-          client_id: string
           created_at: string
           data: Json
           data_type: string
@@ -271,7 +261,6 @@ export type Database = {
         }
         Insert: {
           author?: string | null
-          client_id: string
           created_at?: string
           data: Json
           data_type: string
@@ -288,7 +277,6 @@ export type Database = {
         }
         Update: {
           author?: string | null
-          client_id?: string
           created_at?: string
           data?: Json
           data_type?: string
@@ -303,33 +291,10 @@ export type Database = {
           url?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "client_data_cache_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_analytics_summary"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_data_cache_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_user_mapping"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_data_cache_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       client_data_containers: {
         Row: {
-          client_id: string
           container_type: string
           created_at: string
           created_by: string
@@ -341,7 +306,6 @@ export type Database = {
           xml_content: unknown
         }
         Insert: {
-          client_id: string
           container_type: string
           created_at?: string
           created_by: string
@@ -353,7 +317,6 @@ export type Database = {
           xml_content: unknown
         }
         Update: {
-          client_id?: string
           container_type?: string
           created_at?: string
           created_by?: string
@@ -364,29 +327,7 @@ export type Database = {
           version?: number
           xml_content?: unknown
         }
-        Relationships: [
-          {
-            foreignKeyName: "fk_client_data_containers_client"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_analytics_summary"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "fk_client_data_containers_client"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_user_mapping"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "fk_client_data_containers_client"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       client_pillar_activations: {
         Row: {
@@ -863,7 +804,6 @@ export type Database = {
       path_entries: {
         Row: {
           ai_generated: boolean
-          client_id: string
           content: string | null
           created_at: string
           created_by: string
@@ -882,7 +822,6 @@ export type Database = {
         }
         Insert: {
           ai_generated?: boolean
-          client_id: string
           content?: string | null
           created_at?: string
           created_by: string
@@ -901,7 +840,6 @@ export type Database = {
         }
         Update: {
           ai_generated?: boolean
-          client_id?: string
           content?: string | null
           created_at?: string
           created_by?: string
@@ -918,36 +856,13 @@ export type Database = {
           user_id?: string | null
           visible_to_client?: boolean
         }
-        Relationships: [
-          {
-            foreignKeyName: "path_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_analytics_summary"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "path_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_user_mapping"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "path_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       pillar_assessments: {
         Row: {
           ai_analysis: string | null
           assessment_data: Json
           calculated_score: number | null
-          client_id: string
           created_at: string
           created_by: string
           id: string
@@ -960,7 +875,6 @@ export type Database = {
           ai_analysis?: string | null
           assessment_data?: Json
           calculated_score?: number | null
-          client_id: string
           created_at?: string
           created_by: string
           id?: string
@@ -973,7 +887,6 @@ export type Database = {
           ai_analysis?: string | null
           assessment_data?: Json
           calculated_score?: number | null
-          client_id?: string
           created_at?: string
           created_by?: string
           id?: string
@@ -1031,7 +944,6 @@ export type Database = {
       }
       pillar_visualization_data: {
         Row: {
-          client_id: string
           created_at: string
           data_points: Json
           data_type: string
@@ -1041,7 +953,6 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          client_id: string
           created_at?: string
           data_points?: Json
           data_type: string
@@ -1051,7 +962,6 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
-          client_id?: string
           created_at?: string
           data_points?: Json
           data_type?: string
@@ -1254,7 +1164,6 @@ export type Database = {
       tasks: {
         Row: {
           ai_generated: boolean
-          client_id: string
           completed_at: string | null
           created_at: string
           created_by: string
@@ -1270,7 +1179,6 @@ export type Database = {
         }
         Insert: {
           ai_generated?: boolean
-          client_id: string
           completed_at?: string | null
           created_at?: string
           created_by: string
@@ -1286,7 +1194,6 @@ export type Database = {
         }
         Update: {
           ai_generated?: boolean
-          client_id?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string
@@ -1301,27 +1208,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_analytics_summary"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_user_mapping"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "tasks_source_path_entry_id_fkey"
             columns: ["source_path_entry_id"]
@@ -1551,13 +1437,6 @@ export type Database = {
             foreignKeyName: "weekly_email_logs_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_analytics_summary"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "weekly_email_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "client_user_mapping"
             referencedColumns: ["client_id"]
           },
@@ -1572,20 +1451,6 @@ export type Database = {
       }
     }
     Views: {
-      client_analytics_summary: {
-        Row: {
-          client_id: string | null
-          client_name: string | null
-          instagram_data_count: number | null
-          last_update: string | null
-          news_count: number | null
-          sentiment_count: number | null
-          social_metrics_count: number | null
-          tiktok_data_count: number | null
-          youtube_data_count: number | null
-        }
-        Relationships: []
-      }
       client_user_mapping: {
         Row: {
           client_id: string | null
