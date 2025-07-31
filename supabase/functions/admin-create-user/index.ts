@@ -231,27 +231,60 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('User created successfully, ID:', newUser.user.id);
 
-    // Wait a moment for the trigger to create the profile
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait longer for the trigger to create the profile
+    console.log('Waiting for trigger to create profile...');
+    await new Promise(resolve => setTimeout(resolve, 500)); // Increased to 500ms
 
-    // Verify that the profile was created by the trigger
-    const { data: createdProfile, error: profileCheckError } = await supabaseAdmin
-      .from('profiles')
-      .select('id, email, first_name, last_name')
-      .eq('id', newUser.user.id)
-      .single();
+    // Verify that the profile was created by the trigger - try multiple times
+    let createdProfile = null;
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (!createdProfile && attempts < maxAttempts) {
+      attempts++;
+      console.log(`Profile verification attempt ${attempts}/${maxAttempts}`);
+      
+      const { data: profileData, error: profileCheckError } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, first_name, last_name')
+        .eq('id', newUser.user.id)
+        .maybeSingle();
 
-    if (profileCheckError) {
-      console.error('Profile not created by trigger:', profileCheckError);
+      if (profileCheckError) {
+        console.error(`Profile check error on attempt ${attempts}:`, profileCheckError);
+        if (attempts === maxAttempts) {
+          // Clean up the created user
+          console.log('Max attempts reached, cleaning up user...');
+          await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
+          return new Response(
+            JSON.stringify({ error: 'Profil skapades inte automatiskt: ' + profileCheckError.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 200));
+        continue;
+      }
+      
+      createdProfile = profileData;
+      if (createdProfile) {
+        console.log('Profile created successfully by trigger:', createdProfile);
+        break;
+      } else {
+        console.log(`Profile not found on attempt ${attempts}, retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }
+
+    if (!createdProfile) {
+      console.error('Profile was not created by trigger after all attempts');
       // Clean up the created user
       await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
       return new Response(
-        JSON.stringify({ error: 'Profil skapades inte automatiskt' }),
+        JSON.stringify({ error: 'Profil skapades inte automatiskt av databasutlösaren' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    console.log('Profile created by trigger:', createdProfile);
 
     // Assign role using admin client
     const { error: roleAssignError } = await supabaseAdmin
