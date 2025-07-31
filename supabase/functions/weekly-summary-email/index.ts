@@ -112,7 +112,7 @@ serve(async (req) => {
 
         // Send email
         const { data: emailResult, error: emailError } = await resend.emails.send({
-          from: 'Ditt Utvecklingsstöd <noreply@yourapp.com>',
+          from: 'SHIMM <noreply@yourapp.com>',
           to: [client.email],
           subject: `📊 Veckans sammanfattning för ${client.name}`,
           html,
