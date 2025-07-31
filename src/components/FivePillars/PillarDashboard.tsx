@@ -37,7 +37,7 @@ export const PillarDashboard = ({ userId, userName }: PillarDashboardProps) => {
           Tillbaka till översikt
         </Button>
         <DynamicAssessmentForm
-          userId={userId}
+          clientId={userId}
           formDefinitionId={selectedForm}
           formName={formDefinition?.name || 'Assessment'}
           formDescription={formDefinition?.description}

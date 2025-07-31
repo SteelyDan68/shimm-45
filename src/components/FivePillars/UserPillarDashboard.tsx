@@ -53,8 +53,12 @@ export const UserPillarDashboard = ({
         pillar_key: pillarKey,
         score: assessment?.calculated_score || 0,
         color: pillarConfig.color,
+        color_code: pillarConfig.color,
         name: pillarConfig.name,
-        last_assessment: assessment?.created_at || null
+        icon: pillarConfig.icon,
+        last_assessment: assessment?.created_at || null,
+        trend: 0,
+        is_active: true
       };
     });
   };
@@ -302,7 +306,7 @@ export const UserPillarDashboard = ({
                 <AnalysisActions
                   title={showAnalysisModal.title}
                   content={showAnalysisModal.content}
-                  userName={userName}
+                  clientName={userName}
                   assessmentType={showAnalysisModal.pillarName}
                 />
                 <Button 

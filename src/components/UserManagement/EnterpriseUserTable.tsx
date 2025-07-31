@@ -203,8 +203,8 @@ export const EnterpriseUserTable = ({
                     
                     <TableCell>
                       <div className="text-sm">
-                        {user.last_login_at 
-                          ? new Date(user.last_login_at).toLocaleDateString('sv-SE')
+                        {user.created_at 
+                          ? new Date(user.created_at).toLocaleDateString('sv-SE')
                           : 'Aldrig'
                         }
                       </div>

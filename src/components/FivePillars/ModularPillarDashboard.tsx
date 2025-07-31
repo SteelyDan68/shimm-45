@@ -275,7 +275,7 @@ export const ModularPillarDashboard = ({
                 <AnalysisActions
                   title={showAnalysisModal.title}
                   content={showAnalysisModal.content}
-                  userName={userName}
+                  clientName={userName}
                   assessmentType={showAnalysisModal.pillarName}
                 />
                 <Button 
