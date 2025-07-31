@@ -41,36 +41,15 @@ export const StefanWidget = ({ userId }: StefanWidgetProps) => {
   // Show proactive Stefan messages based on user activity
   useEffect(() => {
     if (journeyState && recentInteractions.length === 0) {
-      // First time user - show welcome message
-      setTimeout(() => {
-        createStefanInteraction(
-          'proactive',
-          'first_visit',
-          {
-            journey_phase: journeyState.current_phase,
-            user_id: userId
-          }
-        );
-        setShowProactiveMessage(true);
-      }, 3000);
+      // Show welcome message for first time users
+      setShowProactiveMessage(true);
     }
-  }, [journeyState, recentInteractions.length, createStefanInteraction, userId]);
+  }, [journeyState, recentInteractions.length]);
 
-  // Check for proactive interventions based on inactivity or patterns
+  // Simplified proactive check - no automatic triggering for now
   useEffect(() => {
-    if (journeyState && journeyState.last_activity_at) {
-      const lastActivity = new Date(journeyState.last_activity_at);
-      const hoursSinceActivity = (Date.now() - lastActivity.getTime()) / (1000 * 60 * 60);
-      
-      // Trigger gentle nudge after 24 hours of inactivity
-      if (hoursSinceActivity > 24 && recentInteractions.length > 0) {
-        triggerProactiveIntervention('inactivity', {
-          hours_since_activity: Math.round(hoursSinceActivity),
-          last_phase: journeyState.current_phase
-        });
-      }
-    }
-  }, [journeyState, triggerProactiveIntervention, recentInteractions]);
+    // This will be implemented later when the backend functions are ready
+  }, [journeyState]);
 
   const getPersonaIcon = (persona: string) => {
     switch (persona) {
