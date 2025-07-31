@@ -18,7 +18,7 @@ export interface UnifiedClient {
  */
 export async function fetchUnifiedClients(): Promise<UnifiedClient[]> {
   try {
-    // First, try to get clients from profiles (new system)
+    // Fetch all users with client role from profiles table (the correct, unified way)
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -26,66 +26,30 @@ export async function fetchUnifiedClients(): Promise<UnifiedClient[]> {
 
     if (profileError) throw profileError;
 
+    // Fetch user roles to filter clients
     const { data: userRoles, error: rolesError } = await supabase
       .from('user_roles')
       .select('*');
 
     if (rolesError) throw rolesError;
 
-    // Get users with client role from profiles
-    const profileClients = profiles?.filter(profile => 
+    // Filter users with client role and map to unified format
+    const unifiedClients = profiles?.filter(profile => 
       userRoles?.some(role => role.user_id === profile.id && role.role === 'client')
-    ) || [];
+    ).map(profile => ({
+      id: profile.id,
+      name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unnamed User',
+      email: profile.email,
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      status: profile.status || 'active',
+      created_at: profile.created_at,
+      category: 'unified', // Mark as coming from unified source
+      user_id: profile.id // For compatibility with legacy code
+    })) || [];
 
-    // MIGRATION FIX: Also get clients from old clients table
-    const { data: oldClients, error: oldClientsError } = await supabase
-      .from('clients')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    console.log('Profile clients:', profileClients.length, profileClients.map(c => `${c.first_name} ${c.last_name}`));
-    console.log('Old clients table:', oldClients?.length || 0, oldClients?.map(c => c.name) || []);
-
-    // Merge both sources - prioritize profiles over old clients
-    const allClients: UnifiedClient[] = [];
-    
-    // Add profile-based clients
-    profileClients.forEach(profile => {
-      allClients.push({
-        id: profile.id,
-        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unnamed User',
-        email: profile.email,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        status: profile.status || 'active',
-        created_at: profile.created_at,
-        category: 'migrated-profile',
-        user_id: profile.id
-      });
-    });
-
-    // Add old clients that don't exist in profiles
-    if (oldClients) {
-      oldClients.forEach(oldClient => {
-        const existsInProfiles = allClients.some(c => c.email === oldClient.email);
-        if (!existsInProfiles) {
-          allClients.push({
-            id: oldClient.id,
-            name: oldClient.name || oldClient.email || 'Unknown',
-            email: oldClient.email,
-            first_name: oldClient.name?.split(' ')[0] || null,
-            last_name: oldClient.name?.split(' ').slice(1).join(' ') || null,
-            status: oldClient.status || 'active',
-            created_at: oldClient.created_at,
-            category: 'legacy-client',
-            user_id: oldClient.user_id || oldClient.id
-          });
-        }
-      });
-    }
-
-    console.log('Unified clients loaded (with migration):', allClients.length, allClients.map(c => c.name));
-    return allClients;
+    console.log('Unified clients loaded:', unifiedClients.length, unifiedClients.map(c => c.name));
+    return unifiedClients;
   } catch (error) {
     console.error('Error fetching unified clients:', error);
     throw error;

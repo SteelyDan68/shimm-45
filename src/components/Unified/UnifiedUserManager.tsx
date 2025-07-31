@@ -132,10 +132,26 @@ export function UnifiedUserManager() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Användarsystem</h2>
+          <h2 className="text-2xl font-bold">Enhetligt Användarsystem</h2>
           <p className="text-muted-foreground">Centraliserad hantering av alla användare och funktioner</p>
         </div>
-        <AdminUserCreation onUserCreated={refetch} />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              const { migrateClientsToProfiles } = await import('@/utils/dataMigration');
+              const result = await migrateClientsToProfiles();
+              toast({
+                title: "Migration slutförd",
+                description: `${result.migrated} användare migrerade, ${result.skipped} hoppade över`
+              });
+              await refetch(); // Refresh data
+            }}
+          >
+            🔄 Migrera gamla klienter
+          </Button>
+          <AdminUserCreation onUserCreated={refetch} />
+        </div>
       </div>
 
       {/* Quick Stats */}
