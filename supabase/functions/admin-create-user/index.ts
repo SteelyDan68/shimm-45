@@ -202,7 +202,8 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Create user using admin client
+    // Create user using admin client - the profile will be created automatically by the trigger
+    console.log('Creating user with email:', email);
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -216,37 +217,41 @@ const handler = async (req: Request): Promise<Response> => {
     if (createError) {
       console.error('User creation error:', createError);
       return new Response(
-        JSON.stringify({ error: createError.message }),
+        JSON.stringify({ error: 'Kunde inte skapa användare: ' + createError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!newUser.user) {
       return new Response(
-        JSON.stringify({ error: 'Failed to create user' }),
+        JSON.stringify({ error: 'Kunde inte skapa användare' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create profile using admin client
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert([{
-        id: newUser.user.id,
-        email,
-        first_name: firstName,
-        last_name: lastName
-      }]);
+    console.log('User created successfully, ID:', newUser.user.id);
 
-    if (profileError) {
-      console.error('Profile creation error:', profileError);
-      // Attempt to clean up the created user
+    // Wait a moment for the trigger to create the profile
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Verify that the profile was created by the trigger
+    const { data: createdProfile, error: profileCheckError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, first_name, last_name')
+      .eq('id', newUser.user.id)
+      .single();
+
+    if (profileCheckError) {
+      console.error('Profile not created by trigger:', profileCheckError);
+      // Clean up the created user
       await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
       return new Response(
-        JSON.stringify({ error: 'Failed to create user profile' }),
+        JSON.stringify({ error: 'Profil skapades inte automatiskt' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Profile created by trigger:', createdProfile);
 
     // Assign role using admin client
     const { error: roleAssignError } = await supabaseAdmin
