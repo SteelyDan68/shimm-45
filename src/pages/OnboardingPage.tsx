@@ -28,7 +28,7 @@ export const OnboardingPage = () => {
     try {
       // Hitta klient som matchar användarens email
       const { data: clientData, error: clientError } = await supabase
-        .from('clients')
+        .from('profiles')
         .select('*')
         .eq('email', user.email)
         .maybeSingle();
@@ -48,8 +48,8 @@ export const OnboardingPage = () => {
 
       setClientProfile(clientData);
 
-      // Om onboarding redan är klar, gå vidare till dashboard
-      const metadata = clientData.profile_metadata as any;
+      // Check if onboarding is already complete using preferences
+      const metadata = (clientData.preferences as any);
       const hasOnboardingData = !!(
         metadata?.onboardingCompleted || 
         (metadata?.generalInfo?.name && metadata?.publicRole?.primaryRole && metadata?.lifeMap?.location)

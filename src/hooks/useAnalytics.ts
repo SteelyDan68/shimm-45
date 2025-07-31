@@ -131,10 +131,10 @@ export const useAnalytics = (clientId?: string) => {
 
       if (tasksError) throw tasksError;
 
-      // Fetch client for velocity history (simulated for now)
+      // Fetch client from profiles table instead of clients
       const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .select('velocity_score, created_at')
+        .from('profiles')
+        .select('created_at, preferences') // Use preferences instead of velocity_score
         .eq('id', clientId)
         .single();
 
@@ -147,7 +147,7 @@ export const useAnalytics = (clientId?: string) => {
       const taskProgress = processTaskProgress(tasks || []);
       
       // Process velocity trends (simulated data based on current score)
-      const velocityTrends = processVelocityTrends(client?.velocity_score || 50, start, end);
+      const velocityTrends = processVelocityTrends(50, start, end); // Use default velocity
       
       // Process sentiment trends (simulated for now)
       const sentimentTrends = processSentimentTrends(start, end);
@@ -159,7 +159,7 @@ export const useAnalytics = (clientId?: string) => {
       const functionalResources = processFunctionalResources(pathEntries || []);
 
       // Calculate summary statistics
-      const summary = calculateSummary(tasks || [], client?.velocity_score || 50, problemAreas);
+      const summary = calculateSummary(tasks || [], 50, problemAreas); // Use default velocity
 
       setData({
         barrierTrends,

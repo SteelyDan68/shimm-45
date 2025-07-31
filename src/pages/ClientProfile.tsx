@@ -97,10 +97,10 @@ export const ClientProfile = () => {
     try {
       // Load client info
       const { data: clientData, error: clientError } = await supabase
-        .from('clients')
+        .from('profiles')
         .select('*')
         .eq('id', clientId)
-        .eq('user_id', user.id)
+        .eq('id', user.id) // Use user.id instead of user_id
         .maybeSingle();
 
       if (clientError) {
@@ -124,7 +124,14 @@ export const ClientProfile = () => {
         return;
       }
 
-      setClient(clientData);
+      setClient({
+        id: clientData.id,
+        name: `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim() || clientData.email || 'Unknown',
+        category: 'general', // Default category
+        email: clientData.email,
+        status: clientData.status || 'active',
+        logic_state: (clientData.preferences as any)?.logic_state
+      });
 
       // Load cache data
       const cache = await getClientCacheData(clientId);

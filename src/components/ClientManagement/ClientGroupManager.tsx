@@ -121,13 +121,20 @@ export function ClientGroupManager() {
 
   const fetchClients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, email, category, status')
-        .order('name');
-
-      if (error) throw error;
-      setClients(data || []);
+      // Use unified client fetching
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const unifiedClients = await fetchUnifiedClients();
+      
+      // Map to Client interface format
+      const mappedClients: Client[] = unifiedClients.map(client => ({
+        id: client.id,
+        name: client.name,
+        email: client.email || '',
+        category: client.category || 'general',
+        status: client.status
+      }));
+      
+      setClients(mappedClients);
     } catch (error: any) {
       console.error('Error fetching clients:', error);
       toast({

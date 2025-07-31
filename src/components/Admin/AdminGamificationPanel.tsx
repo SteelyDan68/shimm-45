@@ -64,13 +64,10 @@ export const AdminGamificationPanel: React.FC = () => {
 
   const loadClients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, email, custom_fields')
-        .order('name');
-
-      if (error) throw error;
-      setClients(data || []);
+      // Use unified client fetching
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const unifiedClients = await fetchUnifiedClients();
+      setClients(unifiedClients);
     } catch (error) {
       console.error('Error loading clients:', error);
       toast({

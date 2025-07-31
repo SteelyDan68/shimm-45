@@ -61,8 +61,8 @@ export const useClientLogic = () => {
   const getClientLogicState = async (clientId: string): Promise<LogicState | null> => {
     try {
       const { data, error } = await supabase
-        .from('clients')
-        .select('logic_state')
+        .from('profiles')
+        .select('preferences') // Store logic state in preferences
         .eq('id', clientId)
         .single();
 
@@ -72,8 +72,8 @@ export const useClientLogic = () => {
       }
 
       // Ensure the logic_state is properly typed
-      const logicState = data.logic_state;
-      if (logicState && 
+      const logicState = (data.preferences as any)?.logic_state;
+      if (logicState &&
           typeof logicState === 'object' && 
           'velocity_rank' in logicState && 
           'recommendation' in logicState && 

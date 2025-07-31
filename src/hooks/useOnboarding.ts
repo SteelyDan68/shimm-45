@@ -22,12 +22,12 @@ export const useOnboarding = () => {
       };
 
       const { error } = await supabase
-        .from('clients')
+        .from('profiles')
         .update({ 
-          profile_metadata: profileMetadata,
-          // Uppdatera också namn från onboarding data
-          name: data.generalInfo.name || undefined,
-          // Uppdatera social media handles i huvudkolumnerna för enklare åtkomst
+          preferences: profileMetadata, // Store in preferences instead
+          // Update name from onboarding data
+          first_name: data.generalInfo.name?.split(' ')[0] || undefined,
+          last_name: data.generalInfo.name?.split(' ').slice(1).join(' ') || undefined,
           instagram_handle: data.publicRole.instagramHandle || null,
           youtube_channel: data.publicRole.youtubeHandle || null,
           tiktok_handle: data.publicRole.tiktokHandle || null
@@ -63,14 +63,14 @@ export const useOnboarding = () => {
   const getOnboardingData = async (clientId: string): Promise<OnboardingData | null> => {
     try {
       const { data, error } = await supabase
-        .from('clients')
-        .select('profile_metadata')
+        .from('profiles')
+        .select('preferences') // Use preferences instead of profile_metadata
         .eq('id', clientId)
         .single();
 
       if (error) throw error;
 
-      return (data?.profile_metadata as unknown as OnboardingData) || null;
+      return (data?.preferences as unknown as OnboardingData) || null;
     } catch (error) {
       console.error('Error getting onboarding data:', error);
       return null;

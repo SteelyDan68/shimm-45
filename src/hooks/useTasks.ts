@@ -162,20 +162,26 @@ export const useTasks = (clientId?: string) => {
 
       // Update velocity score
       const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .select('velocity_score')
+        .from('profiles')
+        .select('preferences')
         .eq('id', task.client_id)
         .single();
 
       if (!clientError && client) {
-        const currentScore = client.velocity_score || 50;
+        const currentScore = (client.preferences as any)?.velocity_score || 50;
         const priorityBonus = task.priority === 'high' ? 15 : task.priority === 'medium' ? 10 : 5;
         const aiBonus = task.ai_generated ? 5 : 0;
         const newScore = Math.min(100, currentScore + priorityBonus + aiBonus);
 
+        // Update velocity score in preferences
+        const updatedPreferences = { 
+          ...(client.preferences as any), 
+          velocity_score: newScore 
+        };
+
         await supabase
-          .from('clients')
-          .update({ velocity_score: newScore })
+          .from('profiles')
+          .update({ preferences: updatedPreferences })
           .eq('id', task.client_id);
       }
 

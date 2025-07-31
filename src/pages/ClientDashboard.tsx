@@ -69,7 +69,7 @@ export const ClientDashboard = () => {
     try {
       // Hitta klient som matchar användarens email
       const { data: clientData, error: clientError } = await supabase
-        .from('clients')
+        .from('profiles')
         .select('*')
         .eq('email', user.email)
         .maybeSingle();
@@ -87,14 +87,22 @@ export const ClientDashboard = () => {
         return;
       }
 
-      // Kontrollera om onboarding är komplett - förbättrad logik
-      const metadata = clientData.profile_metadata as any;
+      // Check if onboarding is complete - improved logic using preferences
+      const metadata = (clientData.preferences as any);
       const hasOnboardingData = !!(
         metadata?.onboardingCompleted || 
         (metadata?.generalInfo?.name && metadata?.publicRole?.primaryRole && metadata?.lifeMap?.location)
       );
 
-      setClientProfile({ ...clientData, hasOnboardingData });
+      setClientProfile({ 
+        id: clientData.id,
+        name: `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim() || clientData.email || 'Unknown',
+        category: 'general', // Default category
+        status: clientData.status || 'active',
+        logic_state: (clientData.preferences as any)?.logic_state,
+        velocity_score: (clientData.preferences as any)?.velocity_score,
+        hasOnboardingData 
+      });
 
       // Ladda statistik
       await loadStats(clientData.id);

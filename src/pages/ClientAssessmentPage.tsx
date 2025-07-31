@@ -26,10 +26,10 @@ export const ClientAssessmentPage = () => {
     
     try {
       const { data: clientData, error: clientError } = await supabase
-        .from('clients')
+        .from('profiles')
         .select('*')
         .eq('id', clientId)
-        .eq('email', user.email) // Säkerställ att användaren äger denna klient
+        .eq('email', user.email) // Ensure user owns this profile
         .maybeSingle();
 
       if (clientError) throw clientError;

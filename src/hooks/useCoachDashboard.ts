@@ -40,13 +40,9 @@ export const useCoachDashboard = () => {
     try {
       setLoading(true);
 
-      // Fetch all clients with their latest data
-      const { data: clientsData, error: clientsError } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('status', 'active');
-
-      if (clientsError) throw clientsError;
+      // Fetch all users with client role from profiles
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const clientsData = await fetchUnifiedClients();
 
       const clientPriorities: ClientPriority[] = [];
 
@@ -156,7 +152,7 @@ export const useCoachDashboard = () => {
 
         // Check if inactive (last update > 10 days)
         const daysSinceUpdate = Math.floor(
-          (Date.now() - new Date(client.updated_at).getTime()) / (1000 * 60 * 60 * 24)
+          (Date.now() - new Date(client.created_at).getTime()) / (1000 * 60 * 60 * 24)
         );
 
         if (daysSinceUpdate > 10) {
@@ -177,7 +173,7 @@ export const useCoachDashboard = () => {
             category: client.category,
             status: client.status,
             velocity_rank: velocityRank,
-            last_updated: client.updated_at,
+            last_updated: client.created_at, // Use created_at since updated_at doesn't exist
             priority_score: priorityScore,
             issues,
             latest_ai_recommendation: latestAiRecommendation,

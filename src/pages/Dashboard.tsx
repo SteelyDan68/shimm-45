@@ -66,12 +66,12 @@ export const Dashboard = () => {
   const checkClientOnboardingStatus = async () => {
     try {
       const { data: clientData } = await supabase
-        .from('clients')
-        .select('profile_metadata')
+        .from('profiles')
+        .select('preferences') // Use preferences instead of profile_metadata
         .eq('email', user!.email)
         .maybeSingle();
 
-      if ((clientData?.profile_metadata as any)?.generalInfo?.name) {
+      if ((clientData?.preferences as any)?.generalInfo?.name) {
         // Onboarding är klar, gå till client dashboard
         navigate('/client-dashboard');
       } else {

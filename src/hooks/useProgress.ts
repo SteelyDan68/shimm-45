@@ -27,17 +27,17 @@ export const useProgress = (clientId?: string) => {
 
     // Store in custom_fields for now (later we'll create proper table)
     const { data, error } = await supabase
-      .from('clients')
+      .from('profiles')
       .update({ 
-        custom_fields: { progress_data: initialProgress }
+        preferences: { progress_data: initialProgress }
       })
       .eq('id', clientId)
-      .select('custom_fields')
+      .select('preferences')
       .single();
 
     if (error) throw error;
 
-    return (data.custom_fields as any)?.progress_data as UserProgress;
+    return (data.preferences as any)?.progress_data as UserProgress;
   }, []);
 
   // Load user progress
@@ -49,14 +49,14 @@ export const useProgress = (clientId?: string) => {
       
       // Get progress from client custom_fields for now
       const { data, error } = await supabase
-        .from('clients')
-        .select('custom_fields')
+        .from('profiles')
+        .select('preferences')
         .eq('id', clientId)
         .single();
 
       if (error) throw error;
 
-      let progressData = (data?.custom_fields as any)?.progress_data as UserProgress;
+      let progressData = (data?.preferences as any)?.progress_data as UserProgress;
       
       if (!progressData) {
         progressData = await initializeProgress(clientId);
@@ -106,8 +106,8 @@ export const useProgress = (clientId?: string) => {
 
       // Update in database
       const { error } = await supabase
-        .from('clients')
-        .update({ custom_fields: { progress_data: updatedProgress } })
+        .from('profiles')
+        .update({ preferences: { progress_data: updatedProgress } })
         .eq('id', clientId);
 
       if (error) throw error;
@@ -185,8 +185,8 @@ export const useProgress = (clientId?: string) => {
 
       // Update in database
       const { error } = await supabase
-        .from('clients')
-        .update({ custom_fields: { progress_data: updatedProgress } })
+        .from('profiles')
+        .update({ preferences: { progress_data: updatedProgress } })
         .eq('id', clientId);
 
       if (error) throw error;
@@ -289,8 +289,8 @@ export const useProgress = (clientId?: string) => {
         };
         
         await supabase
-          .from('clients')
-          .update({ custom_fields: { progress_data: updatedProgress } })
+          .from('profiles')
+          .update({ preferences: { progress_data: updatedProgress } })
           .eq('id', clientId);
         
         setProgress(updatedProgress);
