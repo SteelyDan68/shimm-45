@@ -13,366 +13,46 @@ export interface UserDeletionResult {
 
 /**
  * Delete a specific user and all their data from the system
+ * Uses the edge function for complete deletion with Service Role Key
  */
 export async function deleteUserCompletely(identifier: string): Promise<UserDeletionResult> {
-  const result: UserDeletionResult = {
-    user_found: false,
-    deleted_profile: false,
-    deleted_roles: 0,
-    deleted_assessments: 0,
-    deleted_tasks: 0,
-    deleted_messages: 0,
-    deleted_other_data: 0,
-    errors: []
-  };
-
   try {
-    console.log(`🔍 Looking for user: ${identifier}`);
-
-    // 1. Find the user by name or email
-    const { data: user, error: findError } = await supabase
-      .from('profiles')
-      .select('id, email, first_name, last_name')
-      .or(`email.ilike.%${identifier}%, first_name.ilike.%${identifier}%, last_name.ilike.%${identifier}%`)
-      .single();
-
-    if (findError || !user) {
-      console.log(`❌ User not found: ${identifier}`);
-      result.errors.push(`User not found: ${identifier}`);
-      return result;
+    console.log(`🔍 Initiating complete user deletion for: ${identifier}`);
+    
+    // Get current user for admin verification
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    
+    if (!currentUser) {
+      throw new Error('No authenticated user found');
     }
 
-    result.user_found = true;
-    const userId = user.id;
-    const userName = `${user.first_name} ${user.last_name}`;
-    
-    console.log(`✅ Found user: ${userName} (${user.email}) - ID: ${userId}`);
+    // Call the edge function for comprehensive deletion
+    const { data, error } = await supabase.functions.invoke('user-deletion', {
+      body: {
+        identifier: identifier,
+        admin_user_id: currentUser.id
+      }
+    });
 
-    // 2. Delete all related data in the correct order to respect foreign key constraints
-
-    // Delete assessment form assignments
-    const { count: assessmentAssignmentsCount, error: assessmentAssignmentsError } = await supabase
-      .from('assessment_form_assignments')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (assessmentAssignmentsError) {
-      result.errors.push(`Failed to delete assessment form assignments: ${assessmentAssignmentsError.message}`);
-    } else {
-      result.deleted_other_data += assessmentAssignmentsCount || 0;
-      console.log(`🗑️ Deleted ${assessmentAssignmentsCount} assessment form assignments for ${userName}`);
+    if (error) {
+      console.error('Edge function error:', error);
+      throw new Error(`Deletion service error: ${error.message}`);
     }
 
-    // Delete assessment rounds
-    const { count: assessmentRoundsCount, error: assessmentRoundsError } = await supabase
-      .from('assessment_rounds')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (assessmentRoundsError) {
-      result.errors.push(`Failed to delete assessment rounds: ${assessmentRoundsError.message}`);
-    } else {
-      result.deleted_assessments += assessmentRoundsCount || 0;
-      console.log(`🗑️ Deleted ${assessmentRoundsCount} assessment rounds for ${userName}`);
-    }
-
-    // Delete calendar events
-    const { count: calendarEventsCount, error: calendarEventsError } = await supabase
-      .from('calendar_events')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (calendarEventsError) {
-      result.errors.push(`Failed to delete calendar events: ${calendarEventsError.message}`);
-    } else {
-      result.deleted_other_data += calendarEventsCount || 0;
-      console.log(`🗑️ Deleted ${calendarEventsCount} calendar events for ${userName}`);
-    }
-
-    // Delete client data cache
-    const { count: clientDataCacheCount, error: clientDataCacheError } = await supabase
-      .from('client_data_cache')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (clientDataCacheError) {
-      result.errors.push(`Failed to delete client data cache: ${clientDataCacheError.message}`);
-    } else {
-      result.deleted_other_data += clientDataCacheCount || 0;
-      console.log(`🗑️ Deleted ${clientDataCacheCount} client data cache entries for ${userName}`);
-    }
-
-    // Delete client data containers
-    const { count: clientDataContainersCount, error: clientDataContainersError } = await supabase
-      .from('client_data_containers')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (clientDataContainersError) {
-      result.errors.push(`Failed to delete client data containers: ${clientDataContainersError.message}`);
-    } else {
-      result.deleted_other_data += clientDataContainersCount || 0;
-      console.log(`🗑️ Deleted ${clientDataContainersCount} client data containers for ${userName}`);
-    }
-
-    // Delete client pillar activations
-    const { count: pillarActivationsCount, error: pillarActivationsError } = await supabase
-      .from('client_pillar_activations')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (pillarActivationsError) {
-      result.errors.push(`Failed to delete client pillar activations: ${pillarActivationsError.message}`);
-    } else {
-      result.deleted_other_data += pillarActivationsCount || 0;
-      console.log(`🗑️ Deleted ${pillarActivationsCount} client pillar activations for ${userName}`);
-    }
-
-    // Delete client pillar assignments
-    const { count: pillarAssignmentsCount, error: pillarAssignmentsError } = await supabase
-      .from('client_pillar_assignments')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (pillarAssignmentsError) {
-      result.errors.push(`Failed to delete client pillar assignments: ${pillarAssignmentsError.message}`);
-    } else {
-      result.deleted_other_data += pillarAssignmentsCount || 0;
-      console.log(`🗑️ Deleted ${pillarAssignmentsCount} client pillar assignments for ${userName}`);
-    }
-
-    // Delete pillar visualization data
-    const { count: pillarVisualizationCount, error: pillarVisualizationError } = await supabase
-      .from('pillar_visualization_data')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (pillarVisualizationError) {
-      result.errors.push(`Failed to delete pillar visualization data: ${pillarVisualizationError.message}`);
-    } else {
-      result.deleted_other_data += pillarVisualizationCount || 0;
-      console.log(`🗑️ Deleted ${pillarVisualizationCount} pillar visualization data entries for ${userName}`);
-    }
-
-    // Delete path entries
-    const { count: pathEntriesCount, error: pathEntriesError } = await supabase
-      .from('path_entries')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (pathEntriesError) {
-      result.errors.push(`Failed to delete path entries: ${pathEntriesError.message}`);
-    } else {
-      result.deleted_other_data += pathEntriesCount || 0;
-      console.log(`🗑️ Deleted ${pathEntriesCount} path entries for ${userName}`);
-    }
-
-    // Delete pillar assessments
-    const { count: pillarAssessmentsCount, error: assessmentsError } = await supabase
-      .from('pillar_assessments')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (assessmentsError) {
-      result.errors.push(`Failed to delete pillar assessments: ${assessmentsError.message}`);
-    } else {
-      result.deleted_assessments += pillarAssessmentsCount || 0;
-      console.log(`🗑️ Deleted ${pillarAssessmentsCount} pillar assessments for ${userName}`);
-    }
-
-    // Delete tasks
-    const { count: tasksCount, error: tasksError } = await supabase
-      .from('tasks')
-      .delete({ count: 'exact' })
-      .eq('client_id', userId);
-    
-    if (tasksError) {
-      result.errors.push(`Failed to delete tasks: ${tasksError.message}`);
-    } else {
-      result.deleted_tasks += tasksCount || 0;
-      console.log(`🗑️ Deleted ${tasksCount} tasks for ${userName}`);
-    }
-
-    // Delete messages (as sender or receiver)
-    const { count: messagesCount, error: messagesError } = await supabase
-      .from('messages')
-      .delete({ count: 'exact' })
-      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
-    
-    if (messagesError) {
-      result.errors.push(`Failed to delete messages: ${messagesError.message}`);
-    } else {
-      result.deleted_messages += messagesCount || 0;
-      console.log(`🗑️ Deleted ${messagesCount} messages for ${userName}`);
-    }
-
-    // Delete message preferences
-    const { count: messagePreferencesCount, error: messagePreferencesError } = await supabase
-      .from('message_preferences')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (messagePreferencesError) {
-      result.errors.push(`Failed to delete message preferences: ${messagePreferencesError.message}`);
-    } else {
-      result.deleted_other_data += messagePreferencesCount || 0;
-      console.log(`🗑️ Deleted ${messagePreferencesCount} message preferences for ${userName}`);
-    }
-
-    // Delete invitations (sent by user)
-    const { count: invitationsCount, error: invitationsError } = await supabase
-      .from('invitations')
-      .delete({ count: 'exact' })
-      .eq('invited_by', userId);
-    
-    if (invitationsError) {
-      result.errors.push(`Failed to delete invitations: ${invitationsError.message}`);
-    } else {
-      result.deleted_other_data += invitationsCount || 0;
-      console.log(`🗑️ Deleted ${invitationsCount} invitations for ${userName}`);
-    }
-
-    // Delete user relationships (as coach or client)
-    const { count: relationshipsCount, error: relationshipsError } = await supabase
-      .from('user_relationships')
-      .delete({ count: 'exact' })
-      .or(`coach_id.eq.${userId},client_id.eq.${userId}`);
-    
-    if (relationshipsError) {
-      result.errors.push(`Failed to delete user relationships: ${relationshipsError.message}`);
-    } else {
-      result.deleted_other_data += relationshipsCount || 0;
-      console.log(`🗑️ Deleted ${relationshipsCount} user relationships for ${userName}`);
-    }
-
-    // Delete organization memberships
-    const { count: orgMembershipsCount, error: orgMembershipsError } = await supabase
-      .from('organization_members')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (orgMembershipsError) {
-      result.errors.push(`Failed to delete organization memberships: ${orgMembershipsError.message}`);
-    } else {
-      result.deleted_other_data += orgMembershipsCount || 0;
-      console.log(`🗑️ Deleted ${orgMembershipsCount} organization memberships for ${userName}`);
-    }
-
-    // Delete user consent records
-    const { count: consentRecordsCount, error: consentRecordsError } = await supabase
-      .from('user_consent_records')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (consentRecordsError) {
-      result.errors.push(`Failed to delete user consent records: ${consentRecordsError.message}`);
-    } else {
-      result.deleted_other_data += consentRecordsCount || 0;
-      console.log(`🗑️ Deleted ${consentRecordsCount} user consent records for ${userName}`);
-    }
-
-    // Delete data export requests
-    const { count: exportRequestsCount, error: exportRequestsError } = await supabase
-      .from('data_export_requests')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (exportRequestsError) {
-      result.errors.push(`Failed to delete data export requests: ${exportRequestsError.message}`);
-    } else {
-      result.deleted_other_data += exportRequestsCount || 0;
-      console.log(`🗑️ Deleted ${exportRequestsCount} data export requests for ${userName}`);
-    }
-
-    // Delete data deletion requests
-    const { count: deletionRequestsCount, error: deletionRequestsError } = await supabase
-      .from('data_deletion_requests')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (deletionRequestsError) {
-      result.errors.push(`Failed to delete data deletion requests: ${deletionRequestsError.message}`);
-    } else {
-      result.deleted_other_data += deletionRequestsCount || 0;
-      console.log(`🗑️ Deleted ${deletionRequestsCount} data deletion requests for ${userName}`);
-    }
-
-    // Delete training data
-    const { count: trainingDataCount, error: trainingDataError } = await supabase
-      .from('training_data_stefan')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (trainingDataError) {
-      result.errors.push(`Failed to delete training data: ${trainingDataError.message}`);
-    } else {
-      result.deleted_other_data += trainingDataCount || 0;
-      console.log(`🗑️ Deleted ${trainingDataCount} training data entries for ${userName}`);
-    }
-
-    // Delete user roles
-    const { count: rolesCount, error: rolesError } = await supabase
-      .from('user_roles')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (rolesError) {
-      result.errors.push(`Failed to delete user roles: ${rolesError.message}`);
-    } else {
-      result.deleted_roles += rolesCount || 0;
-      console.log(`🗑️ Deleted ${rolesCount} user roles for ${userName}`);
-    }
-
-    // Delete from clients table by user_id (primary relationship)
-    const { count: clientsCount, error: clientsError } = await supabase
-      .from('clients')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (clientsError) {
-      result.errors.push(`Failed to delete clients: ${clientsError.message}`);
-    } else {
-      result.deleted_other_data += clientsCount || 0;
-      console.log(`🗑️ Deleted ${clientsCount} client records for ${userName}`);
-    }
-
-    // Also delete from clients table by email (fallback for legacy data)
-    const { count: legacyClientsCount, error: legacyError } = await supabase
-      .from('clients')
-      .delete({ count: 'exact' })
-      .eq('email', user.email);
-    
-    if (legacyError) {
-      console.log(`ℹ️ No legacy client data found by email for ${userName}`);
-    } else if (legacyClientsCount && legacyClientsCount > 0) {
-      result.deleted_other_data += legacyClientsCount;
-      console.log(`🗑️ Deleted ${legacyClientsCount} legacy client records by email for ${userName}`);
-    }
-
-    // 3. Finally, delete the profile
-    const { error: deleteProfileError } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-    
-    if (deleteProfileError) {
-      result.errors.push(`Failed to delete profile: ${deleteProfileError.message}`);
-    } else {
-      result.deleted_profile = true;
-      console.log(`🗑️ Deleted profile for ${userName}`);
-    }
-
-    console.log(`🎉 Successfully deleted all data for ${userName}`);
-    
-    if (result.errors.length > 0) {
-      console.error('❌ Some deletion errors occurred:', result.errors);
-    }
-
-    return result;
+    console.log('Deletion result:', data);
+    return data as UserDeletionResult;
 
   } catch (error: any) {
-    result.errors.push(`Deletion failed: ${error.message}`);
     console.error('User deletion failed:', error);
-    return result;
+    return {
+      user_found: false,
+      deleted_profile: false,
+      deleted_roles: 0,
+      deleted_assessments: 0,
+      deleted_tasks: 0,
+      deleted_messages: 0,
+      deleted_other_data: 0,
+      errors: [`Deletion failed: ${error.message}`]
+    };
   }
 }
