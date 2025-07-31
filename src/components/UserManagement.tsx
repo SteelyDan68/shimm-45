@@ -25,7 +25,8 @@ import {
   Mail,
   Trophy,
   Brain,
-  Key
+  Key,
+  User
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AdminUserCreation } from "./AdminUserCreation";
@@ -74,12 +75,14 @@ const roleColors: Record<AppRole, string> = {
 
 export function UserManagement() {
   const { toast } = useToast();
-  const { isAdmin, canManageUsers } = useAuth();
+  const { isAdmin, canManageUsers, roles } = useAuth();
+  const isSuperAdmin = roles.includes('superadmin');
   const [users, setUsers] = useState<ExtendedProfile[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<ExtendedProfile | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isFullProfileDialogOpen, setIsFullProfileDialogOpen] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
 
@@ -219,6 +222,11 @@ export function UserManagement() {
   const openEditDialog = (user: ExtendedProfile) => {
     setSelectedUser(user);
     setIsEditDialogOpen(true);
+  };
+
+  const openFullProfileDialog = (user: ExtendedProfile) => {
+    setSelectedUser(user);
+    setIsFullProfileDialogOpen(true);
   };
 
   if (!canManageUsers) {
@@ -364,11 +372,15 @@ export function UserManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
+                            <DropdownMenuItem onClick={() => openFullProfileDialog(user)}>
+                              <User className="h-4 w-4 mr-2" />
+                              Visa fullständig profil
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditDialog(user)}>
                               <Edit3 className="h-4 w-4 mr-2" />
-                              Redigera
+                              Redigera grundinfo
                             </DropdownMenuItem>
-                            {isAdmin && (
+                            {(isAdmin || isSuperAdmin) && (
                               <DropdownMenuItem className="p-0">
                                 <PasswordManagement 
                                   userId={user.id}
@@ -377,7 +389,7 @@ export function UserManagement() {
                                 />
                               </DropdownMenuItem>
                             )}
-                            {isAdmin && (
+                            {(isAdmin || isSuperAdmin) && (
                               <DropdownMenuItem 
                                 onClick={() => deleteUser(user.id)}
                                 className="text-red-600 focus:text-red-600"
@@ -543,6 +555,116 @@ export function UserManagement() {
                 </Button>
                 <Button onClick={() => setIsEditDialogOpen(false)}>
                   Spara ändringar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Full Profile Dialog */}
+      <Dialog open={isFullProfileDialogOpen} onOpenChange={setIsFullProfileDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Fullständig profil - {selectedUser?.first_name} {selectedUser?.last_name}
+            </DialogTitle>
+            <DialogDescription>
+              Visa och hantera alla användarens profiluppgifter
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-6">
+              {/* Header med avatar och grundinfo */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="h-20 w-20">
+                      <AvatarFallback className="text-lg">
+                        {(selectedUser.first_name?.[0] || '') + (selectedUser.last_name?.[0] || '')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold">
+                        {selectedUser.first_name} {selectedUser.last_name}
+                      </h3>
+                      <p className="text-muted-foreground">{selectedUser.email}</p>
+                      <div className="flex gap-2 mt-2">
+                        {selectedUser.roles?.map((role) => (
+                          <Badge 
+                            key={role} 
+                            variant="secondary"
+                            className={`text-white ${roleColors[role]}`}
+                          >
+                            {roleLabels[role]}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <Badge variant={selectedUser.status === 'active' ? 'default' : 'secondary'}>
+                          {selectedUser.status === 'active' ? 'Aktiv' : 'Inaktiv'}
+                        </Badge>
+                        {selectedUser.organization && (
+                          <Badge variant="outline">{selectedUser.organization}</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right text-sm text-muted-foreground">
+                      <p>Skapad: {new Date(selectedUser.created_at).toLocaleDateString('sv-SE')}</p>
+                      <p>Senaste inloggning: {selectedUser.last_login_at 
+                        ? new Date(selectedUser.last_login_at).toLocaleDateString('sv-SE')
+                        : 'Aldrig'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Lösenordshantering för admin/superadmin */}
+              {(isAdmin || isSuperAdmin) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Key className="h-4 w-4" />
+                      Lösenordshantering
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PasswordManagement 
+                      userId={selectedUser.id}
+                      userEmail={selectedUser.email}
+                      userName={`${selectedUser.first_name} ${selectedUser.last_name}`}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Placeholder för utökad profildata */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Utökad profildata</CardTitle>
+                  <CardDescription>
+                    Här visas all profildata som användaren fyllt i via sin profil
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Fullständig profildata kommer att visas här när användaren fyllt i sin utökade profil.
+                    Detta inkluderar kontaktuppgifter, digital närvaro, arbetsprofil, hälsoinformation och systeminställningar.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsFullProfileDialogOpen(false)}>
+                  Stäng
+                </Button>
+                <Button onClick={() => {
+                  setIsFullProfileDialogOpen(false);
+                  openEditDialog(selectedUser);
+                }}>
+                  Redigera användare
                 </Button>
               </div>
             </div>
