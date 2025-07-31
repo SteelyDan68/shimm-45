@@ -22,6 +22,7 @@ interface Profile {
 interface ComposeMessageProps {
   onClose: () => void;
   onSent: () => void;
+  refreshMessages?: () => void;
   replyToMessage?: {
     id: string;
     sender_id: string;
@@ -30,7 +31,7 @@ interface ComposeMessageProps {
   };
 }
 
-export const ComposeMessage = ({ onClose, onSent, replyToMessage }: ComposeMessageProps) => {
+export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessages }: ComposeMessageProps) => {
   const [recipients, setRecipients] = useState<Profile[]>([]);
   const [selectedRecipient, setSelectedRecipient] = useState<string>('');
   const [subject, setSubject] = useState('');
@@ -106,6 +107,8 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage }: ComposeMessa
       );
 
       if (success) {
+        // Refresh message lists immediately
+        refreshMessages?.();
         onSent();
       }
     } catch (error) {

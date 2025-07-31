@@ -18,6 +18,7 @@ interface AddEventFormProps {
   onAdd: (eventData: Partial<CalendarEventData>) => void;
   clientId?: string;
   initialDate?: Date;
+  onSuccess?: () => void;
 }
 
 const EVENT_CATEGORIES = [
@@ -51,7 +52,8 @@ export const AddEventForm = ({
   onClose, 
   onAdd, 
   clientId,
-  initialDate = new Date()
+  initialDate = new Date(),
+  onSuccess
 }: AddEventFormProps) => {
   const [formData, setFormData] = useState<{
     title: string;
@@ -111,6 +113,8 @@ export const AddEventForm = ({
       visibleToClient: false
     });
     
+    // Trigger refresh of parent components
+    onSuccess?.();
     onClose();
   };
 

@@ -56,7 +56,9 @@ export const DailyCheckInWidget: React.FC = () => {
     });
     if (success) {
       setShowForm(false);
-      loadTrends();
+      // Refresh both trends and today's status
+      await loadTrends();
+      await checkTodaysStatus();
     }
   };
 

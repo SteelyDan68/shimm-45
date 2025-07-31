@@ -59,6 +59,7 @@ const StefanTrainingData: React.FC = () => {
       // Reset file input
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
+      // Trigger refresh of training data list - assuming parent handles this via hook
     }
   };
 

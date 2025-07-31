@@ -51,6 +51,8 @@ const StefanKnowledgeBase: React.FC = () => {
         content: ''
       });
       setShowAddForm(false);
+      // Refresh analyzed data list immediately
+      await fetchAnalyzedData();
     }
   };
 

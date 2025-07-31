@@ -15,9 +15,10 @@ import type { PathEntryType, PathEntryStatus, CreatePathEntryData } from '@/type
 interface AddPathEntryProps {
   clientId: string;
   onAdd: (entryData: CreatePathEntryData) => Promise<any>;
+  onSuccess?: () => void;
 }
 
-export function AddPathEntry({ clientId, onAdd }: AddPathEntryProps) {
+export function AddPathEntry({ clientId, onAdd, onSuccess }: AddPathEntryProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -53,6 +54,9 @@ export function AddPathEntry({ clientId, onAdd }: AddPathEntryProps) {
         timestamp: new Date()
       });
       setIsOpen(false);
+      
+      // Trigger refresh of parent components
+      onSuccess?.();
     } catch (error) {
       console.error('Error adding path entry:', error);
     } finally {

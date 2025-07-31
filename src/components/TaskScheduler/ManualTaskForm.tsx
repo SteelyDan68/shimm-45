@@ -16,9 +16,10 @@ import type { TaskPriority, CreateTaskData } from '@/types/tasks';
 interface ManualTaskFormProps {
   clientId: string;
   onCreateTask: (taskData: CreateTaskData) => Promise<void>;
+  onSuccess?: () => void;
 }
 
-export function ManualTaskForm({ clientId, onCreateTask }: ManualTaskFormProps) {
+export function ManualTaskForm({ clientId, onCreateTask, onSuccess }: ManualTaskFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,6 +52,9 @@ export function ManualTaskForm({ clientId, onCreateTask }: ManualTaskFormProps) 
         deadline: undefined
       });
       setIsOpen(false);
+      
+      // Trigger refresh of parent components
+      onSuccess?.();
     } catch (error) {
       console.error('Error creating manual task:', error);
     } finally {
