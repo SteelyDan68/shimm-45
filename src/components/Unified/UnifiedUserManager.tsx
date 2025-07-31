@@ -139,6 +139,43 @@ export function UnifiedUserManager() {
           <p className="text-muted-foreground">Centraliserad hantering av alla användare och funktioner</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              const userName = prompt('Ange användarnamn eller email för att radera (t.ex. "Börje Sandhill"):');
+              if (!userName) return;
+              
+              if (!window.confirm(`⚠️ VARNING: Detta kommer att radera användaren "${userName}" och ALL deras data permanent. Är du säker?`)) {
+                return;
+              }
+
+              const { deleteUserCompletely } = await import('@/utils/userDeletion');
+              const result = await deleteUserCompletely(userName);
+              
+              if (result.user_found && result.deleted_profile) {
+                toast({
+                  title: "✅ Användare raderad",
+                  description: `Användaren och all relaterad data har raderats permanent`
+                });
+              } else if (!result.user_found) {
+                toast({
+                  title: "❌ Användare hittades inte",
+                  description: `Ingen användare som matchar "${userName}" kunde hittas`,
+                  variant: "destructive"
+                });
+              } else {
+                toast({
+                  title: "⚠️ Delvis raderad",
+                  description: `Vissa data raderades men ${result.errors.length} fel uppstod`,
+                  variant: "destructive"
+                });
+              }
+              
+              await refetch(); // Refresh data
+            }}
+          >
+            🗑️ Radera specifik användare
+          </Button>
           <AdminUserCreation onUserCreated={refetch} />
         </div>
       </div>
