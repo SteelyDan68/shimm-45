@@ -52,26 +52,14 @@ export const useUserTasks = (userId: string, filters?: TaskFilters) => {
     fetchTasks();
   }, [userId, filters]);
 
-  const createTask = async (taskData: Omit<CreateTaskData, 'client_id'>) => {
+  const createTask = async (taskData: Omit<CreateTaskData, 'user_id'>) => {
     if (!userId) return;
 
     try {
-      // Get client_id for backwards compatibility
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-
-      if (!clientData) {
-        throw new Error('Client not found for user');
-      }
-
       const { data, error } = await supabase
         .from('tasks')
         .insert({
           ...taskData,
-          client_id: clientData.id,
           user_id: userId,
           created_by: userId,
         })

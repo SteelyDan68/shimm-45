@@ -155,20 +155,11 @@ export const useUserData = (userId?: string) => {
   const isAdmin = () => hasRole('admin') || hasRole('superadmin');
 
   const getClientId = async () => {
-    if (!targetUserId) return null;
-    
-    try {
-      const { data } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', targetUserId)
-        .single();
-      
-      return data?.id || null;
-    } catch (error) {
-      console.error('Error getting client ID:', error);
-      return null;
+    // In the unified system, the user ID is the client ID for client users
+    if (profile && hasRole('client')) {
+      return targetUserId;
     }
+    return null;
   };
 
   return {

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useGDPR } from '@/hooks/useGDPR';
 import { useToast } from '@/hooks/use-toast';
+import { UserSelfDeleteButton } from '@/components/Profile/UserSelfDeleteButton';
 
 export const DataRightsCenter = () => {
   const { 
@@ -168,10 +169,7 @@ export const DataRightsCenter = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Du kan begära att vi raderar all din personliga data från våra system.
                 </p>
-                <Button variant="destructive" onClick={() => setDeletionReason('')}>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Begär dataradering
-                </Button>
+                <UserSelfDeleteButton />
               </CardContent>
             </Card>
 

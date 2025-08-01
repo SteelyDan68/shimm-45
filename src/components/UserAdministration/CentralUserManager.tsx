@@ -38,6 +38,7 @@ import { SendInvitationForm } from "../InvitationSystem/SendInvitationForm";
 import { InvitationList } from "../InvitationSystem/InvitationList";
 import { PasswordManagement } from "./PasswordManagement";
 import { MultiRoleManager } from "./MultiRoleManager";
+import { GDPRAdminPanel } from "../Admin/GDPRAdminPanel";
 import type { AppRole } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { deleteUserCompletely } from "@/utils/userDeletion";
@@ -314,50 +315,6 @@ export function CentralUserManager() {
           <p className="text-muted-foreground">Konsoliderad hantering av alla användare, roller och funktioner</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="destructive"
-            onClick={async () => {
-              const userName = prompt('Ange användarnamn eller email för att radera (t.ex. "Börje Sandhill"):');
-              if (!userName) return;
-              
-              if (!window.confirm(`⚠️ VARNING: Detta kommer att radera användaren "${userName}" och ALL deras data permanent. Är du säker?`)) {
-                return;
-              }
-
-              try {
-                const result = await deleteUserCompletely(userName);
-                
-                if (result.user_found && result.deleted_profile) {
-                  toast({
-                    title: "✅ Användare raderad",
-                    description: `Användaren och all relaterad data har raderats permanent`
-                  });
-                } else if (!result.user_found) {
-                  toast({
-                    title: "❌ Användare hittades inte",
-                    description: `Ingen användare som matchar "${userName}" kunde hittas`,
-                    variant: "destructive"
-                  });
-                } else {
-                  toast({
-                    title: "⚠️ Delvis raderad",
-                    description: `Vissa data raderades men ${result.errors.length} fel uppstod`,
-                    variant: "destructive"
-                  });
-                }
-                
-                await refetch();
-              } catch (error: any) {
-                toast({
-                  title: "❌ Fel vid radering",
-                  description: error.message || "Kunde inte radera användaren",
-                  variant: "destructive"
-                });
-              }
-            }}
-          >
-            🗑️ Radera specifik användare
-          </Button>
           <Button onClick={() => setIsCreateUserDialogOpen(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
             Skapa användare
@@ -441,6 +398,12 @@ export function CentralUserManager() {
             <TabsTrigger value="roles" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Roller & Behörigheter
+            </TabsTrigger>
+          )}
+          {isAdmin && (
+            <TabsTrigger value="gdpr" className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              GDPR
             </TabsTrigger>
           )}
         </TabsList>
@@ -700,6 +663,13 @@ export function CentralUserManager() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+        )}
+
+        {/* GDPR Tab */}
+        {isAdmin && (
+          <TabsContent value="gdpr">
+            <GDPRAdminPanel />
           </TabsContent>
         )}
       </Tabs>
