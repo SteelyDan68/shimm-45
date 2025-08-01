@@ -1,5 +1,13 @@
 // Centraliserad hjälptext-databas
 export const helpTexts = {
+  messages: {
+    composeMessage: "Skriv och skicka meddelanden till andra användare. Välj mottagare från listan baserat på dina behörigheter.",
+    aiAssisted: "Använd AI-assistenten för att få förslag på professionella svar. AI:n analyserar meddelandet och ger dig ett lämpligt svar.",
+    conversations: "Alla dina konversationer visas här. Klicka på en konversation för att visa alla meddelanden.",
+    messagePermissions: "Dina meddelandebehörigheter beror på din roll. Klienter kan bara skicka meddelanden till sina coaches.",
+    onlineStatus: "Grön prick visar när användaren är online och aktiv i systemet.",
+    readReceipts: "Dubbelcheckmarkeringar (✓✓) visar att meddelandet har lästs av mottagaren."
+  },
   // Dashboard
   dashboard: {
     welcomeMessage: "Detta är din huvudöversikt där du kan se viktig information och snabbåtkomst till funktioner.",
@@ -101,15 +109,6 @@ export const helpTexts = {
     scheduler: "Intelligent schemaläggning som föreslår optimal timing för olika uppgifter."
   },
 
-  // Messages
-  messages: {
-    composeMessage: "Skapa ett nytt meddelande till en annan användare i systemet.",
-    messageThread: "Konversationstråd med alla relaterade meddelanden i kronologisk ordning.",
-    aiAssisted: "Meddelandet innehåller AI-genererade förslag eller innehåll.",
-    readStatus: "Visar om meddelandet har lästs av mottagaren.",
-    messagePreferences: "Inställningar för hur du vill få notifikationer och hantera meddelanden.",
-    notifications: "Automatiska notifikationer för nya meddelanden och viktiga uppdateringar."
-  },
 
   // Analytics
   analytics: {

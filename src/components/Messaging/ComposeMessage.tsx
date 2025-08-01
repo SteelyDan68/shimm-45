@@ -57,11 +57,83 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
   }, [replyToMessage]);
 
   const fetchRecipients = async () => {
+    if (!user) return;
+
     try {
-      const { data, error } = await supabase
+      // Get user's roles first
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      if (rolesError) throw rolesError;
+
+      const roles = userRoles?.map(r => r.role) || [];
+      const isClient = roles.includes('client') || (!roles.includes('admin') && !roles.includes('superadmin') && !roles.includes('coach'));
+      const isCoach = roles.includes('coach');
+      const isAdmin = roles.includes('admin');
+      const isSuperAdmin = roles.includes('superadmin');
+
+      let recipientQuery = supabase
         .from('profiles')
-        .select('id, first_name, last_name, email')
-        .neq('id', user?.id);
+        .select(`
+          id, 
+          first_name, 
+          last_name, 
+          email,
+          user_roles:user_roles!inner(role)
+        `)
+        .neq('id', user.id);
+
+      if (isClient) {
+        // Clients can only message their coaches
+        const { data: relationships } = await supabase
+          .from('user_relationships')
+          .select('coach_id')
+          .eq('client_id', user.id)
+          .eq('is_active', true);
+
+        const coachIds = relationships?.map(r => r.coach_id) || [];
+        if (coachIds.length > 0) {
+          recipientQuery = recipientQuery.in('id', coachIds);
+        } else {
+          setRecipients([]);
+          return;
+        }
+      } else if (isCoach) {
+        // Coaches can message their clients and other coaches/admins
+        const { data: relationships } = await supabase
+          .from('user_relationships')
+          .select('client_id')
+          .eq('coach_id', user.id)
+          .eq('is_active', true);
+
+        const clientIds = relationships?.map(r => r.client_id) || [];
+        
+        // Get all coaches and admins
+        const { data: coachesAndAdmins } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .in('role', ['coach', 'admin']);
+
+        const coachAndAdminIds = coachesAndAdmins?.map(r => r.user_id) || [];
+        const allowedIds = [...clientIds, ...coachAndAdminIds];
+        
+        if (allowedIds.length > 0) {
+          recipientQuery = recipientQuery.in('id', allowedIds);
+        } else {
+          setRecipients([]);
+          return;
+        }
+      } else if (isAdmin) {
+        // Admins can message anyone except superadmins
+        recipientQuery = recipientQuery.not('user_roles.role', 'eq', 'superadmin');
+      } else if (isSuperAdmin) {
+        // Superadmins can only message other superadmins
+        recipientQuery = recipientQuery.eq('user_roles.role', 'superadmin');
+      }
+
+      const { data, error } = await recipientQuery;
 
       if (error) throw error;
       setRecipients(data || []);
