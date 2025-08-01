@@ -140,7 +140,7 @@ export function CentralUserManager() {
     try {
       const result = await deleteUserCompletely(identifier);
 
-      if (result.errors.length > 0) {
+      if (result.errors && result.errors.length > 0) {
         console.error('Deletion errors:', result.errors);
         toast({
           title: "Delvis fel vid borttagning",

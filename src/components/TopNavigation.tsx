@@ -133,7 +133,7 @@ export function TopNavigation() {
               
               <DropdownMenuContent align="end" className="w-56 z-50">
                 <DropdownMenuItem asChild>
-                  <NavLink to={hasRole('client') ? "/edit-profile" : "/user-profile"} className="flex items-center w-full">
+                  <NavLink to="/edit-profile" className="flex items-center w-full">
                     <User className="h-4 w-4 mr-2" />
                     Redigera Profil
                   </NavLink>
