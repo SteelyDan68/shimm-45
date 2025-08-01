@@ -1628,6 +1628,10 @@ export type Database = {
         Args: { "": unknown[] }
         Returns: number
       }
+      user_has_any_role: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       validate_invitation_token: {
         Args: { invitation_token: string }
         Returns: {
