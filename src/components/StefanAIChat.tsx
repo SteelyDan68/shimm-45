@@ -72,9 +72,11 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
 
       if (error) throw error;
 
+      console.log('Stefan AI response:', data); // Debug log
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: data.message || data.response || 'Stefan AI svarade men svaret kunde inte visas.',
         isUser: false,
         timestamp: new Date()
       };
