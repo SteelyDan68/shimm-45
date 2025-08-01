@@ -27,7 +27,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageIcon } from "@/components/Messaging/MessageIcon";
 
 const superAdminItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Administration", url: "/administration", icon: Settings },
   { title: "Klienter", url: "/clients", icon: Users },
   { title: "Coach", url: "/coach", icon: TrendingUp },
@@ -36,7 +36,7 @@ const superAdminItems = [
 ];
 
 const adminItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Administration", url: "/administration", icon: Settings },
   { title: "Klienter", url: "/clients", icon: Users },
   { title: "Intelligence", url: "/intelligence", icon: Brain },
