@@ -1199,11 +1199,11 @@ async function testInstagramRapidAPI(): Promise<{ success: boolean; message: str
   }
 
   try {
-    // Use a different Instagram API from RapidAPI that's more likely to work
-    const response = await fetch('https://instagram-scraper-api2.p.rapidapi.com/v1/user?username_or_id_or_url=instagram', {
+    // Use the Instagram Social API endpoint specified by the user
+    const response = await fetch('https://instagram-social-api.p.rapidapi.com/v1/search_coordinates?latitude=40.7&longitude=-74', {
       method: 'GET',
       headers: {
-        'x-rapidapi-host': 'instagram-scraper-api2.p.rapidapi.com',
+        'x-rapidapi-host': 'instagram-social-api.p.rapidapi.com',
         'x-rapidapi-key': apiKey,
       },
     });
