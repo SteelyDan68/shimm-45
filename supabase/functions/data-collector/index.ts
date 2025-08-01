@@ -1199,13 +1199,20 @@ async function testInstagramRapidAPI(): Promise<{ success: boolean; message: str
   }
 
   try {
-    const response = await fetch('https://instagram-premium-api-2023.p.rapidapi.com/v1/user/followers?amount=1&username=instagram', {
+    // Use a simpler test endpoint for Instagram - just get basic user info 
+    const response = await fetch('https://instagram-premium-api-2023.p.rapidapi.com/v1/user/info?username=instagram', {
       method: 'GET',
       headers: {
         'x-rapidapi-host': 'instagram-premium-api-2023.p.rapidapi.com',
         'x-rapidapi-key': apiKey,
       },
     });
+
+    console.log(`Instagram API test response: ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log(`Instagram API error response: ${errorText}`);
+    }
 
     if (response.ok) {
       return { success: true, message: 'Instagram RapidAPI working correctly' };
@@ -1225,13 +1232,20 @@ async function testTikTokRapidAPI(): Promise<{ success: boolean; message: string
   }
 
   try {
-    const response = await fetch('https://tiktok-api23.p.rapidapi.com/api/user/info?username=tiktok', {
+    // Use a simpler endpoint for TikTok testing
+    const response = await fetch('https://tiktok-api23.p.rapidapi.com/api/user/info?username=charlidamelio', {
       method: 'GET',
       headers: {
         'x-rapidapi-host': 'tiktok-api23.p.rapidapi.com',
         'x-rapidapi-key': apiKey,
       },
     });
+
+    console.log(`TikTok API test response: ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log(`TikTok API error response: ${errorText}`);
+    }
 
     if (response.ok) {
       return { success: true, message: 'TikTok RapidAPI working correctly' };
