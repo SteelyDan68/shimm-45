@@ -45,7 +45,13 @@ const AppRoutes = () => {
             <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
               <Routes>
               <Route path="/" element={
-                hasRole('client') ? <ClientDashboard /> : <Dashboard />
+                (() => {
+                  // Prioritera enligt hierarki: superadmin > admin > coach > client
+                  if (hasRole('superadmin') || hasRole('admin')) return <Dashboard />;
+                  if (hasRole('coach')) return <CoachDashboardPage />;
+                  if (hasRole('client')) return <ClientDashboard />;
+                  return <Dashboard />; // Fallback
+                })()
               } />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/client-dashboard" element={<ClientDashboard />} />

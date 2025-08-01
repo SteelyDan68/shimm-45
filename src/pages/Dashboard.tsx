@@ -53,10 +53,14 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      // Redirect clients to onboarding or their dashboard
-      if (hasRole('client')) {
-        // Kontrollera om onboarding behöver göras
-        checkClientOnboardingStatus();
+      // Redirect clients to their own dashboard
+      if (hasRole('client') && !hasRole('admin') && !hasRole('superadmin') && !hasRole('coach')) {
+        navigate('/client-dashboard');
+        return;
+      }
+      // Redirect coaches to their coach dashboard
+      if (hasRole('coach') && !hasRole('admin') && !hasRole('superadmin')) {
+        navigate('/coach');
         return;
       }
       loadDashboardData();
@@ -172,10 +176,16 @@ export const Dashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold">Välkommen tillbaka, {profile?.first_name || 'Coach'}!</h1>
+            <h1 className="text-3xl font-bold">
+              Välkommen tillbaka, {profile?.first_name || 'Admin'}!
+            </h1>
             <HelpTooltip content={helpTexts.dashboard.welcomeMessage} />
           </div>
-          <p className="text-muted-foreground">Översikt av dina klienter och aktiviteter</p>
+          <p className="text-muted-foreground">
+            Administrativ översikt av systemet och alla användare
+            {hasRole('superadmin') && ' - Superadmin behörigheter'}
+            {hasRole('admin') && !hasRole('superadmin') && ' - Admin behörigheter'}
+          </p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="h-4 w-4 mr-2" />

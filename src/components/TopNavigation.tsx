@@ -8,7 +8,10 @@ import {
   FileText, 
   Settings,
   LogOut,
-  User
+  User,
+  Brain,
+  CheckSquare,
+  Calendar
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,17 +23,35 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageIcon } from "@/components/Messaging/MessageIcon";
 
-const coachItems = [
+const superAdminItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Administration", url: "/administration", icon: Settings },
   { title: "Klienter", url: "/clients", icon: Users },
   { title: "Coach", url: "/coach", icon: TrendingUp },
+  { title: "Intelligence", url: "/intelligence", icon: Brain },
+  { title: "Meddelanden", url: "/messages", icon: FileText },
+];
+
+const adminItems = [
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Administration", url: "/administration", icon: Settings },
+  { title: "Klienter", url: "/clients", icon: Users },
+  { title: "Intelligence", url: "/intelligence", icon: Brain },
+  { title: "Meddelanden", url: "/messages", icon: FileText },
+];
+
+const coachItems = [
+  { title: "Coach Dashboard", url: "/coach", icon: Home },
+  { title: "Klienter", url: "/clients", icon: Users },
+  { title: "Intelligence", url: "/intelligence", icon: Brain },
   { title: "Meddelanden", url: "/messages", icon: FileText },
 ];
 
 const clientItems = [
   { title: "Min Dashboard", url: "/client-dashboard", icon: Home },
+  { title: "Mina Uppgifter", url: "/tasks", icon: CheckSquare },
+  { title: "Kalender", url: "/calendar", icon: Calendar },
   { title: "Meddelanden", url: "/messages", icon: FileText },
-  { title: "Redigera Profil", url: "/edit-profile", icon: User },
 ];
 
 export function TopNavigation() {
@@ -39,8 +60,14 @@ export function TopNavigation() {
   
   const isActive = (path: string) => location.pathname === path;
   
-  // Välj navigationsmenyn baserat på användarroll
-  const navItems = hasRole('client') ? clientItems : coachItems;
+  // Välj navigationsmenyn baserat på användarroll (prioritetsordning)
+  const navItems = (() => {
+    if (hasRole('superadmin')) return superAdminItems;
+    if (hasRole('admin')) return adminItems;
+    if (hasRole('coach')) return coachItems;
+    if (hasRole('client')) return clientItems;
+    return adminItems; // Fallback
+  })();
   
   return (
     <header className="h-16 border-b bg-card shadow-sm">
@@ -90,18 +117,27 @@ export function TopNavigation() {
             </DropdownMenuTrigger>
             
             <DropdownMenuContent align="end" className="w-56">
-              {/* Visa administration endast för icke-klienter */}
-              {!hasRole('client') && (
+              {/* Visa profil-redigering för alla */}
+              <DropdownMenuItem asChild>
+                <NavLink to={hasRole('client') ? "/edit-profile" : "/user-profile"} className="flex items-center w-full">
+                  <User className="h-4 w-4 mr-2" />
+                  Redigera Profil
+                </NavLink>
+              </DropdownMenuItem>
+              
+              {/* Visa administration endast för admin/superadmin (inte för coaches) */}
+              {(hasRole('superadmin') || hasRole('admin')) && (
                 <>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <NavLink to="/administration" className="flex items-center w-full">
                       <Settings className="h-4 w-4 mr-2" />
                       Administration
                     </NavLink>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                 </>
               )}
+              <DropdownMenuSeparator />
               
               <DropdownMenuItem onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-2" />

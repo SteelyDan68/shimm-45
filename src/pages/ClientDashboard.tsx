@@ -80,9 +80,13 @@ export const ClientDashboard = () => {
       if (clientError) throw clientError;
 
       if (!clientData) {
-        // Kontrollera om användaren är admin/coach - då ska de inte vara här
-        if (hasRole('superadmin') || hasRole('admin') || hasRole('coach')) {
-          navigate('/admin');
+        // Kontrollera om användaren är admin/coach utan client-roll - då ska de inte vara här
+        if ((hasRole('superadmin') || hasRole('admin') || hasRole('coach')) && !hasRole('client')) {
+          if (hasRole('coach')) {
+            navigate('/coach');
+          } else {
+            navigate('/dashboard');
+          }
           return;
         }
         // Om vanlig användare utan klientprofil, redirecta till onboarding
