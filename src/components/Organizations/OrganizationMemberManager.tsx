@@ -209,7 +209,7 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
                     </SelectItem>
                   ))}
                   {filteredAvailableUsers.length === 0 && (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="no-users" disabled>
                       Inga tillgängliga användare
                     </SelectItem>
                   )}

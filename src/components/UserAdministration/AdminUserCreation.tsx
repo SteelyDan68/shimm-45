@@ -438,12 +438,12 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="role">Användarroll (valfritt)</Label>
-                <Select value={formData.role || ''} onValueChange={(value) => handleInputChange('role', value === '' ? undefined : value as AppRole)}>
+                <Select value={formData.role || 'none'} onValueChange={(value) => handleInputChange('role', value === 'none' ? undefined : value as AppRole)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Ingen roll (grundläggande åtkomst)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ingen roll</SelectItem>
+                    <SelectItem value="none">Ingen roll</SelectItem>
                     {getAvailableRoles().map(role => (
                       <SelectItem key={role} value={role}>
                         {roleLabels[role]}
