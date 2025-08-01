@@ -11,8 +11,11 @@ import {
   User,
   Brain,
   CheckSquare,
-  Calendar
+  Calendar,
+  Menu,
+  X
 } from "lucide-react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +60,7 @@ const clientItems = [
 export function TopNavigation() {
   const { user, signOut, hasRole } = useAuth();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => location.pathname === path;
   
@@ -70,14 +74,16 @@ export function TopNavigation() {
   })();
   
   return (
-    <header className="h-16 border-b bg-card shadow-sm">
-      <div className="h-full px-6 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-8">
-          <h1 className="text-xl font-bold text-primary">SHIMM</h1>
-          
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+    <>
+      <header className="h-16 border-b bg-card shadow-sm">
+        <div className="h-full px-4 sm:px-6 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center space-x-4">
+            <h1 className="text-lg sm:text-xl font-bold text-primary">SHIMM</h1>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-6">
             {navItems.map((item) => (
               <NavLink
                 key={item.title}
@@ -95,58 +101,91 @@ export function TopNavigation() {
               </NavLink>
             ))}
           </nav>
-        </div>
 
-        {/* User Menu */}
-        <div className="flex items-center space-x-4">
-          <MessageIcon />
-          
-          <span className="text-sm text-muted-foreground hidden sm:block">
-            {user?.email}
-          </span>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-xs">
-                    {user?.email?.charAt(0).toUpperCase() || "N"}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
+          {/* Right side actions */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <MessageIcon />
             
-            <DropdownMenuContent align="end" className="w-56">
-              {/* Visa profil-redigering för alla */}
-              <DropdownMenuItem asChild>
-                <NavLink to={hasRole('client') ? "/edit-profile" : "/user-profile"} className="flex items-center w-full">
-                  <User className="h-4 w-4 mr-2" />
-                  Redigera Profil
-                </NavLink>
-              </DropdownMenuItem>
+            {/* Mobile menu button */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="lg:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+            
+            <span className="text-sm text-muted-foreground hidden sm:block lg:block">
+              {user?.email}
+            </span>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0">
+                  <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                    <AvatarFallback className="text-xs">
+                      {user?.email?.charAt(0).toUpperCase() || "N"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
               
-              {/* Visa administration endast för admin/superadmin (inte för coaches) */}
-              {(hasRole('superadmin') || hasRole('admin')) && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <NavLink to="/administration" className="flex items-center w-full">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Administration
-                    </NavLink>
-                  </DropdownMenuItem>
-                </>
-              )}
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem onClick={signOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logga ut
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <DropdownMenuContent align="end" className="w-56 z-50">
+                <DropdownMenuItem asChild>
+                  <NavLink to={hasRole('client') ? "/edit-profile" : "/user-profile"} className="flex items-center w-full">
+                    <User className="h-4 w-4 mr-2" />
+                    Redigera Profil
+                  </NavLink>
+                </DropdownMenuItem>
+                
+                {(hasRole('superadmin') || hasRole('admin')) && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <NavLink to="/administration" className="flex items-center w-full">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Administration
+                      </NavLink>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logga ut
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-card border-b shadow-lg">
+          <nav className="px-4 py-4 space-y-2">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.title}
+                to={item.url}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`
+                }
+              >
+                <item.icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      )}
+    </>
   );
 }

@@ -45,6 +45,7 @@ import { deleteUserCompletely } from "@/utils/userDeletion";
 import { supabase } from "@/integrations/supabase/client";
 import { validateEmail, validatePasswordStrength, sanitizeText } from "@/utils/inputSanitization";
 import { useNavigate } from "react-router-dom";
+import { MobileUserCard } from "@/components/ui/mobile-table";
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -309,61 +310,62 @@ export function CentralUserManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Central Användaradministration</h2>
-          <p className="text-muted-foreground">Konsoliderad hantering av alla användare, roller och funktioner</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Central Användaradministration</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Konsoliderad hantering av alla användare, roller och funktioner</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setIsCreateUserDialogOpen(true)}>
+          <Button onClick={() => setIsCreateUserDialogOpen(true)} className="w-full sm:w-auto">
             <UserPlus className="h-4 w-4 mr-2" />
-            Skapa användare
+            <span className="hidden sm:inline">Skapa användare</span>
+            <span className="sm:hidden">Skapa</span>
           </Button>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-blue-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Totalt</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+              <Users className="h-4 w-4 text-blue-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Totalt</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Aktiva</p>
-                <p className="text-2xl font-bold">{stats.active}</p>
+              <Shield className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Aktiva</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.active}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Brain className="h-4 w-4 text-purple-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Klienter</p>
-                <p className="text-2xl font-bold">{stats.byRole.client}</p>
+              <Brain className="h-4 w-4 text-purple-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Klienter</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.byRole.client}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4 text-orange-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Coaches</p>
-                <p className="text-2xl font-bold">{stats.byRole.coach}</p>
+              <UserPlus className="h-4 w-4 text-orange-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Coaches</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.byRole.coach}</p>
               </div>
             </div>
           </CardContent>
@@ -371,39 +373,46 @@ export function CentralUserManager() {
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Användarhantering ({stats.total})
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-1">
+          <TabsTrigger value="users" className="flex items-center gap-1 text-xs sm:text-sm">
+            <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Användare</span>
+            <span className="sm:hidden">User</span>
+            <span className="hidden lg:inline">({stats.total})</span>
           </TabsTrigger>
-          <TabsTrigger value="onboarding" className="flex items-center gap-2">
-            <Brain className="h-4 w-4" />
-            Onboarding ({stats.byRole.client})
+          <TabsTrigger value="onboarding" className="flex items-center gap-1 text-xs sm:text-sm">
+            <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Onboarding</span>
+            <span className="sm:hidden">Onb</span>
           </TabsTrigger>
-          <TabsTrigger value="invitations" className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            Inbjudningar
+          <TabsTrigger value="invitations" className="flex items-center gap-1 text-xs sm:text-sm">
+            <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Inbjudningar</span>
+            <span className="sm:hidden">Inv</span>
           </TabsTrigger>
-          <TabsTrigger value="organizations" className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            Organisationer
+          <TabsTrigger value="organizations" className="flex items-center gap-1 text-xs sm:text-sm">
+            <Building2 className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Organisationer</span>
+            <span className="sm:hidden">Org</span>
           </TabsTrigger>
           {canAccessGamification && (
-            <TabsTrigger value="gamification" className="flex items-center gap-2">
-              <Trophy className="h-4 w-4" />
-              Gamification
+            <TabsTrigger value="gamification" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Gamification</span>
+              <span className="sm:hidden">Game</span>
             </TabsTrigger>
           )}
           {canManageRoles && (
-            <TabsTrigger value="roles" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Roller & Behörigheter
+            <TabsTrigger value="roles" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Roller</span>
+              <span className="sm:hidden">Role</span>
             </TabsTrigger>
           )}
           {isAdmin && (
-            <TabsTrigger value="gdpr" className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              GDPR
+            <TabsTrigger value="gdpr" className="flex items-center gap-1 text-xs sm:text-sm">
+              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>GDPR</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -418,8 +427,8 @@ export function CentralUserManager() {
               </CardDescription>
               
               {/* Filters */}
-              <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <div className="relative flex-1">
+              <div className="flex flex-col gap-3 mt-4">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Sök användare..."
@@ -429,29 +438,31 @@ export function CentralUserManager() {
                   />
                 </div>
                 
-                <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filtrera efter roll" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alla roller</SelectItem>
-                    <SelectItem value="superadmin">Superadmin</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="coach">Coach</SelectItem>
-                    <SelectItem value="client">Klient</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alla</SelectItem>
-                    <SelectItem value="active">Aktiv</SelectItem>
-                    <SelectItem value="inactive">Inaktiv</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Select value={roleFilter} onValueChange={setRoleFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filtrera efter roll" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alla roller</SelectItem>
+                      <SelectItem value="superadmin">Superadmin</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="coach">Coach</SelectItem>
+                      <SelectItem value="client">Klient</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[150px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alla</SelectItem>
+                      <SelectItem value="active">Aktiv</SelectItem>
+                      <SelectItem value="inactive">Inaktiv</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -467,96 +478,129 @@ export function CentralUserManager() {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Användare</TableHead>
-                        <TableHead>Roll</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Senast inloggad</TableHead>
-                        <TableHead>Registrerad</TableHead>
-                        <TableHead>Åtgärder</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              {getRoleIcon(user.roles)}
-                              <div>
-                                <div className="font-medium">{`${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Namnlös'}</div>
-                                <div className="text-sm text-muted-foreground">{user.email}</div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          
-                          <TableCell>
-                            {getRoleBadge(user.roles)}
-                          </TableCell>
-                          
-                          <TableCell>
-                            <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                              {user.status === 'active' ? 'Aktiv' : 'Inaktiv'}
-                            </Badge>
-                          </TableCell>
-                          
-                          <TableCell>
-                            <div className="text-sm">
-                              {user.created_at 
-                                ? new Date(user.created_at).toLocaleDateString('sv-SE')
-                                : 'Aldrig'
-                              }
-                            </div>
-                          </TableCell>
-                          
-                          <TableCell>
-                            <div className="text-sm">
-                              {user.created_at 
-                                ? new Date(user.created_at).toLocaleDateString('sv-SE')
-                                : 'Okänt'
-                              }
-                            </div>
-                          </TableCell>
-                          
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => {
-                                  navigate(`/user/${user.id}`);
-                                }}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  Visa CRM-profil
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => {
-                                  setSelectedUser(user);
-                                  setIsEditDialogOpen(true);
-                                }}>
-                                  <Edit3 className="h-4 w-4 mr-2" />
-                                  Redigera grundinfo
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleDeleteUser(user.id)}
-                                  className="text-destructive"
-                                  disabled={deletingUserId === user.id}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  {deletingUserId === user.id ? 'Raderar...' : 'Radera användare'}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
+                <>
+                  {/* Desktop Table */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Användare</TableHead>
+                          <TableHead>Roll</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Senast inloggad</TableHead>
+                          <TableHead>Registrerad</TableHead>
+                          <TableHead>Åtgärder</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                {getRoleIcon(user.roles)}
+                                <div>
+                                  <div className="font-medium">{`${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Namnlös'}</div>
+                                  <div className="text-sm text-muted-foreground">{user.email}</div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell>
+                              {getRoleBadge(user.roles)}
+                            </TableCell>
+                            
+                            <TableCell>
+                              <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                                {user.status === 'active' ? 'Aktiv' : 'Inaktiv'}
+                              </Badge>
+                            </TableCell>
+                            
+                            <TableCell>
+                              <div className="text-sm">
+                                {user.last_login_at 
+                                  ? new Date(user.last_login_at).toLocaleDateString('sv-SE')
+                                  : 'Aldrig'
+                                }
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell>
+                              <div className="text-sm">
+                                {user.created_at 
+                                  ? new Date(user.created_at).toLocaleDateString('sv-SE')
+                                  : 'Okänt'
+                                }
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => {
+                                    setSelectedUser(user);
+                                    setIsFullProfileDialogOpen(true);
+                                  }}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Visa profil
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    navigate(`/user/${user.id}`);
+                                  }}>
+                                    <Key className="h-4 w-4 mr-2" />
+                                    Gå till profil
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    setSelectedUser(user);
+                                    setIsEditDialogOpen(true);
+                                  }}>
+                                    <Edit3 className="h-4 w-4 mr-2" />
+                                    Redigera
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteUser(user.id)}
+                                    className="text-destructive"
+                                    disabled={deletingUserId === user.id}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    {deletingUserId === user.id ? 'Raderar...' : 'Ta bort'}
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile Cards */}
+                  <div className="lg:hidden space-y-3">
+                    {filteredUsers.map((user) => (
+                      <MobileUserCard
+                        key={user.id}
+                        user={user}
+                        onViewProfile={(user) => {
+                          setSelectedUser(user);
+                          setIsFullProfileDialogOpen(true);
+                        }}
+                        onEditUser={(user) => {
+                          setSelectedUser(user);
+                          setIsEditDialogOpen(true);
+                        }}
+                        onDeleteUser={handleDeleteUser}
+                        onNavigateToProfile={(userId) => navigate(`/user/${userId}`)}
+                        isDeleting={deletingUserId === user.id}
+                        getRoleBadge={getRoleBadge}
+                        getRoleIcon={getRoleIcon}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
               
               <div className="mt-4 text-sm text-muted-foreground">
