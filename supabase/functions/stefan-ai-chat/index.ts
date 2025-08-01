@@ -63,25 +63,54 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     let trainingContext = '';
+    let memoryFragments: string[] = [];
     
     if (user_id && supabaseUrl && supabaseServiceKey) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
       
       try {
-        // Get training data for context
+        // Search memory bank for relevant fragments
+        console.log('Searching Stefan memory bank for user query:', message?.substring(0, 100));
+        
+        const memorySearchResponse = await fetch(`${supabaseUrl}/functions/v1/stefan-memory-search`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: message || context || 'allmänt coaching',
+            maxResults: 3,
+            maxTokens: 1500
+          }),
+        });
+
+        if (memorySearchResponse.ok) {
+          const memoryData = await memorySearchResponse.json();
+          if (memoryData.success && memoryData.memories) {
+            memoryFragments = memoryData.memories.map((memory: any) => 
+              `[${memory.category}] ${memory.content} (Källa: ${memory.source}, Similaritet: ${(memory.similarity * 100).toFixed(1)}%)`
+            );
+            console.log('Found memory fragments:', memoryFragments.length);
+          }
+        } else {
+          console.log('Memory search failed, continuing without memory injection');
+        }
+
+        // Get training data for additional context
         const { data: trainingData } = await supabase
           .from('training_data_stefan')
           .select('content, subject, tone, client_name')
           .eq('user_id', user_id)
           .order('created_at', { ascending: false })
-          .limit(5);
+          .limit(3);
           
         if (trainingData && trainingData.length > 0) {
           trainingContext = '\n\nTRÄNINGSDATA KONTEXT:\n' + 
-            trainingData.map(data => `Ämne: ${data.subject}, Ton: ${data.tone}, Innehåll: ${data.content.substring(0, 200)}...`).join('\n');
+            trainingData.map(data => `Ämne: ${data.subject}, Ton: ${data.tone}, Innehåll: ${data.content.substring(0, 150)}...`).join('\n');
         }
       } catch (error) {
-        console.log('Could not fetch training data context:', error);
+        console.log('Could not fetch memory/training data context:', error);
       }
     }
 
@@ -141,7 +170,7 @@ INSTRUKTIONER:
       userMessage = `Användaren har slutfört en bedömning. Ge feedback och nästa steg baserat på resultaten.`;
     }
 
-    // Call OpenAI with enhanced context
+    // Call OpenAI with enhanced context including memory injection
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -155,12 +184,16 @@ INSTRUKTIONER:
             role: 'system',
             content: stefanContext
           },
+          ...(memoryFragments.length > 0 ? [{
+            role: 'system',
+            content: `MINNESBANK (Relevanta fragment från din kunskapsbas):\n${memoryFragments.map((fragment, i) => `${i + 1}. ${fragment}`).join('\n\n')}\n\nAnvänd dessa fragment för att ge mer precisa och personliga svar baserat på din expertis och tidigare erfarenheter.`
+          }] : []),
           {
             role: 'user',
             content: userMessage
           }
         ],
-        max_tokens: interaction_type === 'proactive' ? 200 : 500,
+        max_tokens: interaction_type === 'proactive' ? 300 : 600,
         temperature: 0.7,
       }),
     });
@@ -173,7 +206,14 @@ INSTRUKTIONER:
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
 
-    return new Response(JSON.stringify({ message: aiResponse }), {
+    return new Response(JSON.stringify({ 
+      message: aiResponse,
+      memoryFragmentsUsed: memoryFragments.length,
+      debug: {
+        memorySearch: memoryFragments.length > 0 ? 'success' : 'no_results',
+        trainingContext: trainingContext ? 'loaded' : 'empty'
+      }
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
