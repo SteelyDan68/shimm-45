@@ -22,7 +22,7 @@ export const useDailyCheckIn = (clientId?: string) => {
       const { data, error } = await supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('type', 'check-in')
         .gte('timestamp', `${today}T00:00:00.000Z`)
         .lte('timestamp', `${today}T23:59:59.999Z`)
@@ -79,7 +79,7 @@ export const useDailyCheckIn = (clientId?: string) => {
       const { error: pathError } = await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           type: 'check-in',
           title: `Daglig check-in - ${new Date().toLocaleDateString('sv-SE')}`,
           details: `Humör: ${checkInData.mood_score}/10 | Energi: ${checkInData.energy_level}/10 | Fokus: ${checkInData.pillar_focus}`,
@@ -138,7 +138,7 @@ export const useDailyCheckIn = (clientId?: string) => {
       const { data, error } = await supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .eq('type', 'check-in')
         .gte('timestamp', startDate.toISOString())
         .order('timestamp', { ascending: false });
