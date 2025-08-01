@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
-import { ClientForm } from '@/components/ClientForm';
+
 import { ApiStatusChecker } from '@/components/ApiStatusChecker';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
@@ -50,7 +50,7 @@ export const Dashboard = () => {
     dataPoints: 0
   });
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  
   
   // Map unified clients to dashboard format
   const clients = unifiedClients.map(client => ({
@@ -139,10 +139,6 @@ export const Dashboard = () => {
     }
   };
 
-  const handleSuccess = () => {
-    setShowForm(false);
-    // No need to manually reload - useUnifiedClients will handle updates
-  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -187,23 +183,12 @@ export const Dashboard = () => {
             {hasRole('admin') && !hasRole('superadmin') && ' - Admin behörigheter'}
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
+        <Button onClick={() => navigate('/clients')}>
           <Plus className="h-4 w-4 mr-2" />
-          {showForm ? 'Avbryt' : 'Lägg till klient'}
+          Hantera klienter
         </Button>
       </div>
 
-      {/* Add Client Form */}
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Lägg till ny klient</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ClientForm onSuccess={handleSuccess} />
-          </CardContent>
-        </Card>
-      )}
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
