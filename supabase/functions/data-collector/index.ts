@@ -87,15 +87,52 @@ serve(async (req) => {
 
     console.log('Fetching client from database...');
 
-    // Get client info
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
+    // Try to find client in profiles table first (new approach)
+    let client = null;
+    let clientError = null;
+    
+    const { data: profileClient, error: profileError } = await supabase
+      .from('profiles')
       .select('*')
       .eq('id', client_id)
       .single();
 
-    if (clientError || !client) {
-      console.error('Client not found:', { clientError, client_id });
+    if (profileClient) {
+      console.log('Found client in profiles table:', profileClient.email);
+      // Transform profile to client format for compatibility
+      client = {
+        id: profileClient.id,
+        name: `${profileClient.first_name || ''} ${profileClient.last_name || ''}`.trim() || profileClient.email,
+        category: profileClient.client_category || profileClient.primary_role || 'general',
+        instagram_handle: profileClient.instagram_handle,
+        tiktok_handle: profileClient.tiktok_handle,
+        facebook_page: profileClient.facebook_handle,
+        youtube_handle: profileClient.youtube_handle,
+        twitter_handle: profileClient.twitter_handle,
+        snapchat_handle: profileClient.snapchat_handle,
+        platforms: profileClient.platforms || [],
+        email: profileClient.email,
+        status: profileClient.status || 'active'
+      };
+    } else {
+      // Fallback to clients table (legacy approach)
+      console.log('Profile not found, trying clients table...');
+      const { data: legacyClient, error: legacyError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', client_id)
+        .single();
+
+      client = legacyClient;
+      clientError = legacyError;
+    }
+
+    if (!client) {
+      console.error('Client not found in either profiles or clients table:', { 
+        profileError: profileError?.message, 
+        clientError: clientError?.message, 
+        client_id 
+      });
       throw new Error('Client not found');
     }
 
