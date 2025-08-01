@@ -257,7 +257,7 @@ export const useHabitFormation = (clientId?: string) => {
         .from('path_entries')
         .select('*')
         .eq('client_id', clientId)
-        .contains('metadata', { is_habit: true })
+        .contains('metadata', { is_habit: true } as any)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
