@@ -9,6 +9,7 @@ import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
+import { ProfileCompletionGate } from "@/components/Profile/ProfileCompletionGate";
 import { Dashboard } from "./pages/Dashboard";
 import { AllClients } from "./pages/AllClients";
 import { ClientProfile } from "./pages/ClientProfile";
@@ -56,9 +57,17 @@ const AppRoutes = () => {
               } />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/client-dashboard" element={<ClientDashboard />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/edit-profile" element={<EditProfilePage />} />
-              <Route path="/client-assessment/:clientId" element={<ClientAssessmentPage />} />
+               <Route path="/onboarding" element={
+                 <ProfileCompletionGate requiredForAssessments={true}>
+                   <OnboardingPage />
+                 </ProfileCompletionGate>
+               } />
+               <Route path="/edit-profile" element={<EditProfilePage />} />
+               <Route path="/client-assessment/:clientId" element={
+                 <ProfileCompletionGate requiredForAssessments={true}>
+                   <ClientAssessmentPage />
+                 </ProfileCompletionGate>
+               } />
               <Route path="/clients" element={<AllClients />} />
               <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />

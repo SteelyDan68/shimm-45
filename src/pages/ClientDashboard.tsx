@@ -12,7 +12,8 @@ import {
   MessageSquare,
   Calendar,
   Target,
-  Activity
+  Activity,
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +27,10 @@ import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDa
 import { EnhancedDashboard } from '@/components/Dashboard/EnhancedDashboard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
+import { ProfileCompletionGate } from '@/components/Profile/ProfileCompletionGate';
+import { useExtendedProfile } from '@/hooks/useExtendedProfile';
+import type { ExtendedProfileData } from '@/types/extendedProfile';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ClientProfile {
   id: string;
@@ -46,10 +51,12 @@ interface ClientStats {
 
 export const ClientDashboard = () => {
   const { user, profile, hasRole } = useAuth();
+  const { getExtendedProfile } = useExtendedProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
   
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
+  const [extendedProfile, setExtendedProfile] = useState<ExtendedProfileData | null>(null);
   const [stats, setStats] = useState<ClientStats>({
     completedTasks: 0,
     pendingTasks: 0,
@@ -58,6 +65,8 @@ export const ClientDashboard = () => {
   });
   const [lastAssessmentResult, setLastAssessmentResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [hasCompletedAssessments, setHasCompletedAssessments] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -70,49 +79,72 @@ export const ClientDashboard = () => {
     
     setLoading(true);
     try {
-      // Hitta klient som matchar användarens email
-      const { data: clientData, error: clientError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', user.email)
-        .maybeSingle();
-
-      if (clientError) throw clientError;
-
-      if (!clientData) {
-        // Kontrollera om användaren är admin/coach utan client-roll - då ska de inte vara här
-        if ((hasRole('superadmin') || hasRole('admin') || hasRole('coach')) && !hasRole('client')) {
-          if (hasRole('coach')) {
-            navigate('/coach');
-          } else {
-            navigate('/dashboard');
-          }
-          return;
+      // Redirect non-clients to appropriate dashboards
+      if ((hasRole('superadmin') || hasRole('admin') || hasRole('coach')) && !hasRole('client')) {
+        if (hasRole('coach')) {
+          navigate('/coach');
+        } else {
+          navigate('/dashboard');
         }
-        // Om vanlig användare utan klientprofil, redirecta till onboarding
-        navigate('/onboarding');
         return;
       }
 
-      // Check if onboarding is complete - improved logic using preferences
-      const metadata = (clientData.preferences as any);
-      const hasOnboardingData = !!(
-        metadata?.onboardingCompleted || 
-        (metadata?.generalInfo?.name && metadata?.publicRole?.primaryRole && metadata?.lifeMap?.location)
-      );
+      // Load extended profile to check completion
+      const extendedData = await getExtendedProfile();
+      setExtendedProfile(extendedData);
+      
+      // Check profile completion
+      const isComplete = checkProfileCompletion(extendedData);
+      setProfileComplete(isComplete);
+
+      // Get basic profile data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      if (!profileData) {
+        // Create basic profile if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            first_name: user.user_metadata?.first_name,
+            last_name: user.user_metadata?.last_name,
+          });
+        
+        if (insertError) throw insertError;
+        
+        // Reload after creation
+        await loadClientProfile();
+        return;
+      }
 
       setClientProfile({ 
-        id: clientData.id,
-        name: `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim() || clientData.email || 'Unknown',
-        category: 'general', // Default category
-        status: clientData.status || 'active',
-        logic_state: (clientData.preferences as any)?.logic_state,
-        velocity_score: (clientData.preferences as any)?.velocity_score,
-        hasOnboardingData 
+        id: profileData.id,
+        name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || profileData.email || 'Unknown',
+        category: 'general',
+        status: profileData.status || 'active',
+        logic_state: profileData.logic_state,
+        velocity_score: profileData.velocity_score || 50,
+        hasOnboardingData: isComplete
       });
 
-      // Ladda statistik
-      await loadStats(clientData.id);
+      // Check if user has completed any assessments
+      const { data: assessments } = await supabase
+        .from('pillar_assessments')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
+      
+      setHasCompletedAssessments((assessments?.length || 0) > 0);
+
+      // Load statistics
+      await loadStats(profileData.id);
 
     } catch (error: any) {
       toast({
@@ -123,6 +155,34 @@ export const ClientDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const checkProfileCompletion = (data: ExtendedProfileData | null) => {
+    if (!data) return false;
+    
+    const requiredFields = [
+      data.first_name,
+      data.last_name,
+      data.email,
+      data.phone,
+      data.date_of_birth,
+      data.primary_role,
+      data.location || data.address?.city
+    ];
+
+    // Check if at least one social platform is provided
+    const hasSocialPlatform = !!(
+      data.instagram_handle ||
+      data.youtube_handle ||
+      data.tiktok_handle ||
+      data.facebook_handle ||
+      data.twitter_handle ||
+      data.snapchat_handle
+    );
+
+    const allRequiredFieldsComplete = requiredFields.every(field => field && field.trim() !== '');
+    
+    return allRequiredFieldsComplete && hasSocialPlatform;
   };
 
   const loadStats = async (clientId: string) => {
@@ -217,25 +277,46 @@ export const ClientDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Onboarding varning om data saknas - döljs när användaren fyllt i allmänna info */}
-      {!clientProfile.hasOnboardingData && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="p-4">
+      {/* Profile completion gate */}
+      {!profileComplete && (
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-orange-800">Här är din översikt</h3>
-                <p className="text-sm text-orange-700">Dina värden visas när du har fyllt i din allmänna information.</p>
-              </div>
+              <span>
+                <strong>Komplettera din profil</strong> - Du måste fylla i alla grunduppgifter och minst en social plattform innan du kan göra assessments.
+              </span>
               <Button 
-                onClick={() => navigate('/onboarding')}
+                onClick={() => navigate(`/user/${user?.id}`)}
                 size="sm"
-                className="bg-orange-600 hover:bg-orange-700"
+                className="bg-orange-600 hover:bg-orange-700 ml-4"
               >
-                Starta här! 🚀
+                Komplettera nu
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Assessment reminder for users with complete profiles */}
+      {profileComplete && !hasCompletedAssessments && (
+        <Alert className="border-blue-200 bg-blue-50">
+          <Brain className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            <div className="flex items-center justify-between">
+              <span>
+                <strong>Genomför dina självskattningar</strong> - Gör dina fem pillar-assessments för att aktivera det automatiska systemet och få personliga rekommendationer.
+              </span>
+              <Button 
+                onClick={() => navigate('/tasks')}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 ml-4"
+              >
+                Starta assessments
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Header */}
@@ -336,7 +417,7 @@ export const ClientDashboard = () => {
               <Button 
                 className="w-full justify-start" 
                 variant="outline"
-                onClick={() => navigate('/onboarding')}
+                onClick={() => navigate(`/user/${user?.id}`)}
               >
                 <User className="h-4 w-4 mr-2" />
                 Uppdatera min profil
