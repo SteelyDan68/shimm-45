@@ -22,7 +22,15 @@ serve(async (req) => {
   }
 
   try {
-    const { recommendation_text, client_id, weeks = 3 } = await req.json();
+    const { 
+      recommendation_text, 
+      client_id, 
+      assessment_type,
+      assessment_result,
+      journey_progress,
+      current_phase,
+      weeks = 3 
+    } = await req.json();
 
     if (!recommendation_text || !client_id) {
       throw new Error('Missing required fields: recommendation_text, client_id');
@@ -37,31 +45,47 @@ serve(async (req) => {
     console.log('Generating planning for client:', client_id);
     console.log('Recommendation text length:', recommendation_text.length);
 
-    // Generate plan using AI (with fallback)
-    const systemPrompt = `Du är en expert på att skapa genomförbara utvecklingsplaner för offentliga personer och influencers. 
-            Du förstår vikten av balans mellan produktivitet och återhämtning.`;
+    // Generate autonomous coaching plan using AI
+    const systemPrompt = `Du är Stefan, en AI-coach som skapar autonoma utvecklingsplaner. Du förstår de fem pillars-områdena:
+- Self Care (Välmående & Självvård)
+- Skills (Färdigheter & Utveckling)
+- Talent (Talang & Styrkor)  
+- Brand (Varumärke & Position)
+- Economy (Ekonomi & Tillväxt)
 
-    const userPrompt = `Du har gett följande rekommendation till en offentlig person:
+VIKTIGA PRINCIPER FÖR AUTONOMT COACHING:
+- Skapa små, konkreta och genomförbara uppgifter (max 15-30 min per uppgift)
+- Bygg gradvis komplexitet över tid
+- Fokusera på dagliga mikro-habits som leder till större förändringar
+- Använd positiv psykologi och motivation
+- Anpassa svårighetsgrad till användarens nuvarande nivå
+- Skapa variation för att undvika tristess`;
 
-"${recommendation_text}"
+    const userPrompt = `AUTONOMT COACHING KONTEXT:
+Assessment typ: ${assessment_type || 'allmän utveckling'}
+Nuvarande utvecklingsfas: ${current_phase || 'start'}
+Utvecklingsframsteg: ${journey_progress || 0}%
+Rekommendation: ${recommendation_text}
 
-Skapa en genomförbar ${weeks}-veckorsplan där varje delsteg är:
-- Tidsatt (datum + tid baserat på idag som startpunkt)
-- Beskriven som en konkret aktivitet
-- Märkt med pelare den tillhör ("self_care", "skills", "talent", "brand", "economy")
-- Kategoriserad ("samtal", "mote", "deadline", "lansering", "paminnelse", "annat")
+${assessment_result ? `Assessment-resultat: ${JSON.stringify(assessment_result)}` : ''}
 
-Max 1-2 aktiviteter per dag. Undvik överbelastning. Fördela jämnt över veckorna. Inkludera återhämtning.
-Starta från imorgon och fördela över ${weeks} veckor.
+Skapa en personaliserad ${weeks}-veckors utvecklingsplan med små, autonoma uppgifter som:
+- Börjar med enkla, genomförbara steg
+- Gradvis ökar i komplexitet
+- Fokuserar på de områden som behöver mest utveckling
+- Inkluderar både praktiska övningar och reflektion
+- Skapar hållbara vanor för långsiktig tillväxt
 
-Returnera ENDAST en giltig JSON-array utan kommentarer:
+Fördela 12-20 aktiviteter över ${weeks} veckor. Max 1-2 per dag.
+
+Returnera ENDAST en giltig JSON-array:
 [
   {
-    "title": "Skapa manus till nästa video",
-    "description": "Fokusera på tydligt budskap enligt brand-plan", 
-    "event_date": "2025-01-31T10:00:00Z",
-    "pillar": "brand",
-    "category": "deadline"
+    "title": "5-minuters morgonreflektion",
+    "description": "Sätt dig ner i 5 minuter och reflektera över hur du mår och vad du vill fokusera på idag. Skriv ned tre saker du är tacksam för.",
+    "event_date": "2025-01-31T07:00:00Z",
+    "pillar": "self_care",
+    "category": "daily_habit"
   }
 ]`;
 
@@ -109,15 +133,16 @@ Returnera ENDAST en giltig JSON-array utan kommentarer:
     // Create calendar events and tasks
     for (const activity of plannedActivities) {
       try {
-        // Create calendar event
+        // Create calendar event for autonomous coaching
         const eventData = {
-          client_id,
+          user_id: client_id,
+          created_by: client_id,
           title: activity.title,
           description: activity.description,
           event_date: activity.event_date,
-          created_by_role: 'system',
+          created_by_role: 'ai_system',
           visible_to_client: true,
-          category: activity.category || 'annat'
+          category: activity.category || 'autonomous_task'
         };
 
         const { data: eventResult, error: eventError } = await supabase
@@ -133,16 +158,16 @@ Returnera ENDAST en giltig JSON-array utan kommentarer:
 
         createdEvents.push(eventResult);
 
-        // Create corresponding task
+        // Create corresponding autonomous task
         const taskData = {
-          client_id,
+          user_id: client_id,
+          created_by: client_id,
           title: activity.title,
           description: activity.description,
           deadline: activity.event_date,
           status: 'planned',
           priority: 'medium',
-          ai_generated: true,
-          created_by: supabaseKey, // System user
+          ai_generated: true
         };
 
         const { data: taskResult, error: taskError } = await supabase
@@ -158,19 +183,23 @@ Returnera ENDAST en giltig JSON-array utan kommentarer:
 
         createdTasks.push(taskResult);
 
-        // Create path entry for tracking
+        // Create path entry for autonomous coaching tracking
         const pathEntryData = {
-          client_id,
-          type: 'action',
-          title: `Planerad: ${activity.title}`,
-          details: `Automatiskt genererad från AI-rekommendation: ${activity.description}`,
+          user_id: client_id,
+          created_by: client_id,
+          type: 'autonomous_task',
+          title: `Autonom uppgift: ${activity.title}`,
+          details: `AI-genererad utvecklingsuppgift: ${activity.description}`,
           status: 'planned',
           ai_generated: true,
-          created_by: supabaseKey,
+          created_by_role: 'ai_system',
           visible_to_client: true,
           metadata: {
-            pillar_type: activity.pillar,
-            generated_from: 'ai_planning',
+            pillar: activity.pillar,
+            category: activity.category,
+            generated_from: 'autonomous_coaching',
+            assessment_type: assessment_type,
+            journey_progress: journey_progress,
             original_recommendation: recommendation_text.substring(0, 200)
           }
         };

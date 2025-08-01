@@ -10,6 +10,7 @@ import { StefanInteractionCard } from '@/components/Stefan/StefanInteractionCard
 import { WelcomeAssessmentCard } from '@/components/Dashboard/WelcomeAssessmentCard';
 import { ModularPillarAssessment } from '@/components/FivePillars/ModularPillarAssessment';
 import { PillarHeatmap } from '@/components/FivePillars/PillarHeatmap';
+import { AutonomousCoachingDashboard } from '@/components/Dashboard/AutonomousCoachingDashboard';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 import { PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { 
@@ -295,6 +296,9 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
           </CardContent>
         </Card>
       </div>
+
+      {/* Autonomous Coaching Dashboard */}
+      <AutonomousCoachingDashboard userId={userId} userName={userName} />
 
       {/* Journey Phase Description */}
       <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">

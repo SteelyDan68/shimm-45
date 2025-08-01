@@ -67,7 +67,7 @@ export const useUserJourney = () => {
     loadJourneyState();
   }, [loadJourneyState]);
 
-  // Update journey state after assessment completion
+  // Update journey state after assessment completion and trigger autonomous coaching
   const updateJourneyAfterAssessment = useCallback(async (
     assessmentType: string,
     assessmentResult?: any
@@ -131,16 +131,74 @@ export const useUserJourney = () => {
 
       setJourneyState(updatedState);
 
+      // AUTONOMOUS COACHING: Generate AI-driven action plan
+      await generateAutonomousActionPlan(assessmentType, assessmentResult, newProgress);
+
       // Show progress notification
       toast({
         title: "Framsteg registrerat!",
-        description: `Du har genomfört ${completedAssessments.length} bedömningar. Fantastiskt arbete!`,
+        description: `Du har genomfört ${completedAssessments.length} bedömningar. Stefan förbereder dina nästa steg!`,
       });
 
     } catch (error) {
       console.error('Error updating journey after assessment:', error);
     }
   }, [user, journeyState, toast]);
+
+  // Generate autonomous action plan based on assessment results
+  const generateAutonomousActionPlan = async (
+    assessmentType: string,
+    assessmentResult: any,
+    currentProgress: number
+  ) => {
+    if (!user) return;
+
+    try {
+      // Call AI planning function to create personalized tasks
+      await supabase.functions.invoke('generate-ai-planning', {
+        body: {
+          client_id: user.id,
+          assessment_type: assessmentType,
+          assessment_result: assessmentResult,
+          journey_progress: currentProgress,
+          current_phase: journeyState?.current_phase,
+          recommendation_text: generateRecommendationText(assessmentType, assessmentResult),
+          weeks: 3 // Generate 3-week plan
+        }
+      });
+
+      console.log('Autonomous action plan generated for', assessmentType);
+    } catch (error) {
+      console.error('Error generating autonomous action plan:', error);
+    }
+  };
+
+  // Generate contextual recommendation text for AI planning
+  const generateRecommendationText = (assessmentType: string, result: any): string => {
+    const baseRecommendations = {
+      welcome: "Baserat på din välkomstbedömning, fokusera på att skapa hållbara rutiner och identifiera dina främsta utvecklingsområden.",
+      self_care: "Utveckla din självvård genom att skapa dagliga rutiner som stärker din fysiska och mentala hälsa.",
+      skills: "Bygg dina färdigheter steg för steg genom praktiska övningar och reflektion över dina framsteg.",
+      talent: "Utforska och utveckla dina naturliga talanger genom målriktade aktiviteter och experiment.",
+      brand: "Stärk ditt varumärke genom att tydliggöra ditt värde och kommunicera det konsekvent.",
+      economy: "Förbättra din ekonomiska situation genom smart planering och medvetna val."
+    };
+
+    let recommendation = baseRecommendations[assessmentType as keyof typeof baseRecommendations] || 
+                        "Fortsätt din utveckling genom små, konkreta steg varje dag.";
+
+    // Add specific insights from assessment result
+    if (result?.wheel_of_life_scores) {
+      const lowestAreas = Object.entries(result.wheel_of_life_scores)
+        .sort(([,a], [,b]) => (a as number) - (b as number))
+        .slice(0, 2)
+        .map(([area]) => area);
+      
+      recommendation += ` Fokusera särskilt på ${lowestAreas.join(' och ')}.`;
+    }
+
+    return recommendation;
+  };
 
   // Determine next pillar based on Welcome Assessment results
   const determineNextPillar = (welcomeResult?: any) => {
