@@ -41,6 +41,7 @@ const getMainItems = (hasRole: (role: string) => boolean) => {
   if (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) {
     items.push(
       { title: "Alla Klienter", url: "/clients", icon: Users },
+      { title: "Intelligence", url: "/intelligence", icon: Brain },
       { title: "Analys", url: "/analytics", icon: TrendingUp },
       { title: "Datainsamling", url: "/data-collection", icon: Database }
     );

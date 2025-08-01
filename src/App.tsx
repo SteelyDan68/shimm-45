@@ -21,6 +21,7 @@ import { Administration } from "./pages/Administration";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
 import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
+import { IntelligenceOverview } from "./pages/IntelligenceOverview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const AppRoutes = () => {
               <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/user/:userId" element={<UserProfile />} />
+              <Route path="/intelligence" element={<IntelligenceOverview />} />
               <Route path="/intelligence/:userId" element={<Intelligence />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/administration" element={<Administration />} />
