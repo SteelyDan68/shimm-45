@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Search, Plus } from 'lucide-react';
 import { useMessages, type Message } from '@/hooks/useMessages';
 import { useAuth } from '@/hooks/useAuth';
+import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -35,7 +36,8 @@ export const ConversationList = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { messages } = useMessages();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
+  const { isCoachClient, getCurrentUserClients, getCurrentUserCoach } = useCoachClientRelationships();
 
   useEffect(() => {
     if (user && messages.length > 0) {
@@ -47,10 +49,33 @@ export const ConversationList = ({
     if (!user) return;
 
     try {
-      // Group messages by conversation partner
+      // Group messages by conversation partner, but only allow authorized conversations
       const conversationMap = new Map<string, Message[]>();
       
-      messages.forEach(message => {
+      // Filter messages based on coach-client relationships
+      const filteredMessages = messages.filter(message => {
+        const partnerId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
+        
+        // Admins can message anyone
+        if (hasRole('admin') || hasRole('superadmin')) {
+          return true;
+        }
+        
+        // Coaches can only message their assigned clients
+        if (hasRole('coach')) {
+          return isCoachClient(user.id, partnerId);
+        }
+        
+        // Clients can only message their assigned coach
+        if (hasRole('client')) {
+          const userCoach = getCurrentUserCoach();
+          return userCoach?.coach_id === partnerId;
+        }
+        
+        return false; // Default: no access
+      });
+      
+      filteredMessages.forEach(message => {
         const partnerId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
         
         if (!conversationMap.has(partnerId)) {

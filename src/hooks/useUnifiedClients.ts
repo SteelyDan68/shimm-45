@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface UnifiedClient {
   id: string;
@@ -15,33 +16,63 @@ export interface UnifiedClient {
   logic_state?: any;
   client_category?: string;
   client_status?: string;
+  coach_id?: string; // Added to track coach relationship
 }
 
 export const useUnifiedClients = () => {
   const [clients, setClients] = useState<UnifiedClient[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user, hasRole } = useAuth();
 
   const fetchClients = async () => {
     try {
       setLoading(true);
       
-      // Get all users with client role
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'client');
+      // If user is admin/superadmin, show all clients
+      // If user is coach, only show their assigned clients
+      // If user is client, show only themselves
+      
+      let clientUserIds: string[] = [];
+      
+      if (hasRole('superadmin') || hasRole('admin')) {
+        // Admin sees all clients
+        const { data: userRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'client');
 
-      if (rolesError) throw rolesError;
+        if (rolesError) throw rolesError;
+        clientUserIds = userRoles?.map(r => r.user_id) || [];
+        
+      } else if (hasRole('coach')) {
+        // Coach sees only their assigned clients
+        const { data: relationships, error: relError } = await supabase
+          .from('user_relationships')
+          .select('client_id')
+          .eq('coach_id', user?.id)
+          .eq('is_active', true)
+          .eq('relationship_type', 'coach_client');
 
-      const clientUserIds = userRoles?.map(r => r.user_id) || [];
+        if (relError) throw relError;
+        clientUserIds = relationships?.map(r => r.client_id) || [];
+        
+      } else if (hasRole('client')) {
+        // Client sees only themselves
+        clientUserIds = user?.id ? [user.id] : [];
+        
+      } else {
+        // No specific role - no access to clients
+        setClients([]);
+        return;
+      }
 
       if (clientUserIds.length === 0) {
         setClients([]);
         return;
       }
 
-      // Get profiles for all client users
+      // Get profiles for authorized client users
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -59,6 +90,22 @@ export const useUnifiedClients = () => {
 
       if (profilesError) throw profilesError;
 
+      // Get coach relationships for these clients
+      const { data: relationships, error: relError } = await supabase
+        .from('user_relationships')
+        .select('client_id, coach_id')
+        .in('client_id', clientUserIds)
+        .eq('is_active', true)
+        .eq('relationship_type', 'coach_client');
+
+      if (relError) throw relError;
+
+      // Create a map of client_id to coach_id
+      const clientCoachMap = new Map();
+      relationships?.forEach(rel => {
+        clientCoachMap.set(rel.client_id, rel.coach_id);
+      });
+
       // Map to unified client format
       const unifiedClients: UnifiedClient[] = (profiles || []).map(profile => ({
         id: profile.id,
@@ -73,6 +120,7 @@ export const useUnifiedClients = () => {
         logic_state: profile.logic_state,
         client_category: profile.client_category,
         client_status: profile.client_status,
+        coach_id: clientCoachMap.get(profile.id) || null, // Add coach relationship
       }));
 
       setClients(unifiedClients);
@@ -89,8 +137,10 @@ export const useUnifiedClients = () => {
   };
 
   useEffect(() => {
-    fetchClients();
-  }, []);
+    if (user) { // Only fetch when user is available
+      fetchClients();
+    }
+  }, [user]);
 
   return {
     clients,

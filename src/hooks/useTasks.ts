@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
 import type { Task, CreateTaskData, TaskFilters, TaskStatus } from '@/types/tasks';
 
 export const useTasks = (clientId?: string) => {
@@ -8,9 +10,38 @@ export const useTasks = (clientId?: string) => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<TaskFilters>({});
   const { toast } = useToast();
+  const { user, hasRole } = useAuth();
+  const { isCoachClient, getCurrentUserCoach } = useCoachClientRelationships();
 
   const fetchTasks = async () => {
-    if (!clientId) return;
+    if (!clientId || !user) return;
+    
+    // Check authorization - coaches can only see tasks for their assigned clients
+    if (hasRole('coach') && !isCoachClient(user.id, clientId)) {
+      toast({
+        title: "Ingen behörighet",
+        description: "Du har inte behörighet att se uppgifter för denna klient",
+        variant: "destructive"
+      });
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
+    
+    // Clients can only see their own tasks
+    if (hasRole('client') && user.id !== clientId) {
+      const userCoach = getCurrentUserCoach();
+      if (!userCoach || userCoach.coach_id !== user.id) {
+        toast({
+          title: "Ingen behörighet", 
+          description: "Du kan bara se dina egna uppgifter",
+          variant: "destructive"
+        });
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+    }
     
     try {
       setLoading(true);
@@ -62,8 +93,17 @@ export const useTasks = (clientId?: string) => {
 
   const createTask = async (taskData: CreateTaskData): Promise<Task | null> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Ingen autentiserad användare');
+      
+      // Check authorization - coaches can only create tasks for their assigned clients
+      if (hasRole('coach') && taskData.user_id && !isCoachClient(user.id, taskData.user_id)) {
+        toast({
+          title: "Ingen behörighet",
+          description: "Du kan bara skapa uppgifter för dina tilldelade klienter",
+          variant: "destructive"
+        });
+        return null;
+      }
 
       const { data, error } = await supabase
         .from('tasks')
@@ -98,6 +138,29 @@ export const useTasks = (clientId?: string) => {
 
   const updateTask = async (id: string, updates: Partial<Task>): Promise<boolean> => {
     try {
+      // Find the task to check authorization
+      const task = tasks.find(t => t.id === id);
+      if (!task) throw new Error('Uppgift hittades inte');
+      
+      // Check authorization
+      if (hasRole('coach') && !isCoachClient(user?.id || '', task.user_id)) {
+        toast({
+          title: "Ingen behörighet",
+          description: "Du kan bara uppdatera uppgifter för dina tilldelade klienter",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (hasRole('client') && user?.id !== task.user_id) {
+        toast({
+          title: "Ingen behörighet",
+          description: "Du kan bara uppdatera dina egna uppgifter",
+          variant: "destructive"
+        });
+        return false;
+      }
+
       const { error } = await supabase
         .from('tasks')
         .update(updates)
@@ -127,6 +190,16 @@ export const useTasks = (clientId?: string) => {
     try {
       const task = tasks.find(t => t.id === taskId);
       if (!task) throw new Error('Uppgift hittades inte');
+      
+      // Check authorization - only the task owner can complete their tasks
+      if (user?.id !== task.user_id) {
+        toast({
+          title: "Ingen behörighet",
+          description: "Bara klienten kan markera sina uppgifter som genomförda",
+          variant: "destructive"
+        });
+        return false;
+      }
 
       // Update task status
       const { error: taskError } = await supabase
@@ -140,7 +213,6 @@ export const useTasks = (clientId?: string) => {
       if (taskError) throw taskError;
 
       // Create path_entry for check-in
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Ingen autentiserad användare');
 
       const { error: pathError } = await supabase
@@ -231,8 +303,10 @@ export const useTasks = (clientId?: string) => {
   };
 
   useEffect(() => {
-    fetchTasks();
-  }, [clientId, filters]);
+    if (user) {
+      fetchTasks();
+    }
+  }, [clientId, filters, user]);
 
   return {
     tasks,

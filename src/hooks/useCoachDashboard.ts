@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays, isAfter, parseISO } from 'date-fns';
@@ -57,6 +59,8 @@ export const useCoachDashboard = () => {
   const [activeFilter, setActiveFilter] = useState<DashboardFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('priority');
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { getCurrentUserClients } = useCoachClientRelationships();
   const { clients: unifiedClients } = useUnifiedClients();
 
   const fetchCoachStats = async (clientPriorities: ClientPriority[]) => {
@@ -124,7 +128,7 @@ export const useCoachDashboard = () => {
     try {
       setLoading(true);
 
-      // Use unified clients data
+      // Use unified clients data (already filtered for current coach)
       const clientsData = unifiedClients;
 
       const clientPriorities: ClientPriority[] = [];
@@ -330,8 +334,10 @@ export const useCoachDashboard = () => {
   };
 
   useEffect(() => {
-    fetchClientsWithPriority();
-  }, []);
+    if (user && unifiedClients) {
+      fetchClientsWithPriority();
+    }
+  }, [user, unifiedClients]);
 
   useEffect(() => {
     applyFilters();
