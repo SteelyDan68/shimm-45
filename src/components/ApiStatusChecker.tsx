@@ -32,7 +32,7 @@ export const ApiStatusChecker = () => {
     { name: 'Firecrawl API', icon: Globe, status: 'pending', message: 'Inte testad än' },
     { name: 'Google Search API', icon: Search, status: 'pending', message: 'Inte testad än' },
     { name: 'Social Blade API', icon: Share2, status: 'pending', message: 'Inte testad än' },
-    { name: 'RapidAPI Instagram', icon: Share2, status: 'pending', message: 'Inte testad än' }
+    { name: 'RapidAPI TikTok', icon: Share2, status: 'pending', message: 'Inte testad än' }
   ]);
   const [isChecking, setIsChecking] = useState(false);
 

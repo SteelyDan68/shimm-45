@@ -380,12 +380,16 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
       try {
         let socialData = null;
         
-        // Try RapidAPI first for Instagram (more accurate data)
-        if (platform === 'instagram' && rapidApiKey) {
+        // Try RapidAPI first for Instagram and TikTok (more accurate data)
+        if ((platform === 'instagram' || platform === 'tiktok') && rapidApiKey) {
           try {
-            console.log(`Trying RapidAPI for Instagram handle: ${handle}`);
-            socialData = await fetchInstagramRapidAPI(handle, rapidApiKey, client.name);
-            console.log(`Successfully collected Instagram data via RapidAPI for: ${handle}`);
+            console.log(`Trying RapidAPI for ${platform} handle: ${handle}`);
+            if (platform === 'instagram') {
+              socialData = await fetchInstagramRapidAPI(handle, rapidApiKey, client.name);
+            } else if (platform === 'tiktok') {
+              socialData = await fetchTikTokRapidAPI(handle, rapidApiKey, client.name);
+            }
+            console.log(`Successfully collected ${platform} data via RapidAPI for: ${handle}`);
           } catch (rapidError) {
             console.log(`RapidAPI failed for ${handle}, falling back to Social Blade:`, rapidError);
             // Fall back to Social Blade
@@ -936,6 +940,67 @@ async function fetchInstagramRapidAPI(handle: string, apiKey: string, clientName
   }
 }
 
+// Fetch TikTok data using RapidAPI
+async function fetchTikTokRapidAPI(handle: string, apiKey: string, clientName?: string) {
+  try {
+    const cleanHandle = handle.replace('@', '').replace('https://tiktok.com/@', '').replace('https://www.tiktok.com/@', '');
+    
+    console.log(`Making RapidAPI request for TikTok handle: ${cleanHandle}`);
+    
+    const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?username=${cleanHandle}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'tiktok-api23.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`TikTok RapidAPI request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('RapidAPI TikTok response:', JSON.stringify(data, null, 2));
+    
+    // Transform the data to match our expected format
+    const userInfo = data.data?.user_info || data.data || data;
+    const stats = userInfo.stats || userInfo;
+    
+    const transformedData = {
+      followers: stats.followers_count || stats.followerCount || 0,
+      following: stats.following_count || stats.followingCount || 0,
+      posts: stats.video_count || stats.videoCount || 0,
+      likes: stats.heart_count || stats.heartCount || 0,
+      verified: userInfo.verified || false,
+      username: cleanHandle,
+      nickname: userInfo.nickname || userInfo.display_name || '',
+      bio: userInfo.signature || userInfo.bio || '',
+      avatar_url: userInfo.avatar_url || userInfo.avatarLarger || '',
+      source: 'rapidapi_tiktok'
+    };
+
+    return {
+      id: `rapidapi-tiktok-${Date.now()}`,
+      data_type: 'social_metrics',
+      platform: 'tiktok',
+      source: 'rapidapi_tiktok',
+      title: `TikTok profile for @${cleanHandle}`,
+      url: `https://tiktok.com/@${cleanHandle}`,
+      data: transformedData,
+      metadata: {
+        followers: transformedData.followers,
+        following: transformedData.following,
+        likes: transformedData.likes,
+        verified: transformedData.verified
+      },
+      created_at: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error fetching TikTok data from RapidAPI:', error);
+    throw error;
+  }
+}
+
 // Test API functions
 async function testFirecrawlApi(apiKey: string | undefined) {
   if (!apiKey) {
@@ -1015,18 +1080,18 @@ async function testRapidApi() {
   }
   
   try {
-    // Test with a simple request to check connectivity
-    const response = await fetch('https://instagram-premium-api-2023.p.rapidapi.com/v1/user/followers?amount=1&username=instagram', {
+    // Test with TikTok API since it's more general
+    const response = await fetch('https://tiktok-api23.p.rapidapi.com/api/user/info?username=tiktok', {
       method: 'GET',
       headers: {
-        'x-rapidapi-host': 'instagram-premium-api-2023.p.rapidapi.com',
+        'x-rapidapi-host': 'tiktok-api23.p.rapidapi.com',
         'x-rapidapi-key': apiKey,
       },
     });
     
     return { 
       success: response.ok, 
-      message: response.ok ? 'RapidAPI fungerar' : `Fel: ${response.status}` 
+      message: response.ok ? 'RapidAPI TikTok fungerar' : `Fel: ${response.status}` 
     };
   } catch (error) {
     return { success: false, message: `Fel: ${error.message}` };
