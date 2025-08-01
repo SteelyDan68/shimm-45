@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -35,28 +34,23 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
   const { toast } = useToast();
 
   const generatePassword = () => {
-    // Generate secure password with guaranteed character diversity
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const lowercase = 'abcdefghijklmnopqrstuvwxyz';
     const numbers = '0123456789';
     const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
     
     let password = '';
-    // Ensure at least one character from each category
     password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
     password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
     password += numbers.charAt(Math.floor(Math.random() * numbers.length));
     password += symbols.charAt(Math.floor(Math.random() * symbols.length));
     
-    // Fill remaining length with random characters from all categories
     const allChars = uppercase + lowercase + numbers + symbols;
     for (let i = 4; i < 16; i++) {
       password += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
     
-    // Shuffle the password to avoid predictable patterns
     password = password.split('').sort(() => Math.random() - 0.5).join('');
-    
     setFormData(prev => ({ ...prev, password }));
   };
 
@@ -65,7 +59,6 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
     setIsLoading(true);
 
     try {
-      // Validate and sanitize inputs
       if (!validateEmail(formData.email)) {
         throw new Error('Ogiltig e-postadress');
       }
@@ -75,7 +68,6 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
         throw new Error(`Lösenordet uppfyller inte kraven: ${passwordValidation.errors.join(', ')}`);
       }
 
-      // Create user through secure Edge Function
       const { data, error } = await supabase.functions.invoke('admin-create-user', {
         body: {
           email: sanitizeText(formData.email.toLowerCase().trim()),
@@ -94,7 +86,6 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
           description: `Användare ${formData.email} har skapats framgångsrikt.`,
         });
 
-        // Reset form
         setFormData({
           email: '',
           password: '',
@@ -183,9 +174,6 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
                 Generera
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Lösenordet måste vara minst 8 tecken långt och innehålla stora bokstäver, små bokstäver, siffror och symboler
-            </p>
           </div>
 
           <div>
