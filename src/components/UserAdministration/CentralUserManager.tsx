@@ -326,7 +326,7 @@ export function CentralUserManager() {
         <div className="flex gap-2">
           <Button onClick={() => setIsAdvancedCreateDialogOpen(true)} className="w-full sm:w-auto">
             <UserPlus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Avancerad användarregistrering</span>
+            <span className="hidden sm:inline">Skapa ny användare</span>
             <span className="sm:hidden">Skapa</span>
           </Button>
         </div>

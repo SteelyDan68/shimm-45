@@ -210,13 +210,15 @@ const handler = async (req: Request): Promise<Response> => {
     // First, clean up any potential ghost references for this email
     console.log('Performing cleanup of any ghost references...');
     try {
-      const { data: cleanupResult, error: cleanupError } = await supabaseAdmin
+      const { error: cleanupError } = await supabaseAdmin
         .rpc('cleanup_user_references', { target_email: email });
       
       if (cleanupError) {
         console.error('Cleanup error (non-critical):', cleanupError);
+        console.error('Cleanup error details:', JSON.stringify(cleanupError, null, 2));
+        // Continue anyway - cleanup failure shouldn't block user creation
       } else {
-        console.log('Cleanup result:', cleanupResult);
+        console.log('Ghost reference cleanup completed successfully');
       }
     } catch (cleanupErr) {
       console.log('Cleanup failed (continuing anyway):', cleanupErr);
