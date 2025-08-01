@@ -195,11 +195,12 @@ const StefanMemoryManager: React.FC = () => {
     }
 
     setBulkImporting(true);
-    setImportProgress(0);
+    setImportProgress(10); // Start progress
     setImportResult(null);
 
     try {
       const content = await file.text();
+      setImportProgress(20); // File read
       
       const { data, error } = await supabase.functions.invoke('bulk-import-stefan-memory', {
         body: { jsonlContent: content }
@@ -208,7 +209,7 @@ const StefanMemoryManager: React.FC = () => {
       if (error) throw error;
 
       setImportResult(data);
-      setImportProgress(100);
+      setImportProgress(100); // Complete
 
       toast({
         title: "Bulk-import slutförd",
@@ -378,10 +379,13 @@ const StefanMemoryManager: React.FC = () => {
             {bulkImporting && (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Importerar minnesfragment...</span>
-                  <span>{importProgress}%</span>
+                  <span>Processar minnesfragment... (detta kan ta flera minuter)</span>
+                  <span>{importProgress < 100 ? 'Pågår...' : '100%'}</span>
                 </div>
                 <Progress value={importProgress} className="w-full" />
+                <div className="text-xs text-muted-foreground">
+                  Varje fragment kräver OpenAI embedding-generering. Var patient...
+                </div>
               </div>
             )}
 
