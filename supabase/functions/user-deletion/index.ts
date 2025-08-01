@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
     const { count: assessmentAssignmentsCount, error: assessmentAssignmentsError } = await supabase
       .from('assessment_form_assignments')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (assessmentAssignmentsError) {
       result.errors.push(`Failed to delete assessment form assignments: ${assessmentAssignmentsError.message}`);
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
     const { count: assessmentRoundsCount, error: assessmentRoundsError } = await supabase
       .from('assessment_rounds')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (assessmentRoundsError) {
       result.errors.push(`Failed to delete assessment rounds: ${assessmentRoundsError.message}`);
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     const { count: calendarEventsCount, error: calendarEventsError } = await supabase
       .from('calendar_events')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (calendarEventsError) {
       result.errors.push(`Failed to delete calendar events: ${calendarEventsError.message}`);
@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
     const { count: clientDataCacheCount, error: clientDataCacheError } = await supabase
       .from('client_data_cache')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (clientDataCacheError) {
       result.errors.push(`Failed to delete client data cache: ${clientDataCacheError.message}`);
@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
     const { count: clientDataContainersCount, error: clientDataContainersError } = await supabase
       .from('client_data_containers')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (clientDataContainersError) {
       result.errors.push(`Failed to delete client data containers: ${clientDataContainersError.message}`);
@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
     const { count: pathEntriesCount, error: pathEntriesError } = await supabase
       .from('path_entries')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (pathEntriesError) {
       result.errors.push(`Failed to delete path entries: ${pathEntriesError.message}`);
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     const { count: pillarAssessmentsCount, error: assessmentsError } = await supabase
       .from('pillar_assessments')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (assessmentsError) {
       result.errors.push(`Failed to delete pillar assessments: ${assessmentsError.message}`);
@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
     const { count: tasksCount, error: tasksError } = await supabase
       .from('tasks')
       .delete({ count: 'exact' })
-      .eq('client_id', userId);
+      .eq('user_id', userId);
     
     if (tasksError) {
       result.errors.push(`Failed to delete tasks: ${tasksError.message}`);
@@ -264,31 +264,8 @@ Deno.serve(async (req) => {
       console.log(`🗑️ Deleted ${rolesCount} user roles for ${userName}`);
     }
 
-    // Delete from clients table by user_id (primary relationship)
-    const { count: clientsCount, error: clientsError } = await supabase
-      .from('clients')
-      .delete({ count: 'exact' })
-      .eq('user_id', userId);
-    
-    if (clientsError) {
-      result.errors.push(`Failed to delete clients: ${clientsError.message}`);
-    } else {
-      result.deleted_other_data += clientsCount || 0;
-      console.log(`🗑️ Deleted ${clientsCount} client records for ${userName}`);
-    }
-
-    // Also delete from clients table by email (fallback for legacy data)
-    const { count: legacyClientsCount, error: legacyError } = await supabase
-      .from('clients')
-      .delete({ count: 'exact' })
-      .eq('email', user.email);
-    
-    if (legacyError) {
-      console.log(`ℹ️ No legacy client data found by email for ${userName}`);
-    } else if (legacyClientsCount && legacyClientsCount > 0) {
-      result.deleted_other_data += legacyClientsCount;
-      console.log(`🗑️ Deleted ${legacyClientsCount} legacy client records by email for ${userName}`);
-    }
+    // Note: Clients table has been consolidated into profiles table - no separate deletion needed
+    console.log(`ℹ️ No legacy client data found by email for ${userName}`);
 
     // 3. Finally, delete the profile
     const { error: deleteProfileError } = await supabase
