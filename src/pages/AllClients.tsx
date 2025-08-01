@@ -24,7 +24,7 @@ export const AllClients = () => {
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="h-4 w-4 mr-2" />
-          {showForm ? 'Avbryt' : 'Lägg till klient'}
+          {showForm ? 'Avbryt' : 'Lägg till användare'}
         </Button>
       </div>
 
@@ -32,7 +32,7 @@ export const AllClients = () => {
       {showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Lägg till ny klient</CardTitle>
+            <CardTitle>Lägg till ny användare</CardTitle>
           </CardHeader>
           <CardContent>
             <ClientForm onSuccess={handleSuccess} />

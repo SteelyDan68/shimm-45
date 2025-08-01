@@ -183,9 +183,9 @@ export const Dashboard = () => {
             {hasRole('admin') && !hasRole('superadmin') && ' - Admin behörigheter'}
           </p>
         </div>
-        <Button onClick={() => navigate('/clients')}>
+        <Button onClick={() => navigate('/administration')}>
           <Plus className="h-4 w-4 mr-2" />
-          Hantera klienter
+          Hantera användare
         </Button>
       </div>
 

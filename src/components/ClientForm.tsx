@@ -115,7 +115,7 @@ export const ClientForm = ({ onSuccess }: ClientFormProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lägg till ny klient</CardTitle>
+        <CardTitle>Lägg till ny användare</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

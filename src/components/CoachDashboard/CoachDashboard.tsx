@@ -32,10 +32,10 @@ export function CoachDashboard() {
 
   const quickActions = [
     {
-      title: 'Lägg till klient',
-      description: 'Registrera en ny klient',
+      title: 'Lägg till användare',
+      description: 'Registrera en ny användare',
       icon: Plus,
-      action: () => navigate('/clients?action=add'),
+      action: () => navigate('/administration'),
       color: 'bg-blue-500'
     },
     {
