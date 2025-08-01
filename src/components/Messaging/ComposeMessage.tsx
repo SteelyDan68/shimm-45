@@ -58,45 +58,12 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
 
   const fetchRecipients = async () => {
     try {
-      // Get current user's roles to determine who they can message
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user?.id);
-
-      if (rolesError) throw rolesError;
-      
-      const roles = userRoles?.map(r => r.role) || [];
-      
-      let query = supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select(`
-          id, 
-          first_name, 
-          last_name, 
-          email,
-          user_roles!inner(role)
-        `)
+        .select('id, first_name, last_name, email')
         .neq('id', user?.id);
 
-      // If user is a client, they can only message coaches
-      if (roles.includes('client') && !roles.includes('coach') && !roles.includes('admin') && !roles.includes('superadmin')) {
-        query = query.eq('user_roles.role', 'coach');
-      }
-      // If user is a coach, they can message clients and other coaches
-      else if (roles.includes('coach')) {
-        query = query.in('user_roles.role', ['client', 'coach']);
-      }
-      // Admins and superadmins can message anyone except other superadmins (unless they are superadmin)
-      else if (roles.includes('admin') || roles.includes('superadmin')) {
-        if (!roles.includes('superadmin')) {
-          query = query.neq('user_roles.role', 'superadmin');
-        }
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
-      
       setRecipients(data || []);
     } catch (error) {
       console.error('Error fetching recipients:', error);

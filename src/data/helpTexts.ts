@@ -108,11 +108,7 @@ export const helpTexts = {
     aiAssisted: "Meddelandet innehåller AI-genererade förslag eller innehåll.",
     readStatus: "Visar om meddelandet har lästs av mottagaren.",
     messagePreferences: "Inställningar för hur du vill få notifikationer och hantera meddelanden.",
-    notifications: "Automatiska notifikationer för nya meddelanden och viktiga uppdateringar.",
-    conversationList: "Modern chattlista som Facebook Messenger med olästa meddelanden och senaste aktivitet.",
-    conversationView: "Avancerad chattvy med meddelandegruppering, tidsstämplar och läskvitton.",
-    permissions: "Klienter kan endast meddela sina coaches - inte andra klienter eller superadmins.",
-    messengerFeatures: "Facebook Messenger-nivå med realtid, typing-indikator och online-status."
+    notifications: "Automatiska notifikationer för nya meddelanden och viktiga uppdateringar."
   },
 
   // Analytics
