@@ -398,87 +398,6 @@ export type Database = {
         }
         Relationships: []
       }
-      clients: {
-        Row: {
-          category: string
-          created_at: string
-          custom_fields: Json | null
-          email: string | null
-          facebook_page: string | null
-          follower_counts: Json | null
-          id: string
-          instagram_handle: string | null
-          logic_state: Json | null
-          manager_email: string | null
-          manager_name: string | null
-          name: string
-          notes: string | null
-          phone: string | null
-          primary_contact_email: string | null
-          primary_contact_name: string | null
-          profile_metadata: Json | null
-          status: string
-          tags: string[] | null
-          tiktok_handle: string | null
-          updated_at: string
-          user_id: string
-          velocity_score: number | null
-          youtube_channel: string | null
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          custom_fields?: Json | null
-          email?: string | null
-          facebook_page?: string | null
-          follower_counts?: Json | null
-          id?: string
-          instagram_handle?: string | null
-          logic_state?: Json | null
-          manager_email?: string | null
-          manager_name?: string | null
-          name: string
-          notes?: string | null
-          phone?: string | null
-          primary_contact_email?: string | null
-          primary_contact_name?: string | null
-          profile_metadata?: Json | null
-          status?: string
-          tags?: string[] | null
-          tiktok_handle?: string | null
-          updated_at?: string
-          user_id: string
-          velocity_score?: number | null
-          youtube_channel?: string | null
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          custom_fields?: Json | null
-          email?: string | null
-          facebook_page?: string | null
-          follower_counts?: Json | null
-          id?: string
-          instagram_handle?: string | null
-          logic_state?: Json | null
-          manager_email?: string | null
-          manager_name?: string | null
-          name?: string
-          notes?: string | null
-          phone?: string | null
-          primary_contact_email?: string | null
-          primary_contact_name?: string | null
-          profile_metadata?: Json | null
-          status?: string
-          tags?: string[] | null
-          tiktok_handle?: string | null
-          updated_at?: string
-          user_id?: string
-          velocity_score?: number | null
-          youtube_channel?: string | null
-        }
-        Relationships: []
-      }
       data_deletion_requests: {
         Row: {
           admin_notes: string | null
@@ -1197,6 +1116,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stefan_memory: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          embedding: string | null
+          id: string
+          source: string
+          tags: string[] | null
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          source: string
+          tags?: string[] | null
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          source?: string
+          tags?: string[] | null
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           ai_generated: boolean
@@ -1510,22 +1465,7 @@ export type Database = {
           week_end_date?: string
           week_start_date?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "weekly_email_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_user_mapping"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "weekly_email_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       welcome_assessments: {
         Row: {
@@ -1574,19 +1514,13 @@ export type Database = {
       }
     }
     Views: {
-      client_user_mapping: {
-        Row: {
-          client_id: string | null
-          display_name: string | null
-          email: string | null
-          first_name: string | null
-          last_name: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1607,12 +1541,44 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
       has_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
       }
       is_admin: {
         Args: { _user_id: string }
@@ -1621,6 +1587,38 @@ export type Database = {
       is_organization_member: {
         Args: { _user_id: string; _organization_id: string }
         Returns: boolean
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
       validate_invitation_token: {
         Args: { invitation_token: string }
@@ -1631,6 +1629,30 @@ export type Database = {
           expires_at: string
           is_valid: boolean
         }[]
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
     }
     Enums: {
