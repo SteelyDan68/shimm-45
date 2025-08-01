@@ -22,8 +22,10 @@ import {
   BarChart3,
   UserCheck,
   UserPlus,
-  MessageSquare
+  MessageSquare,
+  Brain
 } from 'lucide-react';
+import StefanMemoryManager from './StefanMemoryManager';
 
 interface AdminDashboardProps {
   onNavigateToTab?: (tab: string) => void;
@@ -74,6 +76,13 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
       icon: Bot,
       action: () => onNavigateToTab?.('stefan-data'),
       color: 'bg-orange-500'
+    },
+    {
+      title: 'Stefan Minnesbank',
+      description: 'Hantera AI-minnesfragment med embeddings',
+      icon: Brain,
+      action: () => onNavigateToTab?.('stefan-memory'),
+      color: 'bg-pink-500'
     }
   ];
 

@@ -31,6 +31,7 @@ import { SystemIntegrityPanel } from "@/components/SystemIntegrityPanel";
 
 import { DataRightsCenter } from "@/components/DataRightsCenter";
 import StefanTrainingData from "@/components/StefanTrainingData";
+import StefanMemoryManager from "@/components/Admin/StefanMemoryManager";
 
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { helpTexts } from "@/data/helpTexts";
@@ -208,7 +209,7 @@ export function Administration() {
       
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profil</span>
@@ -232,6 +233,10 @@ export function Administration() {
           <TabsTrigger value="stefan-data" className="flex items-center gap-2">
             <Bot className="h-4 w-4" />
             <span className="hidden sm:inline">Stefandata</span>
+          </TabsTrigger>
+          <TabsTrigger value="stefan-memory" className="flex items-center gap-2">
+            <Key className="h-4 w-4" />
+            <span className="hidden sm:inline">Minnesbank</span>
           </TabsTrigger>
           <TabsTrigger value="gdpr" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -562,6 +567,11 @@ export function Administration() {
         {/* Stefan Training Data Tab */}
         <TabsContent value="stefan-data">
           <StefanTrainingData />
+        </TabsContent>
+
+        {/* Stefan Memory Manager Tab */}
+        <TabsContent value="stefan-memory">
+          <StefanMemoryManager />
         </TabsContent>
 
         {/* GDPR Tab */}
