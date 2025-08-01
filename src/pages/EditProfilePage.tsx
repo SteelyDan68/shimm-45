@@ -9,8 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Edit } from 'lucide-react';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
 
-export const EditProfilePage = () => {
-  const { user } = useAuth();
+export default function EditProfilePage() {
+  const { user, hasRole } = useAuth();
   const navigate = useNavigate();
   const { saveExtendedProfile, getExtendedProfile, uploadProfilePicture, isLoading } = useExtendedProfile();
   const [initialData, setInitialData] = useState<ExtendedProfileData | null>(null);
@@ -39,13 +39,18 @@ export const EditProfilePage = () => {
     const result = await saveExtendedProfile(data);
     
     if (result.success) {
-      // Efter uppdatering, gå tillbaka till dashboard
-      navigate('/client-dashboard');
+      // Navigate based on user role
+      if (hasRole('client')) {
+        navigate('/client-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 
-  const handleProfilePictureUpload = async (file: File): Promise<string | null> => {
-    return await uploadProfilePicture(file);
+  const handleProfilePictureUpload = async (file: File): Promise<string> => {
+    const result = await uploadProfilePicture(file);
+    return result || '';
   };
 
   if (loading) {
@@ -72,12 +77,17 @@ export const EditProfilePage = () => {
     );
   }
 
+  const getBackUrl = () => {
+    if (hasRole('client')) return '/client-dashboard';
+    return '/dashboard';
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/client-dashboard')}
+          onClick={() => navigate(getBackUrl())}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -93,7 +103,10 @@ export const EditProfilePage = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Här kan du uppdatera din omfattande profilinformation. Dina ändringar sparas säkert och används för att ge dig bättre personliga råd.
+              {hasRole('client') 
+                ? 'Här kan du uppdatera din profilinformation. Grundläggande uppgifter som namn och e-post hanteras av systemadministratörer.'
+                : 'Här kan du uppdatera din omfattande profilinformation. Dina ändringar sparas säkert och används för att ge dig bättre personliga råd.'
+              }
             </p>
           </CardContent>
         </Card>
@@ -104,7 +117,8 @@ export const EditProfilePage = () => {
         onUploadProfilePicture={handleProfilePictureUpload}
         isLoading={isLoading}
         initialData={initialData}
+        isClientView={hasRole('client')}
       />
     </div>
   );
-};
+}

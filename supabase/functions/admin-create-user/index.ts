@@ -13,6 +13,26 @@ interface CreateUserRequest {
   firstName: string;
   lastName: string;
   role: string;
+  extendedProfile?: {
+    personnummer?: string;
+    phone?: string;
+    address?: {
+      street?: string;
+      postalCode?: string;
+      city?: string;
+      country?: string;
+    };
+    bio?: string;
+    organization?: string;
+    job_title?: string;
+    instagram_handle?: string;
+    youtube_handle?: string;
+    tiktok_handle?: string;
+    facebook_handle?: string;
+    twitter_handle?: string;
+    snapchat_handle?: string;
+  };
+  sendInviteEmail?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -118,8 +138,24 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log('Extracting fields from request body...');
-    const { email, password, firstName, lastName, role }: CreateUserRequest = requestBody;
-    console.log('Fields extracted:', { email, firstName, lastName, role, hasPassword: !!password });
+    const { 
+      email, 
+      password, 
+      firstName, 
+      lastName, 
+      role, 
+      extendedProfile,
+      sendInviteEmail = false 
+    }: CreateUserRequest = requestBody;
+    console.log('Fields extracted:', { 
+      email, 
+      firstName, 
+      lastName, 
+      role, 
+      hasPassword: !!password,
+      hasExtendedProfile: !!extendedProfile,
+      sendInviteEmail 
+    });
 
     // Input validation
     console.log('Performing input validation...');
@@ -148,8 +184,19 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Validate personnummer if provided
+    if (extendedProfile?.personnummer) {
+      const cleaned = extendedProfile.personnummer.replace(/\D/g, '');
+      if (cleaned.length !== 12 || !/^\d{12}$/.test(cleaned)) {
+        return new Response(
+          JSON.stringify({ error: 'Personnummer must be 12 digits' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // Validate role is one of the allowed values
-    const allowedRoles = ['superadmin', 'admin', 'manager', 'editor', 'organization', 'client', 'user'];
+    const allowedRoles = ['superadmin', 'admin', 'coach', 'client', 'user'];
     if (!allowedRoles.includes(role)) {
       return new Response(
         JSON.stringify({ error: 'Invalid role specified' }),
@@ -292,6 +339,51 @@ const handler = async (req: Request): Promise<Response> => {
         JSON.stringify({ error: 'Profil skapades inte automatiskt av databasutlösaren' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Update profile with extended information if provided
+    if (extendedProfile) {
+      console.log('Updating profile with extended information...');
+      
+      const profileUpdateData: any = {};
+      
+      if (extendedProfile.personnummer) {
+        profileUpdateData.profile_metadata = {
+          personnummer: extendedProfile.personnummer
+        };
+      }
+      
+      if (extendedProfile.phone) profileUpdateData.phone = extendedProfile.phone;
+      if (extendedProfile.bio) profileUpdateData.bio = extendedProfile.bio;
+      if (extendedProfile.organization) profileUpdateData.organization = extendedProfile.organization;
+      if (extendedProfile.job_title) profileUpdateData.job_title = extendedProfile.job_title;
+      
+      // Address information
+      if (extendedProfile.address) {
+        profileUpdateData.address = extendedProfile.address;
+      }
+      
+      // Social media handles
+      if (extendedProfile.instagram_handle) profileUpdateData.instagram_handle = extendedProfile.instagram_handle;
+      if (extendedProfile.youtube_handle) profileUpdateData.youtube_handle = extendedProfile.youtube_handle;
+      if (extendedProfile.tiktok_handle) profileUpdateData.tiktok_handle = extendedProfile.tiktok_handle;
+      if (extendedProfile.facebook_handle) profileUpdateData.facebook_handle = extendedProfile.facebook_handle;
+      if (extendedProfile.twitter_handle) profileUpdateData.twitter_handle = extendedProfile.twitter_handle;
+      if (extendedProfile.snapchat_handle) profileUpdateData.snapchat_handle = extendedProfile.snapchat_handle;
+
+      if (Object.keys(profileUpdateData).length > 0) {
+        const { error: profileUpdateError } = await supabaseAdmin
+          .from('profiles')
+          .update(profileUpdateData)
+          .eq('id', newUser.user.id);
+
+        if (profileUpdateError) {
+          console.error('Error updating profile with extended data:', profileUpdateError);
+          // Don't fail the entire operation, just log the error
+        } else {
+          console.log('Profile updated with extended information successfully');
+        }
+      }
     }
 
     // Assign role using admin client

@@ -16,13 +16,15 @@ interface ExtendedProfileFormProps {
   onUploadProfilePicture: (file: File) => Promise<string>;
   isLoading: boolean;
   initialData: ExtendedProfileData | null;
+  isClientView?: boolean; // New prop to indicate if this is for client self-editing
 }
 
 export function ExtendedProfileForm({ 
   onComplete, 
   onUploadProfilePicture, 
   isLoading, 
-  initialData 
+  initialData,
+  isClientView = false
 }: ExtendedProfileFormProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
@@ -149,7 +151,7 @@ export function ExtendedProfileForm({
 
   return (
     <div className="space-y-6">
-      {/* Basic Information - Read-only display since it's managed elsewhere */}
+      {/* Basic Information */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -157,7 +159,10 @@ export function ExtendedProfileForm({
             Grundinformation
           </CardTitle>
           <CardDescription>
-            Namn och kontaktuppgifter hanteras i din kontoprofil och onboarding
+            {isClientView 
+              ? "Namn och e-post hanteras av systemadministratörer och kan inte ändras här"
+              : "Namn och kontaktuppgifter hanteras i din kontoprofil och onboarding"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -194,6 +199,11 @@ export function ExtendedProfileForm({
               <div className="text-sm text-muted-foreground">
                 E-post: {formData.email}
               </div>
+              {isClientView && formData.personnummer && (
+                <div className="text-sm text-muted-foreground">
+                  Personnummer: {formData.personnummer}
+                </div>
+              )}
             </div>
           </div>
 
@@ -216,11 +226,17 @@ export function ExtendedProfileForm({
                 type="date"
                 value={formData.date_of_birth || ''}
                 onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                disabled={isClientView}
               />
+              {isClientView && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Hanteras av systemadministratörer
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="gender">Kön</Label>
-              <Select value={formData.gender || ''} onValueChange={(value) => handleInputChange('gender', value)}>
+              <Select value={formData.gender || ''} onValueChange={(value) => handleInputChange('gender', value)} disabled={isClientView}>
                 <SelectTrigger>
                   <SelectValue placeholder="Välj kön" />
                 </SelectTrigger>
@@ -231,6 +247,11 @@ export function ExtendedProfileForm({
                   <SelectItem value="vill_inte_ange">Vill inte ange</SelectItem>
                 </SelectContent>
               </Select>
+              {isClientView && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Hanteras av systemadministratörer
+                </p>
+              )}
             </div>
           </div>
         </CardContent>

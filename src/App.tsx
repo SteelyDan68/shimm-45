@@ -17,7 +17,7 @@ import { UserProfile } from "./pages/UserProfile";
 import UserCrmProfile from "./pages/UserCrmProfile";
 import { ClientDashboard } from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
-import { EditProfilePage } from "./pages/EditProfilePage";
+import EditProfilePage from "./pages/EditProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
 import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
