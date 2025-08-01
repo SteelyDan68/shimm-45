@@ -66,12 +66,8 @@ export const fetchUnifiedClients = async (): Promise<UnifiedClient[]> => {
 
       const roles = userRoles?.map(r => r.role) || [];
       
-      // Only include users with client role OR users with profile data that indicates they're clients
-      const isClient = roles.includes('client') || 
-                      profile.client_status || 
-                      profile.onboarding_completed ||
-                      profile.primary_role ||
-                      (profile.preferences as any)?.onboardingCompleted;
+      // Only include users with explicit client role
+      const isClient = roles.includes('client');
 
       if (isClient) {
         const unifiedClient: UnifiedClient = {
