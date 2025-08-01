@@ -201,14 +201,22 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
         sendInviteEmail: formData.sendInviteEmail
       };
 
+      console.log('Attempting to create user with data:', userData);
+
       // Call enhanced backend function
       const { data, error } = await supabase.functions.invoke('admin-create-user', {
         body: userData
       });
 
-      if (error) throw error;
+      console.log('Response from admin-create-user:', { data, error });
 
-      if (data.success) {
+      if (error) {
+        console.error('Error creating user:', error);
+        throw error;
+      }
+
+      if (data?.success) {
+        console.log('User created successfully:', data);
         toast({
           title: "Användare skapad",
           description: `Användare ${formData.email} har skapats framgångsrikt.${formData.sendInviteEmail ? ' En inbjudan har skickats via e-post.' : ''}`,
