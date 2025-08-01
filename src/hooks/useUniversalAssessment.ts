@@ -73,7 +73,7 @@ export const useUniversalAssessment = () => {
         {
           body: {
             template_id: templateId,
-            client_id: clientId,
+            user_id: clientId,
             answers,
             calculated_scores: scores,
             context: currentTemplate?.context
@@ -87,7 +87,7 @@ export const useUniversalAssessment = () => {
 
       const response: AssessmentResponse = {
         id: `response_${Date.now()}`,
-        client_id: clientId,
+        user_id: clientId,
         template_id: templateId,
         answers,
         calculated_scores: scores,
@@ -153,7 +153,7 @@ export const useUniversalAssessment = () => {
       // Convert to AssessmentResponse format
       const responses = (data || []).map(item => ({
         id: item.id,
-        client_id: item.user_id,
+        user_id: item.user_id,
         template_id: 'universal',
         answers: item.answers as Record<string, any>,
         calculated_scores: {

@@ -26,7 +26,7 @@ export const useClientLogic = () => {
       console.log('Processing client logic for:', clientId);
       
       const { data, error } = await supabase.functions.invoke('client-logic', {
-        body: { client_id: clientId }
+        body: { user_id: clientId }
       });
 
       if (error) {

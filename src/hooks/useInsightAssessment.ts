@@ -38,7 +38,7 @@ export const useInsightAssessment = (clientId: string) => {
         'analyze-assessment',
         {
           body: {
-            client_id: clientId,
+            user_id: clientId,
             client_name: clientName,
             assessment_scores: assessmentData.scores,
             comments: assessmentData.comments,
@@ -87,7 +87,7 @@ export const useInsightAssessment = (clientId: string) => {
       }
 
       const pathEntryData = {
-        client_id: clientId,
+        user_id: clientId,
         created_by: user.id,
         type: 'assessment' as const,
         title: 'Självskattning genomförd',
@@ -108,7 +108,7 @@ export const useInsightAssessment = (clientId: string) => {
 
       // 3. Create AI-generated path_entry with recommendations
       const aiPathEntryData = {
-        client_id: clientId,
+        user_id: clientId,
         created_by: user.id,
         type: 'recommendation' as const,
         title: 'AI-analys och rekommendationer',

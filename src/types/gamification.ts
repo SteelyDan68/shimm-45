@@ -1,6 +1,6 @@
 export interface UserProgress {
   id: string;
-  client_id: string;
+  user_id: string;
   current_xp: number;
   current_level: number;
   xp_to_next_level: number;
@@ -34,7 +34,7 @@ export interface Achievement {
 
 export interface UserAchievement {
   id: string;
-  client_id: string;
+  user_id: string;
   achievement_id: string;
   achievement_key: string;
   earned_at: string;
@@ -45,7 +45,7 @@ export interface UserAchievement {
 
 export interface DailyCheckIn {
   id: string;
-  client_id: string;
+  user_id: string;
   date: string; // YYYY-MM-DD format
   mood_score: number; // 1-10
   energy_level: number; // 1-10
@@ -62,7 +62,7 @@ export interface DailyCheckIn {
 
 export interface CoachingInteraction {
   id: string;
-  client_id: string;
+  user_id: string;
   interaction_type: 'notification' | 'reminder' | 'celebration' | 'check_in_prompt' | 'insight';
   trigger_event: string; // What triggered this interaction
   message_content: string;
@@ -76,7 +76,7 @@ export interface CoachingInteraction {
 }
 
 export interface ProgressAnalytics {
-  client_id: string;
+  user_id: string;
   period: 'week' | 'month' | 'quarter';
   xp_gained: number;
   level_ups: number;
@@ -96,7 +96,7 @@ export interface ProgressAnalytics {
 
 export interface SmartNotification {
   id: string;
-  client_id: string;
+  user_id: string;
   notification_type: 'check_in_reminder' | 'streak_warning' | 'achievement_earned' | 'pillar_focus' | 'custom_coaching';
   title: string;
   message: string;

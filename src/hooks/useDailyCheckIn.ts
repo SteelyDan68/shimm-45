@@ -45,7 +45,7 @@ export const useDailyCheckIn = (clientId?: string) => {
   }, [clientId]);
 
   // Submit daily check-in
-  const submitCheckIn = useCallback(async (checkInData: Omit<DailyCheckIn, 'id' | 'client_id' | 'completed_at' | 'xp_earned' | 'streak_maintained' | 'created_at'>): Promise<boolean> => {
+  const submitCheckIn = useCallback(async (checkInData: Omit<DailyCheckIn, 'id' | 'user_id' | 'completed_at' | 'xp_earned' | 'streak_maintained' | 'created_at'>): Promise<boolean> => {
     if (!clientId) return false;
 
     try {
@@ -66,7 +66,7 @@ export const useDailyCheckIn = (clientId?: string) => {
 
       const fullCheckIn: DailyCheckIn = {
         id: `checkin_${Date.now()}`,
-        client_id: clientId,
+        user_id: clientId,
         date: today,
         completed_at: now,
         xp_earned: 25,
@@ -102,7 +102,7 @@ export const useDailyCheckIn = (clientId?: string) => {
       // Trigger AI coaching response based on check-in
       await supabase.functions.invoke('proactive-coaching-scheduler', {
         body: {
-          client_id: clientId,
+          user_id: clientId,
           trigger_event: 'daily_check_in',
           check_in_data: fullCheckIn
         }

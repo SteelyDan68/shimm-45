@@ -30,7 +30,7 @@ export const useContextualReminders = (clientId?: string) => {
     try {
       const newReminder: ContextualReminder = {
         id: `reminder_${Date.now()}`,
-        client_id: clientId,
+        user_id: clientId,
         habit_id: habitId,
         reminder_type: reminderType,
         trigger_condition: triggerCondition,
@@ -45,7 +45,7 @@ export const useContextualReminders = (clientId?: string) => {
       const { error } = await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           type: 'system',
           title: `🔔 Kontextuell påminnelse skapad`,
           details: `${reminderType} - ${messageTemplate.substring(0, 50)}...`,
@@ -116,7 +116,7 @@ export const useContextualReminders = (clientId?: string) => {
       await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId!,
+          user_id: clientId!,
           type: 'notification',
           title: `🔔 Påminnelse skickad`,
           details: personalizedMessage,
@@ -167,7 +167,7 @@ export const useContextualReminders = (clientId?: string) => {
       const { data, error } = await supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .contains('metadata', { is_reminder: true })
         .order('created_at', { ascending: false });
 
@@ -195,7 +195,7 @@ export const useContextualReminders = (clientId?: string) => {
       const { data: completionData } = await supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('user_id', clientId)
         .contains('metadata', { is_habit_completion: true })
         .order('created_at', { ascending: false })
         .limit(100);

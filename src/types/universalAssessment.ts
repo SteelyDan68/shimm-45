@@ -35,7 +35,7 @@ export interface AssessmentTemplate {
 
 export interface AssessmentResponse {
   id: string;
-  client_id: string;
+  user_id: string;
   template_id: string;
   answers: Record<string, any>;
   calculated_scores: {
@@ -59,7 +59,7 @@ export interface AssessmentResponse {
 
 export interface UserProfile {
   id: string;
-  client_id: string;
+  user_id: string;
   primary_role: string;
   life_situation: string;
   current_challenges: string[];

@@ -22,7 +22,7 @@ export const useSmartNotifications = (clientId?: string) => {
 
     try {
       const notification: Omit<SmartNotification, 'id' | 'created_at' | 'sent_at'> = {
-        client_id: clientId,
+        user_id: clientId,
         notification_type: notificationType,
         title,
         message,
@@ -144,7 +144,7 @@ export const useSmartNotifications = (clientId?: string) => {
         const metadata = entry.metadata as any;
         return {
           id: entry.id,
-          client_id: entry.user_id,
+          user_id: entry.user_id,
           notification_type: metadata?.notification_type,
           title: entry.title.replace('📬 ', ''),
           message: entry.details || '',

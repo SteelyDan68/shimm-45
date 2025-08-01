@@ -13,7 +13,7 @@ export const useProgress = (clientId?: string) => {
   // Initialize user progress if it doesn't exist
   const initializeProgress = useCallback(async (clientId: string): Promise<UserProgress> => {
     const initialProgress = {
-      client_id: clientId,
+      user_id: clientId,
       current_xp: 0,
       current_level: 1,
       xp_to_next_level: 100,
@@ -118,7 +118,7 @@ export const useProgress = (clientId?: string) => {
       await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           type: 'action',
           title: `+${amount} XP: ${reason}`,
           details: `Totalt XP: ${newXP} | Nivå: ${newLevel}`,
@@ -244,7 +244,7 @@ export const useProgress = (clientId?: string) => {
       if (!alreadyEarned && check.condition()) {
         const achievement: UserAchievement = {
           id: `achievement_${Date.now()}_${check.key}`,
-          client_id: clientId,
+          user_id: clientId,
           achievement_id: check.key,
           achievement_key: check.key,
           earned_at: new Date().toISOString(),

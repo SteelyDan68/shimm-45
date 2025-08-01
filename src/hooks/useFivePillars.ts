@@ -61,10 +61,10 @@ export const useFivePillars = (userId?: string) => {
         .from('client_pillar_assignments')
         .upsert({
           user_id: userId,
+          client_id: userId, // Temporary for DB compatibility
           pillar_type: pillarType,
           is_active: true,
-          assigned_by: user.id,
-          client_id: userId // For backward compatibility until fully migrated
+          assigned_by: user.id
         });
 
       if (error) throw error;

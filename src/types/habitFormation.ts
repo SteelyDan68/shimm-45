@@ -5,7 +5,7 @@ export type HabitCategory = 'self_care' | 'skills' | 'talent' | 'brand' | 'econo
 
 export interface NeuroplasticityHabit {
   id: string;
-  client_id: string;
+  user_id: string;
   title: string;
   description: string;
   category: HabitCategory;
@@ -74,7 +74,7 @@ export interface HabitAdjustment {
 }
 
 export interface HabitPattern {
-  client_id: string;
+  user_id: string;
   pattern_type: 'success_time' | 'failure_context' | 'mood_correlation' | 'difficulty_preference';
   pattern_data: Record<string, any>;
   confidence_score: number;
@@ -84,7 +84,7 @@ export interface HabitPattern {
 
 export interface SetbackEvent {
   id: string;
-  client_id: string;
+  user_id: string;
   habit_id?: string;
   setback_type: 'missed_days' | 'low_motivation' | 'external_disruption' | 'difficulty_spike' | 'life_change';
   severity: 'minor' | 'moderate' | 'major';
@@ -120,7 +120,7 @@ export interface RecoveryAction {
 }
 
 export interface HabitAnalytics {
-  client_id: string;
+  user_id: string;
   total_habits: number;
   active_habits: number;
   average_success_rate: number;
@@ -142,7 +142,7 @@ export interface HabitAnalytics {
 
 export interface ContextualReminder {
   id: string;
-  client_id: string;
+  user_id: string;
   habit_id: string;
   reminder_type: 'time_based' | 'location_based' | 'mood_based' | 'activity_based' | 'social_based';
   trigger_condition: Record<string, any>;

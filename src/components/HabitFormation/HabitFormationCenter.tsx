@@ -91,7 +91,7 @@ export const HabitFormationCenter: React.FC<HabitFormationCenterProps> = ({ clie
   const handleCreateHabit = async () => {
     const success = await createHabit({
       ...habitForm,
-      client_id: user?.id || '',
+      user_id: user?.id || '',
       current_commitment: habitForm.initial_commitment
     });
     

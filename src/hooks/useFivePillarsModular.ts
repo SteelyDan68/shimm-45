@@ -195,7 +195,7 @@ export const useFivePillarsModular = (clientId?: string) => {
             pillar_key: pillarKey,
             assessment_data: assessmentData,
             calculated_score: calculatedScore,
-            client_id: clientId
+            user_id: clientId
           }
         }
       );
@@ -288,7 +288,7 @@ export const useFivePillarsModular = (clientId?: string) => {
     
     try {
       const { data, error } = await supabase.functions.invoke('generate-overall-assessment', {
-        body: { client_id: clientId }
+        body: { user_id: clientId }
       });
 
       if (error) throw error;

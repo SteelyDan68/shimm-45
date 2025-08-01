@@ -29,7 +29,7 @@ export const useHabitFormation = (clientId?: string) => {
       const newHabit: NeuroplasticityHabit = {
         ...habitData,
         id: `habit_${Date.now()}`,
-        client_id: clientId,
+        user_id: clientId,
         current_repetitions: 0,
         completion_history: [],
         streak_current: 0,
@@ -44,7 +44,7 @@ export const useHabitFormation = (clientId?: string) => {
       const { error } = await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           type: 'action',
           title: `🎯 Ny vana: ${habitData.title}`,
           details: `Neuroplasticitet-baserad vana - ${habitData.frequency} ${habitData.difficulty}`,
@@ -136,7 +136,7 @@ export const useHabitFormation = (clientId?: string) => {
       await supabase
         .from('path_entries')
         .insert({
-          client_id: clientId,
+          user_id: clientId,
           type: 'action',
           title: `✅ ${habit.title} genomförd`,
           details: `Streak: ${updatedHabit.streak_current} | Kvalitet: ${completion.completion_quality}/10`,
@@ -190,7 +190,7 @@ export const useHabitFormation = (clientId?: string) => {
       if (daysSinceLastCompletion > expectedFrequency * 2) {
         const setback: SetbackEvent = {
           id: `setback_${Date.now()}_${habit.id}`,
-          client_id: clientId,
+          user_id: clientId,
           habit_id: habit.id,
           setback_type: daysSinceLastCompletion > expectedFrequency * 4 ? 'low_motivation' : 'missed_days',
           severity: daysSinceLastCompletion > expectedFrequency * 7 ? 'major' : 
@@ -225,7 +225,7 @@ export const useHabitFormation = (clientId?: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('habit-recovery-planner', {
         body: {
-          client_id: clientId,
+          user_id: clientId,
           setback_event: setback,
           habit_context: habits.find(h => h.id === setback.habit_id)
         }

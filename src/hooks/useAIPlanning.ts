@@ -148,7 +148,7 @@ export const useAIPlanning = (clientId?: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-ai-planning', {
         body: {
-          client_id: clientId,
+          user_id: clientId,
           recommendation_text: recommendationText,
           weeks: weeks
         }
