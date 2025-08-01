@@ -400,6 +400,7 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
 
     if (platforms.length === 0) {
       console.log('No social handles found for client');
+      result.errors.push('Inga sociala mediehandles konfigurerade för denna klient');
       return;
     }
 
