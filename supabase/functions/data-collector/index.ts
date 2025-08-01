@@ -61,14 +61,37 @@ serve(async (req) => {
       }
       
       // General API connectivity tests
+      console.log('Running non-RapidAPI tests in parallel...');
+      
+      // Run non-RapidAPI tests first (these can run in parallel)
+      const [firecrawlResult, googleSearchResult, socialBladeResult, rapidapiResult] = await Promise.all([
+        testFirecrawlApi(firecrawlApiKey),
+        testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
+        testSocialBladeApi(socialBladeApiKey),
+        testRapidApi()
+      ]);
+      
+      // Run RapidAPI tests sequentially to avoid conflicts with shared API key
+      console.log('Running individual RapidAPI tests sequentially...');
+      const instagramResult = await testInstagramRapidAPI();
+      console.log('Instagram test completed, waiting 1 second...');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+      
+      const tiktokResult = await testTikTokRapidAPI();
+      console.log('TikTok test completed, waiting 1 second...');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+      
+      const youtubeResult = await testYouTubeRapidAPI();
+      console.log('YouTube test completed');
+      
       const testResults = {
-        firecrawl: await testFirecrawlApi(firecrawlApiKey),
-        google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
-        social_blade: await testSocialBladeApi(socialBladeApiKey),
-        rapidapi: await testRapidApi(),
-        rapidapi_instagram: await testInstagramRapidAPI(),
-        rapidapi_tiktok: await testTikTokRapidAPI(),
-        rapidapi_youtube: await testYouTubeRapidAPI(),
+        firecrawl: firecrawlResult,
+        google_search: googleSearchResult,
+        social_blade: socialBladeResult,
+        rapidapi: rapidapiResult,
+        rapidapi_instagram: instagramResult,
+        rapidapi_tiktok: tiktokResult,
+        rapidapi_youtube: youtubeResult,
         
         // twitter_api removed due to authentication issues
       };
