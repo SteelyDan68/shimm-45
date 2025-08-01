@@ -43,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { deleteUserCompletely } from "@/utils/userDeletion";
 import { supabase } from "@/integrations/supabase/client";
 import { validateEmail, validatePasswordStrength, sanitizeText } from "@/utils/inputSanitization";
+import { useNavigate } from "react-router-dom";
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -60,6 +61,7 @@ const roleColors: Record<AppRole, string> = {
 
 export function CentralUserManager() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const { 
     users, 
@@ -564,11 +566,10 @@ export function CentralUserManager() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => {
-                                  setSelectedUser(user);
-                                  setIsFullProfileDialogOpen(true);
+                                  navigate(`/user/${user.id}`);
                                 }}>
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Visa fullständig profil
+                                  Visa CRM-profil
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => {
                                   setSelectedUser(user);
