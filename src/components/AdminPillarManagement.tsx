@@ -30,6 +30,7 @@ import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 
 interface Client {
   id: string;
@@ -68,9 +69,6 @@ export const AdminPillarManagement = () => {
     economy: { name: 'Economy', icon: '💰', description: 'Ekonomi och affärsutveckling' },
   };
 
-  useEffect(() => {
-    loadClients();
-  }, []);
 
   useEffect(() => {
     if (selectedClient) {
@@ -78,34 +76,18 @@ export const AdminPillarManagement = () => {
     }
   }, [selectedClient]);
 
-  const loadClients = async () => {
-    try {
-      setLoading(true);
-      // Use unified client fetching
-      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
-      const unifiedClients = await fetchUnifiedClients();
-      
-      // Map to expected format
-      const mappedClients = unifiedClients.map(client => ({
-        id: client.id,
-        name: client.name,
-        email: client.email,
-        category: client.category || 'general',
-        status: client.status
-      }));
-      
-      console.log('Clients loaded (AdminPillarManagement):', mappedClients.length, mappedClients.map(c => c.name));
-      setClients(mappedClients);
-    } catch (error: any) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda klienter: " + error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { clients: unifiedClients, loading: clientsLoading } = useUnifiedClients();
+
+  useEffect(() => {
+    setLoading(clientsLoading);
+    setClients(unifiedClients.map(client => ({
+      id: client.id,
+      name: client.name,
+      email: client.email,
+      category: client.category || 'general',
+      status: client.status
+    })));
+  }, [unifiedClients, clientsLoading]);
 
   const loadClientActivations = async () => {
     if (!selectedClient) return;

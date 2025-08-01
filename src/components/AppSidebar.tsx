@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
+import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 
 interface Client {
   id: string;
@@ -62,44 +63,24 @@ export function AppSidebar() {
   const { open, openMobile } = useSidebar();
   const location = useLocation();
   const { user, hasRole } = useAuth();
-  const [clients, setClients] = useState<Client[]>([]);
+  const { clients: unifiedClients } = useUnifiedClients();
   
   const mainItems = getMainItems(hasRole);
+  
+  // Map unified clients to sidebar format
+  const clients = unifiedClients.map(client => ({
+    id: client.id,
+    name: client.name,
+    category: client.category || 'general',
+    status: client.status,
+    user_id: client.id
+  }));
   
   const currentPath = location.pathname;
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
 
-  useEffect(() => {
-    if (user) {
-      loadClients();
-    }
-  }, [user]);
-
-  const loadClients = async () => {
-    if (!user) return;
-    
-    try {
-      // Use unified client fetching
-      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
-      const unifiedClients = await fetchUnifiedClients();
-      
-      // Map to expected format for sidebar
-      const mappedClients = unifiedClients.map(client => ({
-        id: client.id,
-        name: client.name,
-        category: client.category || 'general',
-        status: client.status,
-        user_id: client.id // Use client.id as user_id for user-centric navigation
-      }));
-      
-      console.log('Clients loaded (AppSidebar):', mappedClients.length, mappedClients.map(c => c.name));
-      setClients(mappedClients);
-    } catch (error) {
-      console.error('Error loading clients:', error);
-    }
-  };
 
   return (
     <Sidebar className={!open ? "w-14" : "w-60"} collapsible="icon">

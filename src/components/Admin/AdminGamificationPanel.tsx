@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProgress } from '@/hooks/useProgress';
 import { useSmartNotifications } from '@/hooks/useSmartNotifications';
 import { useToast } from '@/hooks/use-toast';
+import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Users, 
@@ -58,25 +59,12 @@ export const AdminGamificationPanel: React.FC = () => {
     reason: ''
   });
 
-  useEffect(() => {
-    loadClients();
-  }, []);
 
-  const loadClients = async () => {
-    try {
-      // Use unified client fetching
-      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
-      const unifiedClients = await fetchUnifiedClients();
-      setClients(unifiedClients);
-    } catch (error) {
-      console.error('Error loading clients:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda klienter",
-        variant: "destructive"
-      });
-    }
-  };
+  const { clients: unifiedClients, loading: clientsLoading } = useUnifiedClients();
+
+  useEffect(() => {
+    setClients(unifiedClients);
+  }, [unifiedClients]);
 
   const handleSendNotification = async () => {
     if (!selectedClientId) {

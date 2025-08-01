@@ -15,6 +15,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { ClientForm } from '@/components/ClientForm';
 import { ApiStatusChecker } from '@/components/ApiStatusChecker';
 import { HelpTooltip } from '@/components/HelpTooltip';
@@ -40,8 +41,8 @@ export const Dashboard = () => {
   const { user, hasRole, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { clients: unifiedClients, loading: clientsLoading } = useUnifiedClients();
   
-  const [clients, setClients] = useState<Client[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
     activeClients: 0,
@@ -50,6 +51,16 @@ export const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  
+  // Map unified clients to dashboard format
+  const clients = unifiedClients.map(client => ({
+    id: client.id,
+    name: client.name,
+    category: client.category,
+    status: client.status,
+    logic_state: client.logic_state,
+    created_at: client.created_at
+  }));
 
   useEffect(() => {
     if (user) {
@@ -65,7 +76,7 @@ export const Dashboard = () => {
       }
       loadDashboardData();
     }
-  }, [user, hasRole, navigate]);
+  }, [user, hasRole, navigate, unifiedClients, clientsLoading]);
 
   const checkClientOnboardingStatus = async () => {
     try {
@@ -89,23 +100,10 @@ export const Dashboard = () => {
   };
 
   const loadDashboardData = async () => {
-    if (!user) return;
+    if (!user || clientsLoading) return;
     
     setLoading(true);
     try {
-      // Load unified clients from profiles table
-      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
-      const unifiedClients = await fetchUnifiedClients();
-      
-      setClients(unifiedClients.map(client => ({
-        id: client.id,
-        name: client.name,
-        category: client.category,
-        status: client.status,
-        logic_state: client.logic_state,
-        created_at: client.created_at
-      })));
-
       // Calculate stats from unified clients
       const totalClients = unifiedClients.length;
       const activeClients = unifiedClients.filter(c => c.status === 'active').length;
@@ -143,7 +141,7 @@ export const Dashboard = () => {
 
   const handleSuccess = () => {
     setShowForm(false);
-    loadDashboardData();
+    // No need to manually reload - useUnifiedClients will handle updates
   };
 
   const getCategoryColor = (category: string) => {

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Eye, User, Mail, Phone, Brain } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
+import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { ClientLogicCard } from './ClientLogicCard';
 
 
@@ -22,6 +23,7 @@ interface Client {
   youtube_channel?: string;
   notes?: string;
   created_at: string;
+  user_id?: string;
 }
 
 interface ClientListProps {
@@ -32,46 +34,26 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { clients: unifiedClients, loading } = useUnifiedClients();
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  
+  // Map unified clients to expected Client format
+  const clients = unifiedClients.map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email || '',
+    category: client.category || 'general',
+    status: client.status,
+    user_id: client.user_id || user?.id,
+    created_at: client.created_at,
+    // These fields don't exist in unified client, so provide empty defaults
+    phone: undefined,
+    instagram_handle: undefined,
+    tiktok_handle: undefined,
+    youtube_channel: undefined,
+    notes: undefined
+  }));
 
-  const fetchClients = async () => {
-    if (!user) return;
-
-    try {
-      // Use unified client fetching - for now get all clients since coach assignment isn't implemented
-      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
-      const unifiedClients = await fetchUnifiedClients();
-      
-      // Map to expected Client format
-      const mappedClients = unifiedClients.map(client => ({
-        id: client.id,
-        name: client.name,
-        email: client.email || '',
-        category: client.category || 'general',
-        status: client.status,
-        user_id: client.user_id || user.id, // Temporary: assign to current user
-        created_at: client.created_at,
-        updated_at: client.created_at
-      }));
-      
-      console.log('Clients loaded (ClientList):', mappedClients.length, mappedClients.map(c => c.name));
-      setClients(mappedClients);
-    } catch (error: any) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte hämta klienter: " + error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchClients();
-  }, [user, refreshTrigger]);
 
   const getCategoryColor = (category: string) => {
     switch (category) {
