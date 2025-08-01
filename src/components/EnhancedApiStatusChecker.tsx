@@ -41,7 +41,8 @@ export const EnhancedApiStatusChecker = () => {
     { name: 'Google Search API', icon: Search, status: 'pending', message: 'Inte testad än', enabled: true, category: 'data' },
     { name: 'Social Blade API', icon: Share2, status: 'pending', message: 'Inte testad än', enabled: true, category: 'social' },
     { name: 'RapidAPI Instagram', icon: Share2, status: 'pending', message: 'Inte testad än', enabled: true, category: 'social' },
-    { name: 'RapidAPI TikTok', icon: Share2, status: 'pending', message: 'Inte testad än', enabled: true, category: 'social' }
+    { name: 'RapidAPI TikTok', icon: Share2, status: 'pending', message: 'Inte testad än', enabled: true, category: 'social' },
+    { name: 'RapidAPI YouTube', icon: Share2, status: 'pending', message: 'Inte testad än', enabled: true, category: 'social' }
   ]);
   
   const [isChecking, setIsChecking] = useState(false);
@@ -82,6 +83,7 @@ export const EnhancedApiStatusChecker = () => {
         case 'Social Blade API':
         case 'RapidAPI Instagram':
         case 'RapidAPI TikTok':
+        case 'RapidAPI YouTube':
           await testDataCollectorApi(apiName);
           break;
         default:
@@ -115,7 +117,7 @@ export const EnhancedApiStatusChecker = () => {
       
       // Test Data Collector APIs
       const dataApis = enabledApis.filter(api => 
-        ['Firecrawl API', 'Google Search API', 'Social Blade API', 'RapidAPI Instagram', 'RapidAPI TikTok'].includes(api.name)
+        ['Firecrawl API', 'Google Search API', 'Social Blade API', 'RapidAPI Instagram', 'RapidAPI TikTok', 'RapidAPI YouTube'].includes(api.name)
       );
       if (dataApis.length > 0) {
         await testDataCollectorApis();
@@ -196,7 +198,7 @@ export const EnhancedApiStatusChecker = () => {
 
       if (error) {
         // Mark all enabled data collector APIs as error
-        const dataApis = ['Firecrawl API', 'Google Search API', 'Social Blade API', 'RapidAPI Instagram', 'RapidAPI TikTok'];
+        const dataApis = ['Firecrawl API', 'Google Search API', 'Social Blade API', 'RapidAPI Instagram', 'RapidAPI TikTok', 'RapidAPI YouTube'];
         dataApis.forEach(apiName => {
           const api = apis.find(a => a.name === apiName);
           if (api?.enabled) {
@@ -210,6 +212,14 @@ export const EnhancedApiStatusChecker = () => {
           updateApiStatus('Firecrawl API', 
             results.firecrawl?.success ? 'success' : 'error',
             results.firecrawl?.message || 'Okänt fel',
+            responseTime
+          );
+        }
+
+        if (apis.find(a => a.name === 'RapidAPI YouTube')?.enabled) {
+          updateApiStatus('RapidAPI YouTube',
+            results.rapidapi_youtube?.success ? 'success' : 'error',
+            results.rapidapi_youtube?.message || 'Okänt fel',
             responseTime
           );
         }
@@ -247,7 +257,7 @@ export const EnhancedApiStatusChecker = () => {
         }
       }
     } catch (error: any) {
-      const dataApis = ['Firecrawl API', 'Google Search API', 'Social Blade API', 'RapidAPI Instagram', 'RapidAPI TikTok'];
+      const dataApis = ['Firecrawl API', 'Google Search API', 'Social Blade API', 'RapidAPI Instagram', 'RapidAPI TikTok', 'RapidAPI YouTube'];
       dataApis.forEach(apiName => {
         const api = apis.find(a => a.name === apiName);
         if (api?.enabled) {

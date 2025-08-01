@@ -32,7 +32,9 @@ export const ApiStatusChecker = () => {
     { name: 'Firecrawl API', icon: Globe, status: 'pending', message: 'Inte testad än' },
     { name: 'Google Search API', icon: Search, status: 'pending', message: 'Inte testad än' },
     { name: 'Social Blade API', icon: Share2, status: 'pending', message: 'Inte testad än' },
-    { name: 'RapidAPI TikTok', icon: Share2, status: 'pending', message: 'Inte testad än' }
+    { name: 'RapidAPI Instagram', icon: Share2, status: 'pending', message: 'Inte testad än' },
+    { name: 'RapidAPI TikTok', icon: Share2, status: 'pending', message: 'Inte testad än' },
+    { name: 'RapidAPI YouTube', icon: Share2, status: 'pending', message: 'Inte testad än' }
   ]);
   const [isChecking, setIsChecking] = useState(false);
 
@@ -161,16 +163,33 @@ export const ApiStatusChecker = () => {
           results.rapidapi?.message || 'Okänt fel',
           responseTime
         );
+        
+        updateApiStatus('RapidAPI TikTok',
+          results.rapidapi_tiktok?.success ? 'success' : 'error',
+          results.rapidapi_tiktok?.message || 'Okänt fel',
+          responseTime
+        );
+        
+        updateApiStatus('RapidAPI YouTube',
+          results.rapidapi_youtube?.success ? 'success' : 'error',
+          results.rapidapi_youtube?.message || 'Okänt fel',
+          responseTime
+        );
       } else {
         updateApiStatus('Firecrawl API', 'error', 'Oväntad respons från API', responseTime);
         updateApiStatus('Google Search API', 'error', 'Oväntad respons från API', responseTime);
         updateApiStatus('Social Blade API', 'error', 'Oväntad respons från API', responseTime);
         updateApiStatus('RapidAPI Instagram', 'error', 'Oväntad respons från API', responseTime);
+        updateApiStatus('RapidAPI TikTok', 'error', 'Oväntad respons från API', responseTime);
+        updateApiStatus('RapidAPI YouTube', 'error', 'Oväntad respons från API', responseTime);
       }
     } catch (error: any) {
       updateApiStatus('Firecrawl API', 'error', `Nätverksfel: ${error.message}`);
       updateApiStatus('Google Search API', 'error', `Nätverksfel: ${error.message}`);
       updateApiStatus('Social Blade API', 'error', `Nätverksfel: ${error.message}`);
+      updateApiStatus('RapidAPI Instagram', 'error', `Nätverksfel: ${error.message}`);
+      updateApiStatus('RapidAPI TikTok', 'error', `Nätverksfel: ${error.message}`);
+      updateApiStatus('RapidAPI YouTube', 'error', `Nätverksfel: ${error.message}`);
     }
   };
 

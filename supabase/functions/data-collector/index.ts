@@ -135,7 +135,8 @@ serve(async (req) => {
         client_id 
       });
       throw new Error('Client not found');
-    }
+}
+
 
     console.log('Found client:', client.name);
     console.log('Starting data collection processes...');
@@ -380,14 +381,16 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
       try {
         let socialData = null;
         
-        // Try RapidAPI first for Instagram and TikTok (more accurate data)
-        if ((platform === 'instagram' || platform === 'tiktok') && rapidApiKey) {
+        // Try RapidAPI first for Instagram, TikTok, and YouTube (more accurate data)
+        if ((platform === 'instagram' || platform === 'tiktok' || platform === 'youtube') && rapidApiKey) {
           try {
             console.log(`Trying RapidAPI for ${platform} handle: ${handle}`);
             if (platform === 'instagram') {
               socialData = await fetchInstagramRapidAPI(handle, rapidApiKey, client.name);
             } else if (platform === 'tiktok') {
               socialData = await fetchTikTokRapidAPI(handle, rapidApiKey, client.name);
+            } else if (platform === 'youtube') {
+              socialData = await fetchYouTubeRapidAPI(handle, rapidApiKey, client.name);
             }
             console.log(`Successfully collected ${platform} data via RapidAPI for: ${handle}`);
           } catch (rapidError) {
@@ -511,6 +514,7 @@ async function collectMissingSocialProfiles(client: any, result: DataCollectionR
     if (!client.facebook_page) missingPlatforms.push('facebook');
     if (!client.instagram_handle) missingPlatforms.push('instagram');
     if (!client.tiktok_handle) missingPlatforms.push('tiktok');
+    if (!client.youtube_handle) missingPlatforms.push('youtube');
     
     
     if (missingPlatforms.length === 0) {
@@ -1001,6 +1005,69 @@ async function fetchTikTokRapidAPI(handle: string, apiKey: string, clientName?: 
   }
 }
 
+// Fetch YouTube data using RapidAPI
+async function fetchYouTubeRapidAPI(handle: string, apiKey: string, clientName?: string) {
+  try {
+    const cleanHandle = handle.replace('@', '').replace('https://youtube.com/@', '').replace('https://www.youtube.com/@', '');
+    
+    console.log(`Making RapidAPI request for YouTube handle: ${cleanHandle}`);
+    
+    // First, try to get channel info by handle
+    const response = await fetch(`https://yt-api.p.rapidapi.com/channel/about?id=${cleanHandle}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'yt-api.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`YouTube RapidAPI request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('RapidAPI YouTube response:', JSON.stringify(data, null, 2));
+    
+    // Transform the data to match our expected format
+    const channelInfo = data.data || data;
+    const stats = channelInfo.stats || channelInfo.statistics || {};
+    
+    const transformedData = {
+      subscribers: parseInt(stats.subscriberCount) || 0,
+      videos: parseInt(stats.videoCount) || 0,
+      views: parseInt(stats.viewCount) || 0,
+      verified: channelInfo.badges?.includes('verified') || false,
+      username: cleanHandle,
+      title: channelInfo.title || channelInfo.name || '',
+      description: channelInfo.description || '',
+      avatar_url: channelInfo.avatar?.high?.url || channelInfo.thumbnails?.high?.url || '',
+      country: channelInfo.country || '',
+      created_date: channelInfo.joinedDate || channelInfo.publishedAt || '',
+      source: 'rapidapi_youtube'
+    };
+
+    return {
+      id: `rapidapi-youtube-${Date.now()}`,
+      data_type: 'social_metrics',
+      platform: 'youtube',
+      source: 'rapidapi_youtube',
+      title: `YouTube channel for @${cleanHandle}`,
+      url: `https://youtube.com/@${cleanHandle}`,
+      data: transformedData,
+      metadata: {
+        subscribers: transformedData.subscribers,
+        videos: transformedData.videos,
+        views: transformedData.views,
+        verified: transformedData.verified
+      },
+      created_at: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error fetching YouTube data from RapidAPI:', error);
+    throw error;
+  }
+}
+
 // Test API functions
 async function testFirecrawlApi(apiKey: string | undefined) {
   if (!apiKey) {
@@ -1080,18 +1147,18 @@ async function testRapidApi() {
   }
   
   try {
-    // Test with TikTok API since it's more general
-    const response = await fetch('https://tiktok-api23.p.rapidapi.com/api/user/info?username=tiktok', {
+    // Test with YouTube API 
+    const response = await fetch('https://yt-api.p.rapidapi.com/video/info?id=arj7oStGLkU', {
       method: 'GET',
       headers: {
-        'x-rapidapi-host': 'tiktok-api23.p.rapidapi.com',
+        'x-rapidapi-host': 'yt-api.p.rapidapi.com',
         'x-rapidapi-key': apiKey,
       },
     });
     
     return { 
       success: response.ok, 
-      message: response.ok ? 'RapidAPI TikTok fungerar' : `Fel: ${response.status}` 
+      message: response.ok ? 'RapidAPI (Instagram/TikTok/YouTube) fungerar' : `Fel: ${response.status}` 
     };
   } catch (error) {
     return { success: false, message: `Fel: ${error.message}` };
