@@ -46,6 +46,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { validateEmail, validatePasswordStrength, sanitizeText } from "@/utils/inputSanitization";
 import { useNavigate } from "react-router-dom";
 import { MobileUserCard } from "@/components/ui/mobile-table";
+import { AdminUserCreation } from "./AdminUserCreation";
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",
@@ -88,7 +89,6 @@ export function CentralUserManager() {
   const [selectedUser, setSelectedUser] = useState<UnifiedUser | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFullProfileDialogOpen, setIsFullProfileDialogOpen] = useState(false);
-  const [isAdvancedCreateDialogOpen, setIsAdvancedCreateDialogOpen] = useState(false);
   
   // State för användarhantering
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
@@ -98,15 +98,6 @@ export function CentralUserManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  
-  // State för ny användare
-  const [newUserData, setNewUserData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    role: 'client' as AppRole
-  });
 
   // Filtrerade användare
   const filteredUsers = users.filter(user => {
@@ -123,86 +114,9 @@ export function CentralUserManager() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const generatePassword = () => {
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    
-    let password = '';
-    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
-    password += symbols.charAt(Math.floor(Math.random() * symbols.length));
-    
-    const allChars = uppercase + lowercase + numbers + symbols;
-    for (let i = 4; i < 16; i++) {
-      password += allChars.charAt(Math.floor(Math.random() * allChars.length));
-    }
-    
-    password = password.split('').sort(() => Math.random() - 0.5).join('');
-    setNewUserData(prev => ({ ...prev, password }));
-  };
-
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      if (!validateEmail(newUserData.email)) {
-        throw new Error('Ogiltig e-postadress');
-      }
-
-      const passwordValidation = validatePasswordStrength(newUserData.password);
-      if (!passwordValidation.isValid) {
-        throw new Error(`Lösenordet uppfyller inte kraven: ${passwordValidation.errors.join(', ')}`);
-      }
-
-      const { data, error } = await supabase.functions.invoke('admin-create-user', {
-        body: {
-          email: sanitizeText(newUserData.email.toLowerCase().trim()),
-          password: newUserData.password,
-          firstName: sanitizeText(newUserData.firstName.trim()),
-          lastName: sanitizeText(newUserData.lastName.trim()),
-          role: newUserData.role
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        toast({
-          title: "Användare skapad",
-          description: `Användare ${newUserData.email} har skapats framgångsrikt.`,
-        });
-
-        setNewUserData({
-          email: '',
-          password: '',
-          firstName: '',
-          lastName: '',
-          role: 'client'
-        });
-        setIsAdvancedCreateDialogOpen(false);
-        refetch();
-      } else {
-        throw new Error(data.error || 'Failed to create user');
-      }
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      
-      let errorMessage = error.message || "Kunde inte skapa användare";
-      
-      // Handle specific error cases
-      if (errorMessage.includes('Edge Function returned a non-2xx status code')) {
-        errorMessage = 'Ett tekniskt fel inträffade. Kontrollera att alla fält är korrekt ifyllda och försök igen.';
-      }
-      
-      toast({
-        title: "Fel vid användarskap",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
+  // Callback when user is created successfully
+  const handleUserCreated = () => {
+    refetch();
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -324,11 +238,7 @@ export function CentralUserManager() {
           <p className="text-sm sm:text-base text-muted-foreground">Konsoliderad hantering av alla användare, roller och funktioner</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setIsAdvancedCreateDialogOpen(true)} className="w-full sm:w-auto">
-            <UserPlus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Skapa ny användare</span>
-            <span className="sm:hidden">Skapa</span>
-          </Button>
+          <AdminUserCreation onUserCreated={handleUserCreated} />
         </div>
       </div>
 
@@ -361,7 +271,7 @@ export function CentralUserManager() {
             <div className="flex items-center gap-2">
               <Brain className="h-4 w-4 text-purple-500 flex-shrink-0" />
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground">Klienter</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Användare</p>
                 <p className="text-lg sm:text-2xl font-bold">{stats.byRole.client}</p>
               </div>
             </div>
@@ -726,97 +636,6 @@ export function CentralUserManager() {
         )}
       </Tabs>
 
-      {/* Create User Dialog */}
-      <Dialog open={isAdvancedCreateDialogOpen} onOpenChange={setIsAdvancedCreateDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Skapa ny användare</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={handleCreateUser} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">Förnamn</Label>
-                <Input
-                  id="firstName"
-                  value={newUserData.firstName}
-                  onChange={(e) => setNewUserData(prev => ({ ...prev, firstName: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Efternamn</Label>
-                <Input
-                  id="lastName"
-                  value={newUserData.lastName}
-                  onChange={(e) => setNewUserData(prev => ({ ...prev, lastName: e.target.value }))}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="email">E-post</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newUserData.email}
-                onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="password">Lösenord</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="password"
-                  type="text"
-                  value={newUserData.password}
-                  onChange={(e) => setNewUserData(prev => ({ ...prev, password: e.target.value }))}
-                  required
-                  placeholder="Minst 8 tecken"
-                />
-                <Button type="button" variant="outline" onClick={generatePassword}>
-                  Generera
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="role">Roll</Label>
-              <Select 
-                value={newUserData.role} 
-                onValueChange={(value) => setNewUserData(prev => ({ ...prev, role: value as AppRole }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Välj roll" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(roleLabels).map(([role, label]) => (
-                    <SelectItem key={role} value={role}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsAdvancedCreateDialogOpen(false)}
-              >
-                Avbryt
-              </Button>
-              <Button type="submit">
-                Skapa användare
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
