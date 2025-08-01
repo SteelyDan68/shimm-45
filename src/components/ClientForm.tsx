@@ -39,14 +39,43 @@ export const ClientForm = ({ onSuccess }: ClientFormProps) => {
 
     setIsLoading(true);
     try {
+      // Create or update profile with client data
       const { error } = await supabase
-        .from('clients')
-        .insert([{
-          ...formData,
-          user_id: user.id,
-        }]);
+        .from('profiles')
+        .upsert({
+          id: user.id, // Use authenticated user's ID
+          email: user.email,
+          first_name: formData.name.split(' ')[0] || '',
+          last_name: formData.name.split(' ').slice(1).join(' ') || '',
+          phone: formData.phone || '',
+          client_category: formData.category,
+          client_status: formData.status || 'active',
+          instagram_handle: formData.instagram_handle || '',
+          youtube_handle: formData.youtube_channel || '',
+          tiktok_handle: formData.tiktok_handle || '',
+          facebook_handle: formData.facebook_page || '',
+          primary_contact_name: formData.primary_contact_name || '',
+          primary_contact_email: formData.primary_contact_email || '',
+          manager_name: formData.manager_name || '',
+          manager_email: formData.manager_email || '',
+          custom_fields: { notes: formData.notes },
+          velocity_score: 50, // Default velocity score
+          updated_at: new Date().toISOString()
+        });
 
       if (error) throw error;
+
+      // Ensure user has client role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .upsert({
+          user_id: user.id,
+          role: 'client'
+        });
+
+      if (roleError) {
+        console.warn('Could not assign client role:', roleError);
+      }
 
       toast({
         title: "Klient tillagd",

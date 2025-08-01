@@ -3,16 +3,34 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 // Hjälpfunktion för att bygga AI-kontext från klientens profile_metadata
 export async function buildClientContext(clientId: string, supabase: any): Promise<string> {
   try {
-    // Hämta klientens profile_metadata
-    const { data: clientData, error } = await supabase
-      .from('clients')
-      .select('name, profile_metadata, velocity_score, category')
+    // Try profiles table first (new unified approach)
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, email, client_category, primary_role, velocity_score, profile_metadata, custom_fields')
       .eq('id', clientId)
       .single();
 
-    if (error || !clientData) {
-      console.warn('Could not fetch client context data:', error?.message);
-      return '';
+    let clientData;
+    if (profileData) {
+      clientData = {
+        name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || profileData.email || 'Unknown',
+        profile_metadata: profileData.profile_metadata || {},
+        velocity_score: profileData.velocity_score || 50,
+        category: profileData.client_category || profileData.primary_role || 'general'
+      };
+    } else {
+      // Fallback to legacy clients table
+      const { data: legacyClientData, error } = await supabase
+        .from('clients')
+        .select('name, profile_metadata, velocity_score, category')
+        .eq('id', clientId)
+        .single();
+
+      if (error || !legacyClientData) {
+        console.warn('Could not fetch client context data:', error?.message);
+        return '';
+      }
+      clientData = legacyClientData;
     }
 
     const metadata = clientData.profile_metadata;
@@ -125,16 +143,34 @@ export async function buildAIPromptWithLovableTemplate(
   baseSystemPrompt: string = 'Du är en professionell mentor som hjälper offentliga personer att identifiera och övervinna hinder.'
 ): Promise<string> {
   try {
-    // Hämta klientdata
-    const { data: clientData, error } = await supabase
-      .from('clients')
-      .select('name, profile_metadata, velocity_score, category')
+    // Try profiles table first (new unified approach)
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, email, client_category, primary_role, velocity_score, profile_metadata, custom_fields')
       .eq('id', clientId)
       .single();
 
-    if (error || !clientData) {
-      console.warn('Could not fetch client data for prompt template:', error?.message);
-      return `${baseSystemPrompt}\n\n${assessmentData}`;
+    let clientData;
+    if (profileData) {
+      clientData = {
+        name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || profileData.email || 'Unknown',
+        profile_metadata: profileData.profile_metadata || {},
+        velocity_score: profileData.velocity_score || 50,
+        category: profileData.client_category || profileData.primary_role || 'general'
+      };
+    } else {
+      // Fallback to legacy clients table
+      const { data: legacyClientData, error } = await supabase
+        .from('clients')
+        .select('name, profile_metadata, velocity_score, category')
+        .eq('id', clientId)
+        .single();
+
+      if (error || !legacyClientData) {
+        console.warn('Could not fetch client data for prompt template:', error?.message);
+        return `${baseSystemPrompt}\n\n${assessmentData}`;
+      }
+      clientData = legacyClientData;
     }
 
     return buildLovableAIPrompt(clientData, assessmentData, baseSystemPrompt);

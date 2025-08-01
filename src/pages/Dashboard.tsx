@@ -93,33 +93,35 @@ export const Dashboard = () => {
     
     setLoading(true);
     try {
-      // Load clients
-      const { data: clientsData, error: clientsError } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (clientsError) throw clientsError;
+      // Load unified clients from profiles table
+      const { fetchUnifiedClients } = await import('@/utils/clientDataConsolidation');
+      const unifiedClients = await fetchUnifiedClients();
       
-      const clientsList = clientsData || [];
-      setClients(clientsList);
+      setClients(unifiedClients.map(client => ({
+        id: client.id,
+        name: client.name,
+        category: client.category,
+        status: client.status,
+        logic_state: client.logic_state,
+        created_at: client.created_at
+      })));
 
-      // Calculate stats
-      const totalClients = clientsList.length;
-      const activeClients = clientsList.filter(c => c.status === 'active').length;
-      const recentAnalyses = clientsList.filter(c => 
+      // Calculate stats from unified clients
+      const totalClients = unifiedClients.length;
+      const activeClients = unifiedClients.filter(c => c.status === 'active').length;
+      const recentAnalyses = unifiedClients.filter(c => 
         c.logic_state && 
         typeof c.logic_state === 'object' && 
         !Array.isArray(c.logic_state) &&
         'last_updated' in c.logic_state
       ).length;
 
-      // Get total data points from path_entries table instead
+      // Get total data points from path_entries table
+      const userIds = unifiedClients.map(c => c.id);
       const { count: dataPoints } = await supabase
         .from('path_entries')
         .select('*', { count: 'exact', head: true })
-        .in('user_id', clientsList.map(c => c.id));
+        .in('user_id', userIds.length > 0 ? userIds : ['00000000-0000-0000-0000-000000000000']); // Avoid empty array
 
       setStats({
         totalClients,

@@ -18,35 +18,35 @@ export async function resolveUserClient(
     let userData: UserClientData | null = null;
 
     if (identifier.user_id) {
-      // If user_id is provided, get client data via user_id
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('id, name, profile_metadata, velocity_score, category, user_id')
-        .eq('user_id', identifier.user_id)
+      // Priority 1: Try profiles table first (new unified approach)
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email, client_category, primary_role, velocity_score, profile_metadata, custom_fields')
+        .eq('id', identifier.user_id)
         .single();
 
-      if (clientError || !clientData) {
-        // If no client record, try to get from profiles table
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, profile_metadata')
-          .eq('id', identifier.user_id)
+      if (profileData) {
+        userData = {
+          user_id: identifier.user_id,
+          client_id: identifier.user_id, // Unified approach: user_id = client_id
+          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || profileData.email || 'Unknown User',
+          profile_metadata: profileData.profile_metadata || {},
+          velocity_score: profileData.velocity_score || 50,
+          category: profileData.client_category || profileData.primary_role || 'general'
+        };
+      } else {
+        // Priority 2: Fallback to legacy clients table
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('id, name, profile_metadata, velocity_score, category, user_id')
+          .eq('user_id', identifier.user_id)
           .single();
 
-        if (profileError || !profileData) {
+        if (clientError || !clientData) {
           console.warn('Could not find user data for user_id:', identifier.user_id);
           return null;
         }
 
-        userData = {
-          user_id: identifier.user_id,
-          client_id: identifier.user_id, // Fallback to user_id if no client record
-          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Unknown User',
-          profile_metadata: profileData.profile_metadata || {},
-          velocity_score: 50, // Default value
-          category: 'client'
-        };
-      } else {
         userData = {
           user_id: clientData.user_id,
           client_id: clientData.id,
@@ -57,26 +57,44 @@ export async function resolveUserClient(
         };
       }
     } else if (identifier.client_id) {
-      // If client_id is provided, get data via client_id (backward compatibility)
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('id, name, profile_metadata, velocity_score, category, user_id')
+      // If client_id is provided, try profiles table first
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email, client_category, primary_role, velocity_score, profile_metadata, custom_fields')
         .eq('id', identifier.client_id)
         .single();
 
-      if (clientError || !clientData) {
-        console.warn('Could not find client data for client_id:', identifier.client_id);
-        return null;
-      }
+      if (profileData) {
+        userData = {
+          user_id: identifier.client_id, // Unified approach
+          client_id: identifier.client_id,
+          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || profileData.email || 'Unknown User',
+          profile_metadata: profileData.profile_metadata || {},
+          velocity_score: profileData.velocity_score || 50,
+          category: profileData.client_category || profileData.primary_role || 'general'
+        };
+      } else {
+        // Fallback to legacy clients table
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('id, name, profile_metadata, velocity_score, category, user_id')
+          .eq('id', identifier.client_id)
+          .single();
 
-      userData = {
-        user_id: clientData.user_id,
-        client_id: clientData.id,
-        name: clientData.name,
-        profile_metadata: clientData.profile_metadata,
-        velocity_score: clientData.velocity_score,
-        category: clientData.category
-      };
+        if (clientError || !clientData) {
+          console.warn('Could not find client data for client_id:', identifier.client_id);
+          return null;
+        }
+
+        userData = {
+          user_id: clientData.user_id,
+          client_id: clientData.id,
+          name: clientData.name,
+          profile_metadata: clientData.profile_metadata,
+          velocity_score: clientData.velocity_score,
+          category: clientData.category
+        };
+      }
     } else {
       console.warn('Neither user_id nor client_id provided');
       return null;
