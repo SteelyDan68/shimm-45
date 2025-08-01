@@ -1245,11 +1245,11 @@ async function testTikTokRapidAPI(): Promise<{ success: boolean; message: string
   }
 
   try {
-    // Try a completely different TikTok API endpoint
-    const response = await fetch('https://tiktok-scraper-2023.p.rapidapi.com/user/info?username=charlidamelio', {
+    // Use the TikTok Data4 API endpoint specified by the user
+    const response = await fetch('https://tiktok-data4.p.rapidapi.com/get-user-playlist/?secUid=MS4wLjABAAAAd04PpJrQJrRv5QpeLCz-tj41zTwuemXz6WBpyycnVNGeYqJjlOzJ5fpV9QWK5h4B&count=20&cursor=0', {
       method: 'GET',
       headers: {
-        'x-rapidapi-host': 'tiktok-scraper-2023.p.rapidapi.com',
+        'x-rapidapi-host': 'tiktok-data4.p.rapidapi.com',
         'x-rapidapi-key': apiKey,
       },
     });
