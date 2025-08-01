@@ -47,7 +47,7 @@ export const HabitAnalyticsDashboard: React.FC<HabitAnalyticsDashboardProps> = (
         body: JSON.stringify({
           habit_data: habit,
           analysis_type: 'optimization_suggestions',
-          client_id: clientId
+          user_id: clientId
         })
       });
 

@@ -103,7 +103,6 @@ export const useFivePillarsModular = (clientId?: string) => {
         .from('client_pillar_activations')
         .upsert({
           user_id: clientId,
-          client_id: clientId, // For backward compatibility
           pillar_key: pillarKey,
           is_active: true,
           activated_by: user.id

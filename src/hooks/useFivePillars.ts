@@ -61,7 +61,7 @@ export const useFivePillars = (userId?: string) => {
         .from('client_pillar_assignments')
         .upsert({
           user_id: userId,
-          client_id: userId, // Temporary for DB compatibility
+          client_id: userId,
           pillar_type: pillarType,
           is_active: true,
           assigned_by: user.id

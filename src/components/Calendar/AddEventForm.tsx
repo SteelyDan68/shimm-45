@@ -92,7 +92,7 @@ export const AddEventForm = ({
       category: formData.category || undefined,
       priority: formData.priority,
       duration: formData.duration,
-      client_id: clientId,
+      user_id: clientId,
       metadata: {
         visible_to_client: formData.visibleToClient,
         created_by_role: 'admin' // Should get from auth context

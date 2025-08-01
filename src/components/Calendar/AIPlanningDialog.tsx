@@ -63,7 +63,7 @@ export const AIPlanningDialog = ({
       const { data, error } = await supabase.functions.invoke('generate-ai-planning', {
         body: {
           recommendation_text: recommendationText,
-          client_id: clientId,
+          user_id: clientId,
           weeks: weeks
         }
       });

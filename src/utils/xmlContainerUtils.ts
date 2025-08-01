@@ -87,7 +87,7 @@ export const createAssessmentRecordXML = (assessmentData: any): string => {
     .startContainer('AssessmentRecord')
     .addElement('timestamp', new Date().toISOString())
     .addElement('assessmentId', assessmentData.id)
-    .addElement('clientId', assessmentData.client_id)
+    .addElement('userId', assessmentData.user_id)
     .addElement('assessmentType', assessmentData.pillar_type || assessmentData.form_definition_id || 'general')
     .addElement('scores', assessmentData.scores)
     .addElement('answers', assessmentData.answers)

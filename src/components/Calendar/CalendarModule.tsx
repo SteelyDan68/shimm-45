@@ -37,7 +37,7 @@ export interface CalendarEventData {
   pillar_type?: string;
   priority?: 'low' | 'medium' | 'high';
   status?: string;
-  client_id?: string;
+  user_id?: string;
   duration?: number; // minutes
   isOverdue?: boolean;
   isDueSoon?: boolean;
@@ -137,7 +137,7 @@ export const CalendarModule = ({
             date: new Date(),
             type: 'assessment',
             pillar_type: 'self_care',
-            client_id: clientId
+            user_id: clientId
           },
           {
             id: '2', 
@@ -146,7 +146,7 @@ export const CalendarModule = ({
             type: 'task',
             priority: 'high',
             status: 'planned',
-            client_id: clientId
+            user_id: clientId
           }
         ];
         
@@ -234,7 +234,7 @@ export const CalendarModule = ({
       type: 'custom_event',
       category: eventData.category,
       priority: eventData.priority || 'medium',
-      client_id: clientId,
+      user_id: clientId,
       duration: eventData.duration || 60
     };
 

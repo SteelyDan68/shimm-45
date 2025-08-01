@@ -74,7 +74,7 @@ export const ClientProfile = () => {
             event: 'INSERT',
             schema: 'public',
             table: 'client_data_cache',
-            filter: `client_id=eq.${clientId}`
+            filter: `user_id=eq.${clientId}`
           },
           (payload) => {
             

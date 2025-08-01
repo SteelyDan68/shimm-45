@@ -30,7 +30,7 @@ export class XmlDataAggregator {
 
       // Aggregate data into XML-ready structure
       const aggregatedData = {
-        client_id: clientId,
+        user_id: clientId,
         assessment_summary: {
           total_assessments: assessments?.length || 0,
           latest_assessment: assessments?.[0]?.created_at || null,
@@ -75,7 +75,7 @@ export class XmlDataAggregator {
       }
 
       const aggregatedData = {
-        client_id: clientId,
+        user_id: clientId,
         timeline_summary: {
           total_entries: pathEntries.data?.length || 0,
           completed_tasks: tasks.data?.filter(t => t.status === 'completed').length || 0,
@@ -114,7 +114,7 @@ export class XmlDataAggregator {
       }
 
       const aggregatedData = {
-        client_id: clientId,
+        user_id: clientId,
         pillar_analysis: {
           assessed_pillars: this.groupByPillar(pillarAssessments.data || []),
           trend_analysis: this.analyzePillarTrends(pillarAssessments.data || []),

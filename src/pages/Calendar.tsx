@@ -32,7 +32,7 @@ export function CalendarPage() {
     time: '10:00',
     duration: '60',
     category: 'coaching' as string,
-    client_id: '',
+    user_id: '',
     visible_to_client: true
   });
 
@@ -62,7 +62,7 @@ export function CalendarPage() {
           description: formData.description,
           event_date: eventDateTime.toISOString(),
           category: formData.category,
-          user_id: formData.client_id || user?.id,
+          user_id: formData.user_id || user?.id,
           created_by: user?.id,
           created_by_role: 'coach',
           visible_to_client: formData.visible_to_client
@@ -234,13 +234,13 @@ export function CalendarPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="client_id">Klient (valfritt)</Label>
-                <Input
-                  id="client_id"
-                  value={formData.client_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, client_id: e.target.value }))}
-                  placeholder="Klient-ID eller e-post"
+                <div className="space-y-2">
+                  <Label htmlFor="user_id">Klient (valfritt)</Label>
+                  <Input
+                    id="user_id"
+                    value={formData.user_id}
+                    onChange={(e) => setFormData(prev => ({ ...prev, user_id: e.target.value }))}
+                    placeholder="Användar-ID eller e-post"
                 />
                 <p className="text-xs text-muted-foreground">
                   Lämna tomt för personlig planering
