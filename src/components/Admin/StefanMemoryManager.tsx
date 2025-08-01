@@ -62,21 +62,28 @@ const StefanMemoryManager: React.FC = () => {
 
   const fetchMemories = async () => {
     try {
-      // Use the edge function to fetch memories since stefan_memory isn't in types yet
-      const { data: memoriesData, error } = await supabase.functions.invoke('get-stefan-memories');
+      console.log('Fetching Stefan memories...');
+      const { data, error } = await supabase.functions.invoke('get-stefan-memories');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
       
-      // If no edge function exists yet, use mock data
-      const mockMemories: StefanMemory[] = [];
-      setMemories(mockMemories);
+      if (data && data.memories) {
+        console.log(`Loaded ${data.memories.length} memory fragments`);
+        setMemories(data.memories);
+      } else {
+        console.log('No memories returned from edge function');
+        setMemories([]);
+      }
     } catch (error: any) {
       console.error('Error fetching memories:', error);
-      // For now, just set empty array since table might not be in types yet
       setMemories([]);
       toast({
-        title: "Information",
-        description: "Minnesfragment kommer att visas när edge-funktionen är aktiv",
+        title: "Fel vid hämtning",
+        description: error.message || "Kunde inte hämta minnesfragment",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
