@@ -41,7 +41,7 @@ const getMainItems = (hasRole: (role: string) => boolean) => {
   // Lägg till menyalternativ baserat på roll
   if (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) {
     items.push(
-      { title: "Alla Klienter", url: "/clients", icon: Users },
+      { title: "Alla Användare", url: "/administration", icon: Users },
       { title: "Intelligence", url: "/intelligence", icon: Brain },
       { title: "Analys", url: "/analytics", icon: TrendingUp },
       { title: "Datainsamling", url: "/data-collection", icon: Database }
@@ -107,7 +107,7 @@ export function AppSidebar() {
         {/* Clients */}
         {clients.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel>Klienter</SidebarGroupLabel>
+            <SidebarGroupLabel>Användare</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {clients.slice(0, open ? 8 : 0).map((client) => (
@@ -134,7 +134,7 @@ export function AppSidebar() {
                 {clients.length > 8 && open && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <NavLink to="/clients" className={getNavCls}>
+                      <NavLink to="/administration" className={getNavCls}>
                         <span className="text-xs text-muted-foreground">
                           +{clients.length - 8} fler...
                         </span>

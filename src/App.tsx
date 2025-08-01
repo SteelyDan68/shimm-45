@@ -11,7 +11,7 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
 import { ProfileCompletionGate } from "@/components/Profile/ProfileCompletionGate";
 import { Dashboard } from "./pages/Dashboard";
-import { AllClients } from "./pages/AllClients";
+
 import { ClientProfile } from "./pages/ClientProfile";
 import { UserProfile } from "./pages/UserProfile";
 import UserCrmProfile from "./pages/UserCrmProfile";
@@ -68,7 +68,7 @@ const AppRoutes = () => {
                    <ClientAssessmentPage />
                  </ProfileCompletionGate>
                } />
-              <Route path="/clients" element={<AllClients />} />
+              
               <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/user/:userId" element={<UserCrmProfile />} />
