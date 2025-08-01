@@ -224,7 +224,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log('Cleanup failed (continuing anyway):', cleanupErr);
     }
     
-    // Check auth.users table using admin listUsers
+    // Check auth.users table using admin listUsers and force delete if needed
     const { data: existingUser, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers();
     if (existingUserError) {
       console.error('Error checking existing users:', existingUserError);
@@ -234,8 +234,22 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const authUserExists = existingUser.users.some(u => u.email === email);
-    console.log('Auth user exists:', authUserExists);
+    const existingAuthUser = existingUser.users.find(u => u.email === email);
+    if (existingAuthUser) {
+      console.log('Found existing auth user, attempting to delete:', existingAuthUser.id);
+      const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingAuthUser.id);
+      if (deleteError) {
+        console.error('Failed to delete existing auth user:', deleteError);
+        return new Response(
+          JSON.stringify({ 
+            error: `Kunde inte ta bort befintlig användare med email ${email}. Kontakta systemadministratör.`,
+            details: { deleteError: deleteError.message }
+          }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.log('Successfully deleted existing auth user');
+    }
 
     // Check profiles table for any leftover profiles after cleanup
     const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
@@ -252,20 +266,27 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const profileExists = existingProfile !== null;
-    console.log('Profile exists after cleanup:', profileExists);
-
-    // If either auth user or profile still exists after cleanup, user cannot be created
-    if (authUserExists || profileExists) {
-      console.log('User still exists after cleanup attempt:', email);
-      return new Response(
-        JSON.stringify({ 
-          error: `En användare med email ${email} existerar fortfarande. Kontakta systemadministratör för att helt radera gamla användarreferenser.`,
-          details: { authUserExists, profileExists }
-        }),
-        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (existingProfile) {
+      console.log('Found existing profile, attempting to delete:', existingProfile.id);
+      const { error: deleteProfileError } = await supabaseAdmin
+        .from('profiles')
+        .delete()
+        .eq('id', existingProfile.id);
+      
+      if (deleteProfileError) {
+        console.error('Failed to delete existing profile:', deleteProfileError);
+        return new Response(
+          JSON.stringify({ 
+            error: `Kunde inte ta bort befintlig profil för ${email}. Kontakta systemadministratör.`,
+            details: { deleteError: deleteProfileError.message }
+          }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.log('Successfully deleted existing profile');
     }
+
+    console.log('User cleanup complete, ready to create new user');
 
     // Create user using admin client - the profile will be created automatically by the trigger
     console.log('Creating user with email:', email);
