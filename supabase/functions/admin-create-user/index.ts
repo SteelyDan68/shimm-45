@@ -157,10 +157,10 @@ const handler = async (req: Request): Promise<Response> => {
       sendInviteEmail 
     });
 
-    // Input validation
+    // Input validation (role is now optional)
     console.log('Performing input validation...');
-    if (!email || !password || !firstName || !lastName || !role) {
-      console.error('Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName, role: !!role });
+    if (!email || !password || !firstName || !lastName) {
+      console.error('Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName });
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -195,13 +195,15 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Validate role is one of the allowed values
-    const allowedRoles = ['superadmin', 'admin', 'coach', 'client', 'user'];
-    if (!allowedRoles.includes(role)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid role specified' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Validate role if provided (roles are now optional)
+    if (role) {
+      const allowedRoles = ['superadmin', 'admin', 'coach', 'client'];
+      if (!allowedRoles.includes(role)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid role specified' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Check if user already exists and clean up any ghost references
@@ -417,30 +419,28 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Ta bort eventuell automatiskt skapad 'user' roll först
-    console.log('Removing any default user role before assigning specified role...');
-    await supabaseAdmin
-      .from('user_roles')
-      .delete()
-      .eq('user_id', newUser.user.id)
-      .eq('role', 'user');
+    // Tilldela roll endast om en specificerades (roller är nu optionella)
+    if (role) {
+      console.log('Assigning role:', role);
+      const { error: roleAssignError } = await supabaseAdmin
+        .from('user_roles')
+        .insert([{
+          user_id: newUser.user.id,
+          role: role
+        }]);
 
-    // Assign role using admin client
-    const { error: roleAssignError } = await supabaseAdmin
-      .from('user_roles')
-      .insert([{
-        user_id: newUser.user.id,
-        role: role
-      }]);
-
-    if (roleAssignError) {
-      console.error('Role assignment error:', roleAssignError);
-      // Attempt to clean up
-      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-      return new Response(
-        JSON.stringify({ error: 'Failed to assign user role' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (roleAssignError) {
+        console.error('Role assignment error:', roleAssignError);
+        // Attempt to clean up
+        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
+        return new Response(
+          JSON.stringify({ error: 'Failed to assign user role' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.log('Role assigned successfully');
+    } else {
+      console.log('No role specified - user created without roles (universal identifier only)');
     }
 
     console.log('User created successfully:', { userId: newUser.user.id, email, role, createdBy: user.id });

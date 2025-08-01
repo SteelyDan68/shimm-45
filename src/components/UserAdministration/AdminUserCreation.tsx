@@ -169,8 +169,10 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
         throw new Error('För- och efternamn är obligatoriska');
       }
 
-      if (!formData.role || formData.role.trim() === '') {
-        throw new Error('En roll måste väljas för användaren');
+      // Roller är nu optionella - användare kan skapas utan roller
+      if (formData.role && formData.role.trim() === '') {
+        // Om tom sträng anges, sätt till undefined
+        formData.role = undefined as any;
       }
 
       // Prepare data for backend
@@ -435,12 +437,13 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="role">Användarroll *</Label>
-                <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value as AppRole)}>
+                <Label htmlFor="role">Användarroll (valfritt)</Label>
+                <Select value={formData.role || ''} onValueChange={(value) => handleInputChange('role', value === '' ? undefined : value as AppRole)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Välj roll" />
+                    <SelectValue placeholder="Ingen roll (grundläggande åtkomst)" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Ingen roll</SelectItem>
                     {getAvailableRoles().map(role => (
                       <SelectItem key={role} value={role}>
                         {roleLabels[role]}
@@ -448,6 +451,9 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Användare utan roll har grundläggande åtkomst och kan tilldelas roller senare
+                </p>
               </div>
 
               <div>

@@ -113,8 +113,8 @@ export const useAuth = () => {
         return;
       }
 
-      // Filter out 'user' role and cast to AppRole[]
-      const userRoles = data?.map(item => item.role).filter(role => role !== 'user') as AppRole[] || [];
+      // Hämta alla roller - ingen filtrering längre eftersom "user" inte längre existerar
+      const userRoles = data?.map(item => item.role) as AppRole[] || [];
       setRoles(userRoles);
     } catch (error) {
       console.error('Error in fetchUserRoles:', error);

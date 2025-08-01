@@ -54,13 +54,13 @@ export function MultiRoleManager({ userId, currentRoles, onRolesUpdated, disable
   };
 
   const removeRole = async (role: AppRole) => {
+    // Tillåt att ta bort alla roller - användare kan nu existera utan roller
     if (currentRoles.length <= 1) {
       toast({
-        title: "Kan inte ta bort roll",
-        description: "Användaren måste ha minst en roll",
-        variant: "destructive"
+        title: "Varning",
+        description: "Användaren kommer att sakna roller efter detta. De kommer endast ha grundläggande åtkomst.",
+        variant: "default"
       });
-      return;
     }
 
     setIsUpdating(true);
