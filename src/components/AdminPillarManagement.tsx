@@ -269,16 +269,16 @@ export const AdminPillarManagement = () => {
           </CardContent>
         </Card>
 
-        {/* Pillar Management */}
+        {/* Pillar Overview */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              Five Pillars Hantering
+              Five Pillars Översikt
             </CardTitle>
             {selectedClient && (
               <p className="text-sm text-muted-foreground">
-                Hantera pelare för: <span className="font-medium">{selectedClient.name}</span>
+                Översikt för: <span className="font-medium">{selectedClient.name}</span>
               </p>
             )}
           </CardHeader>
@@ -287,7 +287,7 @@ export const AdminPillarManagement = () => {
               <div className="text-center py-8">
                 <Settings className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
-                  Välj en klient från listan för att hantera deras pelare
+                  Välj en klient från listan för att se deras pelare
                 </p>
               </div>
             ) : (
@@ -313,15 +313,9 @@ export const AdminPillarManagement = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={isActive ? 'default' : 'secondary'}>
-                          {isActive ? 'Aktiv' : 'Inaktiv'}
-                        </Badge>
-                        <Switch
-                          checked={isActive}
-                          onCheckedChange={(checked) => handlePillarToggle(pillarKey, checked)}
-                        />
-                      </div>
+                      <Badge variant={isActive ? 'default' : 'secondary'}>
+                        {isActive ? 'Aktiv' : 'Inaktiv'}
+                      </Badge>
                     </div>
                   );
                 })}

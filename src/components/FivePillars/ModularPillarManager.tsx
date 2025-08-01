@@ -89,7 +89,7 @@ export const ModularPillarManager = ({
     );
   }
 
-  // Coach view - full management interface
+  // Coach view - overview interface (read-only)
   return (
     <Card>
       <CardHeader>
@@ -97,10 +97,10 @@ export const ModularPillarManager = ({
           <div>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
-              Five Pillars Management
+              Five Pillars Översikt
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Hantera aktiverade pelare för {clientName}
+              Översikt av pelare för {clientName}
             </p>
           </div>
           <Badge variant="outline">
@@ -118,7 +118,7 @@ export const ModularPillarManager = ({
             <div
               key={pillar.pillar_key}
               className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
-                isActivated ? 'border-primary bg-primary/5' : 'border-border'
+                isActivated ? 'border-primary bg-primary/5' : 'border-border opacity-50'
               }`}
             >
               <div className="flex items-center space-x-4">
@@ -160,16 +160,9 @@ export const ModularPillarManager = ({
                   </div>
                 )}
 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={isActivated}
-                    onCheckedChange={() => handlePillarToggle(pillar.pillar_key, isActivated)}
-                    disabled={loading}
-                  />
-                  <Label className="text-sm">
-                    {isActivated ? 'Aktiv' : 'Inaktiv'}
-                  </Label>
-                </div>
+                <Badge variant={isActivated ? 'default' : 'secondary'}>
+                  {isActivated ? 'Aktiv' : 'Inaktiv'}
+                </Badge>
               </div>
             </div>
           );
@@ -193,7 +186,7 @@ export const ModularPillarManager = ({
 
           {activatedPillars.length > 0 && (
             <div className="mt-3 text-sm text-muted-foreground">
-              Klienten kommer att se: {activatedPillars.map(p => PILLAR_MODULES[p].name).join(', ')}
+              Klienten har tillgång till: {activatedPillars.map(p => PILLAR_MODULES[p].name).join(', ')}
             </div>
           )}
         </div>
