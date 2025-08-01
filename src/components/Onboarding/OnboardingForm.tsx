@@ -400,8 +400,9 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
                 id="instagramHandle"
                 value={formData.publicRole.instagramHandle}
                 onChange={(e) => updatePublicRole('instagramHandle', e.target.value)}
-                placeholder="@dittanvändarnamn"
+                placeholder="dittanvändarnamn"
               />
+              <p className="text-xs text-muted-foreground mt-1">Endast användarnamnet (utan @ tecken)</p>
             </div>
             <div>
               <Label htmlFor="youtubeHandle">YouTube</Label>
@@ -409,8 +410,9 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
                 id="youtubeHandle"
                 value={formData.publicRole.youtubeHandle}
                 onChange={(e) => updatePublicRole('youtubeHandle', e.target.value)}
-                placeholder="Kanalnamn eller @handle"
+                placeholder="Kanalnamn eller handle"
               />
+              <p className="text-xs text-muted-foreground mt-1">Kanalnamn eller handle (utan @ tecken)</p>
             </div>
             <div>
               <Label htmlFor="tiktokHandle">TikTok</Label>
@@ -418,8 +420,9 @@ export function OnboardingForm({ onComplete, isLoading = false, initialData = nu
                 id="tiktokHandle"
                 value={formData.publicRole.tiktokHandle}
                 onChange={(e) => updatePublicRole('tiktokHandle', e.target.value)}
-                placeholder="@dittanvändarnamn"
+                placeholder="dittanvändarnamn"
               />
+              <p className="text-xs text-muted-foreground mt-1">Endast användarnamnet (utan @ tecken)</p>
             </div>
             <div>
               <Label htmlFor="snapchatHandle">Snapchat</Label>

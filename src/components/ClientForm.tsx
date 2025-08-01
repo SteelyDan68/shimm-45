@@ -174,21 +174,30 @@ export const ClientForm = ({ onSuccess }: ClientFormProps) => {
               value={formData.manager_email}
               onChange={(e) => setFormData({ ...formData, manager_email: e.target.value })}
             />
-            <Input
-              placeholder="Instagram handle"
-              value={formData.instagram_handle}
-              onChange={(e) => setFormData({ ...formData, instagram_handle: e.target.value })}
-            />
-            <Input
-              placeholder="TikTok handle"
-              value={formData.tiktok_handle}
-              onChange={(e) => setFormData({ ...formData, tiktok_handle: e.target.value })}
-            />
-            <Input
-              placeholder="YouTube kanal"
-              value={formData.youtube_channel}
-              onChange={(e) => setFormData({ ...formData, youtube_channel: e.target.value })}
-            />
+            <div className="space-y-1">
+              <Input
+                placeholder="Instagram handle"
+                value={formData.instagram_handle}
+                onChange={(e) => setFormData({ ...formData, instagram_handle: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">Endast användarnamnet (utan @ tecken)</p>
+            </div>
+            <div className="space-y-1">
+              <Input
+                placeholder="TikTok handle"
+                value={formData.tiktok_handle}
+                onChange={(e) => setFormData({ ...formData, tiktok_handle: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">Endast användarnamnet (utan @ tecken)</p>
+            </div>
+            <div className="space-y-1">
+              <Input
+                placeholder="YouTube kanal"
+                value={formData.youtube_channel}
+                onChange={(e) => setFormData({ ...formData, youtube_channel: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">Kanalnamn eller handle (utan @ tecken)</p>
+            </div>
             <Input
               placeholder="Facebook sida"
               value={formData.facebook_page}

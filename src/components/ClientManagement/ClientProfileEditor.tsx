@@ -288,12 +288,13 @@ export function ClientProfileEditor({ client, onSave, onCancel }: ClientProfileE
                     <Instagram className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="instagram"
-                      placeholder="@användarnamn"
+                      placeholder="användarnamn"
                       value={socialMedia.instagram_handle}
                       onChange={(e) => setSocialMedia(prev => ({ ...prev, instagram_handle: e.target.value }))}
                       className="pl-10"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">Endast användarnamnet (utan @ tecken)</p>
                 </div>
                 <div>
                   <Label htmlFor="youtube">YouTube</Label>
@@ -301,12 +302,13 @@ export function ClientProfileEditor({ client, onSave, onCancel }: ClientProfileE
                     <Youtube className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="youtube"
-                      placeholder="Kanalnamn eller URL"
+                      placeholder="Kanalnamn eller handle"
                       value={socialMedia.youtube_channel}
                       onChange={(e) => setSocialMedia(prev => ({ ...prev, youtube_channel: e.target.value }))}
                       className="pl-10"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">Kanalnamn eller handle (utan @ tecken)</p>
                 </div>
                 <div>
                   <Label htmlFor="tiktok">TikTok</Label>
@@ -314,12 +316,13 @@ export function ClientProfileEditor({ client, onSave, onCancel }: ClientProfileE
                     <MessageCircle className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="tiktok"
-                      placeholder="@användarnamn"
+                      placeholder="användarnamn"
                       value={socialMedia.tiktok_handle}
                       onChange={(e) => setSocialMedia(prev => ({ ...prev, tiktok_handle: e.target.value }))}
                       className="pl-10"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">Endast användarnamnet (utan @ tecken)</p>
                 </div>
                 <div>
                   <Label htmlFor="facebook">Facebook</Label>

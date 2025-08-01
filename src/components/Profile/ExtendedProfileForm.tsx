@@ -428,8 +428,9 @@ export function ExtendedProfileForm({
                 id="instagram"
                 value={formData.instagram_handle || ''}
                 onChange={(e) => handleInputChange('instagram_handle', e.target.value)}
-                placeholder="@användarnamn"
+                placeholder="användarnamn"
               />
+              <p className="text-xs text-muted-foreground mt-1">Endast användarnamnet (utan @ tecken)</p>
             </div>
             <div>
               <Label htmlFor="youtube">YouTube</Label>
@@ -439,6 +440,7 @@ export function ExtendedProfileForm({
                 onChange={(e) => handleInputChange('youtube_handle', e.target.value)}
                 placeholder="Kanalnamn"
               />
+              <p className="text-xs text-muted-foreground mt-1">Kanalnamn eller handle (utan @ tecken)</p>
             </div>
           </div>
 
@@ -449,8 +451,9 @@ export function ExtendedProfileForm({
                 id="tiktok"
                 value={formData.tiktok_handle || ''}
                 onChange={(e) => handleInputChange('tiktok_handle', e.target.value)}
-                placeholder="@användarnamn"
+                placeholder="användarnamn"
               />
+              <p className="text-xs text-muted-foreground mt-1">Endast användarnamnet (utan @ tecken)</p>
             </div>
             <div>
               <Label htmlFor="twitter">Twitter/X</Label>
