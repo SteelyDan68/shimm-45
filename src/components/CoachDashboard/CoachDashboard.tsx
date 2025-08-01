@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 export function CoachDashboard() {
   const {
     clients,
+    coachStats,
     loading,
     activeFilter,
     setActiveFilter,
@@ -27,17 +28,7 @@ export function CoachDashboard() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
-  // Mock data för coach-specifika mätvärden
-  const coachStats = {
-    totalActiveClients: 12,
-    highPriorityClients: 3,
-    weeklyMeetings: 8,
-    completedTasks: 24,
-    avgClientProgress: 76,
-    newBarriers: 2,
-    stefanRecommendations: 5,
-    upcomingDeadlines: 4
-  };
+  // Use real coach stats instead of mock data
 
   const quickActions = [
     {

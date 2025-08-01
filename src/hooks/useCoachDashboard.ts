@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { subDays, isAfter, parseISO } from 'date-fns';
 
 export interface ClientPriority {
@@ -24,16 +25,98 @@ export interface ClientIssue {
   days_since?: number;
 }
 
+export interface CoachStats {
+  totalActiveClients: number;
+  highPriorityClients: number;
+  weeklyMeetings: number;
+  completedTasks: number;
+  avgClientProgress: number;
+  newBarriers: number;
+  stefanRecommendations: number;
+  upcomingDeadlines: number;
+}
+
 export type DashboardFilter = 'all' | 'a_clients' | 'highest_barriers' | 'inactive';
 export type SortOption = 'priority' | 'velocity' | 'last_update' | 'barriers';
 
 export const useCoachDashboard = () => {
   const [clients, setClients] = useState<ClientPriority[]>([]);
   const [filteredClients, setFilteredClients] = useState<ClientPriority[]>([]);
+  const [coachStats, setCoachStats] = useState<CoachStats>({
+    totalActiveClients: 0,
+    highPriorityClients: 0,
+    weeklyMeetings: 0,
+    completedTasks: 0,
+    avgClientProgress: 0,
+    newBarriers: 0,
+    stefanRecommendations: 0,
+    upcomingDeadlines: 0
+  });
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<DashboardFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('priority');
   const { toast } = useToast();
+
+  const fetchCoachStats = async (clientPriorities: ClientPriority[]) => {
+    try {
+      // Get real stats from database
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      // Fetch completed tasks this week
+      const { data: completedTasks } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('status', 'completed')
+        .gte('completed_at', weekAgo.toISOString());
+
+      // Fetch calendar events this week  
+      const { data: weeklyMeetings } = await supabase
+        .from('calendar_events')
+        .select('id')
+        .gte('event_date', weekAgo.toISOString())
+        .lte('event_date', new Date().toISOString());
+
+      // Fetch upcoming deadlines (next 3 days)
+      const threeDaysFromNow = new Date();
+      threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+      
+      const { data: upcomingTasks } = await supabase
+        .from('tasks')
+        .select('id')
+        .neq('status', 'completed')
+        .lte('deadline', threeDaysFromNow.toISOString())
+        .gte('deadline', new Date().toISOString());
+
+      // Calculate stats from client data
+      const highPriorityClients = clientPriorities.filter(c => c.priority_score > 40).length;
+      const newBarriers = clientPriorities.filter(c => 
+        c.issues.some(i => i.type === 'new_barriers')
+      ).length;
+      
+      // Calculate average progress from velocity ranks
+      const avgProgress = clientPriorities.length > 0 
+        ? Math.round((clientPriorities.reduce((sum, c) => sum + c.velocity_rank, 0) / clientPriorities.length) * 10)
+        : 0;
+
+      // Get Stefan AI recommendations count (mock for now)
+      const stefanRecommendations = clientPriorities.filter(c => c.latest_ai_recommendation).length;
+
+      setCoachStats({
+        totalActiveClients: clientPriorities.length,
+        highPriorityClients,
+        weeklyMeetings: weeklyMeetings?.length || 0,
+        completedTasks: completedTasks?.length || 0,
+        avgClientProgress: avgProgress,
+        newBarriers,
+        stefanRecommendations,
+        upcomingDeadlines: upcomingTasks?.length || 0
+      });
+    } catch (error) {
+      console.error('Error fetching coach stats:', error);
+      // Use default stats if error
+    }
+  };
 
   const fetchClientsWithPriority = async () => {
     try {
@@ -179,6 +262,7 @@ export const useCoachDashboard = () => {
       }
 
       setClients(clientPriorities);
+      await fetchCoachStats(clientPriorities);
     } catch (error: any) {
       console.error('Error fetching coach dashboard data:', error);
       toast({
@@ -254,6 +338,7 @@ export const useCoachDashboard = () => {
 
   return {
     clients: filteredClients,
+    coachStats,
     loading,
     activeFilter,
     setActiveFilter,

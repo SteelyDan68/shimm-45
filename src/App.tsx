@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +23,9 @@ import { CoachDashboardPage } from "./pages/CoachDashboard";
 import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
+import { TasksPage } from "./pages/Tasks";
+import { CalendarPage } from "./pages/Calendar";
+import { StefanChatPage } from "./pages/StefanChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,7 +42,8 @@ const AppRoutes = () => {
       <Route path="/*" element={
         !user ? <Auth /> : (
           <AppLayout>
-            <Routes>
+            <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+              <Routes>
               <Route path="/" element={
                 hasRole('client') ? <ClientDashboard /> : <Dashboard />
               } />
@@ -56,11 +61,15 @@ const AppRoutes = () => {
               <Route path="/messages" element={<Messages />} />
               <Route path="/administration" element={<Administration />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/tasks" element={<TasksPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/stefan-chat" element={<StefanChatPage />} />
               <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys</h1><p className="text-muted-foreground">Analytiska insikter om dina klienter finns i varje klientprofil.</p></div>} />
               <Route path="/data-collection" element={<div className="p-6"><h1 className="text-2xl font-bold">Datainsamling</h1><p className="text-muted-foreground">Datainsamlingsverktyg finns integrerade i klientprofilerna.</p></div>} />
               <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter</h1><p className="text-muted-foreground">Automatiska veckobrev skickas varje måndag. Mer rapportfunktionalitet utvecklas.</p></div>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
           </AppLayout>
         )
       } />
