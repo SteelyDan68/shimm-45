@@ -65,6 +65,7 @@ serve(async (req) => {
         firecrawl: await testFirecrawlApi(firecrawlApiKey),
         google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
         social_blade: await testSocialBladeApi(socialBladeApiKey),
+        rapidapi: await testRapidApi(),
         
         // twitter_api removed due to authentication issues
       };
@@ -356,13 +357,8 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
   
   try {
     const socialBladeApiKey = Deno.env.get('SOCIAL_BLADE_API_KEY');
+    const rapidApiKey = Deno.env.get('RAPIDAPI_KEY');
     
-    if (!socialBladeApiKey) {
-      console.warn('Social Blade API key missing, skipping social data collection');
-      result.errors.push('Social Blade API key not configured');
-      return;
-    }
-
     const platforms = [];
     
     if (client.instagram_handle) {
@@ -382,12 +378,37 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
 
     for (const { platform, handle } of platforms) {
       try {
-        const socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
+        let socialData = null;
+        
+        // Try RapidAPI first for Instagram (more accurate data)
+        if (platform === 'instagram' && rapidApiKey) {
+          try {
+            console.log(`Trying RapidAPI for Instagram handle: ${handle}`);
+            socialData = await fetchInstagramRapidAPI(handle, rapidApiKey, client.name);
+            console.log(`Successfully collected Instagram data via RapidAPI for: ${handle}`);
+          } catch (rapidError) {
+            console.log(`RapidAPI failed for ${handle}, falling back to Social Blade:`, rapidError);
+            // Fall back to Social Blade
+            if (socialBladeApiKey) {
+              socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
+            }
+          }
+        } else {
+          // Use Social Blade for other platforms or if RapidAPI is not available
+          if (socialBladeApiKey) {
+            socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
+          } else {
+            console.warn('No API keys available for social data collection');
+            result.errors.push('No social media API keys configured');
+            continue;
+          }
+        }
+        
         if (socialData) {
           result.collected_data.social_metrics.push(socialData);
-          console.log(`Successfully collected ${platform} data for:`, handle);
+          console.log(`Successfully collected ${platform} data for: ${handle}`);
         } else {
-          console.warn(`No data found for ${platform}:`, handle);
+          console.warn(`No data found for ${platform}: ${handle}`);
         }
         
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -856,6 +877,65 @@ function extractSocialHandle(url: string, platform: string, title: string) {
   }
 }
 
+// Fetch Instagram data using RapidAPI
+async function fetchInstagramRapidAPI(handle: string, apiKey: string, clientName?: string) {
+  try {
+    const cleanHandle = handle.replace('@', '').replace('https://instagram.com/', '').replace('https://www.instagram.com/', '');
+    
+    console.log(`Making RapidAPI request for Instagram handle: ${cleanHandle}`);
+    
+    const response = await fetch(`https://instagram-premium-api-2023.p.rapidapi.com/v1/user/followers?amount=100&username=${cleanHandle}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'instagram-premium-api-2023.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Instagram RapidAPI request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('RapidAPI Instagram response:', JSON.stringify(data, null, 2));
+    
+    // Transform the data to match our expected format
+    const transformedData = {
+      followers: data.followers_count || 0,
+      following: data.following_count || 0,
+      posts: data.media_count || 0,
+      engagement_rate: data.engagement_rate || 0,
+      verified: data.is_verified || false,
+      bio: data.biography || '',
+      external_url: data.external_url || '',
+      profile_pic_url: data.profile_pic_url || '',
+      full_name: data.full_name || '',
+      username: cleanHandle,
+      source: 'rapidapi_instagram_premium'
+    };
+
+    return {
+      id: `rapidapi-instagram-${Date.now()}`,
+      data_type: 'social_metrics',
+      platform: 'instagram',
+      source: 'rapidapi_instagram_premium',
+      title: `Instagram profile for @${cleanHandle}`,
+      url: `https://instagram.com/${cleanHandle}`,
+      data: transformedData,
+      metadata: {
+        followers: transformedData.followers,
+        following: transformedData.following,
+        engagement_rate: transformedData.engagement_rate,
+        verified: transformedData.verified
+      },
+      created_at: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error fetching Instagram data from RapidAPI:', error);
+    throw error;
+  }
+}
+
 // Test API functions
 async function testFirecrawlApi(apiKey: string | undefined) {
   if (!apiKey) {
@@ -921,6 +1001,32 @@ async function testSocialBladeApi(apiKey: string | undefined) {
     return { 
       success: response.ok, 
       message: response.ok ? 'API fungerar' : `Fel: ${response.status}` 
+    };
+  } catch (error) {
+    return { success: false, message: `Fel: ${error.message}` };
+  }
+}
+
+async function testRapidApi() {
+  const apiKey = Deno.env.get('RAPIDAPI_KEY');
+  
+  if (!apiKey) {
+    return { success: false, message: 'RapidAPI key saknas' };
+  }
+  
+  try {
+    // Test with a simple request to check connectivity
+    const response = await fetch('https://instagram-premium-api-2023.p.rapidapi.com/v1/user/followers?amount=1&username=instagram', {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'instagram-premium-api-2023.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+      },
+    });
+    
+    return { 
+      success: response.ok, 
+      message: response.ok ? 'RapidAPI fungerar' : `Fel: ${response.status}` 
     };
   } catch (error) {
     return { success: false, message: `Fel: ${error.message}` };

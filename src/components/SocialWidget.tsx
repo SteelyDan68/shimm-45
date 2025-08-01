@@ -131,6 +131,7 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
           const data = metric.data || {};
           const platform = data.platform?.toLowerCase() || 'unknown';
           const rawData = data.raw_data;
+          const dataSource = data.source || metric.source || '';
           
           // Extract metrics from raw_data structure
           let followers = 0;
@@ -286,6 +287,17 @@ export const SocialWidget = ({ socialMetrics }: SocialWidgetProps) => {
                   </div>
                 )}
               </div>
+
+              {/* Data source info */}
+              {dataSource && (
+                <div className="pt-3 border-t">
+                  <div className="text-xs text-muted-foreground">
+                    Källa: {dataSource === 'rapidapi_instagram_premium' ? 'RapidAPI (Premium)' : 
+                           dataSource === 'socialblade' ? 'Social Blade' : 
+                           dataSource.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </div>
+                </div>
+              )}
 
               {/* Additional metrics from daily data */}
               {rawData?.daily?.[0] && (

@@ -31,7 +31,8 @@ export const ApiStatusChecker = () => {
     { name: 'Gemini API', icon: Brain, status: 'pending', message: 'Inte testad än' },
     { name: 'Firecrawl API', icon: Globe, status: 'pending', message: 'Inte testad än' },
     { name: 'Google Search API', icon: Search, status: 'pending', message: 'Inte testad än' },
-    { name: 'Social Blade API', icon: Share2, status: 'pending', message: 'Inte testad än' }
+    { name: 'Social Blade API', icon: Share2, status: 'pending', message: 'Inte testad än' },
+    { name: 'RapidAPI Instagram', icon: Share2, status: 'pending', message: 'Inte testad än' }
   ]);
   const [isChecking, setIsChecking] = useState(false);
 
@@ -154,10 +155,17 @@ export const ApiStatusChecker = () => {
           results.social_blade?.message || 'Okänt fel', 
           responseTime
         );
+        
+        updateApiStatus('RapidAPI Instagram',
+          results.rapidapi?.success ? 'success' : 'error',
+          results.rapidapi?.message || 'Okänt fel',
+          responseTime
+        );
       } else {
         updateApiStatus('Firecrawl API', 'error', 'Oväntad respons från API', responseTime);
         updateApiStatus('Google Search API', 'error', 'Oväntad respons från API', responseTime);
         updateApiStatus('Social Blade API', 'error', 'Oväntad respons från API', responseTime);
+        updateApiStatus('RapidAPI Instagram', 'error', 'Oväntad respons från API', responseTime);
       }
     } catch (error: any) {
       updateApiStatus('Firecrawl API', 'error', `Nätverksfel: ${error.message}`);

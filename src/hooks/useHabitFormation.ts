@@ -256,8 +256,8 @@ export const useHabitFormation = (clientId?: string) => {
       const { data, error } = await supabase
         .from('path_entries')
         .select('*')
-        .eq('client_id', clientId)
-        .contains('metadata', { is_habit: true } as any)
+        .eq('user_id', clientId)
+        .filter('metadata->>is_habit', 'eq', 'true')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
