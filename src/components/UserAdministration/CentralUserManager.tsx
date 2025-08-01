@@ -25,7 +25,8 @@ import {
   Filter,
   Brain,
   Zap,
-  Activity
+  Activity,
+  Link
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -40,6 +41,7 @@ import { PasswordManagement } from "./PasswordManagement";
 import { MultiRoleManager } from "./MultiRoleManager";
 import { GDPRAdminPanel } from "../Admin/GDPRAdminPanel";
 import { OrganizationManager } from "../Organizations/OrganizationManager";
+import { CoachClientRelationshipManager } from "./CoachClientRelationshipManager";
 import type { AppRole } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { deleteUserCompletely } from "@/utils/userDeletion";
@@ -322,7 +324,7 @@ export function CentralUserManager() {
 
       {/* Hierarkisk Tab Structure - Endast 3 huvudkategorier */}
       <Tabs defaultValue="people" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 gap-1 h-14 bg-muted/50">
+        <TabsList className="grid w-full grid-cols-4 gap-1 h-14 bg-muted/50">
           <TabsTrigger 
             value="people" 
             className="flex flex-col items-center gap-1 h-12 data-[state=active]:bg-white data-[state=active]:shadow-sm"
@@ -330,6 +332,15 @@ export function CentralUserManager() {
             <Users className="h-5 w-5" />
             <span className="text-sm font-medium">👥 Människor</span>
             <span className="text-xs text-muted-foreground">Users • Onboarding • Invites</span>
+          </TabsTrigger>
+          
+          <TabsTrigger 
+            value="relationships" 
+            className="flex flex-col items-center gap-1 h-12 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            <Link className="h-5 w-5" />
+            <span className="text-sm font-medium">🔗 Relationer</span>
+            <span className="text-xs text-muted-foreground">Coach • Client • Assignments</span>
           </TabsTrigger>
           
           <TabsTrigger 
@@ -503,6 +514,16 @@ export function CentralUserManager() {
                 <InvitationList />
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        {/* 🔗 RELATIONER - Tab Content */}
+        <TabsContent value="relationships" className="space-y-6">
+          <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
+            {/* Main Content */}
+            <div className="xl:col-span-1">
+              <CoachClientRelationshipManager />
+            </div>
           </div>
         </TabsContent>
 
