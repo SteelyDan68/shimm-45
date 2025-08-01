@@ -242,8 +242,8 @@ export const EnhancedApiStatusChecker = () => {
         
         if (apis.find(a => a.name === 'RapidAPI Instagram')?.enabled) {
           updateApiStatus('RapidAPI Instagram',
-            results.rapidapi?.success ? 'success' : 'error',
-            results.rapidapi?.message || 'Okänt fel',
+            results.rapidapi_instagram?.success ? 'success' : 'error',
+            results.rapidapi_instagram?.message || 'Okänt fel',
             responseTime
           );
         }
