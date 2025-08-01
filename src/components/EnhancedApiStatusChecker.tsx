@@ -78,13 +78,23 @@ export const EnhancedApiStatusChecker = () => {
         case 'Gemini API':
           await testGeminiApi();
           break;
-        case 'Firecrawl API':
-        case 'Google Search API':
-        case 'Social Blade API':
         case 'RapidAPI Instagram':
+          await testDataCollectorApi('rapidapi_instagram');
+          break;
         case 'RapidAPI TikTok':
+          await testDataCollectorApi('rapidapi_tiktok');
+          break;
         case 'RapidAPI YouTube':
-          await testDataCollectorApi(apiName);
+          await testDataCollectorApi('rapidapi_youtube');
+          break;
+        case 'Firecrawl API':
+          await testDataCollectorApi('firecrawl');
+          break;
+        case 'Google Search API':
+          await testDataCollectorApi('google_search');
+          break;
+        case 'Social Blade API':
+          await testDataCollectorApi('social_blade');
           break;
         default:
           updateApiStatus(apiName, 'error', 'Okänt API');
@@ -182,8 +192,51 @@ export const EnhancedApiStatusChecker = () => {
     }
   };
 
-  const testDataCollectorApi = async (apiName: string) => {
-    await testDataCollectorApis();
+  const testDataCollectorApi = async (specificTest: string) => {
+    const startTime = Date.now();
+    
+    // Map friendly names to API test identifiers
+    const testMapping: { [key: string]: string } = {
+      'firecrawl': 'Firecrawl API',
+      'google_search': 'Google Search API', 
+      'social_blade': 'Social Blade API',
+      'rapidapi_instagram': 'RapidAPI Instagram',
+      'rapidapi_tiktok': 'RapidAPI TikTok',
+      'rapidapi_youtube': 'RapidAPI YouTube'
+    };
+    
+    const apiName = testMapping[specificTest];
+    if (!apiName) {
+      updateApiStatus('Unknown API', 'error', 'Okänt API test');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('data-collector', {
+        body: { test_mode: true }
+      });
+
+      const responseTime = Date.now() - startTime;
+
+      if (error) {
+        updateApiStatus(apiName, 'error', `Fel: ${error.message}`, responseTime);
+      } else if (data?.test_results) {
+        const results = data.test_results;
+        const result = results[specificTest];
+        
+        if (result) {
+          updateApiStatus(apiName, 
+            result.success ? 'success' : 'error',
+            result.message || 'Okänt fel',
+            responseTime
+          );
+        } else {
+          updateApiStatus(apiName, 'error', 'Inget testresultat mottaget', responseTime);
+        }
+      }
+    } catch (error: any) {
+      updateApiStatus(apiName, 'error', `Nätverksfel: ${error.message}`);
+    }
   };
 
   const testDataCollectorApis = async () => {
