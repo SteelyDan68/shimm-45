@@ -254,8 +254,6 @@ export const Dashboard = () => {
         </Card>
       </div>
 
-      {/* API Status Check */}
-      <ApiStatusChecker />
 
       {/* Recent Clients */}
       <Card>

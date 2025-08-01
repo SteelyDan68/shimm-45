@@ -309,7 +309,7 @@ export const ClientDashboard = () => {
         </Card>
       </div>
 
-      {/* Kapacitetsbarometer - Efter stats-kort */}
+      {/* Kapacitetsbarometer och Quick Actions */}
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -319,10 +319,43 @@ export const ClientDashboard = () => {
           <CapacityBarometer clientId={clientProfile.id} />
         </div>
         
-        {/* Placeholder för framtida komponenter */}
-        <div className="space-y-4">
-          {/* Här kan vi lägga till fler widgets senare */}
-        </div>
+        {/* Quick Actions för klienter */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-blue-600" />
+              Snabbåtgärder
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/onboarding')}
+              >
+                <User className="h-4 w-4 mr-2" />
+                Uppdatera min profil
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/tasks')}
+              >
+                <CheckSquare className="h-4 w-4 mr-2" />
+                Se mina uppgifter
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/messages')}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Kontakta min coach
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* AI Recommendations */}

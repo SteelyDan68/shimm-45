@@ -23,7 +23,11 @@ import {
   UserCheck,
   UserPlus,
   MessageSquare,
-  Brain
+  Brain,
+  Zap,
+  FileText,
+  Globe,
+  Lock
 } from 'lucide-react';
 import StefanMemoryManager from './StefanMemoryManager';
 
@@ -41,48 +45,62 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
     activeClients: 89,
     pendingInvitations: 12,
     systemHealth: 98,
-    automationTasks: 45,
-    dataCollectionStatus: 'active',
+    weeklyGrowth: 8.2,
+    stefanInteractions: 234,
+    activePillars: 5,
     lastBackup: '2024-01-28 03:00',
-    criticalAlerts: 2,
-    recentActivity: 'High'
+    criticalAlerts: 1,
+    activeAutomations: 12
   };
 
   const quickActions = [
     {
-      title: 'Skapa ny användare',
-      description: 'Lägg till en ny användare i systemet',
+      title: 'Skapa användare',
+      description: 'Lägg till nya användare och tilldela roller',
       icon: UserPlus,
       action: () => onNavigateToTab?.('users'),
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
+      priority: 'high'
     },
     {
-      title: 'Systemhälsa',
-      description: 'Kontrollera systemstatus och prestanda',
+      title: 'Stefan AI-hantering',
+      description: 'Konfigurera och övervaka AI-systemet',
+      icon: Brain,
+      action: () => onNavigateToTab?.('stefan-overview'),
+      color: 'bg-purple-500',
+      priority: 'high'
+    },
+    {
+      title: 'Användarbehörigheter',
+      description: 'Hantera roller och åtkomstbehörigheter',
+      icon: Shield,
+      action: () => onNavigateToTab?.('permissions'),
+      color: 'bg-green-500',
+      priority: 'medium'
+    },
+    {
+      title: 'Systemövervakning',
+      description: 'Kontrollera prestanda och drift',
       icon: Activity,
       action: () => onNavigateToTab?.('health'),
-      color: 'bg-green-500'
+      color: 'bg-red-500',
+      priority: 'medium'
     },
     {
-      title: 'GDPR-hantering',
-      description: 'Hantera datarättigheter och export',
-      icon: Shield,
+      title: 'GDPR & Integritet',
+      description: 'Hantera användardata och rättigheter',
+      icon: Lock,
       action: () => onNavigateToTab?.('gdpr'),
-      color: 'bg-purple-500'
+      color: 'bg-orange-500',
+      priority: 'low'
     },
     {
-      title: 'Stefan AI-data',
-      description: 'Hantera träningsdata för AI-modeller',
-      icon: Bot,
-      action: () => onNavigateToTab?.('stefan-data'),
-      color: 'bg-orange-500'
-    },
-    {
-      title: 'Stefan Minnesbank',
-      description: 'Hantera AI-minnesfragment med embeddings',
-      icon: Brain,
-      action: () => onNavigateToTab?.('stefan-memory'),
-      color: 'bg-pink-500'
+      title: 'Automatisering',
+      description: 'Konfigurera automatiska processer',
+      icon: Zap,
+      action: () => onNavigateToTab?.('automation'),
+      color: 'bg-indigo-500',
+      priority: 'low'
     }
   ];
 
@@ -98,6 +116,10 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
     return 'destructive';
   };
 
+  const getPriorityActions = (priority: string) => {
+    return quickActions.filter(action => action.priority === priority);
+  };
+
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
@@ -110,11 +132,11 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
               </div>
               <div>
                 <CardTitle className="text-xl flex items-center gap-2">
-                  Välkommen till Administrationscentret
-                  <HelpTooltip content={helpTexts.administration.userRoles} />
+                  Systemadministration
+                  <HelpTooltip content="Övergripande kontroll över systemet, användare och Stefan AI-funktionalitet" />
                 </CardTitle>
                 <p className="text-muted-foreground">
-                  Hantera användare, system och data från en centraliserad vy
+                  Centraliserad kontroll över plattformens alla funktioner
                 </p>
               </div>
             </div>
@@ -125,28 +147,28 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
               </div>
               <p className="text-sm text-muted-foreground">Systemhälsa</p>
               <Badge variant={getHealthBadge(adminStats.systemHealth)} className="mt-1">
-                {adminStats.systemHealth >= 95 ? 'Excellent' : 
-                 adminStats.systemHealth >= 80 ? 'Good' : 'Needs Attention'}
+                {adminStats.systemHealth >= 95 ? 'Utmärkt' : 
+                 adminStats.systemHealth >= 80 ? 'Bra' : 'Behöver åtgärd'}
               </Badge>
             </div>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Key Metrics */}
+      {/* Key Performance Metrics */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               Totala användare
-              <HelpTooltip content="Totalt antal registrerade användare i systemet, inklusive alla roller" />
+              <HelpTooltip content="Alla registrerade användare inklusive coaches, klienter och administratörer" />
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{adminStats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              +12 sedan förra månaden
+              +{adminStats.weeklyGrowth}% denna vecka
             </p>
           </CardContent>
         </Card>
@@ -154,15 +176,15 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Aktiva klienter
-              <HelpTooltip content="Antal klienter som har varit aktiva de senaste 30 dagarna" />
+              Stefan AI-interaktioner
+              <HelpTooltip content="Antal AI-interaktioner och analyser den senaste veckan" />
             </CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
+            <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{adminStats.activeClients}</div>
+            <div className="text-2xl font-bold">{adminStats.stefanInteractions}</div>
             <p className="text-xs text-muted-foreground">
-              89% aktivitetsgrad
+              AI-sessioner denna vecka
             </p>
           </CardContent>
         </Card>
@@ -170,15 +192,15 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Väntande inbjudningar
-              <HelpTooltip content="Inbjudningar som skickats men inte accepterats än" />
+              Aktiva automationer
+              <HelpTooltip content="Antal pågående automatiserade processer i systemet" />
             </CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <Zap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{adminStats.pendingInvitations}</div>
+            <div className="text-2xl font-bold">{adminStats.activeAutomations}</div>
             <p className="text-xs text-muted-foreground">
-              Väntar på svar
+              Automatiska processer
             </p>
           </CardContent>
         </Card>
@@ -186,8 +208,8 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Kritiska varningar
-              <HelpTooltip content="Systemvarningar som kräver omedelbar uppmärksamhet" />
+              Systemvarningar
+              <HelpTooltip content="Aktiva systemvarningar som kräver uppmärksamhet" />
             </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -200,14 +222,43 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
         </Card>
       </div>
 
-      {/* System Status Overview */}
+      {/* Priority Actions - Reorganized */}
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-green-600" />
-              Systemstatus
-              <HelpTooltip content="Realtidsöversikt över systemets hälsa och prestanda" />
+              <Target className="h-5 w-5 text-red-600" />
+              Prioriterade åtgärder
+              <HelpTooltip content="De viktigaste administrativa funktionerna för daglig drift" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {getPriorityActions('high').map((action, index) => (
+                <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer" onClick={action.action}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded ${action.color} text-white`}>
+                        <action.icon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm">{action.title}</h4>
+                        <p className="text-xs text-muted-foreground">{action.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-600" />
+              Systemöversikt
+              <HelpTooltip content="Realtidsöversikt över systemets prestanda och status" />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -225,67 +276,32 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">API-status</span>
+                <span className="text-sm">Stefan AI-status</span>
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Automatisering</span>
-                <Clock className="h-4 w-4 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
-              Senaste aktivitet
-              <HelpTooltip content="Översikt över nylig systemaktivitet och användarengagemang" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
-                <div className="flex items-center gap-2">
-                  <UserPlus className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm">Ny användare registrerad</span>
-                </div>
-                <span className="text-xs text-muted-foreground">2 min sedan</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Automatisk backup slutförd</span>
-                </div>
-                <span className="text-xs text-muted-foreground">1 tim sedan</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-orange-50 rounded">
-                <div className="flex items-center gap-2">
-                  <Bot className="h-4 w-4 text-orange-600" />
-                  <span className="text-sm">AI-analys genererad</span>
-                </div>
-                <span className="text-xs text-muted-foreground">3 tim sedan</span>
+                <span className="text-sm">Automatiseringar</span>
+                <Badge variant="outline" className="text-xs">
+                  {adminStats.activeAutomations} aktiva
+                </Badge>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Secondary Actions */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-purple-600" />
-            Snabbåtgärder
-            <HelpTooltip content="Vanligaste administrativa uppgifter för snabb åtkomst" />
+            <BarChart3 className="h-5 w-5 text-gray-600" />
+            Ytterligare funktioner
+            <HelpTooltip content="Mindre frekventa administrativa funktioner" />
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {quickActions.map((action, index) => (
+            {[...getPriorityActions('medium'), ...getPriorityActions('low')].map((action, index) => (
               <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer" onClick={action.action}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -304,28 +320,39 @@ export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
         </CardContent>
       </Card>
 
-      {/* Data Insights */}
+      {/* Recent Activity Feed */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-indigo-600" />
-            Datainsikter
-            <HelpTooltip content="Viktiga trender och mätvärden för systemövervakning" />
+            <Clock className="h-5 w-5 text-purple-600" />
+            Senaste systemaktivitet
+            <HelpTooltip content="De senaste viktiga händelserna i systemet" />
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="text-center p-4 bg-blue-50 rounded">
-              <div className="text-2xl font-bold text-blue-600">89%</div>
-              <div className="text-sm text-muted-foreground">Användaraktivitet</div>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-blue-600" />
+                <span className="text-sm">3 nya användare registrerade</span>
+              </div>
+              <span className="text-xs text-muted-foreground">2 tim sedan</span>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded">
-              <div className="text-2xl font-bold text-green-600">45</div>
-              <div className="text-sm text-muted-foreground">Automatiseringar aktiva</div>
+            
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded">
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4 text-green-600" />
+                <span className="text-sm">Stefan AI-minnesbank uppdaterad</span>
+              </div>
+              <span className="text-xs text-muted-foreground">4 tim sedan</span>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded">
-              <div className="text-2xl font-bold text-purple-600">99.8%</div>
-              <div className="text-sm text-muted-foreground">Systemupptid</div>
+            
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-purple-600" />
+                <span className="text-sm">Automatisk systemunderhåll slutfört</span>
+              </div>
+              <span className="text-xs text-muted-foreground">6 tim sedan</span>
             </div>
           </div>
         </CardContent>

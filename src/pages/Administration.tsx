@@ -32,6 +32,7 @@ import { SystemIntegrityPanel } from "@/components/SystemIntegrityPanel";
 import { DataRightsCenter } from "@/components/DataRightsCenter";
 import StefanTrainingData from "@/components/StefanTrainingData";
 import StefanMemoryManager from "@/components/Admin/StefanMemoryManager";
+import StefanOverviewPanel from "@/components/Admin/StefanOverviewPanel";
 
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { helpTexts } from "@/data/helpTexts";
@@ -208,35 +209,23 @@ export function Administration() {
 
       
 
-      <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
-          <TabsTrigger value="profile" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span className="hidden sm:inline">Profil</span>
-          </TabsTrigger>
+      <Tabs defaultValue="users" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Användare</span>
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
+          <TabsTrigger value="stefan-overview" className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            <span className="hidden sm:inline">Stefan AI</span>
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Säkerhet</span>
+            <span className="hidden sm:inline">Behörigheter</span>
           </TabsTrigger>
           <TabsTrigger value="automation" className="flex items-center gap-2">
             <Bot className="h-4 w-4" />
             <span className="hidden sm:inline">Automatisering</span>
-          </TabsTrigger>
-          <TabsTrigger value="data" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">Data</span>
-          </TabsTrigger>
-          <TabsTrigger value="stefan-data" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            <span className="hidden sm:inline">Stefandata</span>
-          </TabsTrigger>
-          <TabsTrigger value="stefan-memory" className="flex items-center gap-2">
-            <Key className="h-4 w-4" />
-            <span className="hidden sm:inline">Minnesbank</span>
           </TabsTrigger>
           <TabsTrigger value="gdpr" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -244,7 +233,7 @@ export function Administration() {
           </TabsTrigger>
           <TabsTrigger value="health" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">Systemhälsa</span>
+            <span className="hidden sm:inline">System</span>
           </TabsTrigger>
         </TabsList>
 
@@ -332,6 +321,79 @@ export function Administration() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Stefan AI Overview Tab */}
+        <TabsContent value="stefan-overview">
+          <StefanOverviewPanel />
+        </TabsContent>
+
+        {/* Permissions Tab */}
+        <TabsContent value="permissions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Behörighetshantering</CardTitle>
+              <CardDescription>
+                Hantera användarroller och åtkomstbehörigheter
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Automatisk rollhantering</h4>
+                    <p className="text-sm text-muted-foreground">Tilldela roller automatiskt baserat på inbjudningstyp</p>
+                  </div>
+                  <Switch
+                    checked={securitySettings.twoFactor}
+                    onCheckedChange={(checked) => 
+                      setSecuritySettings({...securitySettings, twoFactor: checked})
+                    }
+                  />
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="font-medium mb-3">Rollöversikt</h4>
+                  <div className="grid gap-3">
+                    <div className="flex items-center justify-between p-3 border rounded">
+                      <div>
+                        <span className="font-medium">Superadmin</span>
+                        <p className="text-sm text-muted-foreground">Full systemkontroll</p>
+                      </div>
+                      <Badge variant="destructive">1 användare</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded">
+                      <div>
+                        <span className="font-medium">Admin</span>
+                        <p className="text-sm text-muted-foreground">Användarhantering och systemövervakning</p>
+                      </div>
+                      <Badge variant="secondary">3 användare</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded">
+                      <div>
+                        <span className="font-medium">Coach</span>
+                        <p className="text-sm text-muted-foreground">Klienthantering och coaching-funktioner</p>
+                      </div>
+                      <Badge variant="outline">8 användare</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded">
+                      <div>
+                        <span className="font-medium">Client</span>
+                        <p className="text-sm text-muted-foreground">Grundläggande användarfunktioner</p>
+                      </div>
+                      <Badge variant="outline">124 användare</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Button onClick={handleSaveSecurity}>
+                Spara behörighetsinställningar
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
 
 
