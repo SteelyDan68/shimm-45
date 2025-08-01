@@ -157,7 +157,7 @@ export const useUserJourney = () => {
       // Call AI planning function to create personalized tasks
       await supabase.functions.invoke('generate-ai-planning', {
         body: {
-          client_id: user.id,
+          user_id: user.id,
           assessment_type: assessmentType,
           assessment_result: assessmentResult,
           journey_progress: currentProgress,
