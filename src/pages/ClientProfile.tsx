@@ -256,10 +256,11 @@ export const ClientProfile = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="overview">Översikt</TabsTrigger>
           <TabsTrigger value="calendar">Kalender</TabsTrigger>
           <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
+          <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
           <TabsTrigger value="data">Data & Insights</TabsTrigger>
           <TabsTrigger value="tasks">Uppgifter</TabsTrigger>
           <TabsTrigger value="development">Utveckling</TabsTrigger>
@@ -418,6 +419,22 @@ export const ClientProfile = () => {
             userName={client.name} 
             isCoachView={true}
           />
+        </TabsContent>
+
+        {/* Intelligence Tab */}
+        <TabsContent value="intelligence" className="space-y-6">
+          <div className="text-center py-8">
+            <Button 
+              onClick={() => navigate(`/intelligence/${clientId}`)}
+              className="flex items-center gap-2"
+            >
+              <Brain className="h-4 w-4" />
+              Öppna Intelligence-sida
+            </Button>
+            <p className="text-sm text-muted-foreground mt-2">
+              Omfattande dataanalys och insights från sociala medier och nyheter
+            </p>
+          </div>
         </TabsContent>
 
         {/* Data & Insights Tab */}

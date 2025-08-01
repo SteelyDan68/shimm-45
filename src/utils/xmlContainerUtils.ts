@@ -148,6 +148,7 @@ export const validateXMLContainer = (xmlContent: string, containerType: Containe
       'progress_timeline': 'ProgressTimeline',
       'intervention_plan': 'InterventionPlan',
       'coaching_session': 'CoachingSession',
+      'intelligence_report': 'IntelligenceReport',
       'pillar_analysis': 'PillarAnalysis',
       'habit_tracking': 'HabitTracking',
       'milestone_record': 'MilestoneRecord'

@@ -5,7 +5,8 @@ export type ContainerType =
   | 'coaching_session'
   | 'pillar_analysis'
   | 'habit_tracking'
-  | 'milestone_record';
+  | 'milestone_record'
+  | 'intelligence_report';
 
 export interface ClientDataContainer {
   id: string;

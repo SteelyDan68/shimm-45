@@ -20,6 +20,7 @@ import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
 import { InvitationSignup } from "./pages/InvitationSignup";
+import { Intelligence } from "./pages/Intelligence";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const AppRoutes = () => {
               <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/user/:userId" element={<UserProfile />} />
+              <Route path="/intelligence/:userId" element={<Intelligence />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/administration" element={<Administration />} />
               <Route path="/auth" element={<Auth />} />
