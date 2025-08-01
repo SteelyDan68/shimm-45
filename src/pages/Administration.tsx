@@ -19,7 +19,8 @@ import {
   Trash2,
   FileText,
   Users,
-  Key
+  Key,
+  Activity
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +34,7 @@ import { DataRightsCenter } from "@/components/DataRightsCenter";
 import StefanTrainingData from "@/components/StefanTrainingData";
 import StefanMemoryManager from "@/components/Admin/StefanMemoryManager";
 import StefanOverviewPanel from "@/components/Admin/StefanOverviewPanel";
+import { EnhancedApiStatusChecker } from "@/components/EnhancedApiStatusChecker";
 
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { helpTexts } from "@/data/helpTexts";
@@ -210,7 +212,7 @@ export function Administration() {
       
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Användare</span>
@@ -222,6 +224,10 @@ export function Administration() {
           <TabsTrigger value="permissions" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             <span className="hidden sm:inline">Behörigheter</span>
+          </TabsTrigger>
+          <TabsTrigger value="api-status" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            <span className="hidden sm:inline">API Status</span>
           </TabsTrigger>
           <TabsTrigger value="automation" className="flex items-center gap-2">
             <Bot className="h-4 w-4" />
@@ -326,6 +332,11 @@ export function Administration() {
         {/* Stefan AI Overview Tab */}
         <TabsContent value="stefan-overview">
           <StefanOverviewPanel />
+        </TabsContent>
+
+        {/* API Status Tab */}
+        <TabsContent value="api-status">
+          <EnhancedApiStatusChecker />
         </TabsContent>
 
         {/* Permissions Tab */}
