@@ -230,7 +230,7 @@ export function Administration() {
         <Tabs defaultValue="users" className="space-y-6">
           {/* Navigation Tabs */}
           <div className="bg-card rounded-lg border p-1">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 gap-1">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
               <TabsTrigger 
                 value="users" 
                 className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
@@ -257,7 +257,7 @@ export function Administration() {
                 className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
               >
                 <Activity className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">API Status</span>
+                <span className="hidden sm:inline">Systemhälsa</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="automation" 
@@ -272,13 +272,6 @@ export function Administration() {
               >
                 <FileText className="h-4 w-4 flex-shrink-0" />
                 <span className="hidden sm:inline">GDPR</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="health" 
-                className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
-              >
-                <Key className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">System</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -338,20 +331,24 @@ export function Administration() {
             </div>
           </TabsContent>
 
-          {/* API Status Tab */}
+          {/* System Health Tab */}
           <TabsContent value="api-status" className="space-y-6">
             <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <Activity className="h-5 w-5 text-primary" />
-                  API Status & Övervakning
+                  Systemhälsa & Övervakning
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Övervaka systemets API:er och tjänster
+                  Övervaka systemets hälsa, API:er och integritet
                 </p>
               </div>
-              <div className="p-6">
+              <div className="p-6 space-y-6">
                 <EnhancedApiStatusChecker />
+                <Separator />
+                <SystemHealthDashboard />
+                <Separator />
+                <SystemIntegrityPanel />
               </div>
             </div>
           </TabsContent>
@@ -529,24 +526,6 @@ export function Administration() {
             </div>
           </TabsContent>
 
-          {/* System Health Tab */}
-          <TabsContent value="health" className="space-y-6">
-            <div className="bg-card rounded-lg border">
-              <div className="p-6 border-b">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Key className="h-5 w-5 text-primary" />
-                  Systemhälsa
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Övervaka systemets prestanda och integritet
-                </p>
-              </div>
-              <div className="p-6 space-y-6">
-                <SystemHealthDashboard />
-                <SystemIntegrityPanel />
-              </div>
-            </div>
-          </TabsContent>
 
         </Tabs>
       </div>
