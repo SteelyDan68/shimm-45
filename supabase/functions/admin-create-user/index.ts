@@ -204,10 +204,25 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check if user already exists in both auth.users and profiles
+    // Check if user already exists and clean up any ghost references
     console.log('Checking if user already exists with email:', email);
     
-    // Check auth.users table
+    // First, clean up any potential ghost references for this email
+    console.log('Performing cleanup of any ghost references...');
+    try {
+      const { data: cleanupResult, error: cleanupError } = await supabaseAdmin
+        .rpc('cleanup_user_references', { target_email: email });
+      
+      if (cleanupError) {
+        console.error('Cleanup error (non-critical):', cleanupError);
+      } else {
+        console.log('Cleanup result:', cleanupResult);
+      }
+    } catch (cleanupErr) {
+      console.log('Cleanup failed (continuing anyway):', cleanupErr);
+    }
+    
+    // Check auth.users table using admin listUsers
     const { data: existingUser, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers();
     if (existingUserError) {
       console.error('Error checking existing users:', existingUserError);
@@ -220,14 +235,14 @@ const handler = async (req: Request): Promise<Response> => {
     const authUserExists = existingUser.users.some(u => u.email === email);
     console.log('Auth user exists:', authUserExists);
 
-    // Check profiles table for any leftover profiles
+    // Check profiles table for any leftover profiles after cleanup
     const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
       .from('profiles')
       .select('id, email')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
-    if (profileCheckError && profileCheckError.code !== 'PGRST116') { // PGRST116 is "not found"
+    if (profileCheckError) {
       console.error('Error checking existing profiles:', profileCheckError);
       return new Response(
         JSON.stringify({ error: 'Kunde inte kontrollera befintliga profiler' }),
@@ -236,29 +251,18 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const profileExists = existingProfile !== null;
-    console.log('Profile exists:', profileExists);
+    console.log('Profile exists after cleanup:', profileExists);
 
+    // If either auth user or profile still exists after cleanup, user cannot be created
     if (authUserExists || profileExists) {
-      console.log('User or profile already exists with email:', email);
-      
-      // If profile exists but auth user doesn't, clean up the orphaned profile
-      if (profileExists && !authUserExists) {
-        console.log('Cleaning up orphaned profile for:', email);
-        await supabaseAdmin
-          .from('profiles')
-          .delete()
-          .eq('email', email);
-        console.log('Orphaned profile cleaned up, proceeding with user creation');
-      } else {
-        console.log('User already exists with email:', email);
-        return new Response(
-          JSON.stringify({ 
-            error: `En användare med email ${email} existerar redan. Använd en annan e-postadress.`,
-            details: 'Email already in use'
-          }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+      console.log('User still exists after cleanup attempt:', email);
+      return new Response(
+        JSON.stringify({ 
+          error: `En användare med email ${email} existerar fortfarande. Kontakta systemadministratör för att helt radera gamla användarreferenser.`,
+          details: { authUserExists, profileExists }
+        }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Create user using admin client - the profile will be created automatically by the trigger

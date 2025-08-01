@@ -1521,6 +1521,14 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      cleanup_user_references: {
+        Args: { target_email: string }
+        Returns: string
+      }
+      delete_user_completely: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
