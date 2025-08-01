@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, X, Brain, Database } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Trash2, Plus, X, Brain, Database, Upload, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -33,6 +34,15 @@ const StefanMemoryManager: React.FC = () => {
     source: '',
   });
   const [tagInput, setTagInput] = useState('');
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [importResult, setImportResult] = useState<{
+    success: boolean;
+    totalProcessed: number;
+    successCount: number;
+    errorCount: number;
+    errors?: string[];
+  } | null>(null);
 
   const categories = [
     'Self Care',
@@ -162,6 +172,66 @@ const StefanMemoryManager: React.FC = () => {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.jsonl')) {
+      toast({
+        title: "Felaktigt filformat",
+        description: "Endast JSONL-filer är tillåtna",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast({
+        title: "Filen är för stor",
+        description: "Maximal filstorlek är 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setBulkImporting(true);
+    setImportProgress(0);
+    setImportResult(null);
+
+    try {
+      const content = await file.text();
+      
+      const { data, error } = await supabase.functions.invoke('bulk-import-stefan-memory', {
+        body: { jsonlContent: content }
+      });
+
+      if (error) throw error;
+
+      setImportResult(data);
+      setImportProgress(100);
+
+      toast({
+        title: "Bulk-import slutförd",
+        description: `${data.successCount} minnesfragment importerades, ${data.errorCount} misslyckades`,
+        variant: data.errorCount > 0 ? "destructive" : "default",
+      });
+
+      // Refresh memories list
+      fetchMemories();
+    } catch (error: any) {
+      console.error('Error during bulk import:', error);
+      toast({
+        title: "Fel vid bulk-import",
+        description: error.message || "Kunde inte importera minnesfragment",
+        variant: "destructive",
+      });
+    } finally {
+      setBulkImporting(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -275,6 +345,73 @@ const StefanMemoryManager: React.FC = () => {
               {saving ? 'Lagrar...' : 'Lägg till minnesfragment'}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Bulk Import */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Bulk-import från JSONL-fil
+          </CardTitle>
+          <CardDescription>
+            Ladda upp en JSONL-fil med minnesfragment. Varje rad ska vara ett JSON-objekt med fälten: content, tags, category, version, source.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Input
+                type="file"
+                accept=".jsonl"
+                onChange={handleFileUpload}
+                disabled={bulkImporting}
+                className="flex-1"
+              />
+              <Button disabled={bulkImporting} variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                {bulkImporting ? 'Importerar...' : 'Välj JSONL-fil'}
+              </Button>
+            </div>
+
+            {bulkImporting && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Importerar minnesfragment...</span>
+                  <span>{importProgress}%</span>
+                </div>
+                <Progress value={importProgress} className="w-full" />
+              </div>
+            )}
+
+            {importResult && (
+              <div className="bg-muted rounded-lg p-4 space-y-2">
+                <h4 className="font-medium">Import-resultat:</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>Totalt bearbetade: {importResult.totalProcessed}</div>
+                  <div className="text-green-600">Framgångsrika: {importResult.successCount}</div>
+                  <div className="text-red-600">Misslyckade: {importResult.errorCount}</div>
+                </div>
+                {importResult.errors && importResult.errors.length > 0 && (
+                  <div className="mt-2">
+                    <h5 className="font-medium text-sm mb-1">Fel (första 10):</h5>
+                    <div className="text-xs space-y-1 max-h-32 overflow-y-auto">
+                      {importResult.errors.map((error, index) => (
+                        <div key={index} className="text-red-600">{error}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="text-xs text-muted-foreground">
+              <strong>JSONL-format exempel:</strong><br />
+              {"{"}"content": "Coaching tip...", "tags": ["coaching"], "category": "Strategy", "version": "1.0", "source": "Manual Import"{"}"}<br />
+              {"{"}"content": "Another tip...", "tags": ["mindfulness"], "category": "Self Care", "version": "1.0", "source": "Training Data"{"}"}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
