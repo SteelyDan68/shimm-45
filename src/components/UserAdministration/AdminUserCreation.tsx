@@ -169,6 +169,10 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
         throw new Error('För- och efternamn är obligatoriska');
       }
 
+      if (!formData.role || formData.role.trim() === '') {
+        throw new Error('En roll måste väljas för användaren');
+      }
+
       // Prepare data for backend
       const userData = {
         email: sanitizeText(formData.email.toLowerCase().trim()),

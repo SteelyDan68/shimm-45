@@ -417,6 +417,14 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // Ta bort eventuell automatiskt skapad 'user' roll först
+    console.log('Removing any default user role before assigning specified role...');
+    await supabaseAdmin
+      .from('user_roles')
+      .delete()
+      .eq('user_id', newUser.user.id)
+      .eq('role', 'user');
+
     // Assign role using admin client
     const { error: roleAssignError } = await supabaseAdmin
       .from('user_roles')
