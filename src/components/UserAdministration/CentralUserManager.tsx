@@ -88,7 +88,7 @@ export function CentralUserManager() {
   const [selectedUser, setSelectedUser] = useState<UnifiedUser | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFullProfileDialogOpen, setIsFullProfileDialogOpen] = useState(false);
-  const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false);
+  const [isAdvancedCreateDialogOpen, setIsAdvancedCreateDialogOpen] = useState(false);
   
   // State för användarhantering
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
@@ -182,7 +182,7 @@ export function CentralUserManager() {
           lastName: '',
           role: 'client'
         });
-        setIsCreateUserDialogOpen(false);
+        setIsAdvancedCreateDialogOpen(false);
         refetch();
       } else {
         throw new Error(data.error || 'Failed to create user');
@@ -316,9 +316,9 @@ export function CentralUserManager() {
           <p className="text-sm sm:text-base text-muted-foreground">Konsoliderad hantering av alla användare, roller och funktioner</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setIsCreateUserDialogOpen(true)} className="w-full sm:w-auto">
+          <Button onClick={() => setIsAdvancedCreateDialogOpen(true)} className="w-full sm:w-auto">
             <UserPlus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Skapa användare</span>
+            <span className="hidden sm:inline">Avancerad användarregistrering</span>
             <span className="sm:hidden">Skapa</span>
           </Button>
         </div>
@@ -719,7 +719,7 @@ export function CentralUserManager() {
       </Tabs>
 
       {/* Create User Dialog */}
-      <Dialog open={isCreateUserDialogOpen} onOpenChange={setIsCreateUserDialogOpen}>
+      <Dialog open={isAdvancedCreateDialogOpen} onOpenChange={setIsAdvancedCreateDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Skapa ny användare</DialogTitle>
@@ -798,7 +798,7 @@ export function CentralUserManager() {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => setIsCreateUserDialogOpen(false)}
+                onClick={() => setIsAdvancedCreateDialogOpen(false)}
               >
                 Avbryt
               </Button>

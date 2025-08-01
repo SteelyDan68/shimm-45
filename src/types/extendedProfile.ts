@@ -10,6 +10,9 @@ export interface ExtendedProfileData {
   date_of_birth?: string;
   gender?: string;
   
+  // Swedish personal identification number
+  personnummer?: string;
+  
   // Address Information
   address?: {
     street?: string;
