@@ -250,9 +250,13 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('email', email);
         console.log('Orphaned profile cleaned up, proceeding with user creation');
       } else {
+        console.log('User already exists with email:', email);
         return new Response(
-          JSON.stringify({ error: `En användare med email ${email} existerar redan` }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ 
+            error: `En användare med email ${email} existerar redan. Använd en annan e-postadress.`,
+            details: 'Email already in use'
+          }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }

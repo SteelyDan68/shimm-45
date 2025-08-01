@@ -246,9 +246,17 @@ export function AdminUserCreation({ onUserCreated }: AdminUserCreationProps) {
       }
     } catch (error: any) {
       console.error('Error creating user:', error);
+      
+      let errorMessage = error.message || "Kunde inte skapa användare";
+      
+      // Handle specific error cases
+      if (errorMessage.includes('Edge Function returned a non-2xx status code')) {
+        errorMessage = 'Ett tekniskt fel inträffade. Kontrollera att alla fält är korrekt ifyllda och försök igen.';
+      }
+      
       toast({
-        title: "Fel",
-        description: error.message || "Kunde inte skapa användare",
+        title: "Fel vid användarskap",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

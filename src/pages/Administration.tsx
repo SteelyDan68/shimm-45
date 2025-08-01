@@ -212,36 +212,38 @@ export function Administration() {
       
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Användare</span>
-          </TabsTrigger>
-          <TabsTrigger value="stefan-overview" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            <span className="hidden sm:inline">Stefan AI</span>
-          </TabsTrigger>
-          <TabsTrigger value="permissions" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Behörigheter</span>
-          </TabsTrigger>
-          <TabsTrigger value="api-status" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            <span className="hidden sm:inline">API Status</span>
-          </TabsTrigger>
-          <TabsTrigger value="automation" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            <span className="hidden sm:inline">Automatisering</span>
-          </TabsTrigger>
-          <TabsTrigger value="gdpr" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">GDPR</span>
-          </TabsTrigger>
-          <TabsTrigger value="health" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">System</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="flex w-full min-w-max gap-1 justify-start">
+            <TabsTrigger value="users" className="flex items-center gap-2 min-w-fit px-4">
+              <Users className="h-4 w-4" />
+              <span>Användare</span>
+            </TabsTrigger>
+            <TabsTrigger value="stefan-overview" className="flex items-center gap-2 min-w-fit px-4">
+              <Bot className="h-4 w-4" />
+              <span>Stefan AI</span>
+            </TabsTrigger>
+            <TabsTrigger value="permissions" className="flex items-center gap-2 min-w-fit px-4">
+              <Shield className="h-4 w-4" />
+              <span>Behörigheter</span>
+            </TabsTrigger>
+            <TabsTrigger value="api-status" className="flex items-center gap-2 min-w-fit px-4">
+              <Activity className="h-4 w-4" />
+              <span>API Status</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="flex items-center gap-2 min-w-fit px-4">
+              <Bot className="h-4 w-4" />
+              <span>Automatisering</span>
+            </TabsTrigger>
+            <TabsTrigger value="gdpr" className="flex items-center gap-2 min-w-fit px-4">
+              <Shield className="h-4 w-4" />
+              <span>GDPR</span>
+            </TabsTrigger>
+            <TabsTrigger value="health" className="flex items-center gap-2 min-w-fit px-4">
+              <Database className="h-4 w-4" />
+              <span>System</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Profile Tab */}
         <TabsContent value="profile">
