@@ -66,6 +66,9 @@ serve(async (req) => {
         google_search: await testGoogleSearchApi(googleSearchApiKey, googleSearchEngineId),
         social_blade: await testSocialBladeApi(socialBladeApiKey),
         rapidapi: await testRapidApi(),
+        rapidapi_instagram: await testInstagramRapidAPI(),
+        rapidapi_tiktok: await testTikTokRapidAPI(),
+        rapidapi_youtube: await testYouTubeRapidAPI(),
         
         // twitter_api removed due to authentication issues
       };
@@ -1162,6 +1165,85 @@ async function testRapidApi() {
     };
   } catch (error) {
     return { success: false, message: `Fel: ${error.message}` };
+  }
+}
+
+// Test individual RapidAPI endpoints
+async function testInstagramRapidAPI(): Promise<{ success: boolean; message: string }> {
+  const apiKey = Deno.env.get('RAPIDAPI_KEY');
+  if (!apiKey) {
+    return { success: false, message: 'RapidAPI key not configured' };
+  }
+
+  try {
+    const response = await fetch('https://instagram-premium-api-2023.p.rapidapi.com/v1/user/followers?amount=1&username=instagram', {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'instagram-premium-api-2023.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+      },
+    });
+
+    if (response.ok) {
+      return { success: true, message: 'Instagram RapidAPI working correctly' };
+    } else {
+      return { success: false, message: `Instagram RapidAPI error: ${response.status}` };
+    }
+  } catch (error) {
+    console.error('Instagram RapidAPI test failed:', error);
+    return { success: false, message: 'Instagram RapidAPI connection failed' };
+  }
+}
+
+async function testTikTokRapidAPI(): Promise<{ success: boolean; message: string }> {
+  const apiKey = Deno.env.get('RAPIDAPI_KEY');
+  if (!apiKey) {
+    return { success: false, message: 'RapidAPI key not configured' };
+  }
+
+  try {
+    const response = await fetch('https://tiktok-api23.p.rapidapi.com/api/user/info?username=tiktok', {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'tiktok-api23.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+      },
+    });
+
+    if (response.ok) {
+      return { success: true, message: 'TikTok RapidAPI working correctly' };
+    } else {
+      return { success: false, message: `TikTok RapidAPI error: ${response.status}` };
+    }
+  } catch (error) {
+    console.error('TikTok RapidAPI test failed:', error);
+    return { success: false, message: 'TikTok RapidAPI connection failed' };
+  }
+}
+
+async function testYouTubeRapidAPI(): Promise<{ success: boolean; message: string }> {
+  const apiKey = Deno.env.get('RAPIDAPI_KEY');
+  if (!apiKey) {
+    return { success: false, message: 'RapidAPI key not configured' };
+  }
+
+  try {
+    const response = await fetch('https://yt-api.p.rapidapi.com/video/info?id=arj7oStGLkU', {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'yt-api.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+      },
+    });
+
+    if (response.ok) {
+      return { success: true, message: 'YouTube RapidAPI working correctly' };
+    } else {
+      return { success: false, message: `YouTube RapidAPI error: ${response.status}` };
+    }
+  } catch (error) {
+    console.error('YouTube RapidAPI test failed:', error);
+    return { success: false, message: 'YouTube RapidAPI connection failed' };
   }
 }
 
