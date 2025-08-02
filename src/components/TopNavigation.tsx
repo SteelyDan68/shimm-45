@@ -95,7 +95,7 @@ export function TopNavigation() {
             {showHamburgerMenu && (
               <MobileTouchButton 
                 variant="sm"
-                className="bg-transparent text-foreground hover:bg-muted border-0 shadow-none"
+                className="bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border border-border shadow-sm"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -111,23 +111,36 @@ export function TopNavigation() {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <MobileTouchButton 
-                  variant="sm"
-                  className="rounded-full bg-transparent hover:bg-muted border-0 shadow-none p-1"
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  className="relative rounded-full h-10 w-10 p-0 bg-muted/50 hover:bg-muted border border-border"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-sm">
+                    <AvatarFallback className="text-sm bg-primary text-primary-foreground font-semibold">
                       {user?.email?.charAt(0).toUpperCase() || "N"}
                     </AvatarFallback>
                   </Avatar>
-                </MobileTouchButton>
+                </Button>
               </DropdownMenuTrigger>
               
-              <DropdownMenuContent align="end" className="w-56 z-50">
+              <DropdownMenuContent align="end" className="w-64 bg-popover border border-border shadow-lg z-50">
+                {/* User info header */}
+                <div className="px-3 py-2 border-b border-border">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {user?.email}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {hasRole('superadmin') ? 'Superadministratör' : 
+                     hasRole('admin') ? 'Administratör' : 
+                     hasRole('coach') ? 'Coach' : 'Klient'}
+                  </p>
+                </div>
+                
                 <DropdownMenuItem asChild>
-                  <NavLink to="/edit-profile" className="flex items-center w-full">
-                    <User className="h-4 w-4 mr-2" />
-                    Redigera Profil
+                  <NavLink to="/edit-profile" className="flex items-center w-full px-3 py-2 text-sm">
+                    <User className="h-4 w-4 mr-3" />
+                    Min Profil
                   </NavLink>
                 </DropdownMenuItem>
                 
@@ -135,17 +148,21 @@ export function TopNavigation() {
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <NavLink to="/administration" className="flex items-center w-full">
-                        <Settings className="h-4 w-4 mr-2" />
+                      <NavLink to="/administration" className="flex items-center w-full px-3 py-2 text-sm">
+                        <Settings className="h-4 w-4 mr-3" />
                         Administration
                       </NavLink>
                     </DropdownMenuItem>
                   </>
                 )}
+                
                 <DropdownMenuSeparator />
                 
-                <DropdownMenuItem onClick={signOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
+                <DropdownMenuItem 
+                  onClick={signOut}
+                  className="flex items-center w-full px-3 py-2 text-sm text-destructive focus:text-destructive cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4 mr-3" />
                   Logga ut
                 </DropdownMenuItem>
               </DropdownMenuContent>

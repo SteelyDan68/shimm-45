@@ -13,7 +13,7 @@ interface ResponsiveNavigationOptions {
 export function useResponsiveNavigation(options: ResponsiveNavigationOptions = {}) {
   const {
     menuItems = 6, // Estimated number of menu items
-    minSpaceRequired = 800, // Minimum space needed for full navigation
+    minSpaceRequired = 1000, // Increased threshold for better laptop support
     debounceDelay = 100
   } = options;
 
@@ -43,9 +43,10 @@ export function useResponsiveNavigation(options: ResponsiveNavigationOptions = {
     setAvailableWidth(availableForNavigation);
     
     // Estimate space needed for navigation items
-    const estimatedNavWidth = menuItems * 140; // ~140px per nav item with padding
+    const estimatedNavWidth = menuItems * 160; // Increased to ~160px per nav item for better spacing
     
-    setShouldShowHamburger(availableForNavigation < estimatedNavWidth);
+    // More conservative approach - show hamburger earlier to prevent overflow
+    setShouldShowHamburger(availableForNavigation < estimatedNavWidth || headerWidth < 1200);
   }, [menuItems]);
 
   const debouncedCalculate = useCallback(() => {
