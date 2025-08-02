@@ -130,7 +130,7 @@ export const PillarSelector = ({
 
   // Huvudpolicy från Systemarkitekt: Robust data validation
   const availablePillars = Object.keys(PILLAR_MODULES).filter(key => 
-    isPillarActive(key) && getPillarScore(key) > 0
+    isPillarActive(key) // Tillåt alla aktiva pillars oavsett score för val
   );
 
   return (

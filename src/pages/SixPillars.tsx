@@ -153,7 +153,7 @@ export const SixPillars = () => {
                   <Button 
                     className="w-full mt-4"
                     style={{ backgroundColor: pillar.color }}
-                    onClick={() => navigate('/client-dashboard', { state: { activatePillar: pillar.key } })}
+                    onClick={() => navigate('/client-dashboard?tab=pillars', { state: { activatePillar: pillar.key } })}
                   >
                     Aktivera denna pelare
                     <ArrowRight className="h-4 w-4 ml-2" />

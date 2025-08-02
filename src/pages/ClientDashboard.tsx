@@ -60,6 +60,10 @@ export const ClientDashboard = () => {
   // Extract activate pillar from navigation state
   const activatePillar = location.state?.activatePillar;
   
+  // Get initial tab from URL params
+  const searchParams = new URLSearchParams(location.search);
+  const initialTab = searchParams.get('tab') || 'enhanced';
+  
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
   const [extendedProfile, setExtendedProfile] = useState<ExtendedProfileData | null>(null);
   const [stats, setStats] = useState<ClientStats>({
@@ -408,7 +412,7 @@ export const ClientDashboard = () => {
       )}
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="enhanced" className="space-y-6">
+      <Tabs defaultValue={initialTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="enhanced">Översikt</TabsTrigger>
           <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
