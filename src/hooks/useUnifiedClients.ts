@@ -28,6 +28,7 @@ export const useUnifiedClients = () => {
   const fetchClients = async () => {
     try {
       setLoading(true);
+      console.log('🔍 useUnifiedClients: Starting fetch, user:', user?.email, 'admin:', hasRole('admin'), 'coach:', hasRole('coach'), 'client:', hasRole('client'));
       
       // If user is admin/superadmin, show all clients
       // If user is coach, only show their assigned clients
@@ -44,6 +45,7 @@ export const useUnifiedClients = () => {
 
         if (rolesError) throw rolesError;
         clientUserIds = userRoles?.map(r => r.user_id) || [];
+        console.log('🔍 Admin path: Found client user IDs:', clientUserIds);
         
       } else if (hasRole('coach')) {
         // Coach sees only their assigned clients
@@ -55,6 +57,7 @@ export const useUnifiedClients = () => {
 
         if (relError) throw relError;
         clientUserIds = relationships?.map(r => r.client_id) || [];
+        console.log('🔍 Coach path: Found client user IDs:', clientUserIds);
         
       } else if (hasRole('client')) {
         // Client sees only themselves
@@ -66,7 +69,10 @@ export const useUnifiedClients = () => {
         return;
       }
 
+      console.log('🔍 Final clientUserIds before profiles fetch:', clientUserIds);
+      
       if (clientUserIds.length === 0) {
+        console.log('🔍 No client user IDs found, setting empty clients list');
         setClients([]);
         return;
       }
@@ -121,6 +127,7 @@ export const useUnifiedClients = () => {
         coach_id: clientCoachMap.get(profile.id) || null, // Add coach relationship
       }));
 
+      console.log('🔍 Final unified clients:', unifiedClients);
       setClients(unifiedClients);
     } catch (error: any) {
       console.error('Error fetching unified clients:', error);
