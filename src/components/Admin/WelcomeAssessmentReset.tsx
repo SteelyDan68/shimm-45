@@ -26,28 +26,62 @@ export const WelcomeAssessmentReset = () => {
 
     setIsResetting(true);
     try {
-      // Delete welcome assessments
+      // Delete welcome assessments first
       const { error: deleteError } = await supabase
         .from('welcome_assessments')
         .delete()
         .eq('user_id', user.id);
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('Delete welcome assessments error:', deleteError);
+        throw deleteError;
+      }
 
-      // Reset user journey state
-      const { error: updateError } = await supabase
+      // Check if user_journey_state exists
+      const { data: existingJourney } = await supabase
         .from('user_journey_states')
-        .upsert({
-          user_id: user.id,
-          current_phase: 'welcome',
-          completed_assessments: [],
-          journey_progress: 0,
-          next_recommended_assessment: null,
-          metadata: {},
-          last_activity_at: new Date().toISOString()
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (updateError) throw updateError;
+      if (existingJourney) {
+        // Update existing journey state
+        const { error: updateError } = await supabase
+          .from('user_journey_states')
+          .update({
+            current_phase: 'welcome',
+            completed_assessments: [],
+            journey_progress: 0,
+            next_recommended_assessment: null,
+            metadata: {},
+            last_activity_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+
+        if (updateError) {
+          console.error('Update journey state error:', updateError);
+          throw updateError;
+        }
+      } else {
+        // Create new journey state
+        const { error: insertError } = await supabase
+          .from('user_journey_states')
+          .insert({
+            user_id: user.id,
+            current_phase: 'welcome',
+            completed_assessments: [],
+            journey_progress: 0,
+            next_recommended_assessment: null,
+            metadata: {},
+            last_activity_at: new Date().toISOString()
+          });
+
+        if (insertError) {
+          console.error('Insert journey state error:', insertError);
+          throw insertError;
+        }
+      }
 
       toast({
         title: "Återställning slutförd!",
