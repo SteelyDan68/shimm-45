@@ -870,7 +870,7 @@ export function CentralUserManager() {
                           user={user}
                           userRoles={userRoles[user.id] || []}
                           onEdit={() => openUserEditDialog(user)}
-                          onView={() => navigate(`/user-profile/${user.id}`)}
+                          onView={() => navigate(`/user/${user.id}`)}
                           onDelete={() => {
                             setSelectedUser(user);
                             setIsDeleteDialogOpen(true);
@@ -1122,7 +1122,7 @@ export function CentralUserManager() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => navigate(`/user-profile/${relationship.client_id}`)}
+                                  onClick={() => navigate(`/user/${relationship.client_id}`)}
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
                                   Visa profil
@@ -1179,7 +1179,7 @@ export function CentralUserManager() {
                             size="sm"
                             onClick={() => {
                               try {
-                                navigate(`/user-profile/${client.id}`);
+                                navigate(`/user/${client.id}`);
                               } catch (error) {
                                 toast({
                                   title: "Navigeringsfel",
