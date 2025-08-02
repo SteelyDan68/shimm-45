@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { PillarHeatmapData } from '@/types/fivePillarsModular';
 import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useNavigate } from 'react-router-dom';
+import { HelpTooltip } from '@/components/HelpTooltip';
 import { ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface PillarHeatmapProps {
@@ -72,9 +73,13 @@ export const PillarHeatmap = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          {title}
-          <Badge variant="outline">
+          <span className="flex items-center gap-2">
+            {title}
+            <HelpTooltip content="Five Pillars visualisering. Färgkodning: Grön (stark 7-10), Orange (utmaning 4-6), Röd (kritisk 1-3), Grå (obearbetad). Klicka på en pillar för att se detaljer eller göra ny bedömning." />
+          </span>
+          <Badge variant="outline" className="flex items-center gap-1">
             {displayData.filter(p => p.is_active).length} av 5 pelare
+            <HelpTooltip content="Antal aktiva utvecklingsområden (Pillars) som du arbetar med just nu." />
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -154,25 +159,37 @@ export const PillarHeatmap = ({
               <div className="font-semibold text-green-600">
                 {displayData.filter(p => p.score >= 7).length}
               </div>
-              <div className="text-muted-foreground">Starka</div>
+              <div className="text-muted-foreground flex items-center justify-center gap-1">
+                Starka
+                <HelpTooltip content="Områden med poäng 7-10. Dessa är dina styrkor som du kan bygga vidare på." />
+              </div>
             </div>
             <div>
               <div className="font-semibold text-orange-600">
                 {displayData.filter(p => p.score >= 4 && p.score < 7).length}
               </div>
-              <div className="text-muted-foreground">Utmaningar</div>
+              <div className="text-muted-foreground flex items-center justify-center gap-1">
+                Utmaningar
+                <HelpTooltip content="Områden med poäng 4-6. Dessa behöver uppmärksamhet och utveckling." />
+              </div>
             </div>
             <div>
               <div className="font-semibold text-red-600">
                 {displayData.filter(p => p.score > 0 && p.score < 4).length}
               </div>
-              <div className="text-muted-foreground">Kritiska</div>
+              <div className="text-muted-foreground flex items-center justify-center gap-1">
+                Kritiska
+                <HelpTooltip content="Områden med poäng 1-3. Dessa kräver omedelbar uppmärksamhet och prioritet." />
+              </div>
             </div>
             <div>
               <div className="font-semibold text-gray-500">
                 {displayData.filter(p => p.score === 0).length}
               </div>
-              <div className="text-muted-foreground">Obearbetade</div>
+              <div className="text-muted-foreground flex items-center justify-center gap-1">
+                Obearbetade
+                <HelpTooltip content="Områden som inte har bedömts än. Dessa visas som grå rutor." />
+              </div>
             </div>
           </div>
         </div>

@@ -84,7 +84,9 @@ export const helpTexts = {
     maintenancePhase: "Håll momentum och fortsätt växa - bibehåll framsteg och upptäck nya möjligheter.",
     journeyProgress: "Din utvecklingsresa mätt i procent baserat på genomförda assessments och aktiverade områden.",
     recommendedAssessments: "AI föreslår vilka bedömningar du bör göra härnäst baserat på din utvecklingsfas och tidigare resultat.",
-    smartGuide: "Intelligent guide som visar din nuvarande position och ger förslag på nästa steg i utvecklingsresan."
+    smartGuide: "Intelligent guide som visar din nuvarande position och ger förslag på nästa steg i utvecklingsresan.",
+    nextSteps: "Dina rekommenderade nästa steg i utvecklingsresan baserat på dina genomförda bedömningar.",
+    pillarSelection: "Efter välkomstbedömningen väljer du vilka av de sex Pillars (utvecklingsområden) du vill fokusera på."
   },
 
   // Welcome Assessment

@@ -13,6 +13,7 @@ import { PillarHeatmap } from '@/components/FivePillars/PillarHeatmap';
 import { AutonomousCoachingDashboard } from '@/components/Dashboard/AutonomousCoachingDashboard';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 import { PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
+import { HelpTooltip } from '@/components/HelpTooltip';
 import { 
   MapPin, 
   ArrowRight, 
@@ -139,13 +140,22 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
                 {getPhaseIcon(journeyState?.current_phase || 'welcome')}
               </div>
               <div>
-                <CardTitle className="text-xl">Din utvecklingsresa</CardTitle>
-                <p className="text-muted-foreground">{getCurrentPhaseDescription()}</p>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  Din utvecklingsresa
+                  <HelpTooltip content="Din utvecklingsresa består av olika faser som guidar dig genom din personliga utveckling. Varje fas bygger på den föregående." />
+                </CardTitle>
+                <p className="text-muted-foreground flex items-center gap-2">
+                  {getCurrentPhaseDescription()}
+                  <HelpTooltip content="Din nuvarande fas i utvecklingsresan. Varje fas har specifika mål och aktiviteter." />
+                </p>
               </div>
             </div>
-            <Badge variant="secondary" className="text-lg px-3 py-1">
-              {getJourneyProgress()}% klar
-            </Badge>
+            <div className="text-center">
+              <Badge variant="secondary" className="text-lg px-3 py-1 flex items-center gap-1">
+                {getJourneyProgress()}% klar
+                <HelpTooltip content="Visar hur långt du kommit i din utvecklingsresa baserat på genomförda bedömningar och aktiviteter." />
+              </Badge>
+            </div>
           </div>
           
           <Progress value={getJourneyProgress()} className="w-full mt-4" />
@@ -161,11 +171,12 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
 
       {/* Stefan's Latest Message */}
       {recentInteractions.length > 0 && (
-        <div className="space-y-4">
+          <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
               Stefan's senaste meddelande
+              <HelpTooltip content="Stefan är din AI-coach som ger dig personliga råd och vägledning baserat på dina bedömningar och framsteg." />
             </h3>
             {recentInteractions.length > 1 && (
               <Button
@@ -174,6 +185,7 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
                 onClick={() => setShowAllInteractions(!showAllInteractions)}
               >
                 {showAllInteractions ? 'Visa mindre' : `Visa alla (${recentInteractions.length})`}
+                <HelpTooltip content="Klicka för att visa alla dina senaste interaktioner med Stefan." />
               </Button>
             )}
           </div>
@@ -200,9 +212,29 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
             <CardTitle className="flex items-center gap-2">
               <ArrowRight className="h-5 w-5 text-blue-600" />
               Nästa steg i din utveckling
+              <HelpTooltip content="Här visas dina rekommenderade nästa steg baserat på dina genomförda bedömningar och ditt nuvarande utvecklingsstadium." />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Show Pillar Selection Message if Welcome Assessment is Complete */}
+            {journeyState?.current_phase === 'pillar_selection' && (
+              <div className="p-6 rounded-lg bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <Target className="h-6 w-6 text-green-600" />
+                  <h4 className="font-semibold text-green-800">Fantastiskt! Nu är det dags för nästa steg</h4>
+                  <HelpTooltip content="Efter välkomstbedömningen är nästa steg att välja vilka utvecklingsområden (Pillars) du vill fokusera på." />
+                </div>
+                <p className="text-green-700 mb-4">
+                  Du har slutfört din välkomstbedömning och fått en bra överblick över dina utvecklingsområden. 
+                  Nu är det dags att välja en av de sex "Pillars" (utvecklingsområden) som du vill fokusera på härnäst!
+                </p>
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <Star className="h-4 w-4" />
+                  <span>Varje pillar-bedömning tar 10-15 minuter och ger dig djupa insikter</span>
+                </div>
+              </div>
+            )}
+            
             {recommendedAssessments.map((assessment, index) => (
               <div
                 key={assessment.type}
@@ -222,6 +254,7 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
                           Rekommenderat
                         </Badge>
                       )}
+                      <HelpTooltip content={`${assessment.description} - Klicka för att starta denna bedömning.`} />
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">
                       {assessment.description}
@@ -229,6 +262,7 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       <span>{assessment.estimated_time}</span>
+                      <HelpTooltip content="Uppskattat tid att genomföra denna bedömning" />
                     </div>
                   </div>
                   <ArrowRight className="h-5 w-5 text-muted-foreground" />
@@ -246,6 +280,7 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
               Din utvecklingsöversikt
+              <HelpTooltip content="Visualisering av dina aktiva utvecklingsområden (Pillars) och dina poäng inom varje område. Klicka på en pillar för att se mer detaljer eller göra en ny bedömning." />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -266,8 +301,9 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
             <div className="text-2xl font-bold">
               {journeyState?.completed_assessments?.length || 0}
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
               Slutförda bedömningar
+              <HelpTooltip content="Antal bedömningar du har genomfört hittills i din utvecklingsresa." />
             </div>
           </CardContent>
         </Card>
@@ -278,8 +314,9 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
             <div className="text-2xl font-bold">
               {activatedPillars.length}
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
               Aktiva utvecklingsområden
+              <HelpTooltip content="Antal utvecklingsområden (Pillars) som du har aktiverat och arbetar med." />
             </div>
           </CardContent>
         </Card>
@@ -290,8 +327,9 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
             <div className="text-2xl font-bold">
               {journeyState?.stefan_interventions_count || 0}
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
               Stefan-interaktioner
+              <HelpTooltip content="Antal gånger Stefan har gett dig personliga råd och vägledning." />
             </div>
           </CardContent>
         </Card>
@@ -303,19 +341,22 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
       {/* Journey Phase Description */}
       <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
         <CardContent className="p-6">
-          <h4 className="font-semibold mb-2">Vad händer i denna fas?</h4>
+          <h4 className="font-semibold mb-2 flex items-center gap-2">
+            Vad händer i denna fas?
+            <HelpTooltip content="Detaljerad förklaring av vad som händer i din nuvarande utvecklingsfas och vad du kan förvänta dig." />
+          </h4>
           <p className="text-muted-foreground">
             {journeyState?.current_phase === 'welcome' && 
               "Du börjar din resa genom att kartlägga var du står idag. Välkomstbedömningen ger oss en helhetsbild av ditt liv och hjälper oss identifiera de viktigaste utvecklingsområdena."
             }
             {journeyState?.current_phase === 'pillar_selection' && 
-              "Nu fördjupar du dig inom specifika livsområden. Varje pillar-bedömning ger dig djupare insikter och konkreta utvecklingsmöjligheter."
+              "Nu fördjupar du dig inom specifika livsområden. Varje pillar-bedömning ger dig djupare insikter och konkreta utvecklingsmöjligheter. Välj de områden som känns mest relevanta för din situation just nu."
             }
             {journeyState?.current_phase === 'deep_dive' && 
-              "Du arbetar intensivt med dina utvecklingsområden och ser tydliga framsteg. Stefan ger dig personliga råd och strategier."
+              "Du arbetar intensivt med dina utvecklingsområden och ser tydliga framsteg. Stefan ger dig personliga råd och strategier för att maximera din utveckling."
             }
             {journeyState?.current_phase === 'maintenance' && 
-              "Du har kommit långt! Nu handlar det om att bibehålla momentum och fortsätta växa. Stefan hjälper dig hitta nya utmaningar och möjligheter."
+              "Du har kommit långt! Nu handlar det om att bibehålla momentum och fortsätta växa. Stefan hjälper dig hitta nya utmaningar och möjligheter för kontinuerlig utveckling."
             }
           </p>
         </CardContent>
