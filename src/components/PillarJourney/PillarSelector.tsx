@@ -34,12 +34,17 @@ export const PillarSelector = ({
   currentActive, 
   onPillarSelect 
 }: PillarSelectorProps) => {
+  const fivePillarsHook = useFivePillarsModular(userId);
   const { 
     getActivatedPillars, 
     getLatestAssessment, 
-    isPillarActive,
     generateHeatmapData 
-  } = useFivePillarsModular(userId);
+  } = fivePillarsHook;
+  
+  // Huvudpolicy från Frontend Dev: Type-safe helper function
+  const isPillarActive = (pillarKey: string) => {
+    return fivePillarsHook.activations.some(a => a.pillar_key === pillarKey && a.is_active);
+  };
 
   const [selectedPillars, setSelectedPillars] = useState<string[]>([]);
   const [recommendedPillars, setRecommendedPillars] = useState<string[]>([]);
@@ -152,7 +157,7 @@ export const PillarSelector = ({
           const status = getPillarStatus(pillarKey);
           const isSelected = selectedPillars.includes(pillarKey);
           const isRecommended = recommendedPillars.includes(pillarKey);
-          const latestAssessment = getLatestAssessment(pillarKey);
+          const latestAssessment = getLatestAssessment(pillarKey as any);
 
           return (
             <Card 

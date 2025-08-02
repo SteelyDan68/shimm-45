@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 // Huvudpolicy från Systemarkitekt: Stark typning och datamodellering
@@ -58,12 +57,13 @@ export interface PillarReflection {
 
 export interface TimelineEvent {
   id: string;
-  type: 'journey_start' | 'milestone_completed' | 'task_completed' | 'journey_paused' | 'journey_resumed' | 'journey_completed' | 'reflection_added';
-  title: string;
-  description: string;
-  pillarKey: string;
-  timestamp: string;
-  metadata: any;
+  eventType: string;
+  eventTitle: string;
+  eventDescription?: string;
+  occurredAt: string;
+  journeyId: string;
+  pillarName?: string;
+  eventData?: any;
 }
 
 // Huvudpolicy från Product Manager: Robust state management
@@ -72,64 +72,11 @@ export const usePillarJourney = (userId: string) => {
   const [completedJourneys, setCompletedJourneys] = useState<PillarJourney[]>([]);
   const [pausedJourneys, setPausedJourneys] = useState<PillarJourney[]>([]);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Huvudpolicy från Frontend Dev: Progressive enhancement
-  useEffect(() => {
-    if (userId) {
-      loadJourneys();
-      loadTimeline();
-    }
-  }, [userId]);
-
-  const loadJourneys = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('pillar_journeys')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Huvudpolicy från Systemarkitekt: Data segregation
-      const journeys = data || [];
-      setActiveJourneys(journeys.filter(j => j.status === 'active' || j.status === 'planning'));
-      setCompletedJourneys(journeys.filter(j => j.status === 'completed'));
-      setPausedJourneys(journeys.filter(j => j.status === 'paused'));
-      
-    } catch (error: any) {
-      console.error('Error loading journeys:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda utvecklingsresor",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadTimeline = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('pillar_journey_timeline')
-        .select('*')
-        .eq('user_id', userId)
-        .order('timestamp', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      setTimeline(data || []);
-      
-    } catch (error: any) {
-      console.error('Error loading timeline:', error);
-    }
-  };
-
   // Huvudpolicy från AI/Coaching Psykolog: Adaptiv vägledning
-  const initializeJourney = async (pillarKey: string, mode: 'guided' | 'flexible' | 'intensive') => {
+  const initializeJourney = useCallback(async (pillarKey: string, mode: 'guided' | 'flexible' | 'intensive') => {
     try {
       // Kontrollera om användaren redan har en aktiv resa för denna pillar
       const existingJourney = activeJourneys.find(j => j.pillarKey === pillarKey);
@@ -146,45 +93,40 @@ export const usePillarJourney = (userId: string) => {
       const milestones = generateMilestones(pillarKey, mode);
       const estimatedWeeks = mode === 'guided' ? 8 : mode === 'flexible' ? 6 : 4;
       const estimatedCompletion = new Date();
-      estimatedCompletion.setWeeks(estimatedCompletion.getWeeks() + estimatedWeeks);
+      estimatedCompletion.setTime(estimatedCompletion.getTime() + (estimatedWeeks * 7 * 24 * 60 * 60 * 1000));
 
-      const journeyData = {
-        user_id: userId,
-        pillar_key: pillarKey,
-        pillar_name: getPillarName(pillarKey),
+      const newJourney: PillarJourney = {
+        id: `journey_${Date.now()}`,
+        userId,
+        pillarKey,
+        pillarName: getPillarName(pillarKey),
         mode,
-        status: 'planning',
+        status: 'active',
         progress: 0,
-        started_at: new Date().toISOString(),
-        estimated_completion: estimatedCompletion.toISOString(),
+        startedAt: new Date().toISOString(),
+        estimatedCompletion: estimatedCompletion.toISOString(),
         milestones,
         tasks: [],
         reflections: [],
         metadata: {
           mode_details: getModeDetails(mode),
-          initial_assessment_score: await getLatestPillarScore(pillarKey)
-        }
+          initial_assessment_score: 0
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
 
-      const { data, error } = await supabase
-        .from('pillar_journeys')
-        .insert(journeyData)
-        .select()
-        .single();
-
-      if (error) throw error;
+      setActiveJourneys(prev => [...prev, newJourney]);
 
       // Lägg till i timeline
       await addTimelineEvent({
-        type: 'journey_start',
-        title: `Startade utvecklingsresa: ${getPillarName(pillarKey)}`,
-        description: `Påbörjade ${mode} utvecklingsresa för ${getPillarName(pillarKey)}`,
-        pillarKey,
-        metadata: { mode, journey_id: data.id }
+        eventType: 'journey_start',
+        eventTitle: `Startade utvecklingsresa: ${getPillarName(pillarKey)}`,
+        eventDescription: `Påbörjade ${mode} utvecklingsresa för ${getPillarName(pillarKey)}`,
+        journeyId: newJourney.id,
+        pillarName: newJourney.pillarName,
+        eventData: { mode, journey_id: newJourney.id }
       });
-
-      await loadJourneys();
-      await loadTimeline();
 
       toast({
         title: "Utvecklingsresa startad!",
@@ -200,35 +142,32 @@ export const usePillarJourney = (userId: string) => {
         variant: "destructive"
       });
     }
-  };
+  }, [activeJourneys, toast]);
 
   // Huvudpolicy från UX Expert: Graceful state transitions
-  const pauseJourney = async (journeyId: string) => {
+  const pauseJourney = useCallback(async (journeyId: string) => {
     try {
-      const { error } = await supabase
-        .from('pillar_journeys')
-        .update({ 
-          status: 'paused', 
-          paused_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', journeyId);
-
-      if (error) throw error;
-
       const journey = activeJourneys.find(j => j.id === journeyId);
-      if (journey) {
-        await addTimelineEvent({
-          type: 'journey_paused',
-          title: `Pausade utvecklingsresa: ${journey.pillarName}`,
-          description: `Utvecklingsresan för ${journey.pillarName} har pausats`,
-          pillarKey: journey.pillarKey,
-          metadata: { journey_id: journeyId, progress: journey.progress }
-        });
-      }
+      if (!journey) return;
 
-      await loadJourneys();
-      await loadTimeline();
+      const updatedJourney = {
+        ...journey,
+        status: 'paused' as const,
+        pausedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      setActiveJourneys(prev => prev.filter(j => j.id !== journeyId));
+      setPausedJourneys(prev => [...prev, updatedJourney]);
+
+      await addTimelineEvent({
+        eventType: 'journey_paused',
+        eventTitle: `Pausade utvecklingsresa: ${journey.pillarName}`,
+        eventDescription: `Utvecklingsresan för ${journey.pillarName} har pausats`,
+        journeyId,
+        pillarName: journey.pillarName,
+        eventData: { journey_id: journeyId, progress: journey.progress }
+      });
 
       toast({
         title: "Resa pausad",
@@ -244,34 +183,31 @@ export const usePillarJourney = (userId: string) => {
         variant: "destructive"
       });
     }
-  };
+  }, [activeJourneys, toast]);
 
-  const resumeJourney = async (journeyId: string) => {
+  const resumeJourney = useCallback(async (journeyId: string) => {
     try {
-      const { error } = await supabase
-        .from('pillar_journeys')
-        .update({ 
-          status: 'active', 
-          paused_at: null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', journeyId);
-
-      if (error) throw error;
-
       const journey = pausedJourneys.find(j => j.id === journeyId);
-      if (journey) {
-        await addTimelineEvent({
-          type: 'journey_resumed',
-          title: `Återupptog utvecklingsresa: ${journey.pillarName}`,
-          description: `Utvecklingsresan för ${journey.pillarName} har återupptagits`,
-          pillarKey: journey.pillarKey,
-          metadata: { journey_id: journeyId, progress: journey.progress }
-        });
-      }
+      if (!journey) return;
 
-      await loadJourneys();
-      await loadTimeline();
+      const updatedJourney = {
+        ...journey,
+        status: 'active' as const,
+        pausedAt: undefined,
+        updatedAt: new Date().toISOString()
+      };
+
+      setPausedJourneys(prev => prev.filter(j => j.id !== journeyId));
+      setActiveJourneys(prev => [...prev, updatedJourney]);
+
+      await addTimelineEvent({
+        eventType: 'journey_resumed',
+        eventTitle: `Återupptog utvecklingsresa: ${journey.pillarName}`,
+        eventDescription: `Utvecklingsresan för ${journey.pillarName} har återupptagits`,
+        journeyId,
+        pillarName: journey.pillarName,
+        eventData: { journey_id: journeyId, progress: journey.progress }
+      });
 
       toast({
         title: "Resa återupptagen",
@@ -287,34 +223,24 @@ export const usePillarJourney = (userId: string) => {
         variant: "destructive"
       });
     }
-  };
+  }, [pausedJourneys, toast]);
 
-  const abandonJourney = async (journeyId: string) => {
+  const abandonJourney = useCallback(async (journeyId: string) => {
     try {
-      const { error } = await supabase
-        .from('pillar_journeys')
-        .update({ 
-          status: 'abandoned', 
-          abandoned_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', journeyId);
+      const journey = activeJourneys.find(j => j.id === journeyId) || pausedJourneys.find(j => j.id === journeyId);
+      if (!journey) return;
 
-      if (error) throw error;
+      setActiveJourneys(prev => prev.filter(j => j.id !== journeyId));
+      setPausedJourneys(prev => prev.filter(j => j.id !== journeyId));
 
-      const journey = [...activeJourneys, ...pausedJourneys].find(j => j.id === journeyId);
-      if (journey) {
-        await addTimelineEvent({
-          type: 'journey_abandoned',
-          title: `Avbröt utvecklingsresa: ${journey.pillarName}`,
-          description: `Utvecklingsresan för ${journey.pillarName} har avbrutits`,
-          pillarKey: journey.pillarKey,
-          metadata: { journey_id: journeyId, progress: journey.progress }
-        });
-      }
-
-      await loadJourneys();
-      await loadTimeline();
+      await addTimelineEvent({
+        eventType: 'journey_abandoned',
+        eventTitle: `Avbröt utvecklingsresa: ${journey.pillarName}`,
+        eventDescription: `Utvecklingsresan för ${journey.pillarName} har avbrutits`,
+        journeyId,
+        pillarName: journey.pillarName,
+        eventData: { journey_id: journeyId, progress: journey.progress }
+      });
 
       toast({
         title: "Resa avbruten",
@@ -330,35 +256,32 @@ export const usePillarJourney = (userId: string) => {
         variant: "destructive"
       });
     }
-  };
+  }, [activeJourneys, pausedJourneys, toast]);
 
-  const completeJourney = async (journeyId: string) => {
+  const completeJourney = useCallback(async (journeyId: string) => {
     try {
-      const { error } = await supabase
-        .from('pillar_journeys')
-        .update({ 
-          status: 'completed', 
-          completed_at: new Date().toISOString(),
-          progress: 100,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', journeyId);
-
-      if (error) throw error;
-
       const journey = activeJourneys.find(j => j.id === journeyId);
-      if (journey) {
-        await addTimelineEvent({
-          type: 'journey_completed',
-          title: `Slutförde utvecklingsresa: ${journey.pillarName}`,
-          description: `Grattis! Du har slutfört din utvecklingsresa för ${journey.pillarName}`,
-          pillarKey: journey.pillarKey,
-          metadata: { journey_id: journeyId, mode: journey.mode }
-        });
-      }
+      if (!journey) return;
 
-      await loadJourneys();
-      await loadTimeline();
+      const completedJourney = {
+        ...journey,
+        status: 'completed' as const,
+        completedAt: new Date().toISOString(),
+        progress: 100,
+        updatedAt: new Date().toISOString()
+      };
+
+      setActiveJourneys(prev => prev.filter(j => j.id !== journeyId));
+      setCompletedJourneys(prev => [...prev, completedJourney]);
+
+      await addTimelineEvent({
+        eventType: 'journey_completed',
+        eventTitle: `Slutförde utvecklingsresa: ${journey.pillarName}`,
+        eventDescription: `Grattis! Du har slutfört din utvecklingsresa för ${journey.pillarName}`,
+        journeyId,
+        pillarName: journey.pillarName,
+        eventData: { journey_id: journeyId, mode: journey.mode }
+      });
 
       toast({
         title: "Grattis! 🎉",
@@ -374,18 +297,18 @@ export const usePillarJourney = (userId: string) => {
         variant: "destructive"
       });
     }
-  };
+  }, [activeJourneys, toast]);
 
   // Hjälpfunktioner
-  const addTimelineEvent = async (event: Omit<TimelineEvent, 'id' | 'timestamp'>) => {
+  const addTimelineEvent = async (event: Omit<TimelineEvent, 'id' | 'occurredAt'>) => {
     try {
-      await supabase
-        .from('pillar_journey_timeline')
-        .insert({
-          user_id: userId,
-          ...event,
-          timestamp: new Date().toISOString()
-        });
+      const newEvent: TimelineEvent = {
+        id: `event_${Date.now()}`,
+        occurredAt: new Date().toISOString(),
+        ...event
+      };
+
+      setTimeline(prev => [newEvent, ...prev]);
     } catch (error) {
       console.error('Error adding timeline event:', error);
     }
@@ -428,12 +351,12 @@ export const usePillarJourney = (userId: string) => {
 
   const getPillarName = (pillarKey: string): string => {
     const pillarNames: { [key: string]: string } = {
-      self_care: 'Self Care',
-      skills: 'Skills',
-      talent: 'Talent',
-      brand: 'Brand',
-      economy: 'Economy',
-      network: 'Network'
+      self_care: 'Egenvård',
+      stress_management: 'Stresshantering',
+      emotional_regulation: 'Känsloreglering',
+      communication: 'Kommunikation',
+      time_management: 'Tidsplanering',
+      goal_setting: 'Målsättning'
     };
     return pillarNames[pillarKey] || pillarKey;
   };
@@ -446,24 +369,7 @@ export const usePillarJourney = (userId: string) => {
     }[mode];
   };
 
-  const getLatestPillarScore = async (pillarKey: string): Promise<number> => {
-    try {
-      const { data } = await supabase
-        .from('pillar_assessments')
-        .select('calculated_score')
-        .eq('user_id', userId)
-        .eq('pillar_key', pillarKey)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      return data?.calculated_score || 0;
-    } catch {
-      return 0;
-    }
-  };
-
-  const getJourneyTimeline = () => timeline;
+  const getJourneyTimeline = useCallback(() => timeline, [timeline]);
 
   return {
     activeJourneys,
@@ -479,20 +385,4 @@ export const usePillarJourney = (userId: string) => {
     getJourneyTimeline,
     addTimelineEvent
   };
-};
-
-// Helper extension för Date
-declare global {
-  interface Date {
-    setWeeks(weeks: number): void;
-    getWeeks(): number;
-  }
-}
-
-Date.prototype.setWeeks = function(weeks: number) {
-  this.setTime(this.getTime() + (weeks * 7 * 24 * 60 * 60 * 1000));
-};
-
-Date.prototype.getWeeks = function() {
-  return Math.floor(this.getTime() / (7 * 24 * 60 * 60 * 1000));
 };
