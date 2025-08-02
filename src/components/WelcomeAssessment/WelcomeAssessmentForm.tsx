@@ -10,6 +10,7 @@ import { QuickWinsSection } from './QuickWinsSection';
 import { WelcomeAssessmentData } from '@/types/welcomeAssessment';
 import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
 import { useStefanPersonality } from '@/hooks/useStefanPersonality';
+import { useToast } from '@/hooks/use-toast';
 import { WHEEL_OF_LIFE_AREAS, FREE_TEXT_QUESTIONS, QUICK_WINS_QUESTIONS, ADAPTIVE_QUESTIONS } from '@/config/welcomeAssessment';
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
@@ -22,6 +23,7 @@ type AssessmentStep = 'wheel_of_life' | 'adaptive' | 'free_text' | 'quick_wins' 
 export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps) => {
   const { submitWelcomeAssessment, submitting } = useWelcomeAssessment();
   const { createStefanInteraction } = useStefanPersonality();
+  const { toast } = useToast();
   
   const [currentStep, setCurrentStep] = useState<AssessmentStep>('wheel_of_life');
   const [assessmentData, setAssessmentData] = useState<WelcomeAssessmentData>({
@@ -88,23 +90,68 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
   const canProceedToNextStep = () => {
     switch (currentStep) {
       case 'wheel_of_life':
-        return Object.keys(assessmentData.wheelOfLife).length === WHEEL_OF_LIFE_AREAS.length;
+        // Kräver att alla områden har bedömts (inte standardvärdet 5)
+        const wheelAreas = WHEEL_OF_LIFE_AREAS.length;
+        const completedAreas = Object.keys(assessmentData.wheelOfLife).length;
+        // Acceptera om användaren har rört vid alla områden
+        return completedAreas >= wheelAreas;
       case 'adaptive':
-        return adaptiveQuestions.length === 0 || Object.keys(assessmentData.adaptiveQuestions).length >= Math.min(adaptiveQuestions.length, 15);
+        return adaptiveQuestions.length === 0 || Object.keys(assessmentData.adaptiveQuestions).length >= Math.min(adaptiveQuestions.length, 10);
       case 'free_text':
-        return Object.keys(assessmentData.freeTextResponses).length >= 8; // At least 8 of 10 questions
+        return Object.keys(assessmentData.freeTextResponses).length >= 6; // Minst 6 av 10 frågor
       case 'quick_wins':
-        return Object.keys(assessmentData.quickWins).length >= 5; // At least 5 of 7 questions
+        return Object.keys(assessmentData.quickWins).length >= 4; // Minst 4 av 7 frågor
       default:
         return true;
     }
   };
 
+  const getStepValidationMessage = () => {
+    switch (currentStep) {
+      case 'wheel_of_life':
+        const wheelAreas = WHEEL_OF_LIFE_AREAS.length;
+        const completedAreas = Object.keys(assessmentData.wheelOfLife).length;
+        return completedAreas < wheelAreas 
+          ? `Betygsätt alla ${wheelAreas} områden för att fortsätta (${completedAreas}/${wheelAreas} klara)`
+          : '';
+      case 'adaptive':
+        if (adaptiveQuestions.length === 0) return '';
+        const required = Math.min(adaptiveQuestions.length, 10);
+        const completed = Object.keys(assessmentData.adaptiveQuestions).length;
+        return completed < required 
+          ? `Svara på minst ${required} frågor för att fortsätta (${completed}/${required} klara)`
+          : '';
+      case 'free_text':
+        const freeTextCompleted = Object.keys(assessmentData.freeTextResponses).length;
+        return freeTextCompleted < 6 
+          ? `Svara på minst 6 frågor för att fortsätta (${freeTextCompleted}/6 klara)`
+          : '';
+      case 'quick_wins':
+        const quickWinsCompleted = Object.keys(assessmentData.quickWins).length;
+        return quickWinsCompleted < 4 
+          ? `Svara på minst 4 frågor för att fortsätta (${quickWinsCompleted}/4 klara)`
+          : '';
+      default:
+        return '';
+    }
+  };
+
   const goToNextStep = () => {
+    if (!canProceedToNextStep()) {
+      toast({
+        title: "Ofullständigt steg",
+        description: getStepValidationMessage(),
+        variant: "destructive"
+      });
+      return;
+    }
+
     const steps: AssessmentStep[] = ['wheel_of_life', 'adaptive', 'free_text', 'quick_wins', 'review'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1]);
+      // Spara progress automatiskt
+      saveProgress();
     }
   };
 
@@ -113,6 +160,14 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex > 0) {
       setCurrentStep(steps[currentIndex - 1]);
+    }
+  };
+
+  const saveProgress = async () => {
+    try {
+      await submitWelcomeAssessment(assessmentData); // Save as draft
+    } catch (error) {
+      console.error('Error saving progress:', error);
     }
   };
 

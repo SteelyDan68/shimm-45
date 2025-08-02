@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,23 @@ export const WheelOfLifeSection = ({ scores, onScoresChange }: WheelOfLifeSectio
     };
     onScoresChange(updatedScores);
   };
+
+  // Säkerställ att alla områden har default-värden när komponenten laddas
+  useEffect(() => {
+    const defaultScores: Record<string, number> = {};
+    let hasUpdates = false;
+
+    WHEEL_OF_LIFE_AREAS.forEach(area => {
+      if (!(area.key in scores)) {
+        defaultScores[area.key] = 5; // Standardvärde
+        hasUpdates = true;
+      }
+    });
+
+    if (hasUpdates) {
+      onScoresChange({ ...scores, ...defaultScores });
+    }
+  }, []);
 
   const getScoreColor = (score: number) => {
     if (score <= 3) return "text-red-500";
