@@ -56,8 +56,22 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
   }
 
   if (completed && latestAssessment) {
-    // Hide the welcome assessment card once completed
-    return null;
+    // Show completion status instead of hiding
+    return (
+      <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-8 w-8 text-green-600" />
+            <div>
+              <h3 className="font-semibold text-green-900">Välkomstbedömning genomförd!</h3>
+              <p className="text-green-700 text-sm">
+                Stefan har analyserat dina svar och förberett personliga rekommendationer för dig.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

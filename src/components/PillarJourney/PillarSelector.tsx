@@ -17,7 +17,8 @@ import {
   Lightbulb,
   Target,
   DollarSign,
-  Palette
+  Palette,
+  Info
 } from 'lucide-react';
 
 interface PillarSelectorProps {
@@ -135,27 +136,33 @@ export const PillarSelector = ({
 
   return (
     <div className="space-y-6">
-      {/* Status och vägledning */}
-      <Alert>
-        <Target className="h-4 w-4" />
-        <AlertDescription>
-          <div className="flex items-center justify-between">
-            <span>
-              Du kan välja upp till <strong>{availableSlots}</strong> pillars att arbeta med samtidigt.
+      {/* Information Header */}
+      <Card className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-slate-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-slate-900">Utforska alla utvecklingsområden</h3>
+              <p className="text-slate-600 text-sm mt-1">
+                Du kan välja upp till <strong>{availableSlots}</strong> pillars att arbeta med samtidigt. 
+                Varje pillar representerar ett viktigt livsområde för din personliga utveckling.
+              </p>
               {recommendedPillars.length > 0 && (
-                <span className="ml-2">
-                  Rekommenderade: <strong>{recommendedPillars.map(p => PILLAR_MODULES[p]?.name).join(', ')}</strong>
-                </span>
+                <p className="text-sm font-medium text-blue-700 mt-2">
+                  💡 Rekommenderat baserat på din profil: {recommendedPillars.map(p => PILLAR_MODULES[p]?.name).join(', ')}
+                </p>
               )}
-            </span>
-            {selectedPillars.length > 0 && (
-              <Badge variant="secondary">
-                {selectedPillars.length} valda
-              </Badge>
-            )}
+              {selectedPillars.length > 0 && (
+                <div className="mt-2">
+                  <Badge variant="secondary">
+                    {selectedPillars.length} valda
+                  </Badge>
+                </div>
+              )}
+            </div>
           </div>
-        </AlertDescription>
-      </Alert>
+        </CardContent>
+      </Card>
 
       {/* Pillar Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

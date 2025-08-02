@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HelpTooltip } from '@/components/HelpTooltip';
-import { PillarSelector } from './PillarSelector';
+import { GuidedPillarDiscovery } from './GuidedPillarDiscovery';
 import { PillarProgressTracker } from './PillarProgressTracker';
 import { AsynchronousJourneyManager } from './AsynchronousJourneyManager';
 import { PillarTaskManager } from './PillarTaskManager';
@@ -238,8 +238,8 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
             </CardContent>
           </Card>
 
-          {/* Pillar Selector */}
-          <PillarSelector 
+          {/* Guided Pillar Discovery */}
+          <GuidedPillarDiscovery 
             userId={userId}
             maxSelection={journeyModes[selectedMode].maxConcurrent}
             currentActive={activeJourneys.length}

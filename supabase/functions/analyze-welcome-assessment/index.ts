@@ -40,9 +40,9 @@ serve(async (req) => {
     const lowestAreas = sortedAreas.slice(0, 3).map(([area, score]) => ({ area, score }));
     const highestAreas = sortedAreas.slice(-3).map(([area, score]) => ({ area, score }));
 
-    // Prepare AI analysis prompt
+    // Enhanced AI analysis prompt for pillar recommendations
     const analysisPrompt = `
-Du är Stefan, en erfaren coach som analyserar en omfattande välkomstbedömning. Analysera följande data och ge personliga, actionable insikter.
+Du är Stefan, en erfaren coach som analyserar en omfattande välkomstbedömning för att skapa en intelligent utvecklingsplan. Analysera följande data och ge detaljerade pillar-rekommendationer.
 
 ANVÄNDARDATA:
 Namn: ${profile?.first_name || 'Användaren'}
@@ -63,14 +63,24 @@ ${Object.entries(assessment_data.freeTextResponses || {}).map(([key, response]) 
 SNABBA VINSTER:
 ${Object.entries(assessment_data.quickWins || {}).map(([key, value]) => `${key}: ${value ? 'Gör redan' : 'Gör inte'}`).join('\n')}
 
-ANALYS-UPPDRAG:
-1. Ge en känslig, personlig analys av användarens nuläge (max 3 meningar)
-2. Identifiera top 3 utvecklingsområden baserat på all data
-3. Föreslå nästa pillar att fokusera på (self_care, skills, talent, brand, eller economy)
-4. Skapa 3-5 konkreta, actionable rekommendationer
-5. Skriv ett varmt, uppmuntrande meddelande från Stefan (2-3 meningar)
+PILLAR SYSTEM:
+- self_care: Fysisk och mental hälsa, stresshantering, rutiner
+- skills: Färdigheter, kommunikation, ledarskap, inlärning  
+- talent: Naturliga begåvningar, passion, styrkor, flow
+- brand: Personligt varumärke, synlighet, närvaro
+- economy: Ekonomisk planering, inkomst, investeringar
 
-Svara på svenska och var empatisk men rak på sak.
+ANALYS-UPPDRAG:
+1. PILLAR RELEVANCE SCORING: Betygsätt varje pillar 1-10 baserat på användarens behov och potential
+2. PRIMARY RECOMMENDATION: Välj 1 huvudpillar som är mest kritisk för användarens utveckling
+3. SECONDARY RECOMMENDATION: Välj 1 sekundär pillar som kompletterar den första
+4. PERSONLIG MOTIVERING: Förklara VARFÖR dessa pillars är viktiga för just denna användare (2-3 meningar per pillar)
+5. EXPECTED OUTCOMES: Beskriv konkreta förbättringar användaren kan förvänta sig inom 3-4 veckor
+6. READINESS ASSESSMENT: Bedöm användarens beredskap att börja (1-10)
+7. SUCCESS INDICATORS: Lista 3 konkreta tecken på framsteg användaren ska titta efter
+8. STEFAN MESSAGE: Personligt, uppmuntrande meddelande från Stefan (2-3 meningar)
+
+Svara i JSON-format med dessa nycklar: pillar_scores, primary_pillar, secondary_pillar, personal_motivation, expected_outcomes, readiness_score, success_indicators, stefan_message
 `;
 
     // Call OpenAI for analysis
@@ -85,14 +95,14 @@ Svara på svenska och var empatisk men rak på sak.
         messages: [
           {
             role: 'system',
-            content: 'Du är Stefan, en erfaren och empatisk coach som hjälper människor utvecklas. Du ger konkreta, actionable råd på svenska med värme och förståelse.'
+            content: 'Du är Stefan, en erfaren och empatisk coach som hjälper människor utvecklas. Du ger konkreta, actionable råd på svenska med värme och förståelse. Svara alltid i korrekt JSON-format.'
           },
           {
             role: 'user',
             content: analysisPrompt
           }
         ],
-        max_tokens: 1000,
+        max_tokens: 1500,
         temperature: 0.7,
       }),
     });
@@ -100,42 +110,48 @@ Svara på svenska och var empatisk men rak på sak.
     const openAIData = await openAIResponse.json();
     const aiAnalysis = openAIData.choices[0]?.message?.content || '';
 
+    // Parse AI JSON response
+    let aiRecommendations;
+    try {
+      aiRecommendations = JSON.parse(aiAnalysis);
+    } catch (error) {
+      console.error('Failed to parse AI recommendations, using fallback');
+      aiRecommendations = {
+        pillar_scores: { self_care: 8, skills: 6, talent: 5, brand: 4, economy: 5 },
+        primary_pillar: 'self_care',
+        secondary_pillar: 'skills',
+        personal_motivation: {
+          primary: 'Baserat på din bedömning behöver du stärka din grundläggande hälsa och rutiner',
+          secondary: 'Utveckling av färdigheter kommer ge dig verktyg för framtida tillväxt'
+        },
+        expected_outcomes: {
+          primary: 'Bättre energi, sömn och fokus inom 3-4 veckor',
+          secondary: 'Ökad självförtroende och produktivitet'
+        },
+        readiness_score: 7,
+        success_indicators: ['Mer energi på morgonen', 'Färre stresstillfällen', 'Bättre fokus'],
+        stefan_message: `Hej ${profile?.first_name || 'där'}! Jag ser både dina styrkor och utvecklingsmöjligheter. Låt oss börja med det som ger dig mest energi!`
+      };
+    }
+
     // Calculate overall score based on all data
     const quickWinsScore = Object.values(assessment_data.quickWins || {}).filter(Boolean).length / 7 * 10;
     const overallScore = (wheelAverage * 0.7 + quickWinsScore * 0.3);
 
-    // Determine next recommended pillar
-    let nextRecommendedPillar = 'self_care';
-    if (lowestAreas.length > 0) {
-      const lowestArea = lowestAreas[0].area;
-      const pillarMapping: Record<string, string> = {
-        'health': 'self_care',
-        'career': 'skills',
-        'finances': 'economy',
-        'relationships': 'self_care',
-        'personal_growth': 'talent',
-        'fun_recreation': 'self_care',
-        'environment': 'self_care',
-        'family_friends': 'self_care',
-      };
-      nextRecommendedPillar = pillarMapping[lowestArea] || 'self_care';
-    }
+    // Use AI recommendation for next pillar
+    const nextRecommendedPillar = aiRecommendations.primary_pillar || 'self_care';
+    const secondaryRecommendedPillar = aiRecommendations.secondary_pillar || 'skills';
 
-    // Extract Stefan message from AI analysis (look for personal message patterns)
-    const stefanMessageMatch = aiAnalysis.match(/Stefan.*?[.!]/g);
-    const stefanMessage = stefanMessageMatch 
-      ? stefanMessageMatch.slice(-2).join(' ') 
-      : `Hej ${profile?.first_name || 'där'}! Jag har gått igenom din bedömning och ser både styrkor och spännande utvecklingsmöjligheter. Låt oss börja med ${nextRecommendedPillar === 'self_care' ? 'välmående' : nextRecommendedPillar} - det kommer att ge dig en stark grund att bygga på.`;
-
-    // Create structured response
+    // Create enhanced structured response with intelligent recommendations
     const analysisResult = {
       overall_score: Math.round(overallScore * 10) / 10,
       wheel_average: Math.round(wheelAverage * 10) / 10,
       lowest_areas: lowestAreas.map(({area}) => area),
       highest_areas: highestAreas.map(({area}) => area),
       next_recommended_pillar: nextRecommendedPillar,
+      secondary_recommended_pillar: secondaryRecommendedPillar,
       analysis: aiAnalysis,
-      stefan_message: stefanMessage,
+      stefan_message: aiRecommendations.stefan_message,
       key_insights: [
         `Genomsnittligt välmående: ${wheelAverage.toFixed(1)}/10`,
         `Starkaste områden: ${highestAreas.map(({area}) => area).join(', ')}`,
@@ -150,6 +166,29 @@ Svara på svenska och var empatisk men rak på sak.
           .filter(([_, value]) => !value)
           .map(([key, _]) => key)
           .slice(0, 3),
+      },
+      // NEW: Intelligent Pillar Discovery data
+      pillar_recommendations: {
+        pillar_scores: aiRecommendations.pillar_scores || {},
+        primary_pillar: {
+          key: aiRecommendations.primary_pillar,
+          motivation: aiRecommendations.personal_motivation?.primary || '',
+          expected_outcome: aiRecommendations.expected_outcomes?.primary || '',
+          relevance_score: aiRecommendations.pillar_scores?.[aiRecommendations.primary_pillar] || 8
+        },
+        secondary_pillar: {
+          key: aiRecommendations.secondary_pillar,
+          motivation: aiRecommendations.personal_motivation?.secondary || '',
+          expected_outcome: aiRecommendations.expected_outcomes?.secondary || '',
+          relevance_score: aiRecommendations.pillar_scores?.[aiRecommendations.secondary_pillar] || 6
+        },
+        readiness_score: aiRecommendations.readiness_score || 7,
+        success_indicators: aiRecommendations.success_indicators || [],
+        user_context: {
+          life_balance: wheelAverage,
+          change_readiness: Math.min(10, aiRecommendations.readiness_score + (quickWinsScore / 10 * 2)),
+          focus_areas: lowestAreas.slice(0, 2).map(({area}) => area)
+        }
       }
     };
 

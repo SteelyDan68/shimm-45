@@ -323,6 +323,33 @@ export const useUserJourney = () => {
     return phaseDescriptions[journeyState.current_phase] || '';
   }, [journeyState]);
 
+  // Get personalized pillar recommendations from welcome assessment
+  const getPersonalizedPillarRecommendations = useCallback(async () => {
+    if (!user) return null;
+
+    try {
+      const { data: welcomeAssessment } = await supabase
+        .from('welcome_assessments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!welcomeAssessment?.recommendations) return null;
+
+      return welcomeAssessment.recommendations;
+    } catch (error) {
+      console.error('Error getting pillar recommendations:', error);
+      return null;
+    }
+  }, [user]);
+
+  // Check if user has completed welcome assessment
+  const hasCompletedWelcomeAssessment = useCallback(() => {
+    return journeyState?.completed_assessments?.includes('welcome') || false;
+  }, [journeyState]);
+
   return {
     loading,
     journeyState,
@@ -332,5 +359,7 @@ export const useUserJourney = () => {
     shouldShowAssessment,
     getJourneyProgress,
     getCurrentPhaseDescription,
+    getPersonalizedPillarRecommendations,
+    hasCompletedWelcomeAssessment,
   };
 };
