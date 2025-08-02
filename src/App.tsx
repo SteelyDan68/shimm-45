@@ -11,7 +11,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
-import { ProfileCompletionGate } from "@/components/Profile/ProfileCompletionGate";
+
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
 import { ErrorProvider } from "@/hooks/useErrorReporting";
 import { Dashboard } from "./pages/Dashboard";
@@ -69,17 +69,9 @@ const AppRoutes = () => {
               } />
               <Route path={NAVIGATION_ROUTES.DASHBOARD} element={<Dashboard />} />
               <Route path={NAVIGATION_ROUTES.CLIENT_DASHBOARD} element={<ClientDashboard />} />
-               <Route path={NAVIGATION_ROUTES.ONBOARDING} element={
-                 <ProfileCompletionGate requiredForAssessments={true}>
-                   <OnboardingPage />
-                 </ProfileCompletionGate>
-               } />
+                <Route path={NAVIGATION_ROUTES.ONBOARDING} element={<OnboardingPage />} />
                 <Route path={NAVIGATION_ROUTES.EDIT_PROFILE} element={<EditProfilePage />} />
-                <Route path="/client-assessment/:clientId" element={
-                 <ProfileCompletionGate requiredForAssessments={true}>
-                   <ClientAssessmentPage />
-                 </ProfileCompletionGate>
-               } />
+                <Route path="/client-assessment/:clientId" element={<ClientAssessmentPage />} />
               
                <Route path={NAVIGATION_ROUTES.COACH_DASHBOARD} element={<CoachDashboardPage />} />
                <Route path={NAVIGATION_ROUTES.CLIENTS} element={

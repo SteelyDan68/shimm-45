@@ -27,7 +27,7 @@ import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDa
 import { EnhancedDashboard } from '@/components/Dashboard/EnhancedDashboard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
-import { ProfileCompletionGate } from '@/components/Profile/ProfileCompletionGate';
+
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -65,7 +65,6 @@ export const ClientDashboard = () => {
   });
   const [lastAssessmentResult, setLastAssessmentResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profileComplete, setProfileComplete] = useState(false);
   const [hasCompletedAssessments, setHasCompletedAssessments] = useState(false);
 
   useEffect(() => {
@@ -89,13 +88,9 @@ export const ClientDashboard = () => {
         return;
       }
 
-      // Load extended profile to check completion
+      // Load extended profile
       const extendedData = await getExtendedProfile();
       setExtendedProfile(extendedData);
-      
-      // Check profile completion
-      const isComplete = checkProfileCompletion(extendedData);
-      setProfileComplete(isComplete);
 
       // Get basic profile data
       const { data: profileData, error: profileError } = await supabase
@@ -131,7 +126,7 @@ export const ClientDashboard = () => {
         status: profileData.status || 'active',
         logic_state: profileData.logic_state,
         velocity_score: profileData.velocity_score || 50,
-        hasOnboardingData: isComplete
+        hasOnboardingData: true
       });
 
       // Check if user has completed any assessments
@@ -157,33 +152,6 @@ export const ClientDashboard = () => {
     }
   };
 
-  const checkProfileCompletion = (data: ExtendedProfileData | null) => {
-    if (!data) return false;
-    
-    const requiredFields = [
-      data.first_name,
-      data.last_name,
-      data.email,
-      data.phone,
-      data.date_of_birth,
-      data.primary_role,
-      data.location || data.address?.city
-    ];
-
-    // Check if at least one social platform is provided
-    const hasSocialPlatform = !!(
-      data.instagram_handle ||
-      data.youtube_handle ||
-      data.tiktok_handle ||
-      data.facebook_handle ||
-      data.twitter_handle ||
-      data.snapchat_handle
-    );
-
-    const allRequiredFieldsComplete = requiredFields.every(field => field && field.trim() !== '');
-    
-    return allRequiredFieldsComplete && hasSocialPlatform;
-  };
 
   const loadStats = async (clientId: string) => {
     try {
@@ -277,29 +245,8 @@ export const ClientDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Profile completion gate */}
-      {!profileComplete && (
-        <Alert className="border-orange-200 bg-orange-50">
-          <AlertCircle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            <div className="flex items-center justify-between">
-              <span>
-                <strong>Komplettera din profil</strong> - Du måste fylla i alla grunduppgifter och minst en social plattform innan du kan göra assessments.
-              </span>
-              <Button 
-                onClick={() => navigate('/edit-profile')}
-                size="sm"
-                className="bg-orange-600 hover:bg-orange-700 ml-4"
-              >
-                Komplettera nu
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Assessment reminder for users with complete profiles */}
-      {profileComplete && !hasCompletedAssessments && (
+      {/* Assessment reminder for users */}
+      {!hasCompletedAssessments && (
         <Alert className="border-blue-200 bg-blue-50">
           <Brain className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800">
