@@ -77,7 +77,6 @@ export interface UserRelationship {
   id: string;
   coach_id: string;
   client_id: string;
-  relationship_type: string;
   assigned_at: string;
   assigned_by: string | null;
   is_active: boolean;
@@ -108,9 +107,9 @@ export const useUnifiedUsers = () => {
 
       if (rolesError) throw rolesError;
 
-      // Fetch user relationships
+      // Fetch coach-client assignments
       const { data: relationshipsData, error: relationshipsError } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .select('*')
         .eq('is_active', true);
 
@@ -123,8 +122,8 @@ export const useUnifiedUsers = () => {
         const userRoles = rolesData?.filter(role => role.user_id === profile.id).map(role => role.role) || [];
         
         // Find coach-client relationships
-        const asClient = relationshipsData?.find(rel => rel.client_id === profile.id && rel.relationship_type === 'coach_client');
-        const asCoach = relationshipsData?.filter(rel => rel.coach_id === profile.id && rel.relationship_type === 'coach_client').map(rel => rel.client_id) || [];
+        const asClient = relationshipsData?.find(rel => rel.client_id === profile.id);
+        const asCoach = relationshipsData?.filter(rel => rel.coach_id === profile.id).map(rel => rel.client_id) || [];
 
         return {
           ...profile,
@@ -181,11 +180,10 @@ export const useUnifiedUsers = () => {
   const createUserRelationship = useCallback(async (coachId: string, clientId: string) => {
     try {
       const { error } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .insert({
           coach_id: coachId,
           client_id: clientId,
-          relationship_type: 'coach_client',
           assigned_by: coachId
         });
 
@@ -210,7 +208,7 @@ export const useUnifiedUsers = () => {
   const removeUserRelationship = useCallback(async (relationshipId: string) => {
     try {
       const { error } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .update({ is_active: false })
         .eq('id', relationshipId);
 

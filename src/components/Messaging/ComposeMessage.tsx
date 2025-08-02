@@ -88,7 +88,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
       if (isClient) {
         // Clients can only message their coaches
         const { data: relationships } = await supabase
-          .from('user_relationships')
+          .from('coach_client_assignments')
           .select('coach_id')
           .eq('client_id', user.id)
           .eq('is_active', true);
@@ -103,7 +103,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
       } else if (isCoach) {
         // Coaches can message their clients and other coaches/admins
         const { data: relationships } = await supabase
-          .from('user_relationships')
+          .from('coach_client_assignments')
           .select('client_id')
           .eq('coach_id', user.id)
           .eq('is_active', true);

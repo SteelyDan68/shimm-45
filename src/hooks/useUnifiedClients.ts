@@ -48,11 +48,10 @@ export const useUnifiedClients = () => {
       } else if (hasRole('coach')) {
         // Coach sees only their assigned clients
         const { data: relationships, error: relError } = await supabase
-          .from('user_relationships')
+          .from('coach_client_assignments')
           .select('client_id')
           .eq('coach_id', user?.id)
-          .eq('is_active', true)
-          .eq('relationship_type', 'coach_client');
+          .eq('is_active', true);
 
         if (relError) throw relError;
         clientUserIds = relationships?.map(r => r.client_id) || [];
@@ -92,11 +91,10 @@ export const useUnifiedClients = () => {
 
       // Get coach relationships for these clients
       const { data: relationships, error: relError } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .select('client_id, coach_id')
         .in('client_id', clientUserIds)
-        .eq('is_active', true)
-        .eq('relationship_type', 'coach_client');
+        .eq('is_active', true);
 
       if (relError) throw relError;
 

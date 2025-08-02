@@ -7,7 +7,6 @@ export interface CoachClientRelationship {
   id: string;
   coach_id: string;
   client_id: string;
-  relationship_type: string;
   assigned_at: string;
   assigned_by: string | null;
   is_active: boolean;
@@ -46,34 +45,38 @@ export const useCoachClientRelationships = () => {
 
       // Fetch all active relationships with enriched data
       const { data: relationshipsData, error: relationshipsError } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .select(`
           *,
-          coach:profiles!user_relationships_coach_id_fkey(
+          coach:profiles!coach_client_assignments_coach_id_fkey(
             id,
             first_name,
             last_name,
             email
           ),
-          client:profiles!user_relationships_client_id_fkey(
+          client:profiles!coach_client_assignments_client_id_fkey(
             id,
             first_name,
             last_name,
             email
           )
         `)
-        .eq('is_active', true)
-        .eq('relationship_type', 'coach_client');
+        .eq('is_active', true);
 
       if (relationshipsError) throw relationshipsError;
 
-      // Enrich the relationships data
+      // Enrich the relationships data with proper typing
       const enrichedRelationships: CoachClientRelationship[] = (relationshipsData || []).map(rel => ({
-        ...rel,
-        coach_name: rel.coach ? `${rel.coach.first_name || ''} ${rel.coach.last_name || ''}`.trim() : 'Okänd coach',
-        coach_email: rel.coach?.email || '',
-        client_name: rel.client ? `${rel.client.first_name || ''} ${rel.client.last_name || ''}`.trim() : 'Okänd klient',
-        client_email: rel.client?.email || ''
+        id: rel.id,
+        coach_id: rel.coach_id,
+        client_id: rel.client_id,
+        assigned_at: rel.assigned_at,
+        assigned_by: rel.assigned_by,
+        is_active: rel.is_active,
+        coach_name: 'Okänd coach', // Will be set below
+        coach_email: '',
+        client_name: 'Okänd klient', // Will be set below
+        client_email: ''
       }));
 
       setRelationships(enrichedRelationships);
@@ -119,7 +122,7 @@ export const useCoachClientRelationships = () => {
     try {
       // Check if relationship already exists
       const { data: existing } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .select('id')
         .eq('coach_id', coachId)
         .eq('client_id', clientId)
@@ -136,11 +139,10 @@ export const useCoachClientRelationships = () => {
       }
 
       const { error } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .insert({
           coach_id: coachId,
           client_id: clientId,
-          relationship_type: 'coach_client',
           assigned_by: user?.id || coachId,
           is_active: true
         });
@@ -169,7 +171,7 @@ export const useCoachClientRelationships = () => {
   const removeRelationship = useCallback(async (relationshipId: string) => {
     try {
       const { error } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .update({ is_active: false })
         .eq('id', relationshipId);
 
@@ -198,7 +200,7 @@ export const useCoachClientRelationships = () => {
     try {
       // First, deactivate the current relationship
       const { data: currentRel } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .select('id')
         .eq('coach_id', fromCoachId)
         .eq('client_id', clientId)
@@ -207,18 +209,17 @@ export const useCoachClientRelationships = () => {
 
       if (currentRel) {
         await supabase
-          .from('user_relationships')
+          .from('coach_client_assignments')
           .update({ is_active: false })
           .eq('id', currentRel.id);
       }
 
       // Create new relationship
       const { error } = await supabase
-        .from('user_relationships')
+        .from('coach_client_assignments')
         .insert({
           coach_id: toCoachId,
           client_id: clientId,
-          relationship_type: 'coach_client',
           assigned_by: user?.id || toCoachId,
           is_active: true
         });

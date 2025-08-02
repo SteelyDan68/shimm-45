@@ -311,16 +311,10 @@ export function CentralUserManager() {
   };
 
   const addUserRole = async (userId: string, role: AppRole) => {
-    console.log('addUserRole called:', { userId, role, hasAccess: hasUserManagementAccess });
-    
-    if (!hasUserManagementAccess) {
-      console.error('Access denied: User lacks user management permissions');
-      return false;
-    }
+    if (!hasUserManagementAccess) return false;
 
     setRoleOperationLoading(userId);
     try {
-      console.log('Inserting role into database...');
       const { error } = await supabase
         .from('user_roles')
         .insert({
@@ -329,12 +323,8 @@ export function CentralUserManager() {
           assigned_by: currentUser?.id
         });
 
-      if (error) {
-        console.error('Database error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Role added successfully, refreshing data...');
       toast({
         title: "Roll tillagd",
         description: `Rollen ${ROLE_CONFIG[role].label} har tilldelats användaren`
@@ -344,7 +334,6 @@ export function CentralUserManager() {
       await refetchUsers();
       return true;
     } catch (error: any) {
-      console.error('Full error adding role:', error);
       toast({
         title: "Fel",
         description: "Kunde inte tilldela roll: " + error.message,

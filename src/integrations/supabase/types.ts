@@ -398,6 +398,39 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_client_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          client_id: string
+          coach_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          client_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       data_deletion_requests: {
         Row: {
           admin_notes: string | null
@@ -1342,64 +1375,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      user_relationships: {
-        Row: {
-          assigned_at: string | null
-          assigned_by: string | null
-          client_id: string | null
-          coach_id: string | null
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          relationship_type: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          client_id?: string | null
-          coach_id?: string | null
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          relationship_type?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          client_id?: string | null
-          coach_id?: string | null
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          relationship_type?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_relationships_assigned_by_fkey"
-            columns: ["assigned_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_relationships_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_relationships_coach_id_fkey"
-            columns: ["coach_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_roles: {
         Row: {
