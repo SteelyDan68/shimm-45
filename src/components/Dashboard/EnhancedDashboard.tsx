@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StefanWidget } from '@/components/Stefan/StefanWidget';
 import { SmartJourneyGuide } from '@/components/Journey/SmartJourneyGuide';
+import { WelcomeAssessmentReset } from '@/components/Admin/WelcomeAssessmentReset';
 import { PillarHeatmap } from '@/components/FivePillars/PillarHeatmap';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
@@ -136,6 +137,9 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
 
         {/* Journey Tab - Smart Journey Guide */}
         <TabsContent value="journey" className="space-y-6">
+          {/* Debug: Welcome Assessment Reset */}
+          <WelcomeAssessmentReset />
+          
           <SmartJourneyGuide userId={userId} userName={userName} />
         </TabsContent>
 

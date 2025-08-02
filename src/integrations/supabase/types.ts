@@ -1895,6 +1895,10 @@ export type Database = {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: unknown
       }
+      reset_user_welcome_assessment: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       sparsevec_out: {
         Args: { "": unknown }
         Returns: unknown
