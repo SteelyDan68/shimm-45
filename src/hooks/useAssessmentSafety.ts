@@ -73,16 +73,6 @@ export const useAssessmentSafety = (config: AssessmentSafetyConfig) => {
   ) => {
     updateLastInteraction();
 
-    // Kontrollera om det är en avsiktlig åtgärd
-    if (config.preventAccidentalSubmission && !isIntentionalAction()) {
-      toast({
-        title: "För snabb åtgärd",
-        description: "Vänta ett ögonblick innan du försöker igen",
-        variant: "destructive"
-      });
-      return false;
-    }
-
     // Dubbel bekräftelse för kritiska åtgärder
     if (requiresDoubleConfirm) {
       const confirmed = window.confirm(
