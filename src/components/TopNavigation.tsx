@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigation } from "@/hooks/useNavigation";
 import { Button } from "@/components/ui/button";
+import { GlobalSearchBar } from "@/components/GlobalSearch/GlobalSearchBar";
 import { MobileTouchButton, ConditionalRender } from "@/components/ui/mobile-responsive";
 import { 
   LogOut,
@@ -58,8 +59,18 @@ export function TopNavigation() {
             ))}
           </nav>
 
+          {/* Center Search - Desktop Only */}
+          <div className="hidden lg:flex flex-1 max-w-md mx-8">
+            <GlobalSearchBar variant="full" className="w-full" />
+          </div>
+
           {/* Right side actions */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-2">
+            {/* Mobile Search */}
+            <div className="lg:hidden">
+              <GlobalSearchBar variant="compact" />
+            </div>
+            
             <MessageIcon />
             
             {/* Mobile menu button with touch-friendly size */}
