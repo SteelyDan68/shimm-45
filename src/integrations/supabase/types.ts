@@ -515,6 +515,57 @@ export type Database = {
         }
         Relationships: []
       }
+      error_logs: {
+        Row: {
+          context: string | null
+          created_at: string
+          error_id: string
+          id: string
+          message: string
+          metadata: Json | null
+          resolved_at: string | null
+          severity: string | null
+          stack_trace: string | null
+          tags: string[] | null
+          timestamp: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          error_id: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          severity?: string | null
+          stack_trace?: string | null
+          tags?: string[] | null
+          timestamp?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          error_id?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          severity?: string | null
+          stack_trace?: string | null
+          tags?: string[] | null
+          timestamp?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       gdpr_audit_log: {
         Row: {
           action: string
@@ -1489,12 +1540,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      error_statistics: {
+        Row: {
+          affected_users: number | null
+          context: string | null
+          error_count: number | null
+          error_date: string | null
+          severity: string | null
+          unique_errors: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      cleanup_old_error_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       cleanup_user_references: {
         Args: { target_email: string }
