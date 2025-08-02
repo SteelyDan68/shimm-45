@@ -12,7 +12,8 @@ import {
   Database,
   ClipboardList,
   MessageSquare,
-  Building2
+  Building2,
+  Users2
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -63,6 +64,7 @@ export const NAVIGATION_ROUTES = {
   // Auth
   AUTH: "/auth",
   INVITATION: (token: string) => `/invitation/${token}`,
+  COLLABORATION: "/collaboration",
 } as const;
 
 export const MAIN_NAVIGATION: NavigationGroup[] = [
@@ -143,6 +145,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Stefan AI",
         url: NAVIGATION_ROUTES.STEFAN_CHAT,
         icon: Brain,
+        roles: ["superadmin", "admin", "coach", "client"]
+      },
+      {
+        title: "Samarbete",
+        url: NAVIGATION_ROUTES.COLLABORATION,
+        icon: Users2,
         roles: ["superadmin", "admin", "coach", "client"]
       }
     ]
