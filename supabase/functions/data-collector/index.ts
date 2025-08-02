@@ -422,6 +422,15 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
     if (client.facebook_page) {
       platforms.push({ platform: 'facebook', handle: client.facebook_page });
     }
+    if (client.youtube_handle) {
+      platforms.push({ platform: 'youtube', handle: client.youtube_handle });
+    }
+    if (client.twitter_handle) {
+      platforms.push({ platform: 'twitter', handle: client.twitter_handle });
+    }
+    if (client.snapchat_handle) {
+      platforms.push({ platform: 'snapchat', handle: client.snapchat_handle });
+    }
 
     if (platforms.length === 0) {
       console.log('No social handles found for client');
