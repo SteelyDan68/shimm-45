@@ -26,7 +26,7 @@ export const useExtendedProfile = () => {
         phone: profileData.phone,
         avatar_url: profileData.avatar_url,
         bio: profileData.bio,
-        date_of_birth: profileData.date_of_birth,
+        date_of_birth: profileData.date_of_birth === "" ? null : profileData.date_of_birth,
         gender: profileData.gender,
         address: profileData.address,
         location: profileData.location,

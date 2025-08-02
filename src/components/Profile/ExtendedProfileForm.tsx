@@ -226,17 +226,11 @@ export function ExtendedProfileForm({
                 type="date"
                 value={formData.date_of_birth || ''}
                 onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-                disabled={isClientView}
               />
-              {isClientView && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Hanteras av systemadministratörer
-                </p>
-              )}
             </div>
             <div>
               <Label htmlFor="gender">Kön</Label>
-              <Select value={formData.gender || ''} onValueChange={(value) => handleInputChange('gender', value)} disabled={isClientView}>
+              <Select value={formData.gender || ''} onValueChange={(value) => handleInputChange('gender', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Välj kön" />
                 </SelectTrigger>
@@ -247,11 +241,6 @@ export function ExtendedProfileForm({
                   <SelectItem value="vill_inte_ange">Vill inte ange</SelectItem>
                 </SelectContent>
               </Select>
-              {isClientView && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Hanteras av systemadministratörer
-                </p>
-              )}
             </div>
           </div>
         </CardContent>
