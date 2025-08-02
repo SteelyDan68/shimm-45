@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { GlobalSearchBar } from "@/components/GlobalSearch/GlobalSearchBar";
 import { MobileTouchButton, ConditionalRender } from "@/components/ui/mobile-responsive";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useResponsiveNavigation } from "@/hooks/useResponsiveNavigation";
 import { 
   LogOut,
   User,
@@ -32,24 +33,33 @@ export function TopNavigation() {
   // Get all navigation items for current user
   const navItems = navigation.flatMap(group => group.items);
   
+  // Use responsive navigation to determine when to show hamburger menu
+  const { shouldShowHamburger, headerRef } = useResponsiveNavigation({
+    menuItems: navItems.length,
+    minSpaceRequired: 800
+  });
+  
+  // Show hamburger if either mobile OR insufficient space
+  const showHamburgerMenu = isMobile || shouldShowHamburger;
+  
   return (
     <>
-      <header className="nav-mobile bg-card shadow-sm">
+      <header ref={headerRef} className="nav-mobile bg-card shadow-sm">
         <div className="h-full px-4 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-4">
+          <div data-nav-logo className="flex items-center space-x-4">
             <h1 className="text-lg sm:text-xl font-bold text-primary">SHIMM</h1>
           </div>
 
-          {/* Desktop Navigation */}
-          {!isMobile && (
+          {/* Desktop Navigation - only show when there's enough space */}
+          {!showHamburgerMenu && (
             <nav className="flex items-center space-x-6">
               {navItems.map((item) => (
                 <NavLink
                   key={item.title}
                   to={item.url}
                   className={({ isActive }) =>
-                    `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                       isActive
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -63,17 +73,17 @@ export function TopNavigation() {
             </nav>
           )}
 
-          {/* Center Search - Desktop Only */}
-          {!isMobile && (
-            <div className="flex flex-1 max-w-md mx-8">
+          {/* Center Search - Desktop Only when there's space */}
+          {!showHamburgerMenu && (
+            <div data-nav-search className="flex flex-1 max-w-md mx-8">
               <GlobalSearchBar variant="full" className="w-full" />
             </div>
           )}
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-2">
-            {/* Mobile Search */}
-            {isMobile && (
+          <div data-nav-actions className="flex items-center space-x-2">
+            {/* Mobile Search - show when hamburger menu is active */}
+            {showHamburgerMenu && (
               <div>
                 <GlobalSearchBar variant="compact" />
               </div>
@@ -81,8 +91,8 @@ export function TopNavigation() {
             
             <MessageIcon />
             
-            {/* Mobile menu button with touch-friendly size */}
-            {isMobile && (
+            {/* Hamburger menu button - show on mobile OR when insufficient space */}
+            {showHamburgerMenu && (
               <MobileTouchButton 
                 variant="sm"
                 className="bg-transparent text-foreground hover:bg-muted border-0 shadow-none"
@@ -92,7 +102,8 @@ export function TopNavigation() {
               </MobileTouchButton>
             )}
             
-            {!isMobile && (
+            {/* Email display - only show when there's space */}
+            {!showHamburgerMenu && (
               <span className="text-sm text-muted-foreground">
                 {user?.email}
               </span>
@@ -143,8 +154,8 @@ export function TopNavigation() {
         </div>
       </header>
 
-      {/* Mobile Navigation Menu with touch-friendly targets */}
-      {isMobileMenuOpen && isMobile && (
+      {/* Navigation Menu - show when hamburger is active */}
+      {isMobileMenuOpen && showHamburgerMenu && (
         <div className="bg-card border-b shadow-mobile-lg animate-slide-up-mobile">
           <nav className="px-4 py-4 space-mobile-sm">
             {navItems.map((item) => (
