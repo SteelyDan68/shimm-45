@@ -147,16 +147,10 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach", "client"]
       },
       {
-        title: "Intelligence",
-        url: NAVIGATION_ROUTES.INTELLIGENCE,
-        icon: Brain,
-        roles: ["client", "coach"]
-      },
-      {
-        title: "Intelligence Hub",
+        title: "Intelligence Center",
         url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
         icon: Brain,
-        roles: ["superadmin", "admin", "coach"]
+        roles: ["superadmin", "admin", "coach", "client"]
       },
       {
         title: "Stefan AI",

@@ -541,51 +541,60 @@ export type Database = {
       client_data_cache: {
         Row: {
           author: string | null
+          client_id: string | null
+          competitive_insights: Json | null
           created_at: string
           data: Json
+          data_quality_score: number | null
           data_type: string
           expires_at: string | null
           id: string
           image: string | null
+          last_sentiment_analysis: Json | null
           metadata: Json | null
           platform: string | null
           snippet: string | null
           source: string
           title: string | null
           url: string | null
-          user_id: string | null
         }
         Insert: {
           author?: string | null
+          client_id?: string | null
+          competitive_insights?: Json | null
           created_at?: string
           data: Json
+          data_quality_score?: number | null
           data_type: string
           expires_at?: string | null
           id?: string
           image?: string | null
+          last_sentiment_analysis?: Json | null
           metadata?: Json | null
           platform?: string | null
           snippet?: string | null
           source: string
           title?: string | null
           url?: string | null
-          user_id?: string | null
         }
         Update: {
           author?: string | null
+          client_id?: string | null
+          competitive_insights?: Json | null
           created_at?: string
           data?: Json
+          data_quality_score?: number | null
           data_type?: string
           expires_at?: string | null
           id?: string
           image?: string | null
+          last_sentiment_analysis?: Json | null
           metadata?: Json | null
           platform?: string | null
           snippet?: string | null
           source?: string
           title?: string | null
           url?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }
