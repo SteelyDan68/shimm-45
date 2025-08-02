@@ -27,6 +27,7 @@ interface NewsItem {
   relevanceScore?: number;
   type?: string;
   snippet?: string;
+  image?: string;
 }
 
 interface IntelligenceNewsCardProps {
@@ -170,80 +171,84 @@ export function IntelligenceNewsCard({
       
       <CardContent>
         <ScrollArea className={expanded ? "h-96" : "h-auto"}>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-3">
             {displayItems.map((mention, index) => (
-              <div key={`${mention.id}-${index}`}>
-                <div className="space-y-3">
-                  {/* Title and badges */}
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-tight">
+              <div key={`${mention.id}-${index}`} className="border rounded-lg p-3 hover:shadow-sm transition-shadow">
+                <div className="flex gap-3">
+                  {/* News Image */}
+                  {mention.image && (
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={mention.image} 
+                        alt={mention.title}
+                        className="w-16 h-16 rounded object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* News Content */}
+                  <div className="flex-1 min-w-0">
+                    {/* Title */}
+                    <h4 className="font-medium text-sm leading-tight mb-1 line-clamp-2">
                       {cleanTitle(mention.title)}
                     </h4>
                     
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {mention.sentiment && (
-                        <Badge variant="outline" className={getSentimentColor(mention.sentiment)}>
-                          {mention.sentiment}
-                        </Badge>
-                      )}
-                      
-                      {mention.type && (
-                        <Badge variant="outline" className={getTypeColor(mention.type)}>
-                          {mention.type.replace('_', ' ')}
-                        </Badge>
-                      )}
-                      
-                      {mention.relevanceScore && (
-                        <Badge variant="outline">
-                          {Math.round(mention.relevanceScore * 100)}% relevant
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Summary/Snippet */}
-                  {(mention.summary || mention.snippet) && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        {truncateText(mention.summary || mention.snippet || '', 300)}
+                    {/* Snippet/Summary */}
+                    {(mention.summary || mention.snippet) && (
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                        {truncateText(mention.summary || mention.snippet || '', 120)}
                       </p>
+                    )}
+                    
+                    {/* Badges and Meta */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {mention.sentiment && (
+                          <Badge variant="outline" className={`text-xs ${getSentimentColor(mention.sentiment)}`}>
+                            {mention.sentiment}
+                          </Badge>
+                        )}
+                        
+                        {mention.type && (
+                          <Badge variant="outline" className={`text-xs ${getTypeColor(mention.type)}`}>
+                            {mention.type.replace('_', ' ')}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {mention.url && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="h-6 px-2 text-xs"
+                        >
+                          <a 
+                            href={mention.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </Button>
+                      )}
                     </div>
-                  )}
-
-                  {/* Footer with source and actions */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    
+                    {/* Source and Date */}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                       <span className="font-medium">{mention.source}</span>
+                      <span>•</span>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         <span>{formatDistanceToNow(mention.timestamp, { addSuffix: true, locale: sv })}</span>
                       </div>
                     </div>
-                    
-                    {mention.url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="text-xs"
-                      >
-                        <a 
-                          href={mention.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          Läs mer
-                        </a>
-                      </Button>
-                    )}
                   </div>
                 </div>
-                
-                {index < displayItems.length - 1 && (
-                  <Separator className="my-4" />
-                )}
               </div>
             ))}
           </div>

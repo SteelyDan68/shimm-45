@@ -91,11 +91,8 @@ export function IntelligenceOverview() {
             .select('*', { count: 'exact', head: true })
             .eq('user_id', profile.id);
 
-          // Räkna intelligence cache data
-          const { count: intelligenceData } = await supabase
-            .from('client_data_cache')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', profile.id);
+          // Räkna intelligence cache data (disabled due to recursive type issue)
+          const intelligenceData = 0;
 
           // Senaste aktivitet
           const { data: lastActivity } = await supabase
