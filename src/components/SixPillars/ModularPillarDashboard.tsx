@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Clock } from 'lucide-react';
-import { PillarKey } from '@/types/fivePillarsModular';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { PillarKey } from '@/types/sixPillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { PillarHeatmap } from './PillarHeatmap';
 import { ModularPillarAssessment } from './ModularPillarAssessment';
 import { ModularPillarManager } from './ModularPillarManager';
@@ -30,7 +30,7 @@ export const ModularPillarDashboard = ({
     getLatestAssessment, 
     generateHeatmapData,
     refreshData
-  } = useFivePillarsModular(userId);
+  } = useSixPillarsModular(userId);
   
   const [selectedPillar, setSelectedPillar] = useState<PillarKey | null>(null);
   const [showManager, setShowManager] = useState(false);
@@ -87,8 +87,8 @@ export const ModularPillarDashboard = ({
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold">Five Pillars</h1>
-            <HelpTooltip content="Five Pillars är ett utvecklingssystem med fem grundpelare för hållbar framgång och välmående." />
+            <h1 className="text-3xl font-bold">Six Pillars</h1>
+            <HelpTooltip content="Six Pillars är ett utvecklingssystem med sex grundpelare för hållbar framgång och välmående." />
           </div>
           <p className="text-muted-foreground">
             {isCoachView 
@@ -108,7 +108,7 @@ export const ModularPillarDashboard = ({
       {/* Heatmap Overview */}
       <PillarHeatmap 
         heatmapData={heatmapData} 
-        title={isCoachView ? `${userName}s Five Pillars Status` : "Din aktuella helhetsbild"}
+        title={isCoachView ? `${userName}s Six Pillars Status` : "Din aktuella helhetsbild"}
         showInactive={isCoachView}
         userId={userId}
         isCoachView={isCoachView}

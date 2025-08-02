@@ -1,4 +1,4 @@
-import { PillarModuleConfig, PillarKey } from '@/types/fivePillarsModular';
+import { PillarModuleConfig, PillarKey } from '@/types/sixPillarsModular';
 
 // Prioriteringsordning för pillars (Self Care först för att visa självskattning direkt)
 export const PILLAR_PRIORITY_ORDER: PillarKey[] = [

@@ -46,7 +46,7 @@ export const NAVIGATION_ROUTES = {
   EDIT_PROFILE: "/edit-profile",
   
   // Features
-  FIVE_PILLARS: "/five-pillars",
+  SIX_PILLARS: "/six-pillars",
   MESSAGES: "/messages",
   TASKS: "/tasks", 
   CALENDAR: "/calendar",
@@ -122,8 +122,8 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     roles: ["superadmin", "admin", "coach", "client"],
     items: [
       {
-        title: "Five Pillars",
-        url: NAVIGATION_ROUTES.FIVE_PILLARS,
+        title: "Six Pillars",
+        url: NAVIGATION_ROUTES.SIX_PILLARS,
         icon: TrendingUp,
         roles: ["client", "coach"]
       },
@@ -282,10 +282,10 @@ export const QUICK_ACTIONS = {
   ],
   client: [
     {
-      title: "Five Pillars",
+      title: "Six Pillars",
       description: "Starta din utvecklingsresa",
       icon: TrendingUp,
-      url: NAVIGATION_ROUTES.FIVE_PILLARS,
+      url: NAVIGATION_ROUTES.SIX_PILLARS,
       variant: "default" as const
     },
     {

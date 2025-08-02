@@ -4,9 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, Circle, Settings } from 'lucide-react';
-import { PillarKey } from '@/types/fivePillarsModular';
+import { PillarKey } from '@/types/sixPillarsModular';
 import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 
 interface ModularPillarManagerProps {
   clientId?: string;
@@ -35,7 +35,7 @@ export const ModularPillarManager = ({
     loading,
     getActivatedPillars,
     generateHeatmapData
-  } = useFivePillarsModular(targetId!);
+  } = useSixPillarsModular(targetId!);
 
   const activatedPillars = getActivatedPillars();
   const heatmapData = generateHeatmapData();
@@ -97,14 +97,14 @@ export const ModularPillarManager = ({
           <div>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
-              Five Pillars Översikt
+              Six Pillars Översikt
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Översikt av pelare för {clientName}
             </p>
           </div>
           <Badge variant="outline">
-            {activatedPillars.length} av 5 aktiva
+            {activatedPillars.length} av 6 aktiva
           </Badge>
         </div>
       </CardHeader>
@@ -174,7 +174,7 @@ export const ModularPillarManager = ({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-muted-foreground">Aktiverade pelare:</span>
-              <span className="ml-2 font-medium">{activatedPillars.length} / 5</span>
+              <span className="ml-2 font-medium">{activatedPillars.length} / 6</span>
             </div>
             <div>
               <span className="text-muted-foreground">Genomförda assessments:</span>

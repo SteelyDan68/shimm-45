@@ -7,12 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StefanWidget } from '@/components/Stefan/StefanWidget';
 import { SmartJourneyGuide } from '@/components/Journey/SmartJourneyGuide';
 import { WelcomeAssessmentReset } from '@/components/Admin/WelcomeAssessmentReset';
-import { PillarHeatmap } from '@/components/FivePillars/PillarHeatmap';
+import { PillarHeatmap } from '@/components/SixPillars/PillarHeatmap';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { useUserJourney } from '@/hooks/useUserJourney';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { useAuth } from '@/hooks/useAuth';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
@@ -38,7 +38,7 @@ interface EnhancedDashboardProps {
 export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) => {
   const { user } = useAuth();
   const { journeyState, getJourneyProgress, getCurrentPhaseDescription } = useUserJourney();
-  const { generateHeatmapData, getActivatedPillars } = useFivePillarsModular(userId);
+  const { generateHeatmapData, getActivatedPillars } = useSixPillarsModular(userId);
   const [selectedTab, setSelectedTab] = useState('journey');
 
   const heatmapData = generateHeatmapData();
@@ -154,7 +154,7 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
                 </div>
                 <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   Aktiva områden
-                  <HelpTooltip content={helpTexts.fivePillars.activePillars} />
+                  <HelpTooltip content={helpTexts.sixPillars?.activePillars || "Aktiva utvecklingsområden"} />
                 </div>
               </CardContent>
             </Card>
@@ -183,7 +183,7 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
                 </div>
                 <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   Genomsnitt
-                  <HelpTooltip content={helpTexts.fivePillars.overallScore} />
+                  <HelpTooltip content={helpTexts.sixPillars?.overallScore || "Genomsnittlig poäng"} />
                 </div>
               </CardContent>
             </Card>
@@ -206,11 +206,11 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
             userId={userId}
             heatmapData={heatmapData}
             showDetails={true}
-            title="Five Pillars Status"
+            title="Six Pillars Status"
             onPillarClick={() => {}}
           />
           <div className="text-center">
-            <HelpTooltip content={helpTexts.fivePillars.heatmap}>
+            <HelpTooltip content={helpTexts.sixPillars?.heatmap || "Sex Pillars visualisering"}>
               <Button variant="ghost" size="sm" className="text-muted-foreground">
                 Vad betyder färgerna? <span className="ml-1">💡</span>
               </Button>

@@ -8,7 +8,7 @@ import {
   PillarAssessment,
   PillarKey,
   PillarHeatmapData 
-} from '@/types/fivePillarsModular';
+} from '@/types/sixPillarsModular';
 
 // Helper function to calculate trend based on historical assessments
 function calculateTrend(pillarKey: string, assessments: any[]): 'stable' | 'up' | 'down' {
@@ -29,7 +29,7 @@ function calculateTrend(pillarKey: string, assessments: any[]): 'stable' | 'up' 
   return 'stable';
 }
 
-export const useFivePillarsModular = (clientId?: string) => {
+export const useSixPillarsModular = (clientId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);

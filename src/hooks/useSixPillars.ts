@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { PillarType, AssessmentRound, ClientPillarAssignment } from '@/types/fivePillars';
+import { PillarType, AssessmentRound, ClientPillarAssignment } from '@/types/sixPillars';
 
-export const useFivePillars = (userId?: string) => {
+export const useSixPillars = (userId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);

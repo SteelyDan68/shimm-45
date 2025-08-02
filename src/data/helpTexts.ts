@@ -58,7 +58,7 @@ export const helpTexts = {
   },
 
   // Five Pillars
-  fivePillars: {
+  sixPillars: {
     systemOverview: "Five Pillars är ett utvecklingssystem med fem grundpelare för hållbar framgång och välmående.",
     pillarsOrder: "Pillarnas prioriteringsordning: Self Care (välmående) aktiveras automatiskt först, sedan Skills → Talent → Brand → Economy enligt behov.",
     selfCare: "Välmående och hälsa - grundläggande för hållbar prestanda och kreativitet. Aktiveras automatiskt för alla nya användare.",

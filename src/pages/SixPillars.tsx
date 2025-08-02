@@ -1,5 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
-import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
+import { ModularPillarDashboard } from '@/components/SixPillars/ModularPillarDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 // Huvudpolicy från UX Expert: Pedagogisk progression och tydlig informationsarkitektur
-export const FivePillars = () => {
+export const SixPillars = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
@@ -77,11 +77,11 @@ export const FivePillars = () => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <TrendingUp className="h-10 w-10 text-blue-600" />
-          <h1 className="text-4xl font-bold">Five Pillars</h1>
-          <HelpTooltip content="Five Pillars är vårt beprövade system för hållbar utveckling inom fem kritiska livsområden." />
+          <h1 className="text-4xl font-bold">Six Pillars</h1>
+          <HelpTooltip content="Six Pillars är vårt beprövade system för hållbar utveckling inom sex kritiska livsområden." />
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Ett holistiskt utvecklingssystem som balanserar fem grundpelare för hållbar framgång och välmående
+          Ett holistiskt utvecklingssystem som balanserar sex grundpelare för hållbar framgång och välmående
         </p>
         
         <Alert className="max-w-2xl mx-auto bg-blue-50 border-blue-200">
@@ -96,7 +96,7 @@ export const FivePillars = () => {
       {/* Pillar Introduction Grid - Huvudpolicy från Coaching Psykolog: Bygga förståelse */}
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-2">Förstå de fem pelarna</h2>
+          <h2 className="text-2xl font-semibold mb-2">Förstå de sex pelarna</h2>
           <p className="text-muted-foreground">
             Varje pelare representerar ett kritiskt område för din personliga och professionella utveckling
           </p>

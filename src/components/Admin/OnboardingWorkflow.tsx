@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 // Removed AdminUserCreation - now integrated in CentralUserManager
 import { OnboardingForm } from '../Onboarding/OnboardingForm';
-import { ModularPillarAssessment } from '../FivePillars/ModularPillarAssessment';
+import { ModularPillarAssessment } from '../SixPillars/ModularPillarAssessment';
 import { HabitFormationCenter } from '../HabitFormation/HabitFormationCenter';
 
 interface ClientProfile {
@@ -108,7 +108,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
       return { status: 'Behöver onboarding', nextStep: 'Genomför onboarding', color: 'bg-orange-500' };
     }
     if (!client.assessment_completed) {
-      return { status: 'Behöver assessment', nextStep: 'Genomför Five Pillars', color: 'bg-blue-500' };
+      return { status: 'Behöver assessment', nextStep: 'Genomför Six Pillars', color: 'bg-blue-500' };
     }
     if ((client.habits_active || 0) === 0) {
       return { status: 'Behöver vanor', nextStep: 'Skapa vanor', color: 'bg-purple-500' };
@@ -201,7 +201,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
     switch (currentStep) {
       case 'create': return 'Skapa ny klient';
       case 'onboard': return 'Onboarding';
-      case 'assess': return 'Five Pillars Assessment';
+      case 'assess': return 'Six Pillars Assessment';
       case 'habits': return 'Vanformning';
       case 'complete': return 'Klar!';
       default: return '';
@@ -269,10 +269,10 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Five Pillars Assessment för {getClientDisplayName(selectedClient!)}
+                Six Pillars Assessment för {getClientDisplayName(selectedClient!)}
               </CardTitle>
               <CardDescription>
-                Genomför den modulära Five Pillars-bedömningen
+                Genomför den modulära Six Pillars-bedömningen
               </CardDescription>
             </CardHeader>
             <CardContent>

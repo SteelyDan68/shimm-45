@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAIPlanning } from '@/hooks/useAIPlanning';
 import { useUserJourney } from '@/hooks/useUserJourney';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { 
   Brain, 
   Target, 
@@ -38,7 +38,7 @@ export const AutonomousCoachingDashboard = ({ userId, userName }: AutonomousCoac
   } = useAIPlanning(userId);
 
   const { journeyState, getJourneyProgress } = useUserJourney();
-  const { generateHeatmapData } = useFivePillarsModular(userId);
+  const { generateHeatmapData } = useSixPillarsModular(userId);
 
   const [showAllTasks, setShowAllTasks] = useState(false);
 

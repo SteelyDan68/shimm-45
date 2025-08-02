@@ -29,7 +29,7 @@ import {
 import { PILLAR_MODULES, PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 
 interface Client {
@@ -59,7 +59,7 @@ export const AdminPillarManagement = () => {
     activatePillar,
     deactivatePillar,
     refreshData
-  } = useFivePillarsModular(selectedClient?.id);
+  } = useSixPillarsModular(selectedClient?.id);
 
   const PILLAR_CONFIG = {
     self_care: { name: 'Self Care', icon: '🧘', description: 'Personlig hälsa och välmående' },
@@ -256,7 +256,7 @@ export const AdminPillarManagement = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              Five Pillars Översikt
+              Six Pillars Översikt
             </CardTitle>
             {selectedClient && (
               <p className="text-sm text-muted-foreground">

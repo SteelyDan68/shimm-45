@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { PillarHeatmapData } from '@/types/fivePillarsModular';
+import { PillarHeatmapData } from '@/types/sixPillarsModular';
 import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useNavigate } from 'react-router-dom';
 import { HelpTooltip } from '@/components/HelpTooltip';
@@ -21,7 +21,7 @@ interface PillarHeatmapProps {
 
 export const PillarHeatmap = ({ 
   heatmapData, 
-  title = "Five Pillars Heatmap", 
+  title = "Six Pillars Heatmap", 
   showInactive = false,
   clientId,
   isCoachView = false,
@@ -75,10 +75,10 @@ export const PillarHeatmap = ({
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
             {title}
-            <HelpTooltip content="Five Pillars visualisering. Färgkodning: Grön (stark 7-10), Orange (utmaning 4-6), Röd (kritisk 1-3), Grå (obearbetad). Klicka på en pillar för att se detaljer eller göra ny bedömning." />
+            <HelpTooltip content="Six Pillars visualisering. Färgkodning: Grön (stark 7-10), Orange (utmaning 4-6), Röd (kritisk 1-3), Grå (obearbetad). Klicka på en pillar för att se detaljer eller göra ny bedömning." />
           </span>
           <Badge variant="outline" className="flex items-center gap-1">
-            {displayData.filter(p => p.is_active).length} av 5 pelare
+            {displayData.filter(p => p.is_active).length} av 6 pelare
             <HelpTooltip content="Antal aktiva utvecklingsområden (Pillars) som du arbetar med just nu." />
           </Badge>
         </CardTitle>

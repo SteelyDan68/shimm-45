@@ -18,7 +18,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import type { ClientPriority, ClientIssue } from '@/hooks/useCoachDashboard';
 import { CapacityBarometer } from '@/components/CapacityBarometer';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 
 interface ClientCardProps {
   client: ClientPriority;
@@ -57,7 +57,7 @@ const getVelocityColor = (rank: number) => {
 
 export function ClientCard({ client }: ClientCardProps) {
   const navigate = useNavigate();
-  const { getActivatedPillars, generateHeatmapData } = useFivePillarsModular(client.id);
+  const { getActivatedPillars, generateHeatmapData } = useSixPillarsModular(client.id);
   
   const activatedPillars = getActivatedPillars();
   const heatmapData = generateHeatmapData();
@@ -185,12 +185,12 @@ export function ClientCard({ client }: ClientCardProps) {
           </div>
         )}
 
-        {/* Five Pillars Mini-Heatmap */}
+        {/* Six Pillars Mini-Heatmap */}
         {activatedPillars.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-medium flex items-center gap-1">
               <Star className="h-3 w-3" />
-              Five Pillars ({activatedPillars.length}/5 aktiva)
+              Six Pillars ({activatedPillars.length}/6 aktiva)
             </h4>
             <div className="grid grid-cols-3 gap-1">
               {heatmapData.slice(0, 6).map((pillar) => {

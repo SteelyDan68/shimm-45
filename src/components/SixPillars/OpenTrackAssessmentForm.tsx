@@ -8,7 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Clock, Target, Heart, Lightbulb, Users, Calendar } from 'lucide-react';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 
 interface OpenTrackAssessmentFormProps {
   clientId: string;
@@ -16,7 +16,7 @@ interface OpenTrackAssessmentFormProps {
 }
 
 export function OpenTrackAssessmentForm({ clientId, onComplete }: OpenTrackAssessmentFormProps) {
-  const { submitPillarAssessment, loading } = useFivePillarsModular(clientId);
+  const { submitPillarAssessment, loading } = useSixPillarsModular(clientId);
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<Record<string, any>>({});
 

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAssessmentEngine } from '@/hooks/useAssessmentEngine';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { DynamicAssessmentForm } from '@/components/AssessmentEngine/DynamicAssessmentForm';
 
 import { ArrowLeft, TrendingUp, Clock } from 'lucide-react';
@@ -17,7 +17,7 @@ interface PillarDashboardProps {
 export const PillarDashboard = ({ userId, userName }: PillarDashboardProps) => {
   // Use user-centric hooks for enterprise architecture
   const { formDefinitions, assignments, assessmentRounds, getLatestAssessment } = useAssessmentEngine(userId);
-  const { pillarDefinitions, getActivatedPillars } = useFivePillarsModular(userId);
+  const { pillarDefinitions, getActivatedPillars } = useSixPillarsModular(userId);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   
   const activatedPillars = getActivatedPillars();
@@ -58,9 +58,9 @@ export const PillarDashboard = ({ userId, userName }: PillarDashboardProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">Five Pillars Assessment</h1>
+        <h1 className="text-3xl font-bold mb-2">Six Pillars Assessment</h1>
         <p className="text-muted-foreground">
-          Bedöm dina fem grundpelare för en stark karriär och personligt varumärke
+          Bedöm dina sex grundpelare för en stark karriär och personligt varumärke
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export const PillarDashboard = ({ userId, userName }: PillarDashboardProps) => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-2">
-              Den nya självskattningen är nu integrerad i Five Pillars-systemet. Gå till Five Pillars för att göra din självskattning.
+              Den nya självskattningen är nu integrerad i Six Pillars-systemet. Gå till Six Pillars för att göra din självskattning.
             </p>
           </CardContent>
         </Card>

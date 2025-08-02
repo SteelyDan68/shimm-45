@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { PillarType, PILLAR_CONFIGS } from '@/types/fivePillars';
-import { useFivePillars } from '@/hooks/useFivePillars';
+import { PillarType, PILLAR_CONFIGS } from '@/types/sixPillars';
+import { useSixPillars } from '@/hooks/useSixPillars';
 
 interface PillarAssessmentFormProps {
   clientId: string;
@@ -14,7 +14,7 @@ interface PillarAssessmentFormProps {
 }
 
 export const PillarAssessmentForm = ({ clientId, pillarType, onComplete }: PillarAssessmentFormProps) => {
-  const { submitAssessment, loading } = useFivePillars(clientId);
+  const { submitAssessment, loading } = useSixPillars(clientId);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [comments, setComments] = useState('');
 

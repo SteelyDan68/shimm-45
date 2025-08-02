@@ -7,9 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ArrowLeft, Home } from 'lucide-react';
-import { PillarKey } from '@/types/fivePillarsModular';
+import { PillarKey } from '@/types/sixPillarsModular';
 import { PILLAR_MODULES } from '@/config/pillarModules';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { BreadcrumbNavigation } from '@/components/Navigation/BreadcrumbNavigation';
 import { OpenTrackAssessmentForm } from './OpenTrackAssessmentForm';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +31,7 @@ export const ModularPillarAssessment = ({
 }: ModularPillarAssessmentProps) => {
   // Use the appropriate ID (userId for new architecture, clientId for backward compatibility)
   const targetId = userId || clientId;
-  const { submitPillarAssessment, loading } = useFivePillarsModular(targetId!);
+  const { submitPillarAssessment, loading } = useSixPillarsModular(targetId!);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [comments, setComments] = useState('');
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ export const ModularPillarAssessment = ({
           onBack={onBack}
           customPath={[
             { label: 'Dashboard', path: '/client-dashboard' },
-            { label: 'Five Pillars', path: '/client-dashboard?tab=pillars' },
+            { label: 'Six Pillars', path: '/client-dashboard?tab=pillars' },
             { label: `${pillarConfig.name} Bedömning` }
           ]}
         />
@@ -108,7 +108,7 @@ export const ModularPillarAssessment = ({
         onBack={onBack}
         customPath={[
           { label: 'Dashboard', path: '/client-dashboard' },
-          { label: 'Five Pillars', path: '/client-dashboard?tab=pillars' },
+          { label: 'Six Pillars', path: '/client-dashboard?tab=pillars' },
           { label: `${pillarConfig.name} Bedömning` }
         ]}
       />
