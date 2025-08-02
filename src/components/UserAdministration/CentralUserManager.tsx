@@ -140,10 +140,8 @@ export function CentralUserManager() {
     isSuperAdmin
   } = useUnifiedPermissions();
 
-  // State för dialogs
+  // State för användarhantering
   const [selectedUser, setSelectedUser] = useState<UnifiedUser | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isFullProfileDialogOpen, setIsFullProfileDialogOpen] = useState(false);
   
   // State för användarhantering
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
@@ -470,12 +468,10 @@ export function CentralUserManager() {
                           key={user.id}
                           user={user}
                           onEdit={(user) => {
-                            setSelectedUser(user);
-                            setIsEditDialogOpen(true);
+                            navigate(`/admin/edit-profile/${user.id}`);
                           }}
                           onView={(user) => {
-                            setSelectedUser(user);
-                            setIsFullProfileDialogOpen(true);
+                            navigate(`/user-profile/${user.id}`);
                           }}
                           onDelete={handleDeleteUser}
                           isDeleting={deletingUserId === user.id}

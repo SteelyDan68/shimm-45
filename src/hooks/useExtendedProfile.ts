@@ -7,7 +7,7 @@ export const useExtendedProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const saveExtendedProfile = async (profileData: ExtendedProfileData) => {
+  const saveExtendedProfile = async (profileData: ExtendedProfileData, targetUserId?: string) => {
     setIsLoading(true);
     try {
       console.log('Saving extended profile data:', profileData);
@@ -15,9 +15,11 @@ export const useExtendedProfile = () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error('User not authenticated');
 
+      const userId = targetUserId || userData.user.id;
+
       // Map the new structure directly to profiles table columns
       const profileUpdate = {
-        id: userData.user.id,
+        id: userId,
         first_name: profileData.first_name,
         last_name: profileData.last_name,
         email: profileData.email,
@@ -90,15 +92,17 @@ export const useExtendedProfile = () => {
     }
   };
 
-  const getExtendedProfile = async (): Promise<ExtendedProfileData | null> => {
+  const getExtendedProfile = async (targetUserId?: string): Promise<ExtendedProfileData | null> => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return null;
 
+      const userId = targetUserId || userData.user.id;
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userData.user.id)
+        .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
@@ -163,13 +167,14 @@ export const useExtendedProfile = () => {
     }
   };
 
-  const uploadProfilePicture = async (file: File): Promise<string | null> => {
+  const uploadProfilePicture = async (file: File, targetUserId?: string): Promise<string | null> => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error('Användare inte inloggad');
 
+      const userId = targetUserId || userData.user.id;
       const fileExt = file.name.split('.').pop();
-      const fileName = `${userData.user.id}/profile.${fileExt}`;
+      const fileName = `${userId}/profile.${fileExt}`;
 
       // Ta bort befintlig profilbild först
       await supabase.storage
