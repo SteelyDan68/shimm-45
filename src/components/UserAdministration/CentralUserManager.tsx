@@ -79,7 +79,7 @@ const ROLE_CONFIG: Record<AppRole, {
 export function CentralUserManager() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user: currentUser, hasRole } = useAuth();
+  const { user: currentUser, hasRole, roles } = useAuth(); // Lägg till roles från useAuth
   const isMobile = useIsMobile();
   
   /**
@@ -95,10 +95,11 @@ export function CentralUserManager() {
     isSuperAdmin
   } = useUnifiedPermissions();
 
-  // Master permission check
+  // Master permission check - FIX: Direktkontroll utan useUnifiedPermissions
   const hasUserManagementAccess = useMemo(() => {
-    return hasRole('superadmin') || hasRole('admin');
-  }, [hasRole]);
+    const currentRoles = roles || [];
+    return currentRoles.includes('superadmin') || currentRoles.includes('admin');
+  }, [roles]);
 
   /**
    * ========================================================================
