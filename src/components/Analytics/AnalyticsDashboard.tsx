@@ -20,7 +20,17 @@ import {
   Zap
 } from 'lucide-react';
 
-export const AnalyticsDashboard: React.FC = () => {
+interface AnalyticsDashboardProps {
+  clientId?: string;
+  onBack?: () => void;
+  showClientName?: boolean;
+}
+
+export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ 
+  clientId, 
+  onBack, 
+  showClientName = true 
+}) => {
   const { 
     analyticsData, 
     performanceMetrics, 
