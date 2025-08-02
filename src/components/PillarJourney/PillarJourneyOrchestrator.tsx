@@ -13,7 +13,7 @@ import { PillarTaskManager } from './PillarTaskManager';
 import { JourneyTimeline } from './JourneyTimeline';
 import { usePillarJourney } from '@/hooks/usePillarJourney';
 import { useUserJourney } from '@/hooks/useUserJourney';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { 
   Target, 
   MapPin, 
@@ -36,7 +36,7 @@ interface PillarJourneyOrchestratorProps {
 // Huvudpolicy från UX Expert: Kognitiv belastning minimeras genom progressive disclosure
 export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrchestratorProps) => {
   const { journeyState } = useUserJourney();
-  const { getActivatedPillars, activatePillar } = useFivePillarsModular(userId);
+  const { getActivatedPillars, activatePillar } = useSixPillarsModular(userId);
   const { 
     activeJourneys, 
     completedJourneys, 
@@ -209,14 +209,14 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
-                Om Five Pillars systemet
+                Om Six Pillars systemet
                 <HelpTooltip content="Five Pillars är ett beprövat system för hållbar utveckling inom fem kritiska livsområden." />
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Five Pillars är vårt holistiska utvecklingssystem som balanserar fem grundpelare: 
-                <strong> Självomvårdnad, Kompetenser, Talang, Varumärke och Ekonomi</strong>. 
+                Six Pillars är vårt holistiska utvecklingssystem som balanserar sex grundpelare: 
+                <strong> Självomvårdnad, Kompetenser, Talang, Varumärke, Ekonomi och Öppna Spåret</strong>. 
                 Varje pelare representerar ett kritiskt område för din personliga och professionella utveckling.
               </p>
               
@@ -224,15 +224,15 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
                 <div className="space-y-2">
                   <h4 className="font-semibold">Redo att börja?</h4>
                   <p className="text-sm text-muted-foreground">
-                    Gå till Five Pillars Dashboard för att läsa mer om systemet, 
+                    Gå till Six Pillars Dashboard för att läsa mer om systemet, 
                     göra dina första bedömningar och aktivera dina utvecklingsområden.
                   </p>
                 </div>
                 <Button 
-                  onClick={() => window.location.href = '/five-pillars'}
+                  onClick={() => window.location.href = '/six-pillars'}
                   className="shrink-0"
                 >
-                  Öppna Five Pillars
+                  Öppna Six Pillars
                 </Button>
               </div>
             </CardContent>

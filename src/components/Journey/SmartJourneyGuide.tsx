@@ -8,10 +8,10 @@ import { useUserJourney } from '@/hooks/useUserJourney';
 import { useStefanPersonality } from '@/hooks/useStefanPersonality';
 import { StefanInteractionCard } from '@/components/Stefan/StefanInteractionCard';
 import { WelcomeAssessmentCard } from '@/components/Dashboard/WelcomeAssessmentCard';
-import { ModularPillarAssessment } from '@/components/FivePillars/ModularPillarAssessment';
-import { PillarHeatmap } from '@/components/FivePillars/PillarHeatmap';
+import { ModularPillarAssessment } from '@/components/SixPillars/ModularPillarAssessment';
+import { PillarHeatmap } from '@/components/SixPillars/PillarHeatmap';
 import { AutonomousCoachingDashboard } from '@/components/Dashboard/AutonomousCoachingDashboard';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { 
@@ -41,7 +41,7 @@ export const SmartJourneyGuide = ({ userId, userName }: SmartJourneyGuideProps) 
   } = useUserJourney();
   
   const { recentInteractions, createStefanInteraction } = useStefanPersonality();
-  const { getActivatedPillars, generateHeatmapData } = useFivePillarsModular(userId);
+  const { getActivatedPillars, generateHeatmapData } = useSixPillarsModular(userId);
   
   const [selectedAssessment, setSelectedAssessment] = useState<string | null>(null);
   const [showAllInteractions, setShowAllInteractions] = useState(false);

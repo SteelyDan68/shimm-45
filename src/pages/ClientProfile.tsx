@@ -26,7 +26,7 @@ import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessm
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
-import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
+import { ModularPillarDashboard } from '@/components/SixPillars/ModularPillarDashboard';
 import { CalendarModule } from '@/components/Calendar/CalendarModule';
 import { AnalysisActions } from '@/components/ui/analysis-actions';
 import { HelpTooltip } from '@/components/HelpTooltip';

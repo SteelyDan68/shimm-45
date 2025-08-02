@@ -127,7 +127,7 @@ export const ModularPillarDashboard = ({
             <h2 className="text-xl font-semibold">
               {isCoachView ? "Aktiverade pelare" : "Dina aktiva pelare"}
             </h2>
-            <HelpTooltip content={helpTexts.fivePillars.pillarsOrder} />
+            <HelpTooltip content={helpTexts.sixPillars.pillarsOrder} />
           </div>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -151,7 +151,7 @@ export const ModularPillarDashboard = ({
                         <span className="text-xl">{pillarConfig.icon}</span>
                         <CardTitle className="text-lg">{pillarConfig.name}</CardTitle>
                         <HelpTooltip 
-                          content={helpTexts.fivePillars[pillarKey as keyof typeof helpTexts.fivePillars] || pillarConfig.description}
+                          content={helpTexts.sixPillars[pillarKey as keyof typeof helpTexts.sixPillars] || pillarConfig.description}
                         />
                       </div>
                       <Badge variant="secondary">
@@ -172,7 +172,7 @@ export const ModularPillarDashboard = ({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1">
                             <span className="text-sm text-muted-foreground">Nuvarande poäng</span>
-                            <HelpTooltip content={helpTexts.fivePillars.pillarScore} />
+                            <HelpTooltip content={helpTexts.sixPillars.pillarScore} />
                           </div>
                           <div className="flex items-center gap-2">
                             <span 
@@ -226,7 +226,7 @@ export const ModularPillarDashboard = ({
                     {isCoachView && latestAssessment && (
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <span>Senast uppdaterad: {new Date(latestAssessment.updated_at).toLocaleDateString('sv-SE')}</span>
-                        <HelpTooltip content={helpTexts.fivePillars.lastAssessment} />
+                        <HelpTooltip content={helpTexts.sixPillars.lastAssessment} />
                       </div>
                     )}
                   </CardContent>

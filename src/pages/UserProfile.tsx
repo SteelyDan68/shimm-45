@@ -24,7 +24,7 @@ import { useUserPillars } from '@/hooks/useUserPillars';
 import { useUserTasks } from '@/hooks/useUserTasks';
 import { useUserAssessments } from '@/hooks/useUserAssessments';
 import { supabase } from '@/integrations/supabase/client';
-import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDashboard';
+import { ModularPillarDashboard } from '@/components/SixPillars/ModularPillarDashboard';
 import { CalendarModule } from '@/components/Calendar/CalendarModule';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { TaskScheduler } from '@/components/TaskScheduler/TaskScheduler';

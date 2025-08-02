@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Brain, Send, BarChart3, Zap, Users, Activity } from 'lucide-react';
 import { useInsightAssessment } from '@/hooks/useInsightAssessment';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 
 interface AssessmentFormProps {
   clientId: string;
@@ -56,7 +56,7 @@ const relationshipQuestions = [
 
 export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentFormProps) {
   const { submitAssessment, isSubmitting } = useInsightAssessment(clientId);
-  const { submitPillarAssessment } = useFivePillarsModular(clientId);
+  const { submitPillarAssessment } = useSixPillarsModular(clientId);
   
   const [scores, setScores] = useState(() => {
     const initialScores: Record<string, number> = {};

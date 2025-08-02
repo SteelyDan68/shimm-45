@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { PILLAR_MODULES } from '@/config/pillarModules';
-import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { 
   CheckCircle, 
   Clock, 
@@ -34,16 +34,16 @@ export const PillarSelector = ({
   currentActive, 
   onPillarSelect 
 }: PillarSelectorProps) => {
-  const fivePillarsHook = useFivePillarsModular(userId);
+  const sixPillarsHook = useSixPillarsModular(userId);
   const { 
     getActivatedPillars, 
     getLatestAssessment, 
     generateHeatmapData 
-  } = fivePillarsHook;
+  } = sixPillarsHook;
   
   // Huvudpolicy från Frontend Dev: Type-safe helper function
   const isPillarActive = (pillarKey: string) => {
-    return fivePillarsHook.activations.some(a => a.pillar_key === pillarKey && a.is_active);
+    return sixPillarsHook.activations.some(a => a.pillar_key === pillarKey && a.is_active);
   };
 
   const [selectedPillars, setSelectedPillars] = useState<string[]>([]);
@@ -256,9 +256,9 @@ export const PillarSelector = ({
             </p>
             <Button 
               variant="outline" 
-              onClick={() => window.location.href = '/five-pillars'}
+              onClick={() => window.location.href = '/six-pillars'}
             >
-              Gå till Five Pillars Dashboard
+              Gå till Six Pillars Dashboard
             </Button>
           </CardContent>
         </Card>
