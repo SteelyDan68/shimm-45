@@ -119,7 +119,7 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
       case 'free_text':
         return Object.keys(assessmentData.freeTextResponses).length >= 6; // Minst 6 av 10 frågor
       case 'quick_wins':
-        return Object.keys(assessmentData.quickWins).length >= 4; // Minst 4 av 7 frågor
+        return Object.keys(assessmentData.quickWins).length >= 1; // Minst 1 av 7 frågor
       default:
         return true;
     }
@@ -147,8 +147,8 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
           : '';
       case 'quick_wins':
         const quickWinsCompleted = Object.keys(assessmentData.quickWins).length;
-        return quickWinsCompleted < 4 
-          ? `Svara på minst 4 frågor för att fortsätta (${quickWinsCompleted}/4 klara)`
+        return quickWinsCompleted < 1 
+          ? `Svara på minst 1 fråga för att fortsätta (${quickWinsCompleted}/1 klara)`
           : '';
       default:
         return '';
@@ -216,7 +216,7 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
           onComplete(result);
         }
       }
-    }, true); // Kräv dubbel bekräftelse
+    }, false); // Ingen dubbel bekräftelse
 
     return success;
   };
