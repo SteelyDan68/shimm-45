@@ -48,11 +48,21 @@ export default function UserCrmProfile() {
   const [editData, setEditData] = useState<ExtendedProfileData>({});
   const [loadingExtended, setLoadingExtended] = useState(true);
 
-  // Access control
+  // Access control - Users can view their own profile, admins can view all profiles  
+  console.log('🔍 UserCrmProfile access check:', { 
+    userId, 
+    userAuthId: user?.id, 
+    isAdmin: isAdmin(),
+    isOwn: userId === user?.id,
+    hasClientRole: hasRole('client'),
+    canView: userId === user?.id || isAdmin()
+  });
   const canViewProfile = userId === user?.id || isAdmin();
   
   useEffect(() => {
+    console.log('🔍 Access control result:', { canViewProfile, userId, userAuthId: user?.id });
     if (!canViewProfile) {
+      console.error('❌ Access denied for user profile view');
       toast({
         title: "Åtkomst nekad",
         description: "Du har inte behörighet att visa denna profil",

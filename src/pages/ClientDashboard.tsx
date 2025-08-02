@@ -287,7 +287,7 @@ export const ClientDashboard = () => {
                 <strong>Komplettera din profil</strong> - Du måste fylla i alla grunduppgifter och minst en social plattform innan du kan göra assessments.
               </span>
               <Button 
-                onClick={() => navigate(`/user/${user?.id}`)}
+                onClick={() => navigate('/edit-profile')}
                 size="sm"
                 className="bg-orange-600 hover:bg-orange-700 ml-4"
               >
@@ -417,7 +417,7 @@ export const ClientDashboard = () => {
               <Button 
                 className="w-full justify-start" 
                 variant="outline"
-                onClick={() => navigate(`/user/${user?.id}`)}
+                onClick={() => navigate('/edit-profile')}
               >
                 <User className="h-4 w-4 mr-2" />
                 Uppdatera min profil
