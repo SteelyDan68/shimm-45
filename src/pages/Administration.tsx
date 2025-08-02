@@ -201,9 +201,9 @@ export function Administration() {
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-6 max-w-7xl">
-        <Tabs defaultValue="users" className="space-y-6">
+        <Tabs defaultValue="users" className="space-y-8">
           {/* Navigation Tabs */}
-          <div className="bg-card rounded-lg border p-1">
+          <div className="bg-card rounded-lg border p-1 mb-8">
             <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
               <TabsTrigger 
                 value="users" 
@@ -251,7 +251,7 @@ export function Administration() {
           </div>
 
           {/* User Management Tab */}
-          <TabsContent value="users" className="space-y-6">
+          <TabsContent value="users" className="space-y-6 mt-8">
             <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
@@ -288,7 +288,7 @@ export function Administration() {
           </TabsContent>
 
           {/* Stefan AI Overview Tab */}
-          <TabsContent value="stefan-overview" className="space-y-6">
+          <TabsContent value="stefan-overview" className="space-y-6 mt-8">
             <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -306,7 +306,7 @@ export function Administration() {
           </TabsContent>
 
           {/* System Health Tab */}
-          <TabsContent value="api-status" className="space-y-6">
+          <TabsContent value="api-status" className="space-y-6 mt-8">
             <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -328,7 +328,7 @@ export function Administration() {
           </TabsContent>
 
           {/* Permissions Tab */}
-          <TabsContent value="permissions" className="space-y-6">
+          <TabsContent value="permissions" className="space-y-6 mt-8">
             <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -348,13 +348,12 @@ export function Administration() {
                      </p>
                   </div>
                 </div>
-
               </div>
             </div>
           </TabsContent>
 
           {/* Automation Tab */}
-          <TabsContent value="automation" className="space-y-6">
+          <TabsContent value="automation" className="space-y-6 mt-8">
             <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -436,7 +435,7 @@ export function Administration() {
           </TabsContent>
 
           {/* GDPR Tab */}
-          <TabsContent value="gdpr" className="space-y-6">
+          <TabsContent value="gdpr" className="space-y-6 mt-8">
             <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
