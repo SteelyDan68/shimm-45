@@ -6,7 +6,8 @@ export const PILLAR_PRIORITY_ORDER: PillarKey[] = [
   'skills',
   'talent', 
   'brand',
-  'economy'
+  'economy',
+  'open_track'
 ];
 
 // Define questions and scoring logic for each pillar module
@@ -370,6 +371,117 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
           if (value <= 4) insights.developmentAreas.push(key);
         }
       });
+      
+      return insights;
+    }
+  },
+
+  open_track: {
+    key: 'open_track',
+    name: 'Öppet Spår',
+    description: 'Din personliga utvecklingsresa med fritt valbara mål och förändringar',
+    icon: '🛤️',
+    color: '#EC4899',
+    questions: [
+      // Huvudmål och vision
+      { key: 'change_goal', text: 'Vad vill du specifikt förändra eller utveckla?', type: 'text', weight: 2.0 },
+      { key: 'goal_importance', text: 'Varför är denna förändring viktig för dig?', type: 'text', weight: 1.8 },
+      { key: 'success_vision', text: 'Hur ser framgång ut för dig inom detta område? Beskriv så detaljerat som möjligt.', type: 'text', weight: 1.8 },
+      
+      // Nuläge och utmaningar
+      { key: 'current_situation', text: 'Hur ser din situation ut idag inom detta område?', type: 'text', weight: 1.5 },
+      { key: 'main_challenges', text: 'Vilka är dina största utmaningar eller hinder?', type: 'text', weight: 1.6 },
+      { key: 'previous_attempts', text: 'Vad har du redan provat för att förändra detta?', type: 'text', weight: 1.3 },
+      { key: 'challenge_background', text: 'Beskriv bakgrunden till denna utmaning - hur länge har den funnits?', type: 'text', weight: 1.2 },
+      
+      // Kapacitet och tidsplanering
+      { key: 'daily_time_commitment', text: 'Hur mycket tid per dag kan du realistiskt avsätta för detta?', type: 'multiple_choice', options: ['5-10 minuter', '15-30 minuter', '30-60 minuter', '1-2 timmar', 'Mer än 2 timmar'], weight: 1.8 },
+      { key: 'weekly_schedule', text: 'Vilka dagar i veckan passar bäst för dig att arbeta med detta?', type: 'multiple_choice', options: ['Varje dag', 'Vardagar', 'Helger', 'Specifika dagar (beskriv i kommentar)', 'Oregelbundet när jag har tid'], weight: 1.5 },
+      { key: 'total_timeframe', text: 'Hur lång tid föreställer du dig att denna förändring behöver ta?', type: 'multiple_choice', options: ['1-4 veckor', '1-3 månader', '3-6 månader', '6-12 månader', 'Mer än ett år', 'Det spelar ingen roll'], weight: 1.6 },
+      { key: 'urgency_level', text: 'Hur akut känns denna förändring för dig?', type: 'slider', min: 1, max: 10, weight: 1.4 },
+      
+      // Resurser och stöd
+      { key: 'available_resources', text: 'Vilka resurser, verktyg eller hjälp har du tillgång till?', type: 'text', weight: 1.3 },
+      { key: 'support_system', text: 'Vem i din omgivning kan stötta dig i denna förändring?', type: 'text', weight: 1.2 },
+      { key: 'motivation_level', text: 'Hur motiverad känner du dig just nu (1-10)?', type: 'slider', min: 1, max: 10, weight: 1.5 },
+      { key: 'confidence_level', text: 'Hur säker är du på att du kan lyckas med denna förändring (1-10)?', type: 'slider', min: 1, max: 10, weight: 1.4 },
+      
+      // Djupare förståelse
+      { key: 'emotional_connection', text: 'Vilka känslor väcker denna förändring hos dig?', type: 'text', weight: 1.1 },
+      { key: 'past_successes', text: 'Berätta om en liknande förändring du lyckats med tidigare', type: 'text', weight: 1.2 },
+      { key: 'biggest_fear', text: 'Vad är du mest rädd för när det gäller denna förändring?', type: 'text', weight: 1.1 },
+      { key: 'milestone_preferences', text: 'Föredrar du små dagliga framsteg eller större veckovisa mål?', type: 'multiple_choice', options: ['Små dagliga steg', 'Större veckovisa mål', 'En blandning av båda', 'Låt coachen bestämma'], weight: 1.3 },
+      
+      // Kommentarer och tillägg
+      { key: 'additional_context', text: 'Finns det något annat viktigt att veta om din situation eller detta mål?', type: 'text', weight: 1.0 },
+      { key: 'preferred_approach', text: 'Vilken typ av stöd eller approach tror du skulle fungera bäst för dig?', type: 'text', weight: 1.1 }
+    ],
+    scoreCalculation: (answers: Record<string, any>) => {
+      // För "Öppet spår" är scoring mer kvalitativ och baserad på flera faktorer
+      let totalScore = 0;
+      let components = 0;
+      
+      // Målklarhet (30% av total score)
+      const goalClarity = (answers.change_goal?.length > 10 ? 7 : 3) + 
+                         (answers.goal_importance?.length > 20 ? 7 : 3) + 
+                         (answers.success_vision?.length > 30 ? 8 : 4);
+      totalScore += (goalClarity / 22) * 3;
+      components++;
+      
+      // Motivation och självförtroende (25% av total score)
+      const motivationScore = ((answers.motivation_level || 5) + (answers.confidence_level || 5)) / 2;
+      totalScore += (motivationScore / 10) * 2.5;
+      components++;
+      
+      // Kapacitet och realism (25% av total score)
+      const hasRealisticTimeframe = answers.total_timeframe && answers.daily_time_commitment;
+      const urgencyBalance = answers.urgency_level >= 3 && answers.urgency_level <= 8; // Lagom urgency
+      const capacityScore = (hasRealisticTimeframe ? 6 : 3) + (urgencyBalance ? 4 : 2);
+      totalScore += (capacityScore / 10) * 2.5;
+      components++;
+      
+      // Förberedelse och insikt (20% av total score)
+      const preparationScore = (answers.current_situation?.length > 15 ? 5 : 2) + 
+                              (answers.main_challenges?.length > 15 ? 5 : 2);
+      totalScore += (preparationScore / 10) * 2;
+      components++;
+      
+      return components > 0 ? Math.round((totalScore / components) * 10) / 10 : 5;
+    },
+    insightGeneration: (answers: Record<string, any>, score: number) => {
+      const insights: Record<string, any> = {
+        overallScore: score,
+        changeGoal: answers.change_goal || '',
+        timeCommitment: answers.daily_time_commitment || '',
+        timeframe: answers.total_timeframe || '',
+        motivationLevel: answers.motivation_level || 5,
+        confidenceLevel: answers.confidence_level || 5,
+        urgencyLevel: answers.urgency_level || 5,
+        mainChallenges: answers.main_challenges || '',
+        supportSystem: answers.support_system || '',
+        readinessLevel: 'moderate',
+        recommendedApproach: '',
+        keyFocusAreas: []
+      };
+      
+      // Bedöm beredskap baserat på score och svar
+      if (score >= 7.5 && insights.motivationLevel >= 7 && insights.confidenceLevel >= 6) {
+        insights.readinessLevel = 'high';
+        insights.recommendedApproach = 'intensiv';
+      } else if (score >= 5.5 && insights.motivationLevel >= 5) {
+        insights.readinessLevel = 'moderate';
+        insights.recommendedApproach = 'gradual';
+      } else {
+        insights.readinessLevel = 'preparation_needed';
+        insights.recommendedApproach = 'foundational';
+      }
+      
+      // Identifiera nyckelområden baserat på svar
+      if (insights.motivationLevel >= 8) insights.keyFocusAreas.push('high_motivation');
+      if (insights.confidenceLevel <= 4) insights.keyFocusAreas.push('confidence_building');
+      if (insights.urgencyLevel >= 8) insights.keyFocusAreas.push('urgent_action');
+      if (answers.previous_attempts?.length > 20) insights.keyFocusAreas.push('learning_from_past');
+      if (answers.support_system?.length > 10) insights.keyFocusAreas.push('strong_support');
       
       return insights;
     }

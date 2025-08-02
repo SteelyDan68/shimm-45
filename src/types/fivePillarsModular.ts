@@ -1,4 +1,4 @@
-export type PillarKey = 'self_care' | 'skills' | 'talent' | 'brand' | 'economy';
+export type PillarKey = 'self_care' | 'skills' | 'talent' | 'brand' | 'economy' | 'open_track';
 
 export interface PillarDefinition {
   id: string;
