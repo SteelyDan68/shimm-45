@@ -320,8 +320,11 @@ export const getQuickActionsForRole = (roles: string[]) => {
 };
 
 export const getDefaultRouteForRole = (roles: string[]): string => {
-  // Prioritera roller: superadmin > admin > coach > client
-  if (roles.includes('superadmin') || roles.includes('admin')) {
+  // HIERARKISK ROLLPRIORITERING med SUPERADMIN GOD MODE
+  if (roles.includes('superadmin')) {
+    return NAVIGATION_ROUTES.DASHBOARD; // Superadmin sees main admin dashboard
+  }
+  if (roles.includes('admin')) {
     return NAVIGATION_ROUTES.DASHBOARD;
   }
   if (roles.includes('coach')) {

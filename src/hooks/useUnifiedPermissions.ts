@@ -15,7 +15,16 @@ export interface PermissionCheck {
 // Define all system permissions
 const PERMISSIONS: Record<AppRole, Permission[]> = {
   superadmin: [
-    { action: '*', resource: '*' }, // Full access to everything
+    { action: '*', resource: '*' }, // COMPLETE GOD MODE ACCESS TO EVERYTHING
+    { action: 'override', resource: 'security' }, // Can override any security restriction
+    { action: 'manage', resource: 'system_core' }, // Core system management
+    { action: 'access', resource: 'debug_mode' }, // Debug and diagnostic access
+    { action: 'control', resource: 'ai_systems' }, // Full AI system control
+    { action: 'manage', resource: 'user_impersonation' }, // Can act as any user
+    { action: 'access', resource: 'system_logs' }, // Full system log access
+    { action: 'modify', resource: 'database_structure' }, // Can modify DB directly
+    { action: 'control', resource: 'automation' }, // Full automation control
+    { action: 'access', resource: 'financial_data' }, // All financial/billing data
   ],
   admin: [
     { action: 'read', resource: 'users' },

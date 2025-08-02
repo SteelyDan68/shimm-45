@@ -156,6 +156,26 @@ export const HabitFormationCenter: React.FC<HabitFormationCenterProps> = ({ clie
     return Math.min((habit.current_repetitions / habit.repetition_goal) * 100, 100);
   };
 
+  const getNeuroplasticityPhase = (progress: number) => {
+    if (progress < 20) return { phase: 'Initiering', color: 'red', description: 'Nya neurala vägar bildas' };
+    if (progress < 40) return { phase: 'Etablering', color: 'orange', description: 'Förstärkning av kopplingar' };
+    if (progress < 66) return { phase: 'Stabilisering', color: 'yellow', description: 'Myelinisering påbörjas' };
+    if (progress < 90) return { phase: 'Automatisering', color: 'blue', description: 'Stark neural pathway' };
+    return { phase: 'Neuroplasticitet uppnådd', color: 'green', description: 'Permanent neural förändring' };
+  };
+
+  const getOptimalChallengeLevel = (habit: any) => {
+    const successRate = habit.success_rate;
+    const currentDifficulty = habit.difficulty;
+    
+    if (successRate > 85 && currentDifficulty !== 'challenging') {
+      return 'Redo för nästa nivå! Öka utmaningen för optimal neuroplasticitet.';
+    } else if (successRate < 70 && currentDifficulty !== 'micro') {
+      return 'Minska utmaningen för att bibehålla konsistens och neurala förstärkningar.';
+    }
+    return 'Perfekt balans för neuroplasticitet-utveckling!';
+  };
+
   const getCategoryIcon = (category: HabitCategory) => {
     switch (category) {
       case 'self_care': return '💚';
@@ -295,8 +315,16 @@ export const HabitFormationCenter: React.FC<HabitFormationCenterProps> = ({ clie
                       <span>{Math.round(getNeuroplasticityProgress(habit))}%</span>
                     </div>
                     <Progress value={getNeuroplasticityProgress(habit)} className="h-2" />
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {habit.current_repetitions} av {habit.repetition_goal} repetitioner
+                    <div className="flex justify-between items-center mt-1">
+                      <div className="text-xs text-muted-foreground">
+                        {habit.current_repetitions} av {habit.repetition_goal} repetitioner
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {getNeuroplasticityPhase(getNeuroplasticityProgress(habit)).phase}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {getNeuroplasticityPhase(getNeuroplasticityProgress(habit)).description}
                     </div>
                   </div>
                   
@@ -309,14 +337,31 @@ export const HabitFormationCenter: React.FC<HabitFormationCenterProps> = ({ clie
                     <strong>Nuvarande åtagande:</strong> {habit.current_commitment}
                   </div>
 
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setSelectedHabitId(habit.id)}
-                    className="w-full"
-                  >
-                    Genomför nu
-                  </Button>
+                  {/* Neuroplasticity Optimization Hint */}
+                  <div className="p-2 bg-blue-50 rounded text-xs text-blue-800">
+                    💡 {getOptimalChallengeLevel(habit)}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedHabitId(habit.id)}
+                      className="flex-1"
+                    >
+                      Genomför nu
+                    </Button>
+                    {habit.success_rate > 85 && (
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={() => console.log('Level up habit:', habit.id)}
+                      >
+                        📈 Nivå upp
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}

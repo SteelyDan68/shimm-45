@@ -12,7 +12,8 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  BarChart3
 } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { format, addDays, startOfWeek, endOfWeek, isSameDay, isToday, isPast, isFuture } from 'date-fns';
@@ -114,12 +115,36 @@ export const CalendarModule = ({
 
   const dueSoonEvents = useMemo(() => {
     const tomorrow = addDays(new Date(), 1);
+    const dayAfterTomorrow = addDays(new Date(), 2);
     return events.filter(event => 
       event.type === 'task' && 
       event.status !== 'completed' && 
-      (isToday(event.date) || isSameDay(event.date, tomorrow))
+      (isToday(event.date) || 
+       isSameDay(event.date, tomorrow) ||
+       isSameDay(event.date, dayAfterTomorrow))
     );
   }, [events]);
+
+  // Enhanced calendar analytics
+  const calendarStats = useMemo(() => {
+    const thisWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const thisWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+    
+    const thisWeekEvents = events.filter(event => 
+      event.date >= thisWeekStart && event.date <= thisWeekEnd
+    );
+
+    return {
+      totalEvents: events.length,
+      thisWeekEvents: thisWeekEvents.length,
+      completedTasks: events.filter(e => e.type === 'task' && e.status === 'completed').length,
+      upcomingDeadlines: dueSoonEvents.length,
+      overdueItems: overdueEvents.length,
+      efficiency: events.length > 0 
+        ? Math.round((events.filter(e => e.type === 'task' && e.status === 'completed').length / events.filter(e => e.type === 'task').length) * 100) 
+        : 0
+    };
+  }, [events, dueSoonEvents, overdueEvents]);
 
   // Load calendar data
   useEffect(() => {
@@ -267,6 +292,44 @@ export const CalendarModule = ({
 
   return (
     <div className="space-y-6">
+      {/* Enhanced Calendar Statistics */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Kalenderöversikt
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{calendarStats.totalEvents}</div>
+              <div className="text-xs text-muted-foreground">Totala händelser</div>
+            </div>
+            <div className="p-3 bg-green-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">{calendarStats.thisWeekEvents}</div>
+              <div className="text-xs text-muted-foreground">Denna vecka</div>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">{calendarStats.completedTasks}</div>
+              <div className="text-xs text-muted-foreground">Slutförda</div>
+            </div>
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <div className="text-2xl font-bold text-orange-600">{calendarStats.upcomingDeadlines}</div>
+              <div className="text-xs text-muted-foreground">Kommande</div>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg">
+              <div className="text-2xl font-bold text-red-600">{calendarStats.overdueItems}</div>
+              <div className="text-xs text-muted-foreground">Försenade</div>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-600">{calendarStats.efficiency}%</div>
+              <div className="text-xs text-muted-foreground">Effektivitet</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Header */}
       <Card>
         <CardHeader>
@@ -274,6 +337,9 @@ export const CalendarModule = ({
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               {isCoachView ? `Kalender - ${clientName}` : 'Min planering'}
+              <Badge variant="outline" className="ml-2">
+                {calendarStats.totalEvents} händelser
+              </Badge>
             </CardTitle>
             
             <div className="flex items-center gap-2">
