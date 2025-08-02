@@ -32,6 +32,13 @@ export interface AnalyticsData {
   // Stefan Interactions
   stefanInteractions: number;
   aiRecommendationsFollowed: number;
+  
+  // Summary for compatibility
+  summary?: {
+    totalUsers: number;
+    activeUsers: number;
+    completionRate: number;
+  };
 }
 
 export interface ActivityPoint {
@@ -68,13 +75,67 @@ export interface PerformanceMetrics {
 }
 
 // Legacy compatibility exports
-export interface BarrierTrend { trend: string; count: number; }
-export interface FunctionalResourceTrend { resource: string; usage: number; }
-export interface ProblemArea { area: string; severity: number; }
-export interface SentimentTrend { date: string; sentiment: number; }
-export interface TaskProgress { completed: number; total: number; }
-export interface VelocityPoint { date: string; velocity: number; }
-export interface AnalyticsFilters { timeRange: string; category: string; }
+export interface BarrierTrend { 
+  trend: string; 
+  count: number; 
+  date: string;
+  types: {
+    technical: number;
+    process: number;
+    communication: number;
+    resource: number;
+    other: number;
+  };
+}
+
+export interface FunctionalResourceTrend { 
+  resource: string; 
+  usage: number;
+  functionalAccessCount: number;
+  subjectiveOpportunitiesAvg: number;
+  hasRegularSupport: boolean;
+  relationshipComments: string[];
+}
+
+export interface ProblemArea { 
+  area: string; 
+  severity: number;
+  count: number;
+  trend: 'up' | 'down' | 'stable';
+  percentage: number;
+}
+
+export interface SentimentTrend { 
+  date: string; 
+  sentiment: number;
+  average: number;
+  positive: number;
+  neutral: number;
+  negative: number;
+}
+
+export interface TaskProgress { 
+  completed: number; 
+  total: number;
+  created: number;
+  pending: number;
+  date: string;
+}
+
+export interface VelocityPoint { 
+  date: string; 
+  velocity: number;
+  score: number;
+  rank: number;
+}
+
+export interface AnalyticsFilters { 
+  timeRange: string; 
+  category: string;
+  period: string;
+  startDate: string;
+  endDate: string;
+}
 
 export const useAnalytics = () => {
   const { user } = useAuth();
