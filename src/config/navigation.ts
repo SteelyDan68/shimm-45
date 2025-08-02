@@ -158,12 +158,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach", "client"]
       },
       {
-        title: "Samarbete",
-        url: NAVIGATION_ROUTES.COLLABORATION,
-        icon: Users2,
-        roles: ["superadmin", "admin", "coach", "client"]
-      },
-      {
         title: "AI Coaching",
         url: NAVIGATION_ROUTES.AI_COACHING,
         icon: Brain,
@@ -272,13 +266,6 @@ export const QUICK_ACTIONS = {
       url: `${NAVIGATION_ROUTES.TASKS}?action=create`,
       variant: "outline" as const
     },
-    {
-      title: "Schemalägg möte",
-      description: "Boka tid med klienter", 
-      icon: Calendar,
-      url: `${NAVIGATION_ROUTES.CALENDAR}?action=schedule`,
-      variant: "outline" as const
-    }
   ],
   client: [
     {

@@ -16,7 +16,8 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
-  Brain
+  Brain,
+  Route
 } from 'lucide-react';
 
 // Huvudpolicy från UX Expert: Pedagogisk progression och tydlig informationsarkitektur
@@ -68,6 +69,14 @@ export const SixPillars = () => {
       color: '#10B981',
       description: 'Din finansiella trygghet och förmåga att skapa värde.',
       benefits: ['Ekonomisk frihet', 'Säkerhet', 'Investeringsmöjligheter']
+    },
+    {
+      key: 'open_track',
+      name: 'Öppna spåret',
+      icon: <Route className="h-8 w-8" />,
+      color: '#EC4899',
+      description: 'Din personliga utvecklingsresa med fritt valbara mål och förändringar.',
+      benefits: ['Flexibel utveckling', 'Personliga mål', 'Egen takt']
     }
   ];
 
@@ -129,16 +138,26 @@ export const SixPillars = () => {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">Fördelar:</h4>
-                  <ul className="space-y-1">
-                    {pillar.benefits.map((benefit, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
-                        <span>{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700">Fördelar:</h4>
+                    <ul className="space-y-1">
+                      {pillar.benefits.map((benefit, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                          <span>{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Button 
+                    className="w-full mt-4"
+                    style={{ backgroundColor: pillar.color }}
+                    onClick={() => navigate('/client-dashboard', { state: { activatePillar: pillar.key } })}
+                  >
+                    Aktivera denna pelare
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>

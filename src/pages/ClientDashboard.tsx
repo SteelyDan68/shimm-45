@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { PillarDashboard } from '@/components/SixPillars/PillarDashboard';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
@@ -55,6 +55,10 @@ export const ClientDashboard = () => {
   const { getExtendedProfile } = useExtendedProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extract activate pillar from navigation state
+  const activatePillar = location.state?.activatePillar;
   
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
   const [extendedProfile, setExtendedProfile] = useState<ExtendedProfileData | null>(null);
@@ -427,6 +431,7 @@ export const ClientDashboard = () => {
             userId={clientProfile.id} 
             userName={clientProfile.name} 
             isCoachView={false}
+            initialActivatePillar={activatePillar}
           />
         </TabsContent>
 

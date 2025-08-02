@@ -1,0 +1,123 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    )
+
+    const authHeader = req.headers.get('Authorization')!
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''))
+    
+    if (authError || !user) {
+      throw new Error('Unauthorized')
+    }
+
+    const { receiverId, content, subject, messageType = 'text' } = await req.json()
+
+    if (!receiverId || !content) {
+      throw new Error('Missing required fields: receiverId and content')
+    }
+
+    // Insert the message
+    const { data: message, error: insertError } = await supabaseClient
+      .from('messages')
+      .insert({
+        sender_id: user.id,
+        receiver_id: receiverId,
+        content,
+        subject,
+        message_type: messageType,
+        is_read: false
+      })
+      .select(`
+        *,
+        sender_profile:profiles!messages_sender_id_fkey(first_name, last_name, email),
+        receiver_profile:profiles!messages_receiver_id_fkey(first_name, last_name, email)
+      `)
+      .single()
+
+    if (insertError) throw insertError
+
+    // Send real-time notification to receiver
+    await supabaseClient
+      .channel('messages')
+      .send({
+        type: 'broadcast',
+        event: 'new_message',
+        payload: {
+          message,
+          sender_id: user.id,
+          receiver_id: receiverId
+        }
+      })
+
+    // Get receiver's notification preferences
+    const { data: receiverPrefs } = await supabaseClient
+      .from('message_preferences')
+      .select('email_notifications, internal_notifications')
+      .eq('user_id', receiverId)
+      .single()
+
+    // Send email notification if enabled
+    if (receiverPrefs?.email_notifications !== false) {
+      const { data: receiverProfile } = await supabaseClient
+        .from('profiles')
+        .select('email, first_name, last_name')
+        .eq('id', receiverId)
+        .single()
+
+      if (receiverProfile?.email) {
+        const { data: senderProfile } = await supabaseClient
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user.id)
+          .single()
+
+        const senderName = senderProfile 
+          ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() || user.email
+          : user.email
+
+        try {
+          await supabaseClient.functions.invoke('send-message-notification', {
+            body: {
+              receiverEmail: receiverProfile.email,
+              senderName,
+              subject: subject || 'Nytt meddelande',
+              messageContent: content,
+            }
+          })
+        } catch (emailError) {
+          console.error('Failed to send email notification:', emailError)
+        }
+      }
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: message
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+
+  } catch (error) {
+    console.error('Error in send-realtime-message:', error)
+    return new Response(JSON.stringify({
+      error: error.message
+    }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+})

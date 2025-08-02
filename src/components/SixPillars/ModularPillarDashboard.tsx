@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,19 +17,22 @@ interface ModularPillarDashboardProps {
   userId: string;
   userName: string;
   isCoachView?: boolean;
+  initialActivatePillar?: PillarKey;
 }
 
 export const ModularPillarDashboard = ({ 
   userId, 
   userName, 
-  isCoachView = false 
+  isCoachView = false,
+  initialActivatePillar
 }: ModularPillarDashboardProps) => {
   const { 
     pillarDefinitions, 
     getActivatedPillars, 
     getLatestAssessment, 
     generateHeatmapData,
-    refreshData
+    refreshData,
+    activatePillar
   } = useSixPillarsModular(userId);
   
   const [selectedPillar, setSelectedPillar] = useState<PillarKey | null>(null);
@@ -42,6 +45,29 @@ export const ModularPillarDashboard = ({
 
   const activatedPillars = getActivatedPillars();
   const heatmapData = generateHeatmapData();
+
+  // Handle initial pillar activation
+  useEffect(() => {
+    if (initialActivatePillar && activatePillar) {
+      const handleActivation = async () => {
+        try {
+          await activatePillar(initialActivatePillar);
+          // Auto-start assessment after activation
+          setSelectedPillar(initialActivatePillar);
+        } catch (error) {
+          console.error('Failed to activate pillar:', error);
+        }
+      };
+      
+      // Check if pillar is not already activated
+      if (!activatedPillars.includes(initialActivatePillar)) {
+        handleActivation();
+      } else {
+        // If already activated, just start assessment
+        setSelectedPillar(initialActivatePillar);
+      }
+    }
+  }, [initialActivatePillar, activatePillar, activatedPillars]);
 
   // If in assessment mode
   if (selectedPillar) {

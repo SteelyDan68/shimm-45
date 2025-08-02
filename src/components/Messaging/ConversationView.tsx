@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { formatDistanceToNow, format, isSameDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { HelpTooltip } from '@/components/HelpTooltip';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ConversationViewProps {
   recipientId: string;
@@ -26,8 +27,11 @@ export const ConversationView = ({
 }: ConversationViewProps) => {
   const [newMessage, setNewMessage] = useState('');
   const [conversationMessages, setConversationMessages] = useState<Message[]>([]);
-  const [isOnline] = useState(Math.random() > 0.5); // Mock online status
+  const [isOnline, setIsOnline] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [lastSeen, setLastSeen] = useState<Date | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { user } = useAuth();
   const { messages, sendMessage, markAsRead } = useMessages();
 
@@ -47,6 +51,27 @@ export const ConversationView = ({
       }
     });
   }, [messages, recipientId, user?.id, markAsRead]);
+
+  // Set up presence tracking
+  useEffect(() => {
+    if (!user) return;
+
+    // Mock online status and last seen for demo
+    setIsOnline(Math.random() > 0.3);
+    setLastSeen(new Date(Date.now() - Math.random() * 3600000)); // Random time within last hour
+
+    // In a real app, you would track presence via Supabase realtime
+    const presenceChannel = supabase
+      .channel(`presence-${recipientId}`)
+      .on('presence', { event: 'sync' }, () => {
+        // Handle presence updates
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+    };
+  }, [recipientId, user]);
 
   // Auto scroll to bottom
   useEffect(() => {

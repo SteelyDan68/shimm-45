@@ -247,8 +247,8 @@ export const useMessages = () => {
       fetchPreferences();
       setLoading(false);
 
-      // Set up real-time subscription
-      const channel = supabase
+      // Set up real-time subscription for database changes
+      const dbChannel = supabase
         .channel('messages-changes')
         .on(
           'postgres_changes',
@@ -264,8 +264,19 @@ export const useMessages = () => {
         )
         .subscribe();
 
+      // Set up real-time subscription for instant messaging
+      const realtimeChannel = supabase
+        .channel('instant-messages')
+        .on('broadcast', { event: 'new_message' }, (payload) => {
+          if (payload.payload.receiver_id === user.id || payload.payload.sender_id === user.id) {
+            fetchMessages(); // Refresh messages when receiving real-time update
+          }
+        })
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(dbChannel);
+        supabase.removeChannel(realtimeChannel);
       };
     }
   }, [user]);
