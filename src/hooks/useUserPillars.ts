@@ -83,7 +83,13 @@ export const useUserPillars = (userId: string) => {
   };
 
   useEffect(() => {
-    fetchData();
+    // Only fetch when userId is available
+    if (userId) {
+      console.log('useUserPillars: Triggering fetchData for userId:', userId);
+      fetchData();
+    } else {
+      console.log('useUserPillars: Waiting for userId');
+    }
   }, [userId]);
 
   const activatePillar = async (pillarKey: PillarKey) => {

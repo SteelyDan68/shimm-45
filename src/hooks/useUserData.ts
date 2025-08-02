@@ -106,7 +106,13 @@ export const useUserData = (userId?: string) => {
   };
 
   useEffect(() => {
-    fetchData();
+    // Only fetch when targetUserId is available
+    if (targetUserId) {
+      console.log('useUserData: Triggering fetchData for targetUserId:', targetUserId);
+      fetchData();
+    } else {
+      console.log('useUserData: Waiting for targetUserId');
+    }
   }, [targetUserId]);
 
   const updateProfile = async (updates: Partial<UserProfile>) => {

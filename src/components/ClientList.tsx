@@ -128,8 +128,8 @@ export const ClientList = ({ refreshTrigger }: ClientListProps) => {
             <CardContent className="space-y-2">
               {client.email && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  {client.email}
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span className="truncate break-all">{client.email}</span>
                 </div>
               )}
               {client.phone && (

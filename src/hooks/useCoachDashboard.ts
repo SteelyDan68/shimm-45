@@ -59,7 +59,7 @@ export const useCoachDashboard = () => {
   const [activeFilter, setActiveFilter] = useState<DashboardFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('priority');
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const { getCurrentUserClients } = useCoachClientRelationships();
   const { clients: unifiedClients } = useUnifiedClients();
 
@@ -334,10 +334,18 @@ export const useCoachDashboard = () => {
   };
 
   useEffect(() => {
-    if (user && unifiedClients) {
+    // Wait for user, roles, and clients before processing
+    if (user && hasRole && unifiedClients && unifiedClients.length >= 0) {
+      console.log('useCoachDashboard: Triggering fetchClientsWithPriority');
       fetchClientsWithPriority();
+    } else {
+      console.log('useCoachDashboard: Waiting for dependencies', { 
+        user: !!user, 
+        hasRole: !!hasRole, 
+        unifiedClients: unifiedClients?.length 
+      });
     }
-  }, [user, unifiedClients]);
+  }, [user, unifiedClients, hasRole]);
 
   useEffect(() => {
     applyFilters();

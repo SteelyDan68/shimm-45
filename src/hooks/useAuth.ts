@@ -278,7 +278,10 @@ export const useAuth = () => {
 
   const hasRole = useCallback((role: AppRole): boolean => {
     const result = roles.includes(role);
-    console.log(`hasRole(${role}): ${result}, current roles:`, roles);
+    // Only log if roles have been loaded to reduce noise
+    if (roles.length > 0) {
+      console.log(`hasRole(${role}): ${result}, current roles:`, roles);
+    }
     return result;
   }, [roles]);
 
