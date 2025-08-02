@@ -46,6 +46,7 @@ export const NAVIGATION_ROUTES = {
   EDIT_PROFILE: "/edit-profile",
   
   // Features
+  FIVE_PILLARS: "/five-pillars",
   MESSAGES: "/messages",
   TASKS: "/tasks", 
   CALENDAR: "/calendar",
@@ -120,6 +121,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     title: "Verktyg",
     roles: ["superadmin", "admin", "coach", "client"],
     items: [
+      {
+        title: "Five Pillars",
+        url: NAVIGATION_ROUTES.FIVE_PILLARS,
+        icon: TrendingUp,
+        roles: ["client", "coach"]
+      },
       {
         title: "Mina Uppgifter",
         url: NAVIGATION_ROUTES.TASKS,
@@ -275,11 +282,18 @@ export const QUICK_ACTIONS = {
   ],
   client: [
     {
+      title: "Five Pillars",
+      description: "Starta din utvecklingsresa",
+      icon: TrendingUp,
+      url: NAVIGATION_ROUTES.FIVE_PILLARS,
+      variant: "default" as const
+    },
+    {
       title: "Genomför bedömning",
       description: "Uppdatera din utveckling",
       icon: ClipboardList,
       url: NAVIGATION_ROUTES.ONBOARDING,
-      variant: "default" as const
+      variant: "secondary" as const
     },
     {
       title: "Stefan AI Hjälp",

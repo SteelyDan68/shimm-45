@@ -204,6 +204,40 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
             </CardContent>
           </Card>
 
+          {/* Informationssektion om Five Pillars */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Om Five Pillars systemet
+                <HelpTooltip content="Five Pillars är ett beprövat system för hållbar utveckling inom fem kritiska livsområden." />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Five Pillars är vårt holistiska utvecklingssystem som balanserar fem grundpelare: 
+                <strong> Självomvårdnad, Kompetenser, Talang, Varumärke och Ekonomi</strong>. 
+                Varje pelare representerar ett kritiskt område för din personliga och professionella utveckling.
+              </p>
+              
+              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Redo att börja?</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Gå till Five Pillars Dashboard för att läsa mer om systemet, 
+                    göra dina första bedömningar och aktivera dina utvecklingsområden.
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => window.location.href = '/five-pillars'}
+                  className="shrink-0"
+                >
+                  Öppna Five Pillars
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Pillar Selector */}
           <PillarSelector 
             userId={userId}

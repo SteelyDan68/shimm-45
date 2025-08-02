@@ -254,7 +254,10 @@ export const PillarSelector = ({
             <p className="text-muted-foreground mb-4">
               Du behöver först aktivera och bedöma dina pillars innan du kan starta utvecklingsresor.
             </p>
-            <Button variant="outline">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/five-pillars'}
+            >
               Gå till Five Pillars Dashboard
             </Button>
           </CardContent>
