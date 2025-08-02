@@ -36,6 +36,7 @@ import { CoachDashboardPage } from "./pages/CoachDashboard";
 import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
+import { IntelligenceHubPage } from "./pages/IntelligenceHub";
 import { TasksPage } from "./pages/Tasks";
 import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChat";
@@ -88,8 +89,9 @@ const AppRoutes = () => {
                <Route path="/ai-coaching" element={<AICoaching />} />
                <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
                <Route path="/mobile" element={<MobileOptimization />} />
-              <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
-              <Route path="/intelligence/:userId" element={<Intelligence />} />
+               <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
+               <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
+               <Route path="/intelligence/:userId" element={<Intelligence />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
               <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
