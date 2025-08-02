@@ -23,7 +23,7 @@ export const useUnifiedClients = () => {
   const [clients, setClients] = useState<UnifiedClient[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, roles } = useAuth();
 
   const fetchClients = async () => {
     try {
@@ -155,10 +155,14 @@ export const useUnifiedClients = () => {
   };
 
   useEffect(() => {
-    if (user) { // Only fetch when user is available
+    // Only fetch when user is available AND roles have been loaded
+    if (user && roles && roles.length > 0) {
+      console.log('useUnifiedClients: Triggering fetchClients because user and roles are available');
       fetchClients();
+    } else {
+      console.log('useUnifiedClients: Waiting for user and roles', { user: !!user, roles });
     }
-  }, [user]);
+  }, [user, roles]); // Also depend on roles, not just user
 
   return {
     clients,
