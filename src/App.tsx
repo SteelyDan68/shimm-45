@@ -15,6 +15,7 @@ import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoun
 import { ErrorProvider } from "@/hooks/useErrorReporting";
 import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 
 import { ClientProfile } from "./pages/ClientProfile";
 import { UserProfile } from "./pages/UserProfile";
@@ -82,6 +83,7 @@ const AppRoutes = () => {
               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/user/:userId" element={<UserCrmProfile />} />
               <Route path="/search" element={<GlobalSearchPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
               <Route path="/intelligence/:userId" element={<Intelligence />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
