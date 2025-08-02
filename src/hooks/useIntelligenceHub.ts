@@ -161,8 +161,8 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
         milestones: [] // Could be populated from coaching_milestones table
       };
 
-      // Extract social profiles from actual profile data (handles)
-      const socialProfiles = [
+      // Extract social profiles from actual profile data (handles) and enrich with cache data
+      const baseSocialProfiles = [
         { platform: 'Instagram', handle: profile.instagram_handle, verified: false },
         { platform: 'YouTube', handle: profile.youtube_handle, verified: false },
         { platform: 'TikTok', handle: profile.tiktok_handle, verified: false },
@@ -170,6 +170,29 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
         { platform: 'Facebook', handle: profile.facebook_handle, verified: false },
         { platform: 'Snapchat', handle: profile.snapchat_handle, verified: false }
       ].filter(p => p.handle); // Only include platforms with handles
+      
+      // Enrich with cached social metrics data
+      const socialProfiles = baseSocialProfiles.map(baseProfile => {
+        const cachedData = socialItems.find(item => 
+          item.source?.toLowerCase() === baseProfile.platform.toLowerCase() ||
+          item.platform?.toLowerCase() === baseProfile.platform.toLowerCase()
+        );
+        
+        if (cachedData && cachedData.data) {
+          const data = typeof cachedData.data === 'object' && !Array.isArray(cachedData.data) ? cachedData.data as any : {};
+          return {
+            ...baseProfile,
+            followers: (data.follower_count as number) || (data.public_metrics as any)?.followers || 0,
+            following: (data.following_count as number) || (data.public_metrics as any)?.following || 0,
+            posts: (data.post_count as number) || (data.public_metrics as any)?.posts || 0,
+            engagement: (data.engagement_rate as number) || 0,
+            verified: (data.verified as boolean) || false,
+            url: (data.external_url as string) || undefined
+          };
+        }
+        
+        return baseProfile;
+      });
 
       // Extract news mentions
       const newsMentions = newsItems.map(item => ({

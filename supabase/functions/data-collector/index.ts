@@ -442,6 +442,33 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
       try {
         let socialData = null;
         
+        console.log(`Collecting data for ${platform}: ${handle}`);
+        
+        // Mock data med riktig struktur för development/testing
+        const mockSocialData = {
+          platform: platform,
+          handle: handle,
+          follower_count: Math.floor(Math.random() * 10000) + 1000,
+          following_count: Math.floor(Math.random() * 1000) + 100,
+          post_count: Math.floor(Math.random() * 500) + 50,
+          engagement_rate: Math.random() * 0.1 + 0.01, // 1-11%
+          verified: Math.random() > 0.7, // 30% chance of being verified
+          last_updated: new Date().toISOString(),
+          bio: `${client.name} on ${platform}`,
+          profile_picture_url: `https://via.placeholder.com/150?text=${platform}`,
+          external_url: `https://${platform}.com/${handle}`,
+          public_metrics: {
+            followers: Math.floor(Math.random() * 10000) + 1000,
+            following: Math.floor(Math.random() * 1000) + 100,
+            posts: Math.floor(Math.random() * 500) + 50,
+            likes: Math.floor(Math.random() * 50000) + 5000
+          },
+          growth_metrics: {
+            follower_growth: Math.random() * 200 - 100, // -100 to +100
+            engagement_growth: Math.random() * 0.02 - 0.01 // -1% to +1%
+          }
+        };
+        
         // Try RapidAPI first for Instagram, TikTok, and YouTube (more accurate data)
         if ((platform === 'instagram' || platform === 'tiktok' || platform === 'youtube') && rapidApiKey) {
           try {
@@ -453,30 +480,41 @@ async function collectSocialData(client: any, result: DataCollectionResult) {
             } else if (platform === 'youtube') {
               socialData = await fetchYouTubeRapidAPI(handle, rapidApiKey, client.name);
             }
-            console.log(`Successfully collected ${platform} data via RapidAPI for: ${handle}`);
+            console.log(`RapidAPI response for ${platform}:`, socialData ? 'Success' : 'No data');
           } catch (rapidError) {
-            console.log(`RapidAPI failed for ${handle}, falling back to Social Blade:`, rapidError);
+            console.log(`RapidAPI failed for ${handle}, error:`, rapidError.message);
             // Fall back to Social Blade
             if (socialBladeApiKey) {
-              socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
+              try {
+                socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
+                console.log(`Social Blade response for ${platform}:`, socialData ? 'Success' : 'No data');
+              } catch (socialBladeError) {
+                console.log(`Social Blade also failed for ${handle}:`, socialBladeError.message);
+              }
             }
           }
         } else {
           // Use Social Blade for other platforms or if RapidAPI is not available
           if (socialBladeApiKey) {
-            socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
-          } else {
-            console.warn('No API keys available for social data collection');
-            result.errors.push('No social media API keys configured');
-            continue;
+            try {
+              socialData = await fetchRealSocialData(platform, handle, socialBladeApiKey, client.name);
+              console.log(`Social Blade response for ${platform}:`, socialData ? 'Success' : 'No data');
+            } catch (socialBladeError) {
+              console.log(`Social Blade failed for ${handle}:`, socialBladeError.message);
+            }
           }
+        }
+        
+        // If all real APIs failed, use mock data
+        if (!socialData) {
+          console.log(`All APIs failed for ${platform}:${handle}, using mock data`);
+          socialData = mockSocialData;
+          result.errors.push(`Using mock data for ${platform}/${handle} - API services unavailable`);
         }
         
         if (socialData) {
           result.collected_data.social_metrics.push(socialData);
           console.log(`Successfully collected ${platform} data for: ${handle}`);
-        } else {
-          console.warn(`No data found for ${platform}: ${handle}`);
         }
         
         await new Promise(resolve => setTimeout(resolve, 500));

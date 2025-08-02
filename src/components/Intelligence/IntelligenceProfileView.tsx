@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { IntelligenceProfile } from '@/types/intelligenceHub';
 import { IntelligenceDataCollector } from './IntelligenceDataCollector';
+import { IntelligenceNewsCard } from './IntelligenceNewsCard';
+import { IntelligenceSocialCard } from './IntelligenceSocialCard';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -265,92 +267,26 @@ export function IntelligenceProfileView({
             </Card>
 
             {/* News Mentions */}
-            {profile.newsMentions.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Share2 className="h-5 w-5 text-green-600" />
-                    Senaste Nyhetsmentioner
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {profile.newsMentions.slice(0, 3).map(mention => (
-                      <div key={mention.id} className="p-3 border rounded-lg">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-medium">{mention.title}</h4>
-                          <Badge variant="outline" className={
-                            mention.sentiment === 'positive' ? 'bg-green-100 text-green-800' :
-                            mention.sentiment === 'negative' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }>
-                            {mention.sentiment}
-                          </Badge>
-                        </div>
-                        {mention.summary && (
-                          <p className="text-sm text-muted-foreground mb-2">{mention.summary}</p>
-                        )}
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{mention.source}</span>
-                          <span>{formatDistanceToNow(mention.timestamp, { addSuffix: true, locale: sv })}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <IntelligenceNewsCard 
+              newsMentions={profile.newsMentions}
+              title="Senaste Nyhetsmentioner"
+              maxItems={3}
+              showFilters={true}
+            />
           </TabsContent>
 
           {/* Social Media Tab */}
           <TabsContent value="social" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Social Media Profiler</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {profile.socialProfiles.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">
-                    Inga sociala medier kopplade
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {profile.socialProfiles.map((social, index) => (
-                      <div key={index} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium capitalize">{social.platform}</h4>
-                          {social.verified && (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Verified
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <div className="text-muted-foreground">Följare</div>
-                            <div className="font-medium">{social.followers?.toLocaleString() || 'N/A'}</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Följer</div>
-                            <div className="font-medium">{social.following?.toLocaleString() || 'N/A'}</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Inlägg</div>
-                            <div className="font-medium">{social.posts?.toLocaleString() || 'N/A'}</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Engagement</div>
-                            <div className="font-medium">{social.engagement ? `${(social.engagement * 100).toFixed(1)}%` : 'N/A'}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <IntelligenceSocialCard 
+              socialProfiles={profile.socialProfiles}
+              title="Social Media Profiler"
+              showGrowthMetrics={true}
+              onRefreshPlatform={(platform, handle) => {
+                console.log(`Refreshing ${platform} for handle: ${handle}`);
+                // Trigger refresh for specific platform
+                onRefresh?.();
+              }}
+            />
           </TabsContent>
 
           {/* Progress Tab */}
