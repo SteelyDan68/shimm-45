@@ -52,6 +52,7 @@ export const NAVIGATION_ROUTES = {
   CALENDAR: "/calendar",
   INTELLIGENCE: "/intelligence",
   INTELLIGENCE_USER: (id: string) => `/intelligence/${id}`,
+  INTELLIGENCE_HUB: "/intelligence-hub",
   STEFAN_CHAT: "/stefan-chat",
   
   // Assessment
@@ -148,6 +149,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
       {
         title: "Intelligence",
         url: NAVIGATION_ROUTES.INTELLIGENCE,
+        icon: Brain,
+        roles: ["client", "coach"]
+      },
+      {
+        title: "Intelligence Hub",
+        url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
         icon: Brain,
         roles: ["superadmin", "admin", "coach"]
       },
