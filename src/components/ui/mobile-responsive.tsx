@@ -37,18 +37,21 @@ interface MobileTouchButtonProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
-export const MobileTouchButton: React.FC<MobileTouchButtonProps> = ({ 
+MobileTouchButton.displayName = "MobileTouchButton";
+
+export const MobileTouchButton = React.forwardRef<HTMLButtonElement, MobileTouchButtonProps>(({ 
   children, 
   onClick, 
   variant = 'md',
   className = "",
   disabled = false,
   type = 'button'
-}) => {
+}, ref) => {
   const touchClass = `touch-target-${variant}`;
   
   return (
     <button
+      ref={ref}
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -66,7 +69,7 @@ export const MobileTouchButton: React.FC<MobileTouchButtonProps> = ({
       {children}
     </button>
   );
-};
+});
 
 interface MobileGridProps {
   children: React.ReactNode;
