@@ -126,6 +126,15 @@ export const helpTexts = {
   // Administration
   administration: {
     userRoles: "Användarroller: Superadmin (full åtkomst), Admin (hög åtkomst), Manager/Coach (klienthantering), Editor (redigering), User (grundläggande), Client (begränsad åtkomst).",
+    
+    // Coach-Client Relationships
+    coachClientRelationships: "Här hanterar du tilldelningar mellan coaches och klienter. Du kan skapa nya relationer, flytta klienter mellan coaches och ta bort befintliga kopplingar.",
+    createRelationship: "Skapa nya coach-client-relationer genom att välja en coach och en klient. Varje klient kan bara ha en aktiv coach åt gången.",
+    transferClient: "Flytta en klient från en coach till en annan. Den gamla relationen inaktiveras automatiskt och en ny skapas.",
+    unassignedClients: "Klienter som inte är tilldelade till någon coach. Klicka på ögat för att se klientprofilen eller använd 'Skapa relation' för att tilldela dem.",
+    relationshipsList: "Lista över alla aktiva coach-client-relationer. Du kan visa klientprofiler, flytta klienter eller ta bort relationer härifrån.",
+    relationshipStats: "Statistik över coaches, klienter och aktiva relationer i systemet för överblick och planering.",
+    
     securitySettings: "Säkerhetsinställningar för kontoskydd och dataintegritet.",
     automationSettings: "Automatiska processer för datainsamling, rapporter och AI-analys.",
     dataExport: "Exportera all din data i maskinläsbart format enligt GDPR-rättigheter.",

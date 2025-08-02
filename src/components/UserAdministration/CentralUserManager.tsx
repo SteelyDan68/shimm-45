@@ -63,6 +63,8 @@ import { PRIMARY_ROLES, PLATFORMS, COUNTRIES } from '@/types/extendedProfile';
 // Utils
 import { supabase } from '@/integrations/supabase/client';
 import { deleteUserCompletely } from '@/utils/userDeletion';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { helpTexts } from '@/data/helpTexts';
 
 /**
  * ==========================================================================
@@ -889,7 +891,51 @@ export function CentralUserManager() {
 
         {/* RELATIONSHIPS TAB */}
         <TabsContent value="relationships" className="space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold">Coach-Client Relationer</h2>
+              <HelpTooltip content={helpTexts.administration.coachClientRelationships} />
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Crown className="h-4 w-4 text-primary" />
+                <span>Coach</span>
+              </div>
+              <ArrowRight className="h-4 w-4" />
+              <div className="flex items-center gap-1">
+                <User className="h-4 w-4 text-green-500" />
+                <span>Klient</span>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-6">
+            {/* Info Card */}
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Coach-Client Relationer</h3>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
+                      Här ser du alla aktiva kopplingar mellan coaches och klienter. Varje klient kan bara ha en aktiv coach åt gången.
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-blue-600 dark:text-blue-400">
+                      <div className="flex items-center gap-1">
+                        <Crown className="h-3 w-3" />
+                        <span>Coach (ansvarig för klienten)</span>
+                      </div>
+                      <ArrowRight className="h-3 w-3" />
+                      <div className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        <span>Klient (får coaching)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             {/* Relationship Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
@@ -952,10 +998,13 @@ export function CentralUserManager() {
                   
                   <Dialog open={isRelationshipDialogOpen} onOpenChange={setIsRelationshipDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button>
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Skapa relation
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button>
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Skapa relation
+                        </Button>
+                        <HelpTooltip content={helpTexts.administration.createRelationship} />
+                      </div>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
@@ -1047,19 +1096,23 @@ export function CentralUserManager() {
                         const client = clients.find(c => c.id === relationship.client_id);
                         
                         return (
-                          <div key={relationship.id} className="border rounded-lg p-4 hover:bg-muted/20 transition-colors">
+                          <div key={relationship.id} className="border-2 rounded-lg p-4 hover:bg-muted/20 transition-colors bg-gradient-to-r from-blue-50/20 to-green-50/20 dark:from-blue-950/20 dark:to-green-950/20">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full">
                                   <Crown className="h-4 w-4 text-primary" />
-                                  <span className="font-medium">
+                                  <span className="font-medium text-primary">
                                     {`${coach?.first_name} ${coach?.last_name}`.trim() || 'Okänd coach'}
                                   </span>
                                 </div>
-                                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                                <div className="flex items-center gap-2">
-                                  <User className="h-4 w-4 text-green-500" />
-                                  <span className="font-medium">
+                                <div className="flex items-center">
+                                  <ArrowRight className="h-5 w-5 text-muted-foreground mx-2" />
+                                  <span className="text-sm text-muted-foreground">tilldelad</span>
+                                  <ArrowRight className="h-5 w-5 text-muted-foreground mx-2" />
+                                </div>
+                                <div className="flex items-center gap-2 bg-green-500/10 px-3 py-1 rounded-full">
+                                  <User className="h-4 w-4 text-green-600" />
+                                  <span className="font-medium text-green-700 dark:text-green-400">
                                     {`${client?.first_name} ${client?.last_name}`.trim() || 'Okänd klient'}
                                   </span>
                                 </div>
@@ -1084,6 +1137,7 @@ export function CentralUserManager() {
                                 >
                                   <ArrowRight className="h-4 w-4 mr-1" />
                                   Flytta
+                                  <HelpTooltip content={helpTexts.administration.transferClient} />
                                 </Button>
                                 <Button
                                   variant="destructive"
@@ -1111,6 +1165,7 @@ export function CentralUserManager() {
                     <h4 className="font-medium mb-3 flex items-center gap-2">
                       <UserMinus className="h-4 w-4 text-orange-500" />
                       Otilldelade klienter ({unassignedClients.length})
+                      <HelpTooltip content={helpTexts.administration.unassignedClients} />
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       {unassignedClients.map((client) => (
@@ -1122,7 +1177,17 @@ export function CentralUserManager() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/user-profile/${client.id}`)}
+                            onClick={() => {
+                              try {
+                                navigate(`/user-profile/${client.id}`);
+                              } catch (error) {
+                                toast({
+                                  title: "Navigeringsfel",
+                                  description: "Kunde inte öppna klientprofilen. Försök igen.",
+                                  variant: "destructive"
+                                });
+                              }
+                            }}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
