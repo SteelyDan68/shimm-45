@@ -1,0 +1,29 @@
+{
+  "appId": "app.lovable.00a0d53e45e245a58d70ae3e74d84396",
+  "appName": "shimm-45",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "dist",
+  "server": {
+    "url": "https://00a0d53e-45e2-45a5-8d70-ae3e74d84396.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#FFFFFF"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#FFFFFF",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": true,
+      "spinnerColor": "#999999"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

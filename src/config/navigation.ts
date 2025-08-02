@@ -13,7 +13,8 @@ import {
   ClipboardList,
   MessageSquare,
   Building2,
-  Users2
+  Users2,
+  Smartphone
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -65,6 +66,8 @@ export const NAVIGATION_ROUTES = {
   AUTH: "/auth",
   INVITATION: (token: string) => `/invitation/${token}`,
   COLLABORATION: "/collaboration",
+  AI_COACHING: "/ai-coaching",
+  MOBILE: "/mobile",
 } as const;
 
 export const MAIN_NAVIGATION: NavigationGroup[] = [
@@ -151,6 +154,18 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Samarbete",
         url: NAVIGATION_ROUTES.COLLABORATION,
         icon: Users2,
+        roles: ["superadmin", "admin", "coach", "client"]
+      },
+      {
+        title: "AI Coaching",
+        url: NAVIGATION_ROUTES.AI_COACHING,
+        icon: Brain,
+        roles: ["superadmin", "admin", "coach", "client"]
+      },
+      {
+        title: "Mobil",
+        url: NAVIGATION_ROUTES.MOBILE,
+        icon: Smartphone,
         roles: ["superadmin", "admin", "coach", "client"]
       }
     ]

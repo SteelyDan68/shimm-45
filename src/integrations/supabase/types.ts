@@ -14,6 +14,200 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_coaching_analytics: {
+        Row: {
+          created_at: string
+          id: string
+          metric_data: Json | null
+          metric_type: string
+          metric_value: number
+          recorded_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_data?: Json | null
+          metric_type: string
+          metric_value: number
+          recorded_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_data?: Json | null
+          metric_type?: string
+          metric_value?: number
+          recorded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_coaching_plans: {
+        Row: {
+          adaptation_triggers: Json
+          created_at: string
+          duration: number
+          expires_at: string | null
+          focus_areas: Json
+          generated_at: string
+          id: string
+          milestones: Json
+          status: string
+          updated_at: string
+          user_id: string
+          weekly_goals: Json
+        }
+        Insert: {
+          adaptation_triggers: Json
+          created_at?: string
+          duration?: number
+          expires_at?: string | null
+          focus_areas: Json
+          generated_at?: string
+          id?: string
+          milestones: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+          weekly_goals: Json
+        }
+        Update: {
+          adaptation_triggers?: Json
+          created_at?: string
+          duration?: number
+          expires_at?: string | null
+          focus_areas?: Json
+          generated_at?: string
+          id?: string
+          milestones?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+          weekly_goals?: Json
+        }
+        Relationships: []
+      }
+      ai_coaching_sessions: {
+        Row: {
+          context: Json | null
+          created_at: string
+          end_time: string | null
+          follow_up: Json | null
+          id: string
+          recommendations: Json | null
+          session_type: string
+          start_time: string
+          updated_at: string
+          user_feedback: Json | null
+          user_id: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          end_time?: string | null
+          follow_up?: Json | null
+          id?: string
+          recommendations?: Json | null
+          session_type: string
+          start_time?: string
+          updated_at?: string
+          user_feedback?: Json | null
+          user_id: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          end_time?: string | null
+          follow_up?: Json | null
+          id?: string
+          recommendations?: Json | null
+          session_type?: string
+          start_time?: string
+          updated_at?: string
+          user_feedback?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_recommendations: {
+        Row: {
+          category: string
+          created_at: string
+          dependencies: Json | null
+          description: string
+          difficulty: string
+          due_date: string | null
+          estimated_time: number
+          expected_outcome: string
+          id: string
+          implemented_at: string | null
+          metrics: Json | null
+          priority: string
+          reasoning: string
+          resources: Json | null
+          session_id: string | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          dependencies?: Json | null
+          description: string
+          difficulty: string
+          due_date?: string | null
+          estimated_time?: number
+          expected_outcome: string
+          id?: string
+          implemented_at?: string | null
+          metrics?: Json | null
+          priority: string
+          reasoning: string
+          resources?: Json | null
+          session_id?: string | null
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          dependencies?: Json | null
+          description?: string
+          difficulty?: string
+          due_date?: string | null
+          estimated_time?: number
+          expected_outcome?: string
+          id?: string
+          implemented_at?: string | null
+          metrics?: Json | null
+          priority?: string
+          reasoning?: string
+          resources?: Json | null
+          session_id?: string | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_recommendations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ai_coaching_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_form_assignments: {
         Row: {
           assigned_at: string
@@ -1338,6 +1532,51 @@ export type Database = {
           original_filename?: string | null
           subject?: string | null
           tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_coaching_preferences: {
+        Row: {
+          avoid_topics: Json | null
+          coaching_frequency: string
+          communication_style: string
+          created_at: string
+          focus_priorities: Json | null
+          id: string
+          learning_style: string
+          motivation_style: string
+          notification_preferences: Json
+          preferred_session_time: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avoid_topics?: Json | null
+          coaching_frequency?: string
+          communication_style?: string
+          created_at?: string
+          focus_priorities?: Json | null
+          id?: string
+          learning_style?: string
+          motivation_style?: string
+          notification_preferences?: Json
+          preferred_session_time?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avoid_topics?: Json | null
+          coaching_frequency?: string
+          communication_style?: string
+          created_at?: string
+          focus_priorities?: Json | null
+          id?: string
+          learning_style?: string
+          motivation_style?: string
+          notification_preferences?: Json
+          preferred_session_time?: string | null
           updated_at?: string
           user_id?: string
         }

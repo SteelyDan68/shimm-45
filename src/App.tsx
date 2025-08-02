@@ -17,6 +17,8 @@ import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { Collaboration } from "@/pages/Collaboration";
+import { AICoaching } from "@/pages/AICoaching";
+import { MobileOptimization } from "@/pages/MobileOptimization";
 
 import { ClientProfile } from "./pages/ClientProfile";
 import { UserProfile } from "./pages/UserProfile";
@@ -85,6 +87,8 @@ const AppRoutes = () => {
               <Route path="/user/:userId" element={<UserCrmProfile />} />
               <Route path="/search" element={<GlobalSearchPage />} />
               <Route path="/collaboration" element={<Collaboration />} />
+              <Route path="/ai-coaching" element={<AICoaching />} />
+              <Route path="/mobile" element={<MobileOptimization />} />
               <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
               <Route path="/intelligence/:userId" element={<Intelligence />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />

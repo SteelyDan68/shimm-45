@@ -77,7 +77,10 @@ export function CoachingDashboard() {
   };
 
   const handleEndSession = async () => {
-    await endCoachingSession(sessionFeedback);
+    await endCoachingSession({
+      ...sessionFeedback,
+      implementedRecommendations: []
+    });
     setSessionFeedback({ rating: 5, comment: '' });
   };
 
