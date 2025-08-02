@@ -28,6 +28,7 @@ import { EnhancedDashboard } from '@/components/Dashboard/EnhancedDashboard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 import { PillarJourneyOrchestrator } from '@/components/PillarJourney/PillarJourneyOrchestrator';
+import { ClientJourneyOrchestrator } from '@/components/ClientJourney/ClientJourneyOrchestrator';
 
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
@@ -254,12 +255,10 @@ export const ClientDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Pillar Journey Orchestrator for personalized guidance */}
-      {!hasCompletedAssessments && (
-        <div className="mb-6">
-          <PillarJourneyOrchestrator userId={profile?.id || ''} userName={clientProfile.name} />
-        </div>
-      )}
+      {/* REVOLUTIONERANDE KLIENTRESA-ORCHESTRATOR */}
+      <div className="mb-6">
+        <ClientJourneyOrchestrator userId={profile?.id || ''} userName={clientProfile.name} />
+      </div>
 
       {/* Header */}
       <div className="flex items-center justify-between">
