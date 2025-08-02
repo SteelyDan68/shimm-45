@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { TopNavigation } from "@/components/TopNavigation";
+import { MobileContainer } from "@/components/ui/mobile-responsive";
 import StefanAIChat from "./StefanAIChat";
 
 interface AppLayoutProps {
@@ -14,11 +15,13 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <TopNavigation />
       
-      <main className="flex-1 overflow-auto bg-background px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        {children}
+      <main className="flex-1 overflow-auto">
+        <MobileContainer className="py-4 min-h-full">
+          {children}
+        </MobileContainer>
       </main>
       <StefanAIChat />
     </div>

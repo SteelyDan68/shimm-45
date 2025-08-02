@@ -2,57 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Mobile-First Design System
+   All colors, gradients, fonts, spacing, and responsive tokens defined here.
+   Built with mobile-first approach - base styles for mobile, then scale up.
+   All colors MUST be HSL.
 */
 
 @layer base {
   :root {
+    /* Color System */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    /* Mobile-First Spacing System */
+    --space-mobile-xs: 0.25rem;   /* 4px */
+    --space-mobile-sm: 0.5rem;    /* 8px */
+    --space-mobile-md: 0.75rem;   /* 12px */
+    --space-mobile-lg: 1rem;      /* 16px */
+    --space-mobile-xl: 1.5rem;    /* 24px */
+    --space-mobile-2xl: 2rem;     /* 32px */
+    --space-mobile-3xl: 3rem;     /* 48px */
 
+    /* Touch Target Sizes (minimum 44px as per accessibility) */
+    --touch-target-sm: 2.75rem;   /* 44px */
+    --touch-target-md: 3rem;      /* 48px */
+    --touch-target-lg: 3.5rem;    /* 56px */
+
+    /* Mobile Typography Scale */
+    --text-mobile-xs: 0.75rem;    /* 12px */
+    --text-mobile-sm: 0.875rem;   /* 14px */
+    --text-mobile-base: 1rem;     /* 16px */
+    --text-mobile-lg: 1.125rem;   /* 18px */
+    --text-mobile-xl: 1.25rem;    /* 20px */
+    --text-mobile-2xl: 1.5rem;    /* 24px */
+    --text-mobile-3xl: 1.875rem;  /* 30px */
+
+    /* Border Radius Scale */
+    --radius-mobile-sm: 0.25rem;  /* 4px */
+    --radius-mobile-md: 0.5rem;   /* 8px */
+    --radius-mobile-lg: 0.75rem;  /* 12px */
+    --radius: var(--radius-mobile-md);
+
+    /* Mobile Shadows */
+    --shadow-mobile-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-mobile-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-mobile-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+
+    /* Sidebar System */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Mobile Navigation Heights */
+    --nav-height-mobile: 3.5rem;  /* 56px */
+    --nav-height-tablet: 4rem;    /* 64px */
   }
 
   .dark {
@@ -101,5 +126,172 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    /* Mobile-first font sizing and line height */
+    font-size: var(--text-mobile-base);
+    line-height: 1.5;
+    /* Improve touch scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+
+  /* Mobile-first responsive images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Better touch targets for mobile */
+  button, a, [role="button"] {
+    min-height: var(--touch-target-sm);
+    min-width: var(--touch-target-sm);
+    /* Improve touch feedback */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Mobile-first form inputs */
+  input, textarea, select {
+    min-height: var(--touch-target-sm);
+    /* Prevent zoom on iOS */
+    font-size: max(16px, var(--text-mobile-base));
+  }
+}
+
+@layer components {
+  /* Mobile-first container system */
+  .container-mobile {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-mobile-lg);
+    padding-right: var(--space-mobile-lg);
+  }
+
+  @media (min-width: 640px) {
+    .container-mobile {
+      padding-left: var(--space-mobile-xl);
+      padding-right: var(--space-mobile-xl);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-mobile {
+      padding-left: var(--space-mobile-2xl);
+      padding-right: var(--space-mobile-2xl);
+    }
+  }
+
+  /* Mobile-first typography utilities */
+  .text-mobile-xs { font-size: var(--text-mobile-xs); }
+  .text-mobile-sm { font-size: var(--text-mobile-sm); }
+  .text-mobile-base { font-size: var(--text-mobile-base); }
+  .text-mobile-lg { font-size: var(--text-mobile-lg); }
+  .text-mobile-xl { font-size: var(--text-mobile-xl); }
+  .text-mobile-2xl { font-size: var(--text-mobile-2xl); }
+  .text-mobile-3xl { font-size: var(--text-mobile-3xl); }
+
+  /* Mobile-first touch targets */
+  .touch-target-sm { min-height: var(--touch-target-sm); min-width: var(--touch-target-sm); }
+  .touch-target-md { min-height: var(--touch-target-md); min-width: var(--touch-target-md); }
+  .touch-target-lg { min-height: var(--touch-target-lg); min-width: var(--touch-target-lg); }
+
+  /* Mobile-first spacing utilities */
+  .space-mobile-xs { gap: var(--space-mobile-xs); }
+  .space-mobile-sm { gap: var(--space-mobile-sm); }
+  .space-mobile-md { gap: var(--space-mobile-md); }
+  .space-mobile-lg { gap: var(--space-mobile-lg); }
+  .space-mobile-xl { gap: var(--space-mobile-xl); }
+  .space-mobile-2xl { gap: var(--space-mobile-2xl); }
+  .space-mobile-3xl { gap: var(--space-mobile-3xl); }
+
+  /* Mobile-first shadow utilities */
+  .shadow-mobile-sm { box-shadow: var(--shadow-mobile-sm); }
+  .shadow-mobile-md { box-shadow: var(--shadow-mobile-md); }
+  .shadow-mobile-lg { box-shadow: var(--shadow-mobile-lg); }
+
+  /* Mobile-first card component */
+  .card-mobile {
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-mobile-md);
+    box-shadow: var(--shadow-mobile-sm);
+    padding: var(--space-mobile-lg);
+    margin-bottom: var(--space-mobile-md);
+  }
+
+  /* Mobile-first navigation component */
+  .nav-mobile {
+    height: var(--nav-height-mobile);
+    padding: 0 var(--space-mobile-lg);
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  @media (min-width: 768px) {
+    .nav-mobile {
+      height: var(--nav-height-tablet);
+      padding: 0 var(--space-mobile-xl);
+    }
+  }
+
+  /* Mobile-first grid system */
+  .grid-mobile-1 { grid-template-columns: 1fr; }
+  .grid-mobile-2 { grid-template-columns: 1fr; }
+  
+  @media (min-width: 640px) {
+    .grid-mobile-2 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Mobile-first animation utilities */
+  .animate-fade-in-mobile {
+    animation: fadeInMobile 0.3s ease-out;
+  }
+
+  .animate-slide-up-mobile {
+    animation: slideUpMobile 0.3s ease-out;
+  }
+
+  /* Hide on mobile */
+  .hidden-mobile {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .hidden-mobile {
+      display: block;
+    }
+  }
+
+  /* Show only on mobile */
+  .mobile-only {
+    display: block;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-only {
+      display: none;
+    }
+  }
+}
+
+@keyframes fadeInMobile {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-mobile-sm));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-mobile-lg));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

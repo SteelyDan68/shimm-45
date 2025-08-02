@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigation } from "@/hooks/useNavigation";
 import { Button } from "@/components/ui/button";
+import { MobileTouchButton, ConditionalRender } from "@/components/ui/mobile-responsive";
 import { 
   LogOut,
   User,
@@ -30,8 +31,8 @@ export function TopNavigation() {
   
   return (
     <>
-      <header className="h-16 border-b bg-card shadow-sm">
-        <div className="h-full px-4 sm:px-6 flex items-center justify-between">
+      <header className="nav-mobile bg-card shadow-sm">
+        <div className="h-full px-4 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-4">
             <h1 className="text-lg sm:text-xl font-bold text-primary">SHIMM</h1>
@@ -61,15 +62,14 @@ export function TopNavigation() {
           <div className="flex items-center space-x-2 sm:space-x-4">
             <MessageIcon />
             
-            {/* Mobile menu button */}
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="lg:hidden"
+            {/* Mobile menu button with touch-friendly size */}
+            <MobileTouchButton 
+              variant="sm"
+              className="lg:hidden bg-transparent text-foreground hover:bg-muted border-0 shadow-none"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            </MobileTouchButton>
             
             <span className="text-sm text-muted-foreground hidden sm:block lg:block">
               {user?.email}
@@ -77,13 +77,16 @@ export function TopNavigation() {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0">
-                  <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                    <AvatarFallback className="text-xs">
+                <MobileTouchButton 
+                  variant="sm"
+                  className="rounded-full bg-transparent hover:bg-muted border-0 shadow-none p-1"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="text-sm">
                       {user?.email?.charAt(0).toUpperCase() || "N"}
                     </AvatarFallback>
                   </Avatar>
-                </Button>
+                </MobileTouchButton>
               </DropdownMenuTrigger>
               
               <DropdownMenuContent align="end" className="w-56 z-50">
@@ -117,25 +120,25 @@ export function TopNavigation() {
         </div>
       </header>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Navigation Menu with touch-friendly targets */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-card border-b shadow-lg">
-          <nav className="px-4 py-4 space-y-2">
+        <div className="lg:hidden bg-card border-b shadow-mobile-lg animate-slide-up-mobile">
+          <nav className="px-4 py-4 space-mobile-sm">
             {navItems.map((item) => (
               <NavLink
                 key={item.title}
                 to={item.url}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  `flex items-center space-x-3 touch-target-md px-4 rounded-lg text-mobile-base font-medium transition-colors ${
                     isActive
                       ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/70"
                   }`
                 }
               >
-                <item.icon className="h-5 w-5" />
-                <span>{item.title}</span>
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <span className="truncate">{item.title}</span>
               </NavLink>
             ))}
           </nav>
