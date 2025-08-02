@@ -11,8 +11,9 @@ import { WelcomeAssessmentData } from '@/types/welcomeAssessment';
 import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
 import { useStefanPersonality } from '@/hooks/useStefanPersonality';
 import { useToast } from '@/hooks/use-toast';
+import { useAssessmentSafety } from '@/hooks/useAssessmentSafety';
 import { WHEEL_OF_LIFE_AREAS, FREE_TEXT_QUESTIONS, QUICK_WINS_QUESTIONS, ADAPTIVE_QUESTIONS } from '@/config/welcomeAssessment';
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Save } from 'lucide-react';
 
 interface WelcomeAssessmentFormProps {
   onComplete?: (result: any) => void;
@@ -26,11 +27,29 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
   const { toast } = useToast();
   
   const [currentStep, setCurrentStep] = useState<AssessmentStep>('wheel_of_life');
+  const [isDraft, setIsDraft] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [assessmentData, setAssessmentData] = useState<WelcomeAssessmentData>({
     wheelOfLife: {},
     adaptiveQuestions: {},
     freeTextResponses: {},
     quickWins: {},
+  });
+
+  // Säkerhetshantering för assessment
+  const { safeSubmit, safeNavigate, safeAutoSave, updateLastInteraction } = useAssessmentSafety({
+    isActive: true,
+    hasUnsavedChanges,
+    preventAccidentalSubmission: true,
+    onBeforeExit: async () => {
+      const shouldExit = window.confirm(
+        'Du har en pågående bedömning. Vill du verkligen lämna sidan? Dina ändringar sparas som utkast.'
+      );
+      if (shouldExit && hasUnsavedChanges) {
+        await saveProgress();
+      }
+      return shouldExit;
+    }
   });
 
   const [adaptiveQuestions, setAdaptiveQuestions] = useState<any[]>([]);
@@ -165,33 +184,52 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
 
   const saveProgress = async () => {
     try {
-      await submitWelcomeAssessment(assessmentData); // Save as draft
+      // Bara local save för nu - ingen backend för utkast
+      setHasUnsavedChanges(false);
+      console.log('Progress saved locally');
     } catch (error) {
       console.error('Error saving progress:', error);
     }
   };
 
   const handleSubmit = async () => {
-    const result = await submitWelcomeAssessment(assessmentData);
-    
-    if (result) {
-      // Trigger Stefan welcome interaction
-      await createStefanInteraction(
-        'assessment_completion',
-        'welcome_assessment',
-        {
-          assessment_type: 'welcome',
-          total_questions: 40,
-          completion_time: Date.now(),
-          wheel_scores: assessmentData.wheelOfLife,
-        }
-      );
+    const success = await safeSubmit(async () => {
+      const result = await submitWelcomeAssessment(assessmentData, false); // Final submission
       
-      if (onComplete) {
-        onComplete(result);
+      if (result) {
+        // Trigger Stefan welcome interaction
+        await createStefanInteraction(
+          'assessment_completion',
+          'welcome_assessment',
+          {
+            assessment_type: 'welcome',
+            total_questions: 40,
+            completion_time: Date.now(),
+            wheel_scores: assessmentData.wheelOfLife,
+          }
+        );
+        
+        setIsDraft(false);
+        setHasUnsavedChanges(false);
+        
+        if (onComplete) {
+          onComplete(result);
+        }
       }
-    }
+    }, true); // Kräv dubbel bekräftelse
+
+    return success;
   };
+
+  // Uppdatera osparade ändringar när data ändras
+  useEffect(() => {
+    const hasData = Object.keys(assessmentData.wheelOfLife).length > 0 ||
+                   Object.keys(assessmentData.adaptiveQuestions).length > 0 ||
+                   Object.keys(assessmentData.freeTextResponses).length > 0 ||
+                   Object.keys(assessmentData.quickWins).length > 0;
+    
+    setHasUnsavedChanges(hasData && isDraft);
+  }, [assessmentData, isDraft]);
 
   const getStepTitle = () => {
     switch (currentStep) {

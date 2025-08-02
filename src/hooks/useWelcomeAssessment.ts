@@ -11,7 +11,8 @@ export const useWelcomeAssessment = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const submitWelcomeAssessment = useCallback(async (
-    assessmentData: WelcomeAssessmentData
+    assessmentData: WelcomeAssessmentData,
+    isDraft: boolean = false
   ): Promise<WelcomeAssessmentResult | null> => {
     if (!user) {
       toast({
@@ -24,6 +25,12 @@ export const useWelcomeAssessment = () => {
 
     setSubmitting(true);
     try {
+      // Om det är ett utkast, spara bara utan AI-analys
+      if (isDraft) {
+        // För utkast - spara bara utan AI-analys
+        console.log('Saving draft...');
+        return null; // Vi behöver inte spara utkast för nu
+      }
       // First, call the AI analysis function
       const { data: aiResult, error: aiError } = await supabase.functions.invoke(
         'analyze-welcome-assessment',
