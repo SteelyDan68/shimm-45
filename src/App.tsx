@@ -24,6 +24,7 @@ import { MobileOptimization } from "@/pages/MobileOptimization";
 import { ClientProfile } from "./pages/ClientProfile";
 import { UserProfile } from "./pages/UserProfile";
 import UserCrmProfile from "./pages/UserCrmProfile";
+import { ClientList } from "./components/ClientList";
 import { ClientDashboard } from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import EditProfilePage from "./pages/EditProfilePage";
@@ -80,9 +81,15 @@ const AppRoutes = () => {
                  </ProfileCompletionGate>
                } />
               
-              <Route path={NAVIGATION_ROUTES.COACH_DASHBOARD} element={<CoachDashboardPage />} />
-              <Route path="/client/:clientId" element={<ClientProfile />} />
-              <Route path="/user/:userId" element={<UserCrmProfile />} />
+               <Route path={NAVIGATION_ROUTES.COACH_DASHBOARD} element={<CoachDashboardPage />} />
+               <Route path={NAVIGATION_ROUTES.CLIENTS} element={
+                 <div className="p-6">
+                   <h1 className="text-2xl font-bold mb-6">Klienter</h1>
+                   <ClientList refreshTrigger={0} />
+                 </div>
+               } />
+               <Route path="/client/:clientId" element={<ClientProfile />} />
+               <Route path="/user/:userId" element={<UserCrmProfile />} />
               <Route path="/search" element={<GlobalSearchPage />} />
               <Route path="/collaboration" element={<Collaboration />} />
               <Route path="/ai-coaching" element={<AICoaching />} />
