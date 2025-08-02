@@ -30,16 +30,29 @@ interface DataCollectionResult {
 }
 
 serve(async (req) => {
-  console.log('DataCollector function called:', req.method);
+  console.log('=== DATA COLLECTOR FUNCTION STARTED ===');
+  console.log('Method:', req.method);
+  console.log('Headers:', Object.fromEntries(req.headers.entries()));
+  console.log('Timestamp:', new Date().toISOString());
 
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Parsing request body...');
-    const { client_id, test_mode, platform, url } = await req.json();
-    console.log('Request parameters:', { client_id, test_mode, platform, url });
+    console.log('=== PARSING REQUEST BODY ===');
+    const body = await req.text();
+    console.log('Raw body:', body);
+    
+    const { client_id, test_mode, platform, url, timestamp, force_refresh } = JSON.parse(body);
+    console.log('=== PARSED PARAMETERS ===');
+    console.log('client_id:', client_id);
+    console.log('test_mode:', test_mode);
+    console.log('platform:', platform);
+    console.log('url:', url);
+    console.log('timestamp:', timestamp);
+    console.log('force_refresh:', force_refresh);
 
     // Test mode - check API connectivity or specific platform test
     if (test_mode) {
@@ -105,14 +118,16 @@ serve(async (req) => {
       });
     }
 
+    console.log('=== STARTING ACTUAL DATA COLLECTION ===');
     console.log('Processing data collection for client:', client_id);
 
     if (!client_id) {
-      console.error('Missing client_id parameter');
+      console.error('=== MISSING CLIENT_ID ===');
+      console.error('All received parameters:', { client_id, test_mode, platform, url, timestamp, force_refresh });
       throw new Error('client_id is required');
     }
 
-    console.log('Fetching client from database...');
+    console.log('=== FETCHING CLIENT FROM DATABASE ===');
 
     // Try to find client in profiles table first (new approach)
     let client = null;
@@ -125,7 +140,17 @@ serve(async (req) => {
       .single();
 
     if (profileClient) {
-      console.log('Found client in profiles table:', profileClient.email);
+      console.log('=== FOUND CLIENT IN PROFILES TABLE ===');
+      console.log('Email:', profileClient.email);
+      console.log('Social handles found:', {
+        instagram: profileClient.instagram_handle,
+        tiktok: profileClient.tiktok_handle,
+        facebook: profileClient.facebook_handle,
+        youtube: profileClient.youtube_handle,
+        twitter: profileClient.twitter_handle,
+        snapchat: profileClient.snapchat_handle
+      });
+      
       // Transform profile to client format for compatibility
       client = {
         id: profileClient.id,

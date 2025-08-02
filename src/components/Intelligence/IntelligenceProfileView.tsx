@@ -26,6 +26,7 @@ import {
   Settings
 } from 'lucide-react';
 import { IntelligenceProfile } from '@/types/intelligenceHub';
+import { IntelligenceDataCollector } from './IntelligenceDataCollector';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -176,6 +177,17 @@ export function IntelligenceProfileView({
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Enhanced Data Collector */}
+            <IntelligenceDataCollector 
+              profile={{
+                userId: profile.userId,
+                displayName: profile.displayName,
+                email: profile.email,
+                socialProfiles: profile.socialProfiles
+              }}
+              onDataCollected={onRefresh}
+            />
+            
             {/* Recent Insights */}
             <Card>
               <CardHeader>
