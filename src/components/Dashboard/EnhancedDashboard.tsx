@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StefanWidget } from '@/components/Stefan/StefanWidget';
-import { SmartJourneyGuide } from '@/components/Journey/SmartJourneyGuide';
+
 import { WelcomeAssessmentReset } from '@/components/Admin/WelcomeAssessmentReset';
 import { PillarHeatmap } from '@/components/SixPillars/PillarHeatmap';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
@@ -135,12 +135,17 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
           </TabsTrigger>
         </TabsList>
 
-        {/* Journey Tab - Smart Journey Guide */}
+        {/* Journey Tab - Now uses PillarJourneyOrchestrator */}
         <TabsContent value="journey" className="space-y-6">
           {/* Debug: Welcome Assessment Reset */}
           <WelcomeAssessmentReset />
           
-          <SmartJourneyGuide userId={userId} userName={userName} />
+          <div className="text-center py-8 text-muted-foreground">
+            <p className="mb-4">Din utvecklingsresa hanteras nu via Five Pillars-systemet med intelligenta rekommendationer</p>
+            <Button onClick={() => window.location.href = '/client-dashboard?tab=pillars'}>
+              Gå till Five Pillars
+            </Button>
+          </div>
         </TabsContent>
 
         {/* Overview Tab - Heatmap and Statistics */}

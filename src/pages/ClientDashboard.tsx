@@ -18,7 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { PillarDashboard } from '@/components/SixPillars/PillarDashboard';
+
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
