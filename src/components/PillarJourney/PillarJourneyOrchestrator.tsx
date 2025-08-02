@@ -243,7 +243,14 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
             userId={userId}
             maxSelection={journeyModes[selectedMode].maxConcurrent}
             currentActive={activeJourneys.length}
-            onPillarSelect={(pillarKey) => initializeJourney(pillarKey, selectedMode)}
+            onPillarSelect={async (pillarKey) => {
+              console.log(`🎯 Pillar selected: ${pillarKey}`);
+              const result = await initializeJourney(pillarKey, selectedMode);
+              if (result?.shouldNavigate) {
+                console.log(`🔄 Navigating to: ${result.url}`);
+                window.location.href = result.url;
+              }
+            }}
           />
         </TabsContent>
 

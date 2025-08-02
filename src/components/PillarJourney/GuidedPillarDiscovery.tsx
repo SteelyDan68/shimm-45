@@ -12,7 +12,7 @@ interface GuidedPillarDiscoveryProps {
   userId: string;
   maxSelection: number;
   currentActive: number;
-  onPillarSelect: (pillarKey: string) => void;
+  onPillarSelect: (pillarKey: string) => Promise<{ shouldNavigate: boolean; url?: string } | void>;
 }
 
 export const GuidedPillarDiscovery: React.FC<GuidedPillarDiscoveryProps> = ({

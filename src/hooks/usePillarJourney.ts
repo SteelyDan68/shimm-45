@@ -82,57 +82,28 @@ export const usePillarJourney = (userId: string) => {
       const existingJourney = activeJourneys.find(j => j.pillarKey === pillarKey);
       if (existingJourney) {
         toast({
-          title: "Information",
+          title: "Information", 
           description: "Du har redan en aktiv resa för denna pillar",
           variant: "default"
         });
         return;
       }
 
-      // Skapa ny resa med intelligenta milstolpar baserat på läge
-      const milestones = generateMilestones(pillarKey, mode);
-      const estimatedWeeks = mode === 'guided' ? 8 : mode === 'flexible' ? 6 : 4;
-      const estimatedCompletion = new Date();
-      estimatedCompletion.setTime(estimatedCompletion.getTime() + (estimatedWeeks * 7 * 24 * 60 * 60 * 1000));
-
-      const newJourney: PillarJourney = {
-        id: `journey_${Date.now()}`,
-        userId,
-        pillarKey,
-        pillarName: getPillarName(pillarKey),
-        mode,
-        status: 'active',
-        progress: 0,
-        startedAt: new Date().toISOString(),
-        estimatedCompletion: estimatedCompletion.toISOString(),
-        milestones,
-        tasks: [],
-        reflections: [],
-        metadata: {
-          mode_details: getModeDetails(mode),
-          initial_assessment_score: 0
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      setActiveJourneys(prev => [...prev, newJourney]);
-
-      // Lägg till i timeline
-      await addTimelineEvent({
-        eventType: 'journey_start',
-        eventTitle: `Startade utvecklingsresa: ${getPillarName(pillarKey)}`,
-        eventDescription: `Påbörjade ${mode} utvecklingsresa för ${getPillarName(pillarKey)}`,
-        journeyId: newJourney.id,
-        pillarName: newJourney.pillarName,
-        eventData: { mode, journey_id: newJourney.id }
-      });
-
+      // KRITISK FIX: Navigera till assessment-formuläret istället för bara skapa lokal resa
+      console.log(`🚀 Starting pillar assessment for: ${pillarKey}`);
+      
+      // Skapa URL för att starta assessment
+      const assessmentUrl = `/six-pillars?pillar=${pillarKey}&startAssessment=true`;
+      
       toast({
-        title: "Utvecklingsresa startad!",
-        description: `Din ${mode} resa för ${getPillarName(pillarKey)} har påbörjats`,
+        title: "Startar assessment...",
+        description: `Tar dig till ${getPillarName(pillarKey)}-bedömningen`,
         variant: "default"
       });
+
+      // Navigera till assessment (måste göras från komponenten, inte hooken)
+      // Vi returnerar URL:en så komponenten kan hantera navigationen
+      return { shouldNavigate: true, url: assessmentUrl, pillarKey, mode };
 
     } catch (error: any) {
       console.error('Error initializing journey:', error);
@@ -141,6 +112,7 @@ export const usePillarJourney = (userId: string) => {
         description: "Kunde inte starta utvecklingsresa",
         variant: "destructive"
       });
+      return { shouldNavigate: false };
     }
   }, [activeJourneys, toast]);
 

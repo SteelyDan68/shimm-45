@@ -29,7 +29,7 @@ interface IntelligentPillarRecommendationProps {
     };
   };
   stefanMessage: string;
-  onPillarSelect: (pillarKey: string) => void;
+  onPillarSelect: (pillarKey: string) => Promise<{ shouldNavigate: boolean; url?: string } | void>;
 }
 
 export const IntelligentPillarRecommendation: React.FC<IntelligentPillarRecommendationProps> = ({
@@ -49,14 +49,20 @@ export const IntelligentPillarRecommendation: React.FC<IntelligentPillarRecommen
     };
   };
 
-  const handleStartJourney = (pillarKey: string) => {
-    onPillarSelect(pillarKey);
-    navigate('/client-dashboard?tab=pillars', { 
-      state: { 
-        activatePillar: pillarKey,
-        fromRecommendation: true
-      } 
-    });
+  const handleStartJourney = async (pillarKey: string) => {
+    console.log(`🚀 Starting journey for pillar: ${pillarKey}`);
+    const result = await onPillarSelect(pillarKey);
+    
+    // Om onPillarSelect returnerar navigation-info, använd den
+    if (result && 'shouldNavigate' in result && result.shouldNavigate) {
+      console.log(`🔄 Navigating to: ${result.url}`);
+      window.location.href = result.url!;
+    } else {
+      // Fallback - navigera direkt till assessment
+      const assessmentUrl = `/six-pillars?pillar=${pillarKey}&startAssessment=true`;
+      console.log(`🔄 Fallback navigation to: ${assessmentUrl}`);
+      window.location.href = assessmentUrl;
+    }
   };
 
   const primaryPillar = getPillarInfo(pillarRecommendations.primary_pillar.key);
