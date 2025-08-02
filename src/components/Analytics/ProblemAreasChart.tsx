@@ -42,9 +42,9 @@ export function ProblemAreasChart({ data }: ProblemAreasChartProps) {
 
   const getTrendIcon = (trend: ProblemArea['trend']) => {
     switch (trend) {
-      case 'increasing':
+      case 'up':
         return <TrendingUp className="h-4 w-4 text-destructive" />;
-      case 'decreasing':
+      case 'down':
         return <TrendingDown className="h-4 w-4 text-success" />;
       default:
         return <Minus className="h-4 w-4 text-muted-foreground" />;

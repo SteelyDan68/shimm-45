@@ -26,7 +26,7 @@ const getRankColor = (rank: string) => {
 
 export function VelocityTrendChart({ data }: VelocityTrendChartProps) {
   const currentScore = data[data.length - 1]?.score || 0;
-  const currentRank = data[data.length - 1]?.rank || 'C';
+  const currentRank = data[data.length - 1]?.rank || 0;
   const averageScore = data.length > 0 ? Math.round(data.reduce((sum, point) => sum + point.score, 0) / data.length) : 0;
   
   // Calculate trend direction
@@ -39,8 +39,8 @@ export function VelocityTrendChart({ data }: VelocityTrendChartProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           Velocity-trend 
-          <Badge variant={getRankColor(currentRank) as any}>
-            {currentRank}-klient
+          <Badge variant={getRankColor(currentRank.toString()) as any}>
+            {currentRank >= 80 ? 'A' : currentRank >= 60 ? 'B' : 'C'}-klient
           </Badge>
         </CardTitle>
         <CardDescription>

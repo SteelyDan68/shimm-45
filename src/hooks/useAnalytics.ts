@@ -38,6 +38,11 @@ export interface AnalyticsData {
     totalUsers: number;
     activeUsers: number;
     completionRate: number;
+    completedTasks: number;
+    totalTasks: number;
+    currentVelocity: number;
+    averageVelocity: number;
+    mostCommonBarrier: string;
   };
 }
 
@@ -133,8 +138,8 @@ export interface AnalyticsFilters {
   timeRange: string; 
   category: string;
   period: string;
-  startDate: string;
-  endDate: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export const useAnalytics = () => {
@@ -268,7 +273,18 @@ export const useAnalytics = () => {
         ],
         
         stefanInteractions: 12,
-        aiRecommendationsFollowed: 8
+        aiRecommendationsFollowed: 8,
+        
+        summary: {
+          totalUsers: 1,
+          activeUsers: 1,
+          completionRate: 68,
+          completedTasks: 23,
+          totalTasks: 34,
+          currentVelocity: 72,
+          averageVelocity: 65,
+          mostCommonBarrier: 'Tidsbrist'
+        }
       };
       
       const mockPerformance: PerformanceMetrics = {
