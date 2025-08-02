@@ -11,6 +11,7 @@ import { PillarKey } from '@/types/fivePillarsModular';
 import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useFivePillarsModular } from '@/hooks/useFivePillarsModular';
 import { BreadcrumbNavigation } from '@/components/Navigation/BreadcrumbNavigation';
+import { OpenTrackAssessmentForm } from './OpenTrackAssessmentForm';
 import { useNavigate } from 'react-router-dom';
 
 interface ModularPillarAssessmentProps {
@@ -36,6 +37,26 @@ export const ModularPillarAssessment = ({
   const navigate = useNavigate();
 
   const pillarConfig = PILLAR_MODULES[pillarKey];
+
+  // Special handling for open_track pillar
+  if (pillarKey === 'open_track') {
+    return (
+      <div className="space-y-4">
+        <BreadcrumbNavigation 
+          onBack={onBack}
+          customPath={[
+            { label: 'Dashboard', path: '/client-dashboard' },
+            { label: 'Five Pillars', path: '/client-dashboard?tab=pillars' },
+            { label: `${pillarConfig.name} Bedömning` }
+          ]}
+        />
+        <OpenTrackAssessmentForm
+          clientId={targetId!}
+          onComplete={onComplete}
+        />
+      </div>
+    );
+  }
 
   // Initialize answers with default values
   useEffect(() => {
