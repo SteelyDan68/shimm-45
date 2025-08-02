@@ -161,18 +161,15 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
         milestones: [] // Could be populated from coaching_milestones table
       };
 
-      // Extract social profiles from cache data
-      const socialProfiles = socialItems.map(item => {
-        const data = (item.data && typeof item.data === 'object' ? item.data : {}) as any;
-        return {
-          platform: item.source,
-          followers: data?.followers || 0,
-          following: data?.following || 0,
-          posts: data?.posts || 0,
-          engagement: data?.engagement || 0,
-          verified: data?.verified || false
-        };
-      });
+      // Extract social profiles from actual profile data (handles)
+      const socialProfiles = [
+        { platform: 'Instagram', handle: profile.instagram_handle, verified: false },
+        { platform: 'YouTube', handle: profile.youtube_handle, verified: false },
+        { platform: 'TikTok', handle: profile.tiktok_handle, verified: false },
+        { platform: 'Twitter', handle: profile.twitter_handle, verified: false },
+        { platform: 'Facebook', handle: profile.facebook_handle, verified: false },
+        { platform: 'Snapchat', handle: profile.snapchat_handle, verified: false }
+      ].filter(p => p.handle); // Only include platforms with handles
 
       // Extract news mentions
       const newsMentions = newsItems.map(item => ({
