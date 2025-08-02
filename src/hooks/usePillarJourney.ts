@@ -316,14 +316,14 @@ export const usePillarJourney = (userId: string) => {
 
   const generateMilestones = (pillarKey: string, mode: string): PillarMilestone[] => {
     // Huvudpolicy från AI/Coaching Psykolog: Adaptiva milstolpar
-    const baseMilestones = [
+    const baseMilestones: PillarMilestone[] = [
       {
         id: `milestone-1-${pillarKey}`,
         title: 'Initial bedömning',
         description: 'Genomför en fördjupad bedömning av ditt nuvarande läge',
         targetDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         progress: 0,
-        type: 'assessment' as const
+        type: 'assessment'
       },
       {
         id: `milestone-2-${pillarKey}`,
@@ -331,7 +331,7 @@ export const usePillarJourney = (userId: string) => {
         description: 'Påbörja din första utvecklingsaktivitet inom detta område',
         targetDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
         progress: 0,
-        type: 'practice' as const
+        type: 'practice'
       }
     ];
 
@@ -342,7 +342,7 @@ export const usePillarJourney = (userId: string) => {
         description: 'Reflektion över första veckans framsteg och lärdomar',
         targetDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
         progress: 0,
-        type: 'reflection' as const
+        type: 'reflection'
       });
     }
 
