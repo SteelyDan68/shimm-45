@@ -37,8 +37,6 @@ interface MobileTouchButtonProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
-MobileTouchButton.displayName = "MobileTouchButton";
-
 export const MobileTouchButton = React.forwardRef<HTMLButtonElement, MobileTouchButtonProps>(({ 
   children, 
   onClick, 
@@ -70,6 +68,8 @@ export const MobileTouchButton = React.forwardRef<HTMLButtonElement, MobileTouch
     </button>
   );
 });
+
+MobileTouchButton.displayName = "MobileTouchButton";
 
 interface MobileGridProps {
   children: React.ReactNode;
