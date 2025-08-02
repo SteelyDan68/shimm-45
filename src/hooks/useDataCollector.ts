@@ -27,7 +27,7 @@ export const useDataCollector = () => {
       });
       
       const requestPromise = supabase.functions.invoke('data-collector', {
-        body: { user_id: clientId }
+        body: { client_id: clientId }
       });
       
       const { data, error } = await Promise.race([requestPromise, timeoutPromise]) as any;
