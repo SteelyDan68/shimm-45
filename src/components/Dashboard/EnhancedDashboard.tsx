@@ -249,7 +249,7 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
             
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant={selectedTab === 'journey' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedTab('journey')}
               >
