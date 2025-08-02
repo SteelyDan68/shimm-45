@@ -127,8 +127,49 @@ export function ExtendedProfileForm({
     }
   };
 
+  const validateForm = () => {
+    const errors: string[] = [];
+    
+    // Obligatoriska fält
+    if (!formData.date_of_birth) {
+      errors.push('Födelsedatum är obligatoriskt');
+    }
+    
+    if (!formData.gender) {
+      errors.push('Kön är obligatoriskt');
+    }
+    
+    // Minst ett sociala medier-fält måste vara ifyllt
+    const socialMediaFields = [
+      formData.instagram_handle,
+      formData.youtube_handle,
+      formData.tiktok_handle,
+      formData.facebook_handle,
+      formData.twitter_handle,
+      formData.snapchat_handle
+    ];
+    
+    const hasSocialMedia = socialMediaFields.some(field => field && field.trim().length > 0);
+    if (!hasSocialMedia) {
+      errors.push('Minst ett sociala medier-fält måste fyllas i');
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = async () => {
     try {
+      const validationErrors = validateForm();
+      
+      if (validationErrors.length > 0) {
+        toast({
+          title: "Ofullständig profil",
+          description: validationErrors.join(', '),
+          variant: "destructive"
+        });
+        return;
+      }
+      
       await onComplete(formData);
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -220,18 +261,26 @@ export function ExtendedProfileForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="dateOfBirth">Födelsedatum</Label>
+              <Label htmlFor="dateOfBirth" className="text-sm font-medium">
+                Födelsedatum <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="dateOfBirth"
                 type="date"
                 value={formData.date_of_birth || ''}
                 onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                className={!formData.date_of_birth ? 'border-destructive' : ''}
               />
+              {!formData.date_of_birth && (
+                <p className="text-xs text-destructive mt-1">Detta fält är obligatoriskt</p>
+              )}
             </div>
             <div>
-              <Label htmlFor="gender">Kön</Label>
+              <Label htmlFor="gender" className="text-sm font-medium">
+                Kön <span className="text-destructive">*</span>
+              </Label>
               <Select value={formData.gender || ''} onValueChange={(value) => handleInputChange('gender', value)}>
-                <SelectTrigger>
+                <SelectTrigger className={!formData.gender ? 'border-destructive' : ''}>
                   <SelectValue placeholder="Välj kön" />
                 </SelectTrigger>
                 <SelectContent>
@@ -241,6 +290,9 @@ export function ExtendedProfileForm({
                   <SelectItem value="vill_inte_ange">Vill inte ange</SelectItem>
                 </SelectContent>
               </Select>
+              {!formData.gender && (
+                <p className="text-xs text-destructive mt-1">Detta fält är obligatoriskt</p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -322,27 +374,6 @@ export function ExtendedProfileForm({
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="creativeStrengths">Kreativa styrkor</Label>
-            <Textarea
-              id="creativeStrengths"
-              value={formData.creative_strengths || ''}
-              onChange={(e) => handleInputChange('creative_strengths', e.target.value)}
-              placeholder="Vad är du bra på?"
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="challenges">Utmaningar</Label>
-            <Textarea
-              id="challenges"
-              value={formData.challenges || ''}
-              onChange={(e) => handleInputChange('challenges', e.target.value)}
-              placeholder="Vilka utmaningar står du inför?"
-              rows={2}
-            />
-          </div>
         </CardContent>
       </Card>
 
@@ -401,34 +432,18 @@ export function ExtendedProfileForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="managerName">Managers namn</Label>
-              <Input
-                id="managerName"
-                value={formData.manager_name || ''}
-                onChange={(e) => handleInputChange('manager_name', e.target.value)}
-                placeholder="Manager/agent namn"
-              />
-            </div>
-            <div>
-              <Label htmlFor="managerEmail">Managers e-post</Label>
-              <Input
-                id="managerEmail"
-                type="email"
-                value={formData.manager_email || ''}
-                onChange={(e) => handleInputChange('manager_email', e.target.value)}
-                placeholder="manager@example.com"
-              />
-            </div>
-          </div>
         </CardContent>
       </Card>
 
       {/* Social Media */}
       <Card>
         <CardHeader>
-          <CardTitle>Sociala medier</CardTitle>
+          <CardTitle>
+            Sociala medier <span className="text-destructive">*</span>
+          </CardTitle>
+          <CardDescription>
+            Fyll i minst ett av dina sociala medier-konton för att aktivera dina pillars
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -499,35 +514,6 @@ export function ExtendedProfileForm({
         </CardContent>
       </Card>
 
-      {/* Health & Accessibility */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Hälsa och tillgänglighet</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="physicalLimitations">Fysiska begränsningar</Label>
-            <Textarea
-              id="physicalLimitations"
-              value={formData.physical_limitations || ''}
-              onChange={(e) => handleInputChange('physical_limitations', e.target.value)}
-              placeholder="Eventuella fysiska begränsningar..."
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="neurodiversity">Neurodiversitet</Label>
-            <Textarea
-              id="neurodiversity"
-              value={formData.neurodiversity || ''}
-              onChange={(e) => handleInputChange('neurodiversity', e.target.value)}
-              placeholder="ADHD, autism, dyslexi etc..."
-              rows={2}
-            />
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Platforms & Tags */}
       <Card>
