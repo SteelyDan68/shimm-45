@@ -12,6 +12,7 @@
  * - Unified permission system
  * - Consistent UX patterns
  * - Performance optimized
+ * - Mobile-first responsive design
  * 
  * SECTIONS:
  * 1. User Overview & CRUD
@@ -41,6 +42,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileContainer, MobileTouchButton, MobileGrid, MobileStack } from '@/components/ui/mobile-responsive';
+import { ResponsiveTable } from '@/components/ui/mobile-table';
 
 // Icons
 import { 
@@ -119,6 +123,7 @@ export function CentralUserManager() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user: currentUser, hasRole } = useAuth();
+  const isMobile = useIsMobile();
   
   /**
    * ========================================================================

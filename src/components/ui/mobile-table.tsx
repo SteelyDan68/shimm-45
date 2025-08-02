@@ -1,106 +1,175 @@
-import * as React from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye, Edit3, Trash2, Key } from "lucide-react"
-import type { UnifiedUser } from "@/hooks/useUnifiedUserData"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
-interface MobileUserCardProps {
-  user: UnifiedUser;
-  onViewProfile: (user: UnifiedUser) => void;
-  onEditUser: (user: UnifiedUser) => void;
-  onDeleteUser: (userId: string) => void;
-  onNavigateToProfile: (userId: string) => void;
-  isDeleting?: boolean;
-  getRoleBadge: (roles: string[]) => React.ReactNode;
-  getRoleIcon: (roles: string[]) => React.ReactNode;
+interface MobileTableRowData {
+  id: string;
+  title: string;
+  subtitle?: string;
+  badges?: Array<{
+    label: string;
+    variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  }>;
+  actions?: React.ReactNode;
+  fields?: Array<{
+    label: string;
+    value: string | React.ReactNode;
+  }>;
 }
 
-export function MobileUserCard({ 
-  user, 
-  onViewProfile, 
-  onEditUser, 
-  onDeleteUser, 
-  onNavigateToProfile,
-  isDeleting = false,
-  getRoleBadge,
-  getRoleIcon
-}: MobileUserCardProps) {
-  const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email?.split('@')[0] || 'Okänd användare';
-  
-  return (
-    <Card className="mb-3">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
-            <Avatar className="h-10 w-10 flex-shrink-0">
-              <AvatarFallback className="text-sm">
-                {userName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                {getRoleIcon(user.roles)}
-                <p className="font-medium text-sm truncate">{userName}</p>
+interface ResponsiveTableProps {
+  data: MobileTableRowData[];
+  columns: Array<{
+    key: string;
+    label: string;
+    className?: string;
+  }>;
+  onRowClick?: (item: MobileTableRowData) => void;
+  className?: string;
+}
+
+// Enhanced mobile-responsive table wrapper
+export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
+  data,
+  columns,
+  onRowClick,
+  className
+}) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className={cn("space-y-3", className)}>
+        {data.map((item) => (
+          <Card 
+            key={item.id} 
+            className={cn(
+              "cursor-pointer transition-all hover:shadow-md active:scale-[0.98]",
+              onRowClick && "hover:bg-muted/50"
+            )}
+            onClick={() => onRowClick?.(item)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-sm truncate">{item.title}</h3>
+                  {item.subtitle && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">
+                      {item.subtitle}
+                    </p>
+                  )}
+                </div>
+                {item.actions && (
+                  <div className="ml-2 flex-shrink-0">
+                    {item.actions}
+                  </div>
+                )}
               </div>
               
-              <p className="text-xs text-muted-foreground truncate mb-2">
-                {user.email}
-              </p>
-              
-              <div className="flex flex-wrap items-center gap-2">
-                {getRoleBadge(user.roles)}
-                <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                  {user.status === 'active' ? 'Aktiv' : 'Inaktiv'}
-                </Badge>
-              </div>
-              
-              {user.last_login_at && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Senast inloggad: {new Date(user.last_login_at).toLocaleDateString('sv-SE')}
-                </p>
+              {item.badges && item.badges.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {item.badges.map((badge, index) => (
+                    <Badge 
+                      key={index} 
+                      variant={badge.variant} 
+                      className="text-xs"
+                    >
+                      {badge.label}
+                    </Badge>
+                  ))}
+                </div>
               )}
-            </div>
-          </div>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 flex-shrink-0"
-                disabled={isDeleting}
+              
+              {item.fields && item.fields.length > 0 && (
+                <div className="space-y-2">
+                  {item.fields.map((field, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground">
+                        {field.label}:
+                      </span>
+                      <div className="text-xs font-medium">
+                        {field.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop table view
+  return (
+    <div className="relative w-full overflow-auto">
+      <table className={cn("w-full caption-bottom text-sm", className)}>
+        <thead className="[&_tr]:border-b">
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={column.key}
+                className={cn(
+                  "h-12 px-4 text-left align-middle font-medium text-muted-foreground",
+                  column.className
+                )}
               >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="z-50">
-              <DropdownMenuItem onClick={() => onViewProfile(user)}>
-                <Eye className="h-4 w-4 mr-2" />
-                Visa profil
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onNavigateToProfile(user.id)}>
-                <Key className="h-4 w-4 mr-2" />
-                Gå till profil
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEditUser(user)}>
-                <Edit3 className="h-4 w-4 mr-2" />
-                Redigera
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => onDeleteUser(user.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Ta bort
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardContent>
-    </Card>
+                {column.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="[&_tr:last-child]:border-0">
+          {data.map((item) => (
+            <tr
+              key={item.id}
+              className={cn(
+                "border-b transition-colors hover:bg-muted/50",
+                onRowClick && "cursor-pointer"
+              )}
+              onClick={() => onRowClick?.(item)}
+            >
+              <td className="p-4 align-middle">
+                <div>
+                  <div className="font-medium">{item.title}</div>
+                  {item.subtitle && (
+                    <div className="text-sm text-muted-foreground">
+                      {item.subtitle}
+                    </div>
+                  )}
+                </div>
+              </td>
+              {item.badges && (
+                <td className="p-4 align-middle">
+                  <div className="flex flex-wrap gap-1">
+                    {item.badges.map((badge, index) => (
+                      <Badge key={index} variant={badge.variant}>
+                        {badge.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </td>
+              )}
+              {item.fields?.map((field, index) => (
+                <td key={index} className="p-4 align-middle">
+                  {field.value}
+                </td>
+              ))}
+              {item.actions && (
+                <td className="p-4 align-middle">
+                  {item.actions}
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
-}
+};

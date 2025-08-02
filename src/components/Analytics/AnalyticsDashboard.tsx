@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileContainer, MobileGrid, MobileStack } from '@/components/ui/mobile-responsive';
+import { ResponsiveChart, MobileStatsCard } from '@/components/ui/mobile-charts';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -31,6 +34,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   onBack, 
   showClientName = true 
 }) => {
+  const isMobile = useIsMobile();
   const { 
     analyticsData, 
     performanceMetrics, 
@@ -43,8 +47,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
   if (isLoading || !analyticsData || !performanceMetrics) {
     return (
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <MobileContainer className="space-y-6">
+        <MobileGrid columns={isMobile ? 1 : 2}>
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -57,8 +61,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </CardContent>
             </Card>
           ))}
-        </div>
-      </div>
+        </MobileGrid>
+      </MobileContainer>
     );
   }
 
@@ -75,11 +79,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <MobileContainer className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className={isMobile ? "space-y-4" : "flex flex-row items-center justify-between"}>
         <div>
-          <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+          <h1 className={isMobile ? "text-xl font-bold" : "text-2xl font-bold"}>Analytics Dashboard</h1>
           <p className="text-muted-foreground">
             Spåra din utveckling och framsteg
           </p>
@@ -98,67 +102,41 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </Select>
           <Button variant="outline" size="sm" onClick={() => exportAnalytics('json')}>
             <Download className="h-4 w-4 mr-2" />
-            Exportera
+            {isMobile ? "" : "Exportera"}
           </Button>
         </div>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Övergripande Framsteg</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.overallProgress}%</div>
-            <Progress value={analyticsData.overallProgress} className="mt-2" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Velocity Score</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.velocityScore}</div>
-            <p className="text-xs text-muted-foreground">
-              Produktivitet: {performanceMetrics.productivityScore}%
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inloggningssvit</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.loginStreak}</div>
-            <p className="text-xs text-muted-foreground">
-              dagar i rad
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Uppgifter Slutförda</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.taskCompletionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              denna period
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <MobileGrid columns={isMobile ? 1 : 2}>
+        <MobileStatsCard
+          title="Övergripande Framsteg"
+          value={`${analyticsData.overallProgress}%`}
+          icon={<Target className="h-4 w-4" />}
+        />
+        <MobileStatsCard
+          title="Velocity Score"
+          value={analyticsData.velocityScore}
+          subtitle={`Produktivitet: ${performanceMetrics.productivityScore}%`}
+          icon={<Zap className="h-4 w-4" />}
+        />
+        <MobileStatsCard
+          title="Inloggningssvit"
+          value={analyticsData.loginStreak}
+          subtitle="dagar i rad"
+          icon={<Calendar className="h-4 w-4" />}
+        />
+        <MobileStatsCard
+          title="Uppgifter Slutförda"
+          value={`${analyticsData.taskCompletionRate}%`}
+          subtitle="denna period"
+          icon={<Award className="h-4 w-4" />}
+        />
+      </MobileGrid>
 
       {/* Insights */}
       {insights.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <MobileGrid columns={isMobile ? 1 : 2}>
           {insights.map((insight, index) => (
             <Card key={index} className={`
               ${insight.type === 'success' ? 'border-green-200 bg-green-50' : ''}
@@ -173,50 +151,24 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </CardContent>
             </Card>
           ))}
-        </div>
+        </MobileGrid>
       )}
 
       {/* Pillar Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Fem Pelare - Utveckling
-          </CardTitle>
-          <CardDescription>
-            Din utveckling inom varje pelare över tid
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {analyticsData.pillarsProgress.map((pillar) => (
-              <div key={pillar.pillarKey} className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium capitalize">
-                      {pillar.pillarKey.replace('_', ' ')}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {getTrendIcon(pillar.trend)}
-                      <span className={`text-sm font-medium ${getTrendColor(pillar.trend)}`}>
-                        {pillar.currentScore.toFixed(1)}
-                      </span>
-                      <Badge variant="outline" className="text-xs">
-                        {pillar.trend === 'up' ? '+' : pillar.trend === 'down' ? '' : '±'}
-                        {Math.abs(pillar.change).toFixed(1)}
-                      </Badge>
-                    </div>
-                  </div>
-                  <Progress value={(pillar.currentScore / 10) * 100} className="h-2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <ResponsiveChart
+        title="Fem Pelare - Utveckling"
+        type="progress"
+        data={analyticsData.pillarsProgress.map((pillar) => ({
+          label: pillar.pillarKey.replace('_', ' '),
+          value: pillar.currentScore,
+          percentage: (pillar.currentScore / 10) * 100,
+          trend: pillar.trend,
+          subtitle: `Förändring: ${pillar.trend === 'up' ? '+' : pillar.trend === 'down' ? '' : '±'}${Math.abs(pillar.change).toFixed(1)}`
+        }))}
+      />
 
-      {/* Goals Progress */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Goals and Activity */}
+      <MobileGrid columns={isMobile ? 1 : 2}>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -257,33 +209,35 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
+            <MobileGrid columns={2}>
+              <div className="text-center">
                 <div className="text-2xl font-bold text-primary">
                   {analyticsData.totalSessions}
                 </div>
                 <p className="text-sm text-muted-foreground">Totala sessioner</p>
               </div>
-              <div>
+              <div className="text-center">
                 <div className="text-2xl font-bold text-primary">
                   {analyticsData.averageSessionDuration.toFixed(1)}m
                 </div>
                 <p className="text-sm text-muted-foreground">Snitt sessionstid</p>
               </div>
-            </div>
+            </MobileGrid>
             
             <div className="pt-4 border-t">
               <h4 className="font-medium mb-2 flex items-center gap-2">
                 <Brain className="h-4 w-4" />
                 Stefan Interaktioner
               </h4>
-              <div className="flex justify-between text-sm">
-                <span>Totala chattningar:</span>
-                <span className="font-medium">{analyticsData.stefanInteractions}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Följda rekommendationer:</span>
-                <span className="font-medium">{analyticsData.aiRecommendationsFollowed}</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>Totala chattningar:</span>
+                  <span className="font-medium">{analyticsData.stefanInteractions}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Följda rekommendationer:</span>
+                  <span className="font-medium">{analyticsData.aiRecommendationsFollowed}</span>
+                </div>
               </div>
             </div>
 
@@ -292,7 +246,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 <Clock className="h-4 w-4" />
                 Engagemang
               </h4>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm">Engagemangsnivå:</span>
                 <Badge 
                   variant={performanceMetrics.engagementLevel === 'high' ? 'default' : 
@@ -303,7 +257,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                    performanceMetrics.engagementLevel === 'medium' ? 'Medium' : 'Låg'}
                 </Badge>
               </div>
-              <div className="mt-2">
+              <div>
                 <div className="text-xs text-muted-foreground mb-1">Konsistens</div>
                 <Progress value={analyticsData.consistencyScore} className="h-2" />
                 <div className="text-xs text-muted-foreground mt-1">
@@ -313,7 +267,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
           </CardContent>
         </Card>
-      </div>
+      </MobileGrid>
 
       {/* AI Recommendations */}
       {performanceMetrics.recommendations.length > 0 && (
@@ -339,6 +293,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </CardContent>
         </Card>
       )}
-    </div>
+    </MobileContainer>
   );
 };
