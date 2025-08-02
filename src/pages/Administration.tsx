@@ -29,6 +29,7 @@ import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManag
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 import { SystemHealthDashboard } from "@/components/SystemHealthDashboard";
 import { SystemIntegrityPanel } from "@/components/SystemIntegrityPanel";
+import { IntegratedAdminDashboard } from "@/components/Admin/IntegratedAdminDashboard";
 
 import { DataRightsCenter } from "@/components/DataRightsCenter";
 import StefanTrainingData from "@/components/StefanTrainingData";
@@ -201,10 +202,17 @@ export function Administration() {
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-6 max-w-7xl">
-        <Tabs defaultValue="users" className="space-y-8">
+        <Tabs defaultValue="dashboard" className="space-y-8">
           {/* Navigation Tabs */}
           <div className="bg-card rounded-lg border p-1 mb-8">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 gap-1">
+              <TabsTrigger 
+                value="dashboard" 
+                className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
+              >
+                <Activity className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Översikt</span>
+              </TabsTrigger>
               <TabsTrigger 
                 value="users" 
                 className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
@@ -249,6 +257,15 @@ export function Administration() {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          {/* Integrated Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6 mt-12">
+            <IntegratedAdminDashboard onNavigateToTab={(tab) => {
+              // Navigera till angiven tab programmatiskt
+              const tabTrigger = document.querySelector(`[value="${tab}"]`) as HTMLElement;
+              tabTrigger?.click();
+            }} />
+          </TabsContent>
 
           {/* User Management Tab */}
           <TabsContent value="users" className="space-y-6 mt-12">

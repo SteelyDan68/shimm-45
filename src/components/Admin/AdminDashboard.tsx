@@ -38,6 +38,8 @@ interface AdminDashboardProps {
 export const AdminDashboard = ({ onNavigateToTab }: AdminDashboardProps) => {
   const { user, hasRole } = useAuth();
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  
+  console.warn('AdminDashboard är deprecated. Använd IntegratedAdminDashboard istället.');
 
   // Mock data - replace with real data hooks
   const adminStats = {
