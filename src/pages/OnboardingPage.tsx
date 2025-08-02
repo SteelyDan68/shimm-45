@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { supabase } from '@/integrations/supabase/client';
-import { OnboardingForm } from '@/components/Onboarding/OnboardingForm';
+import { StreamlinedOnboardingFlow } from '@/components/Onboarding/StreamlinedOnboardingFlow';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -67,14 +67,12 @@ export const OnboardingPage = () => {
     }
   };
 
-  const handleOnboardingComplete = async (data: OnboardingData) => {
-    if (!clientProfile) return;
-
-    const result = await saveOnboardingData(clientProfile.id, data);
-    
-    if (result.success) {
-      // Efter onboarding, gå till insight assessment
+  const handleOnboardingComplete = () => {
+    // Efter onboarding, gå till insight assessment  
+    if (clientProfile) {
       navigate(`/client-assessment/${clientProfile.id}`);
+    } else {
+      navigate('/client-dashboard');
     }
   };
 
@@ -123,9 +121,8 @@ export const OnboardingPage = () => {
         </Button>
       </div>
       
-      <OnboardingForm 
+      <StreamlinedOnboardingFlow 
         onComplete={handleOnboardingComplete}
-        isLoading={isLoading}
       />
     </div>
   );
