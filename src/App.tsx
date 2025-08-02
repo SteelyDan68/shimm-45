@@ -11,6 +11,8 @@ import { AppLayout } from "@/components/AppLayout";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
 import { ProfileCompletionGate } from "@/components/Profile/ProfileCompletionGate";
+import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorProvider } from "@/hooks/useErrorReporting";
 import { Dashboard } from "./pages/Dashboard";
 
 import { ClientProfile } from "./pages/ClientProfile";
@@ -44,8 +46,13 @@ const AppRoutes = () => {
       {/* Protected routes */}
       <Route path="/*" element={
         !user ? <Auth /> : (
-          <AppLayout>
-            <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+          <PageErrorBoundary>
+            <AppLayout>
+              <Suspense fallback={
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              }>
               <Routes>
                <Route path="/" element={
                 (() => {
@@ -87,7 +94,8 @@ const AppRoutes = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>
-          </AppLayout>
+            </AppLayout>
+          </PageErrorBoundary>
         )
       } />
     </Routes>
@@ -95,18 +103,22 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SecurityHeadersProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-          <CookieConsent />
-        </BrowserRouter>
-      </TooltipProvider>
-    </SecurityHeadersProvider>
-  </QueryClientProvider>
+  <CriticalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ErrorProvider>
+        <SecurityHeadersProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppRoutes />
+              <CookieConsent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </SecurityHeadersProvider>
+      </ErrorProvider>
+    </QueryClientProvider>
+  </CriticalErrorBoundary>
 );
 
 export default App;
