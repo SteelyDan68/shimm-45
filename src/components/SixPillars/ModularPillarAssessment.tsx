@@ -51,7 +51,6 @@ export const ModularPillarAssessment = ({
           ]}
         />
         <OpenTrackAssessmentForm
-          clientId={targetId!}
           onComplete={onComplete}
         />
       </div>

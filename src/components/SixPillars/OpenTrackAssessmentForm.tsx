@@ -11,7 +11,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Compass } from 'lucide-react';
 
-export function OpenTrackAssessmentForm({ onComplete }: { onComplete?: () => void }) {
+interface OpenTrackAssessmentFormProps {
+  onComplete?: () => void;
+}
+
+export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,6 +49,7 @@ export function OpenTrackAssessmentForm({ onComplete }: { onComplete?: () => voi
 
       await supabase.from('pillar_assessments').insert({
         user_id: user.id,
+        created_by: user.id,
         pillar_key: 'open_track',
         assessment_data: formData,
         calculated_score: Math.min(score, 100)
