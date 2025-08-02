@@ -1,28 +1,6 @@
 /**
- * ==========================================================================
- * CENTRAL USER MANAGEMENT MODULE
- * ==========================================================================
- * 
- * This is the ONLY component for ALL user management functionality.
- * NEVER create separate components - everything goes here.
- * 
- * ARCHITECTURE:
- * - Modular sections that can be modified independently
- * - Centralized state management
- * - Unified permission system
- * - Consistent UX patterns
- * - Performance optimized
- * - Mobile-first responsive design
- * 
- * SECTIONS:
- * 1. User Overview & CRUD
- * 2. Role Management (integrated)
- * 3. Coach-Client Relationships
- * 4. Onboarding & Invitations
- * 5. Organization Management
- * 6. GDPR & Security
- * 7. System Health & Automation
- * ==========================================================================
+ * Central User Management Component
+ * Handles user administration, roles, and relationships
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -70,54 +48,33 @@ import { deleteUserCompletely } from '@/utils/userDeletion';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 
-/**
- * ==========================================================================
- * CONFIGURATION & CONSTANTS
- * ==========================================================================
- */
-
 const ROLE_CONFIG: Record<AppRole, {
   label: string;
   icon: React.ComponentType<any>;
-  color: string;
-  bgGradient: string;
   description: string;
 }> = {
   superadmin: {
     label: "Superadministratör",
     icon: Crown,
-    color: "text-red-600",
-    bgGradient: "bg-gradient-to-r from-red-500 to-pink-500",
-    description: "Full systemkontroll och alla behörigheter"
+    description: "Full systemkontroll"
   },
   admin: {
     label: "Administratör", 
     icon: Shield,
-    color: "text-orange-600",
-    bgGradient: "bg-gradient-to-r from-orange-500 to-amber-500",
-    description: "Hantera användare, system och konfiguration"
+    description: "Användarhantering"
   },
   coach: {
     label: "Coach",
     icon: Brain,
-    color: "text-blue-600", 
-    bgGradient: "bg-gradient-to-r from-blue-500 to-cyan-500",
-    description: "Handleda klienter och skapa utvecklingsplaner"
+    description: "Klientcoaching"
   },
   client: {
     label: "Klient",
     icon: User,
-    color: "text-green-600",
-    bgGradient: "bg-gradient-to-r from-green-500 to-emerald-500",
-    description: "Få coaching och utveckling"
+    description: "Grundfunktioner"
   }
 };
 
-/**
- * ==========================================================================
- * MAIN COMPONENT
- * ==========================================================================
- */
 
 export function CentralUserManager() {
   const navigate = useNavigate();
@@ -1250,7 +1207,7 @@ export function CentralUserManager() {
                   {Object.entries(ROLE_CONFIG).map(([role, config]) => (
                     <div key={role} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${config.bgGradient}`} />
+                        <config.icon className="h-4 w-4 text-primary" />
                         <span className="font-medium">{config.label}</span>
                       </div>
                       <Badge variant="outline">{stats.byRole[role as AppRole] || 0} användare</Badge>
@@ -1552,8 +1509,8 @@ function UserManagementCard({
           {/* User Info */}
           <div className="flex items-center gap-3 flex-1">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className={roleConfig.bgGradient}>
-                <roleConfig.icon className="h-5 w-5 text-white" />
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                <roleConfig.icon className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
             

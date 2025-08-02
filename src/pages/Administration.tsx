@@ -43,19 +43,6 @@ import { helpTexts } from "@/data/helpTexts";
 export function Administration() {
   const { user, session } = useAuth();
   const { toast } = useToast();
-  const [profileData, setProfileData] = useState({
-    name: "SHIMM Management",
-    email: user?.email || "",
-    timezone: "Stockholm (UTC+1)",
-    language: "Svenska"
-  });
-
-  const [securitySettings, setSecuritySettings] = useState({
-    twoFactor: false,
-    analyticalCookies: true,
-    dataSharing: false
-  });
-
   const [automationSettings, setAutomationSettings] = useState({
     autoDataCollection: true,
     scheduledReports: false,
@@ -63,19 +50,6 @@ export function Administration() {
     alertThresholds: false
   });
 
-  const handleSaveProfile = () => {
-    toast({
-      title: "Profil sparad",
-      description: "Dina profilinställningar har uppdaterats."
-    });
-  };
-
-  const handleSaveSecurity = () => {
-    toast({
-      title: "Säkerhetsinställningar sparade",
-      description: "Dina säkerhetsinställningar har uppdaterats."
-    });
-  };
 
   const handleSaveAutomation = async () => {
     try {
@@ -206,12 +180,12 @@ export function Administration() {
             <div>
               <div className="flex items-center gap-3">
                 <Shield className="h-8 w-8 text-primary" />
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight">Central Användaradministration</h1>
-                  <p className="text-sm text-muted-foreground">
-                    Hantera användare, roller och systemkonfiguration
-                  </p>
-                </div>
+                 <div>
+                   <h1 className="text-2xl font-bold tracking-tight">Administration</h1>
+                   <p className="text-sm text-muted-foreground">
+                     Användarhantering och systemkonfiguration
+                   </p>
+                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -367,61 +341,14 @@ export function Administration() {
               </div>
               <div className="p-6 space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">Automatisk rollhantering</h4>
-                      <p className="text-sm text-muted-foreground">Tilldela roller automatiskt baserat på inbjudningstyp</p>
-                    </div>
-                    <Switch
-                      checked={securitySettings.twoFactor}
-                      onCheckedChange={(checked) => 
-                        setSecuritySettings({...securitySettings, twoFactor: checked})
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-medium mb-4">Rollöversikt</h4>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="flex items-center justify-between p-4 border rounded-lg bg-background">
-                        <div>
-                          <span className="font-medium">Superadmin</span>
-                          <p className="text-sm text-muted-foreground">Full systemkontroll</p>
-                        </div>
-                        <Badge variant="destructive">1 användare</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg bg-background">
-                        <div>
-                          <span className="font-medium">Admin</span>
-                          <p className="text-sm text-muted-foreground">Användarhantering och systemövervakning</p>
-                        </div>
-                        <Badge variant="secondary">3 användare</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg bg-background">
-                        <div>
-                          <span className="font-medium">Coach</span>
-                          <p className="text-sm text-muted-foreground">Klienthantering och coaching-funktioner</p>
-                        </div>
-                        <Badge variant="outline">8 användare</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg bg-background">
-                        <div>
-                          <span className="font-medium">Client</span>
-                          <p className="text-sm text-muted-foreground">Grundläggande användarfunktioner</p>
-                        </div>
-                        <Badge variant="outline">124 användare</Badge>
-                      </div>
-                    </div>
+                   <div>
+                     <h4 className="font-medium mb-4">Rollhantering</h4>
+                     <p className="text-sm text-muted-foreground">
+                       Rollöversikt finns i användarhanteringsfliken med aktuella data.
+                     </p>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <Button onClick={handleSaveSecurity}>
-                    Spara behörighetsinställningar
-                  </Button>
-                </div>
               </div>
             </div>
           </TabsContent>
