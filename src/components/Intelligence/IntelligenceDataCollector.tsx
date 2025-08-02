@@ -110,6 +110,12 @@ export function IntelligenceDataCollector({
       updateProgress('validation', 10, 'Validerar social media handles...');
       
       if (profile.socialProfiles.filter(p => p.handle).length === 0) {
+        console.error('Social handles check failed:', {
+          socialProfiles: profile.socialProfiles,
+          filteredProfiles: profile.socialProfiles.filter(p => p.handle),
+          profileUserId: profile.userId,
+          profileDisplayName: profile.displayName
+        });
         throw new Error('Inga social media handles konfigurerade');
       }
 
