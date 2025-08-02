@@ -43,24 +43,10 @@ export const useCoachClientRelationships = () => {
     try {
       setLoading(true);
 
-      // Fetch all active relationships with enriched data
+      // Fetch all active relationships with basic data first
       const { data: relationshipsData, error: relationshipsError } = await supabase
         .from('coach_client_assignments')
-        .select(`
-          *,
-          coach:profiles!coach_client_assignments_coach_id_fkey(
-            id,
-            first_name,
-            last_name,
-            email
-          ),
-          client:profiles!coach_client_assignments_client_id_fkey(
-            id,
-            first_name,
-            last_name,
-            email
-          )
-        `)
+        .select('*')
         .eq('is_active', true);
 
       if (relationshipsError) throw relationshipsError;
