@@ -55,7 +55,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth, type AppRole } from '@/hooks/useAuth';
 import { useUnifiedUserData, type UnifiedUser } from '@/hooks/useUnifiedUserData';
 import { useUnifiedPermissions } from '@/hooks/useUnifiedPermissions';
-import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
+import { useCoachClientRelationships, type CoachClientRelationship } from '@/hooks/useCoachClientRelationships';
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
 import { PRIMARY_ROLES, PLATFORMS, COUNTRIES } from '@/types/extendedProfile';
@@ -154,6 +154,7 @@ export function CentralUserManager() {
     loading: relationshipsLoading,
     createRelationship,
     removeRelationship,
+    transferClient,
     getClientsByCoach,
     refetch: refetchRelationships
   } = useCoachClientRelationships();
@@ -193,10 +194,15 @@ export function CentralUserManager() {
   const [selectedClient, setSelectedClient] = useState<string>('');
   const [relationshipFilter, setRelationshipFilter] = useState<string>('all');
   
+  // Transfer Client State
+  const [transferringRelationship, setTransferringRelationship] = useState<CoachClientRelationship | null>(null);
+  const [newCoach, setNewCoach] = useState<string>('');
+  
   // Dialog States
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isRelationshipDialogOpen, setIsRelationshipDialogOpen] = useState(false);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   
   // Form States
@@ -489,6 +495,30 @@ export function CentralUserManager() {
   const handleRemoveRelationship = async (relationshipId: string) => {
     const success = await removeRelationship(relationshipId);
     if (success) {
+      await refreshAllData();
+    }
+  };
+
+  const handleTransferClient = async () => {
+    if (!transferringRelationship || !newCoach) {
+      toast({
+        title: "Välj ny coach",
+        description: "Du måste välja en ny coach för att flytta klienten.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const success = await transferClient(
+      transferringRelationship.client_id,
+      transferringRelationship.coach_id,
+      newCoach
+    );
+
+    if (success) {
+      setTransferringRelationship(null);
+      setNewCoach('');
+      setIsTransferDialogOpen(false);
       await refreshAllData();
     }
   };
@@ -1045,6 +1075,17 @@ export function CentralUserManager() {
                                   Visa profil
                                 </Button>
                                 <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setTransferringRelationship(relationship);
+                                    setIsTransferDialogOpen(true);
+                                  }}
+                                >
+                                  <ArrowRight className="h-4 w-4 mr-1" />
+                                  Flytta
+                                </Button>
+                                <Button
                                   variant="destructive"
                                   size="sm"
                                   onClick={() => handleRemoveRelationship(relationship.id)}
@@ -1320,6 +1361,74 @@ export function CentralUserManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Transfer Client Dialog */}
+      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Flytta klient till ny coach</DialogTitle>
+          </DialogHeader>
+          
+          {transferringRelationship && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-2">Flyttar klient:</p>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-green-500" />
+                  <span className="font-medium">
+                    {(() => {
+                      const client = clients.find(c => c.id === transferringRelationship.client_id);
+                      return `${client?.first_name} ${client?.last_name}`.trim() || 'Okänd klient';
+                    })()}
+                  </span>
+                </div>
+                
+                <p className="text-sm text-muted-foreground mt-3 mb-2">Från coach:</p>
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-primary" />
+                  <span className="font-medium">
+                    {(() => {
+                      const coach = coaches.find(c => c.id === transferringRelationship.coach_id);
+                      return `${coach?.first_name} ${coach?.last_name}`.trim() || 'Okänd coach';
+                    })()}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <Label>Välj ny coach</Label>
+                <Select value={newCoach} onValueChange={setNewCoach}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj en coach" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coaches
+                      .filter(coach => coach.id !== transferringRelationship.coach_id)
+                      .map((coach) => (
+                        <SelectItem key={coach.id} value={coach.id}>
+                          {`${coach.first_name} ${coach.last_name}`.trim()}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsTransferDialogOpen(false);
+              setTransferringRelationship(null);
+              setNewCoach('');
+            }}>
+              Avbryt
+            </Button>
+            <Button onClick={handleTransferClient}>
+              Flytta klient
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
