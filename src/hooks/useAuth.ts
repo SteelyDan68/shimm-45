@@ -277,7 +277,9 @@ export const useAuth = () => {
   };
 
   const hasRole = useCallback((role: AppRole): boolean => {
-    return roles.includes(role);
+    const result = roles.includes(role);
+    console.log(`hasRole(${role}): ${result}, current roles:`, roles);
+    return result;
   }, [roles]);
 
   const hasAnyRole = useCallback((checkRoles: AppRole[]): boolean => {
