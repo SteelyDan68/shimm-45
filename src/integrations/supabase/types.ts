@@ -89,6 +89,108 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_coaching_recommendations: {
+        Row: {
+          ai_adaptation_notes: string | null
+          category: string
+          completion_rate: number | null
+          created_at: string
+          dependencies: Json | null
+          description: string
+          difficulty: string
+          due_date: string | null
+          estimated_time_minutes: number
+          expected_outcome: string
+          id: string
+          implementation_date: string | null
+          priority: string
+          reasoning: string
+          recommendation_type: string
+          resources: Json | null
+          session_id: string | null
+          status: string
+          success_metrics: Json | null
+          superseded_by: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          user_notes: string | null
+          user_rating: number | null
+          version: number
+        }
+        Insert: {
+          ai_adaptation_notes?: string | null
+          category: string
+          completion_rate?: number | null
+          created_at?: string
+          dependencies?: Json | null
+          description: string
+          difficulty: string
+          due_date?: string | null
+          estimated_time_minutes?: number
+          expected_outcome: string
+          id?: string
+          implementation_date?: string | null
+          priority: string
+          reasoning: string
+          recommendation_type: string
+          resources?: Json | null
+          session_id?: string | null
+          status?: string
+          success_metrics?: Json | null
+          superseded_by?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          user_notes?: string | null
+          user_rating?: number | null
+          version?: number
+        }
+        Update: {
+          ai_adaptation_notes?: string | null
+          category?: string
+          completion_rate?: number | null
+          created_at?: string
+          dependencies?: Json | null
+          description?: string
+          difficulty?: string
+          due_date?: string | null
+          estimated_time_minutes?: number
+          expected_outcome?: string
+          id?: string
+          implementation_date?: string | null
+          priority?: string
+          reasoning?: string
+          recommendation_type?: string
+          resources?: Json | null
+          session_id?: string | null
+          status?: string
+          success_metrics?: Json | null
+          superseded_by?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          user_notes?: string | null
+          user_rating?: number | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_coaching_recommendations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_coaching_recommendations_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "ai_coaching_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_coaching_sessions: {
         Row: {
           context: Json | null
@@ -622,6 +724,296 @@ export type Database = {
           id?: string
           is_active?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      coaching_analytics: {
+        Row: {
+          created_at: string
+          id: string
+          metric_data: Json | null
+          metric_type: string
+          metric_value: number | null
+          recommendation_id: string | null
+          recorded_at: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_data?: Json | null
+          metric_type: string
+          metric_value?: number | null
+          recommendation_id?: string | null
+          recorded_at?: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_data?: Json | null
+          metric_type?: string
+          metric_value?: number | null
+          recommendation_id?: string | null
+          recorded_at?: string
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_analytics_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_coaching_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_analytics_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_milestones: {
+        Row: {
+          ai_assessment: string | null
+          completion_date: string | null
+          created_at: string
+          description: string
+          id: string
+          milestone_date: string
+          plan_id: string | null
+          status: string
+          success_criteria: Json
+          title: string
+          updated_at: string
+          user_reflection: string | null
+        }
+        Insert: {
+          ai_assessment?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          milestone_date: string
+          plan_id?: string | null
+          status?: string
+          success_criteria?: Json
+          title: string
+          updated_at?: string
+          user_reflection?: string | null
+        }
+        Update: {
+          ai_assessment?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          milestone_date?: string
+          plan_id?: string | null
+          status?: string
+          success_criteria?: Json
+          title?: string
+          updated_at?: string
+          user_reflection?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_milestones_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_plans: {
+        Row: {
+          adaptation_count: number | null
+          ai_generation_context: Json | null
+          completion_rate: number | null
+          created_at: string
+          description: string | null
+          duration_days: number
+          effectiveness_score: number | null
+          focus_areas: Json
+          generated_at: string
+          id: string
+          last_reviewed_at: string | null
+          parent_plan_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          adaptation_count?: number | null
+          ai_generation_context?: Json | null
+          completion_rate?: number | null
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          effectiveness_score?: number | null
+          focus_areas?: Json
+          generated_at?: string
+          id?: string
+          last_reviewed_at?: string | null
+          parent_plan_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          adaptation_count?: number | null
+          ai_generation_context?: Json | null
+          completion_rate?: number | null
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          effectiveness_score?: number | null
+          focus_areas?: Json
+          generated_at?: string
+          id?: string
+          last_reviewed_at?: string | null
+          parent_plan_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_plans_parent_plan_id_fkey"
+            columns: ["parent_plan_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_progress_entries: {
+        Row: {
+          created_at: string
+          description: string | null
+          entry_type: string
+          id: string
+          impact_score: number | null
+          metadata: Json | null
+          plan_id: string | null
+          recommendation_id: string | null
+          session_id: string | null
+          title: string
+          user_id: string
+          visible_to_user: boolean
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          entry_type: string
+          id?: string
+          impact_score?: number | null
+          metadata?: Json | null
+          plan_id?: string | null
+          recommendation_id?: string | null
+          session_id?: string | null
+          title: string
+          user_id: string
+          visible_to_user?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          entry_type?: string
+          id?: string
+          impact_score?: number | null
+          metadata?: Json | null
+          plan_id?: string | null
+          recommendation_id?: string | null
+          session_id?: string | null
+          title?: string
+          user_id?: string
+          visible_to_user?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_progress_entries_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_progress_entries_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_coaching_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_progress_entries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_sessions: {
+        Row: {
+          ai_analysis: string | null
+          context_data: Json
+          created_at: string
+          duration_minutes: number | null
+          effectiveness_score: number | null
+          end_time: string | null
+          id: string
+          implementation_rate: number | null
+          session_type: string
+          start_time: string
+          status: string
+          updated_at: string
+          user_feedback: Json | null
+          user_id: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          context_data?: Json
+          created_at?: string
+          duration_minutes?: number | null
+          effectiveness_score?: number | null
+          end_time?: string | null
+          id?: string
+          implementation_rate?: number | null
+          session_type: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+          user_feedback?: Json | null
+          user_id: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          context_data?: Json
+          created_at?: string
+          duration_minutes?: number | null
+          effectiveness_score?: number | null
+          end_time?: string | null
+          id?: string
+          implementation_rate?: number | null
+          session_type?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+          user_feedback?: Json | null
+          user_id?: string
         }
         Relationships: []
       }

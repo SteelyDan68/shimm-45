@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useGDPR } from '@/hooks/useGDPR';
+import { useToast } from '@/hooks/use-toast';
 
 export interface CoachingContext {
   userId: string;
@@ -80,11 +82,14 @@ export interface PersonalizedCoachingPlan {
 
 export const useAdvancedAICoaching = () => {
   const { user } = useAuth();
+  const { logGDPRActivity } = useGDPR();
+  const { toast } = useToast();
   const [currentSession, setCurrentSession] = useState<CoachingSession | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [recommendations, setRecommendations] = useState<AICoachingRecommendation[]>([]);
   const [coachingPlan, setCoachingPlan] = useState<PersonalizedCoachingPlan | null>(null);
   const [sessionHistory, setSessionHistory] = useState<CoachingSession[]>([]);
+  const [progressEntries, setProgressEntries] = useState<any[]>([]);
 
   // Start a new coaching session
   const startCoachingSession = useCallback(async (
@@ -96,11 +101,30 @@ export const useAdvancedAICoaching = () => {
     setIsAnalyzing(true);
     
     try {
-      // Gather user context
+      // Gather user context from database
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      const { data: recentPillarAssessments } = await supabase
+        .from('pillar_assessments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
       const fullContext: CoachingContext = {
         userId: user.id,
+        pillarsData: recentPillarAssessments,
+        challenges: userProfile?.challenges ? [userProfile.challenges] : [],
+        preferences: {
+          communicationStyle: 'supportive',
+          motivationStyle: 'progress',
+          learningStyle: 'visual'
+        },
         ...context,
-        // Add real data gathering here
       };
 
       // Call AI analysis function
@@ -114,26 +138,56 @@ export const useAdvancedAICoaching = () => {
 
       if (error) throw error;
 
+      // Map database session to our interface
       const session: CoachingSession = {
-        id: `session_${Date.now()}`,
+        id: analysisResult.session.id,
         userId: user.id,
-        startTime: new Date(),
+        startTime: new Date(analysisResult.session.start_time),
         type,
         context: fullContext,
-        recommendations: analysisResult.recommendations || []
+        recommendations: analysisResult.recommendations?.map((rec: any) => ({
+          id: rec.id,
+          type: rec.recommendation_type,
+          title: rec.title,
+          description: rec.description,
+          reasoning: rec.reasoning,
+          priority: rec.priority,
+          category: rec.category,
+          estimatedTime: rec.estimated_time_minutes,
+          difficulty: rec.difficulty,
+          expectedOutcome: rec.expected_outcome,
+          metrics: rec.success_metrics,
+          resources: rec.resources,
+          dependencies: rec.dependencies,
+          dueDate: rec.due_date ? new Date(rec.due_date) : undefined
+        })) || []
       };
 
       setCurrentSession(session);
-      setRecommendations(analysisResult.recommendations || []);
+      setRecommendations(session.recommendations);
+
+      // Log GDPR activity
+      await logGDPRActivity('ai_coaching_session_started', {
+        session_id: session.id,
+        session_type: type
+      });
+
+      toast({
+        title: "AI Coaching Session Startad",
+        description: `${session.recommendations.length} personaliserade rekommendationer genererade`,
+      });
+
       return session;
 
     } catch (error) {
       console.error('Error starting coaching session:', error);
       
-      // Fallback with mock recommendations
+      // Fallback with enhanced mock recommendations
       const mockRecommendations = generateMockRecommendations(type);
+      const sessionId = crypto.randomUUID();
+      
       const session: CoachingSession = {
-        id: `session_${Date.now()}`,
+        id: sessionId,
         userId: user.id,
         startTime: new Date(),
         type,
@@ -143,12 +197,18 @@ export const useAdvancedAICoaching = () => {
 
       setCurrentSession(session);
       setRecommendations(mockRecommendations);
+
+      toast({
+        title: "Session Startad (Offline Mode)",
+        description: "Genererade lokala rekommendationer baserat på användardata",
+      });
+
       return session;
 
     } finally {
       setIsAnalyzing(false);
     }
-  }, [user]);
+  }, [user, logGDPRActivity, toast]);
 
   // End current session with feedback
   const endCoachingSession = useCallback(async (feedback?: CoachingSession['userFeedback']) => {
@@ -287,16 +347,69 @@ export const useAdvancedAICoaching = () => {
     }
   }, [currentSession]);
 
-  // Load session history on mount
+  // Load session history and progress from database
   useEffect(() => {
-    if (user) {
-      const storageKey = `coaching_history_${user.id}`;
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        const history = JSON.parse(stored);
-        setSessionHistory(history);
+    const loadHistoryAndProgress = async () => {
+      if (!user) return;
+
+      try {
+        // Load coaching sessions from database
+        const { data: sessions } = await supabase
+          .from('coaching_sessions')
+          .select(`
+            *,
+            ai_coaching_recommendations(*)
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (sessions) {
+          const mappedSessions = sessions.map((s: any) => ({
+            id: s.id,
+            userId: s.user_id,
+            startTime: new Date(s.start_time),
+            endTime: s.end_time ? new Date(s.end_time) : undefined,
+            type: s.session_type,
+            context: s.context_data,
+            recommendations: s.ai_coaching_recommendations?.map((rec: any) => ({
+              id: rec.id,
+              type: rec.recommendation_type,
+              title: rec.title,
+              description: rec.description,
+              reasoning: rec.reasoning,
+              priority: rec.priority,
+              category: rec.category,
+              estimatedTime: rec.estimated_time_minutes,
+              difficulty: rec.difficulty,
+              expectedOutcome: rec.expected_outcome,
+              metrics: rec.success_metrics,
+              resources: rec.resources
+            })) || [],
+            userFeedback: s.user_feedback
+          }));
+          setSessionHistory(mappedSessions);
+        }
+
+        // Load progress entries for timeline
+        const { data: progressData } = await supabase
+          .from('coaching_progress_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('visible_to_user', true)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (progressData) {
+          setProgressEntries(progressData);
+        }
+
+      } catch (error) {
+        console.error('Error loading coaching history:', error);
       }
-    }
+    };
+
+    loadHistoryAndProgress();
   }, [user]);
 
   return {
@@ -306,6 +419,7 @@ export const useAdvancedAICoaching = () => {
     recommendations,
     coachingPlan,
     sessionHistory,
+    progressEntries,
 
     // Actions
     startCoachingSession,

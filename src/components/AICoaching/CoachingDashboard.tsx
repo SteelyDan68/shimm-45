@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAdvancedAICoaching } from '@/hooks/useAdvancedAICoaching';
+import { CoachingTimeline } from '@/components/ClientPath/CoachingTimeline';
 import { 
   Brain, 
   Target, 
@@ -29,6 +30,7 @@ export function CoachingDashboard() {
     recommendations,
     coachingPlan,
     sessionHistory,
+    progressEntries,
     hasActiveSession,
     sessionDuration,
     totalSessions,
@@ -527,69 +529,81 @@ export function CoachingDashboard() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
-          {sessionHistory.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-semibold mb-2">Ingen historik</h3>
-                <p className="text-muted-foreground">
-                  Dina coaching-sessioner kommer att visas här
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {sessionHistory.slice().reverse().map((session) => (
-                <Card key={session.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">
-                        {session.type === 'assessment' && 'Bedömning'}
-                        {session.type === 'planning' && 'Planering'}
-                        {session.type === 'review' && 'Återblick'}
-                        {session.type === 'emergency' && 'Akut stöd'}
-                      </CardTitle>
-                      <div className="flex items-center gap-2">
-                        {session.userFeedback?.rating && (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 text-yellow-500" />
-                            <span className="text-sm">{session.userFeedback.rating}/5</span>
+          {/* Progress Timeline */}
+          <CoachingTimeline entries={progressEntries} />
+          
+          {/* Session History */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Session Historik
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {sessionHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-semibold mb-2">Ingen historik</h3>
+                  <p className="text-muted-foreground">
+                    Dina coaching-sessioner kommer att visas här
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {sessionHistory.slice().reverse().map((session) => (
+                    <Card key={session.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">
+                            {session.type === 'assessment' && 'Bedömning'}
+                            {session.type === 'planning' && 'Planering'}
+                            {session.type === 'review' && 'Återblick'}
+                            {session.type === 'emergency' && 'Akut stöd'}
+                          </CardTitle>
+                          <div className="flex items-center gap-2">
+                            {session.userFeedback?.rating && (
+                              <div className="flex items-center gap-1">
+                                <Star className="h-3 w-3 text-yellow-500" />
+                                <span className="text-sm">{session.userFeedback.rating}/5</span>
+                              </div>
+                            )}
+                            <span className="text-sm text-muted-foreground">
+                              {formatDistanceToNow(session.startTime, { addSuffix: true, locale: sv })}
+                            </span>
                           </div>
-                        )}
-                        <span className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(session.startTime, { addSuffix: true, locale: sv })}
-                        </span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-sm">
-                        <span className="font-medium">Varaktighet:</span> {
-                          session.endTime 
-                            ? Math.floor((session.endTime.getTime() - session.startTime.getTime()) / (1000 * 60))
-                            : '?'
-                        } minuter
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Rekommendationer:</span> {session.recommendations.length}
-                      </p>
-                      {session.userFeedback?.implementedRecommendations && (
-                        <p className="text-sm">
-                          <span className="font-medium">Genomförda:</span> {session.userFeedback.implementedRecommendations.length}
-                        </p>
-                      )}
-                      {session.userFeedback?.comment && (
-                        <p className="text-sm">
-                          <span className="font-medium">Kommentar:</span> {session.userFeedback.comment}
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <p className="text-sm">
+                            <span className="font-medium">Varaktighet:</span> {
+                              session.endTime 
+                                ? Math.floor((session.endTime.getTime() - session.startTime.getTime()) / (1000 * 60))
+                                : '?'
+                            } minuter
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Rekommendationer:</span> {session.recommendations.length}
+                          </p>
+                          {session.userFeedback?.implementedRecommendations && (
+                            <p className="text-sm">
+                              <span className="font-medium">Genomförda:</span> {session.userFeedback.implementedRecommendations.length}
+                            </p>
+                          )}
+                          {session.userFeedback?.comment && (
+                            <p className="text-sm">
+                              <span className="font-medium">Kommentar:</span> {session.userFeedback.comment}
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
