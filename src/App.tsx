@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
 import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -46,40 +47,40 @@ const AppRoutes = () => {
           <AppLayout>
             <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
               <Routes>
-              <Route path="/" element={
+               <Route path="/" element={
                 (() => {
-                  // Prioritera enligt hierarki: superadmin > admin > coach > client
+                  const userRoles = user ? [] : []; // Will be handled by useAuth roles
                   if (hasRole('superadmin') || hasRole('admin')) return <Dashboard />;
                   if (hasRole('coach')) return <CoachDashboardPage />;
                   if (hasRole('client')) return <ClientDashboard />;
-                  return <Dashboard />; // Fallback
+                  return <Dashboard />;
                 })()
               } />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/client-dashboard" element={<ClientDashboard />} />
-               <Route path="/onboarding" element={
+              <Route path={NAVIGATION_ROUTES.DASHBOARD} element={<Dashboard />} />
+              <Route path={NAVIGATION_ROUTES.CLIENT_DASHBOARD} element={<ClientDashboard />} />
+               <Route path={NAVIGATION_ROUTES.ONBOARDING} element={
                  <ProfileCompletionGate requiredForAssessments={true}>
                    <OnboardingPage />
                  </ProfileCompletionGate>
                } />
-                <Route path="/edit-profile" element={<EditProfilePage />} />
+                <Route path={NAVIGATION_ROUTES.EDIT_PROFILE} element={<EditProfilePage />} />
                 <Route path="/client-assessment/:clientId" element={
                  <ProfileCompletionGate requiredForAssessments={true}>
                    <ClientAssessmentPage />
                  </ProfileCompletionGate>
                } />
               
-              <Route path="/coach" element={<CoachDashboardPage />} />
+              <Route path={NAVIGATION_ROUTES.COACH_DASHBOARD} element={<CoachDashboardPage />} />
               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/user/:userId" element={<UserCrmProfile />} />
-              <Route path="/intelligence" element={<IntelligenceOverview />} />
+              <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
               <Route path="/intelligence/:userId" element={<Intelligence />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/administration" element={<Administration />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/tasks" element={<TasksPage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
-              <Route path="/stefan-chat" element={<StefanChatPage />} />
+              <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
+              <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
+              <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
+              <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
+              <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
+              <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
               <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys</h1><p className="text-muted-foreground">Analytiska insikter om dina klienter finns i varje klientprofil.</p></div>} />
               <Route path="/data-collection" element={<div className="p-6"><h1 className="text-2xl font-bold">Datainsamling</h1><p className="text-muted-foreground">Datainsamlingsverktyg finns integrerade i klientprofilerna.</p></div>} />
               <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter</h1><p className="text-muted-foreground">Automatiska veckobrev skickas varje måndag. Mer rapportfunktionalitet utvecklas.</p></div>} />

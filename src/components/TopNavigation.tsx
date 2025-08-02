@@ -1,19 +1,13 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigation } from "@/hooks/useNavigation";
 import { Button } from "@/components/ui/button";
 import { 
-  Home, 
-  Users, 
-  TrendingUp, 
-  FileText, 
-  Settings,
   LogOut,
   User,
-  Brain,
-  CheckSquare,
-  Calendar,
   Menu,
-  X
+  X,
+  Settings
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -26,52 +20,13 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageIcon } from "@/components/Messaging/MessageIcon";
 
-const superAdminItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Administration", url: "/administration", icon: Settings },
-  { title: "Klienter", url: "/clients", icon: Users },
-  { title: "Coach", url: "/coach", icon: TrendingUp },
-  { title: "Intelligence", url: "/intelligence", icon: Brain },
-  { title: "Meddelanden", url: "/messages", icon: FileText },
-];
-
-const adminItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Administration", url: "/administration", icon: Settings },
-  { title: "Klienter", url: "/clients", icon: Users },
-  { title: "Intelligence", url: "/intelligence", icon: Brain },
-  { title: "Meddelanden", url: "/messages", icon: FileText },
-];
-
-const coachItems = [
-  { title: "Coach Dashboard", url: "/coach", icon: Home },
-  { title: "Klienter", url: "/clients", icon: Users },
-  { title: "Intelligence", url: "/intelligence", icon: Brain },
-  { title: "Meddelanden", url: "/messages", icon: FileText },
-];
-
-const clientItems = [
-  { title: "Min Dashboard", url: "/client-dashboard", icon: Home },
-  { title: "Mina Uppgifter", url: "/tasks", icon: CheckSquare },
-  { title: "Kalender", url: "/calendar", icon: Calendar },
-  { title: "Meddelanden", url: "/messages", icon: FileText },
-];
-
 export function TopNavigation() {
   const { user, signOut, hasRole } = useAuth();
-  const location = useLocation();
+  const { navigation, isActive, routes } = useNavigation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const isActive = (path: string) => location.pathname === path;
-  
-  // Välj navigationsmenyn baserat på användarroll (prioritetsordning)
-  const navItems = (() => {
-    if (hasRole('superadmin')) return superAdminItems;
-    if (hasRole('admin')) return adminItems;
-    if (hasRole('coach')) return coachItems;
-    if (hasRole('client')) return clientItems;
-    return adminItems; // Fallback
-  })();
+  // Get all navigation items for current user
+  const navItems = navigation.flatMap(group => group.items);
   
   return (
     <>

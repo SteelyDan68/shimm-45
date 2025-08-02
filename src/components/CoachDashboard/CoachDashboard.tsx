@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle, Users, Plus, Brain, Target, TrendingUp, CheckSquare, MessageSquare, Calendar, Activity } from 'lucide-react';
 import { HelpTooltip } from '@/components/HelpTooltip';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
 
 export function CoachDashboard() {
@@ -25,41 +25,8 @@ export function CoachDashboard() {
     filteredCount
   } = useCoachDashboard();
 
-  const navigate = useNavigate();
+  const { navigateTo, quickActions } = useNavigation();
   const { user, profile } = useAuth();
-
-  // Use real coach stats instead of mock data
-
-  const quickActions = [
-    {
-      title: 'Lägg till användare',
-      description: 'Registrera en ny användare',
-      icon: Plus,
-      action: () => navigate('/administration'),
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Stefan AI-konsultation',
-      description: 'Få AI-råd för klientarbete',
-      icon: Brain,
-      action: () => navigate('/stefan-chat'),
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'Skapa uppgift',
-      description: 'Tilldela ny uppgift till klient',
-      icon: CheckSquare,
-      action: () => navigate('/tasks?action=create'),
-      color: 'bg-green-500'
-    },
-    {
-      title: 'Schemalägg möte',
-      description: 'Boka tid med klient',
-      icon: Calendar,
-      action: () => navigate('/calendar?action=schedule'),
-      color: 'bg-orange-500'
-    }
-  ];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -172,10 +139,10 @@ export function CoachDashboard() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {quickActions.map((action, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer" onClick={action.action}>
+              <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigateTo(action.url)}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded ${action.color} text-white`}>
+                    <div className="p-2 rounded bg-primary text-primary-foreground">
                       <action.icon className="h-4 w-4" />
                     </div>
                     <div>
