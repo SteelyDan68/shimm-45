@@ -56,6 +56,9 @@ export const PillarSelector = ({
   // Huvudpolicy från AI/Coaching Psykolog: Intelligenta rekommendationer
   useEffect(() => {
     const generateRecommendations = () => {
+      // Kontrollera att vi har data innan vi sätter rekommendationer
+      if (!heatmapData || heatmapData.length === 0) return;
+      
       // Prioritera baserat på scores och användarens behov
       const pillarsByPriority = heatmapData
         .filter(p => p.is_active && p.score > 0)
@@ -68,11 +71,16 @@ export const PillarSelector = ({
         .slice(0, maxSelection)
         .map(p => p.pillar_key);
 
-      setRecommendedPillars(pillarsByPriority);
+      // Undvik att sätta samma data igen (förhindra loops)
+      setRecommendedPillars(prev => {
+        const isSame = prev.length === pillarsByPriority.length && 
+                      prev.every((p, i) => p === pillarsByPriority[i]);
+        return isSame ? prev : pillarsByPriority;
+      });
     };
 
     generateRecommendations();
-  }, [heatmapData, maxSelection]);
+  }, [userId, maxSelection]); // Endast beroende på userId och maxSelection
 
   // Huvudpolicy från Product Manager: Användarfokuserad funktionalitet
   const getPillarIcon = (pillarKey: string) => {
