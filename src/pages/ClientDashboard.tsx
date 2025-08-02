@@ -27,6 +27,7 @@ import { ModularPillarDashboard } from '@/components/FivePillars/ModularPillarDa
 import { EnhancedDashboard } from '@/components/Dashboard/EnhancedDashboard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
+import { PillarJourneyOrchestrator } from '@/components/PillarJourney/PillarJourneyOrchestrator';
 
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
@@ -245,25 +246,11 @@ export const ClientDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Assessment reminder for users */}
+      {/* Pillar Journey Orchestrator for personalized guidance */}
       {!hasCompletedAssessments && (
-        <Alert className="border-blue-200 bg-blue-50">
-          <Brain className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-800">
-            <div className="flex items-center justify-between">
-              <span>
-                <strong>Genomför dina självskattningar</strong> - Gör dina fem pillar-assessments för att aktivera det automatiska systemet och få personliga rekommendationer.
-              </span>
-              <Button 
-                onClick={() => navigate('/tasks')}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 ml-4"
-              >
-                Starta assessments
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
+        <div className="mb-6">
+          <PillarJourneyOrchestrator userId={profile?.id || ''} userName={clientProfile.name} />
+        </div>
       )}
 
       {/* Header */}
