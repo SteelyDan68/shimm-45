@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import { ExtendedProfileForm } from '@/components/Profile/ExtendedProfileForm';
+import { AdminRoleManager } from '@/components/UserAdministration/AdminRoleManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +20,7 @@ export default function AdminEditProfilePage() {
   const [initialData, setInitialData] = useState<ExtendedProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [targetUserName, setTargetUserName] = useState<string>('');
+  const [roleChanged, setRoleChanged] = useState(false);
 
   // Check admin permissions
   const canEditProfile = hasRole('admin') || hasRole('superadmin');
@@ -145,13 +147,27 @@ export default function AdminEditProfilePage() {
         </Card>
       </div>
 
-      <ExtendedProfileForm 
-        onComplete={handleProfileUpdate}
-        onUploadProfilePicture={handleProfilePictureUpload}
-        isLoading={isLoading}
-        initialData={initialData}
-        isClientView={false}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Profile Form - Takes 2 columns */}
+        <div className="lg:col-span-2">
+          <ExtendedProfileForm 
+            onComplete={handleProfileUpdate}
+            onUploadProfilePicture={handleProfilePictureUpload}
+            isLoading={isLoading}
+            initialData={initialData}
+            isClientView={false}
+          />
+        </div>
+
+        {/* Role Management - Takes 1 column */}
+        <div className="lg:col-span-1">
+          <AdminRoleManager
+            targetUserId={userId!}
+            targetUserName={targetUserName}
+            onRoleChanged={() => setRoleChanged(!roleChanged)}
+          />
+        </div>
+      </div>
     </div>
   );
 }

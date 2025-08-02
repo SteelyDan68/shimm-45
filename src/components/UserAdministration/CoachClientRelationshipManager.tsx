@@ -9,12 +9,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
 import { useUnifiedUsers } from '@/hooks/useUnifiedUsers';
-import { Users, UserPlus, UserMinus, ArrowRight, Crown, User, RefreshCw } from 'lucide-react';
+import { Users, UserPlus, UserMinus, ArrowRight, Crown, User, RefreshCw, Link, Filter, Search, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 
 export function CoachClientRelationshipManager() {
+  const navigate = useNavigate();
   const [selectedCoach, setSelectedCoach] = useState<string>('');
   const [selectedClient, setSelectedClient] = useState<string>('');
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCoach, setFilterCoach] = useState<string>('all');
   const { toast } = useToast();
 
   const {
@@ -36,6 +41,24 @@ export function CoachClientRelationshipManager() {
   const clients = getClients();
   const assignedClientIds = new Set(relationships.map(rel => rel.client_id));
   const unassignedClients = clients.filter(client => !assignedClientIds.has(client.id));
+
+  // Filter relationships based on search and coach filter
+  const filteredRelationships = relationships.filter(rel => {
+    const coach = coaches.find(c => c.id === rel.coach_id);
+    const client = clients.find(c => c.id === rel.client_id);
+    
+    const matchesSearch = searchTerm === '' || 
+      coach?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coach?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coach?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCoachFilter = filterCoach === 'all' || rel.coach_id === filterCoach;
+    
+    return matchesSearch && matchesCoachFilter;
+  });
 
   const handleAssignClient = async () => {
     if (!selectedCoach || !selectedClient) {
@@ -213,41 +236,88 @@ export function CoachClientRelationshipManager() {
         </CardContent>
       </Card>
 
+      {/* Search and Filter Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filtrera och Sök
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Sök coach eller klient..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={filterCoach} onValueChange={setFilterCoach}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrera på coach" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alla coaches</SelectItem>
+                {coaches.map((coach) => (
+                  <SelectItem key={coach.id} value={coach.id}>
+                    {coach.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Existing Relationships */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Aktiva Coach-Klient Relationer
+            Aktiva Coach-Klient Relationer ({filteredRelationships.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[400px]">
             <div className="space-y-4">
-              {coaches.map((coach) => {
-                const coachRelationships = getClientsByCoach(coach.id);
-                
-                if (coachRelationships.length === 0) return null;
-
-                return (
-                  <div key={coach.id} className="border rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Crown className="h-4 w-4 text-primary" />
-                      <span className="font-medium">{coach.name}</span>
-                      <Badge variant="secondary">{coachRelationships.length} klienter</Badge>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      {coachRelationships.map((relationship) => (
-                        <div key={relationship.id} className="flex items-center justify-between bg-muted/50 rounded p-2">
+              {filteredRelationships.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>{searchTerm || filterCoach !== 'all' ? 'Inga relationer matchar filtret.' : 'Inga aktiva relationer finns ännu.'}</p>
+                  <p className="text-sm">{searchTerm || filterCoach !== 'all' ? 'Prova att ändra sökterm eller filter.' : 'Skapa en relation för att komma igång.'}</p>
+                </div>
+              ) : (
+                filteredRelationships.map((relationship) => {
+                  const coach = coaches.find(c => c.id === relationship.coach_id);
+                  const client = clients.find(c => c.id === relationship.client_id);
+                  
+                  return (
+                    <div key={relationship.id} className="border rounded-lg p-4 hover:bg-muted/20 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            <span className="text-sm">{relationship.client_name}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {relationship.client_email}
-                            </Badge>
+                            <Crown className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{coach?.name || 'Okänd coach'}</span>
                           </div>
-                          
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-green-500" />
+                            <span className="font-medium">{client?.name || 'Okänd klient'}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/user-profile/${relationship.client_id}`)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Visa profil
+                          </Button>
                           <Button
                             variant="destructive"
                             size="sm"
@@ -256,18 +326,14 @@ export function CoachClientRelationshipManager() {
                             <UserMinus className="h-4 w-4" />
                           </Button>
                         </div>
-                      ))}
+                      </div>
+                      
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        Relation skapad: {new Date(relationship.assigned_at).toLocaleDateString('sv-SE')}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-              
-              {relationships.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>Inga aktiva relationer finns ännu.</p>
-                  <p className="text-sm">Skapa en relation för att komma igång.</p>
-                </div>
+                  );
+                })
               )}
             </div>
           </ScrollArea>
@@ -286,14 +352,23 @@ export function CoachClientRelationshipManager() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {unassignedClients.map((client) => (
-                <div key={client.id} className="flex items-center gap-2 p-2 border rounded">
-                  <User className="h-4 w-4 text-orange-500" />
-                  <span className="text-sm">{client.name}</span>
-                  {client.client_category && (
-                    <Badge variant="outline" className="text-xs">
-                      {client.client_category}
-                    </Badge>
-                  )}
+                <div key={client.id} className="flex items-center justify-between p-2 border rounded hover:bg-muted/20 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm">{client.name}</span>
+                    {client.client_category && (
+                      <Badge variant="outline" className="text-xs">
+                        {client.client_category}
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/user-profile/${client.id}`)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
