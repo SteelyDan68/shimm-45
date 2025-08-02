@@ -3,17 +3,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigation } from "@/hooks/useNavigation";
 import { Button } from "@/components/ui/button";
 import { GlobalSearchBar } from "@/components/GlobalSearch/GlobalSearchBar";
-import { MobileTouchButton, ConditionalRender } from "@/components/ui/mobile-responsive";
+import { MobileTouchButton } from "@/components/ui/mobile-responsive";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useResponsiveNavigation } from "@/hooks/useResponsiveNavigation";
 import { 
   LogOut,
   User,
-  Menu,
-  X,
-  Settings
+  Settings,
+  HelpCircle
 } from "lucide-react";
-import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,175 +24,111 @@ import { MessageIcon } from "@/components/Messaging/MessageIcon";
 
 export function TopNavigation() {
   const { user, signOut, hasRole } = useAuth();
-  const { navigation, isActive, routes } = useNavigation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { routes } = useNavigation();
+  const { open: sidebarOpen } = useSidebar();
   const isMobile = useIsMobile();
   
-  // Get all navigation items for current user
-  const navItems = navigation.flatMap(group => group.items);
-  
-  // Use responsive navigation to determine when to show hamburger menu
-  const { shouldShowHamburger, headerRef } = useResponsiveNavigation({
-    menuItems: navItems.length,
-    minSpaceRequired: 800
-  });
-  
-  // Show hamburger if either mobile OR insufficient space
-  const showHamburgerMenu = isMobile || shouldShowHamburger;
-  
   return (
-    <>
-      <header ref={headerRef} className="nav-mobile bg-card shadow-sm">
-        <div className="h-full px-4 flex items-center justify-between">
-          {/* Logo */}
-          <div data-nav-logo className="flex items-center space-x-4">
-            <h1 className="text-lg sm:text-xl font-bold text-primary">SHIMM</h1>
-          </div>
+    <header className="h-16 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-40">
+      <div className="flex h-full items-center gap-4 px-4">
+        {/* Sidebar Toggle */}
+        <SidebarTrigger className="h-8 w-8" />
+        
+        {/* Logo - Hidden on mobile when sidebar is open */}
+        <div className={`flex items-center ${isMobile && sidebarOpen ? 'hidden' : ''}`}>
+          <NavLink to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <h1 className="text-lg font-bold text-primary">SHIMM</h1>
+          </NavLink>
+        </div>
 
-          {/* Desktop Navigation - only show when there's enough space */}
-          {!showHamburgerMenu && (
-            <nav className="flex items-center space-x-6">
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.title}
-                  to={item.url}
-                  className={({ isActive }) =>
-                    `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`
-                  }
-                >
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.title}</span>
-                </NavLink>
-              ))}
-            </nav>
+        {/* Center Search */}
+        <div className="flex-1 max-w-md mx-4">
+          <GlobalSearchBar variant={isMobile ? "compact" : "full"} className="w-full" />
+        </div>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2">
+          <MessageIcon />
+          
+          {/* Email - Desktop Only */}
+          {!isMobile && (
+            <span className="text-sm text-muted-foreground truncate max-w-48">
+              {user?.email}
+            </span>
           )}
-
-          {/* Center Search - Desktop Only when there's space */}
-          {!showHamburgerMenu && (
-            <div data-nav-search className="flex flex-1 max-w-md mx-8">
-              <GlobalSearchBar variant="full" className="w-full" />
-            </div>
-          )}
-
-          {/* Right side actions */}
-          <div data-nav-actions className="flex items-center space-x-2">
-            {/* Mobile Search - show when hamburger menu is active */}
-            {showHamburgerMenu && (
-              <div>
-                <GlobalSearchBar variant="compact" />
-              </div>
-            )}
-            
-            <MessageIcon />
-            
-            {/* Hamburger menu button - show on mobile OR when insufficient space */}
-            {showHamburgerMenu && (
-              <MobileTouchButton 
-                variant="sm"
-                className="bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border border-border shadow-sm"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="relative h-9 w-9 rounded-full border border-border/50 hover:border-border transition-colors"
+                aria-label="Användarmeny"
               >
-                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </MobileTouchButton>
-            )}
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-xs bg-primary text-primary-foreground font-semibold">
+                    {user?.email?.charAt(0).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
             
-            {/* Email display - only show when there's space */}
-            {!showHamburgerMenu && (
-              <span className="text-sm text-muted-foreground">
-                {user?.email}
-              </span>
-            )}
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="relative rounded-full h-10 w-10 p-0 bg-muted/50 hover:bg-muted border border-border"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-sm bg-primary text-primary-foreground font-semibold">
-                      {user?.email?.charAt(0).toUpperCase() || "N"}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72 bg-popover/95 backdrop-blur border shadow-lg">
+              {/* User Info Header */}
+              <div className="px-3 py-3 border-b border-border">
+                <p className="text-sm font-medium text-foreground truncate" title={user?.email}>
+                  {user?.email}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {hasRole('superadmin') ? 'Superadministratör' : 
+                   hasRole('admin') ? 'Administratör' : 
+                   hasRole('coach') ? 'Coach' : 'Klient'}
+                </p>
+              </div>
               
-              <DropdownMenuContent align="end" className="w-64 bg-popover border border-border shadow-lg z-50">
-                {/* User info header */}
-                <div className="px-3 py-2 border-b border-border">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {user?.email}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {hasRole('superadmin') ? 'Superadministratör' : 
-                     hasRole('admin') ? 'Administratör' : 
-                     hasRole('coach') ? 'Coach' : 'Klient'}
-                  </p>
-                </div>
-                
+              {/* Navigation Links */}
+              <div className="py-1">
                 <DropdownMenuItem asChild>
-                  <NavLink to="/edit-profile" className="flex items-center w-full px-3 py-2 text-sm">
-                    <User className="h-4 w-4 mr-3" />
-                    Min Profil
+                  <NavLink to="/edit-profile" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                    <User className="h-4 w-4 mr-3 text-muted-foreground" />
+                    <span>Min Profil</span>
                   </NavLink>
                 </DropdownMenuItem>
                 
                 {(hasRole('superadmin') || hasRole('admin')) && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <NavLink to="/administration" className="flex items-center w-full px-3 py-2 text-sm">
-                        <Settings className="h-4 w-4 mr-3" />
-                        Administration
-                      </NavLink>
-                    </DropdownMenuItem>
-                  </>
+                  <DropdownMenuItem asChild>
+                    <NavLink to="/administration" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                      <Settings className="h-4 w-4 mr-3 text-muted-foreground" />
+                      <span>Administration</span>
+                    </NavLink>
+                  </DropdownMenuItem>
                 )}
                 
-                <DropdownMenuSeparator />
-                
+                <DropdownMenuItem asChild>
+                  <NavLink to="/stefan-chat" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                    <HelpCircle className="h-4 w-4 mr-3 text-muted-foreground" />
+                    <span>Hjälp & Support</span>
+                  </NavLink>
+                </DropdownMenuItem>
+              </div>
+              
+              <DropdownMenuSeparator />
+              
+              {/* Sign Out */}
+              <div className="py-1">
                 <DropdownMenuItem 
                   onClick={signOut}
-                  className="flex items-center w-full px-3 py-2 text-sm text-destructive focus:text-destructive cursor-pointer"
+                  className="flex items-center w-full px-3 py-2 text-sm text-destructive focus:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
                 >
                   <LogOut className="h-4 w-4 mr-3" />
-                  Logga ut
+                  <span>Logga ut</span>
                 </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </header>
-
-      {/* Navigation Menu - show when hamburger is active */}
-      {isMobileMenuOpen && showHamburgerMenu && (
-        <div className="bg-card border-b shadow-mobile-lg animate-slide-up-mobile">
-          <nav className="px-4 py-4 space-mobile-sm">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.title}
-                to={item.url}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center space-x-3 touch-target-md px-4 rounded-lg text-mobile-base font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/70"
-                  }`
-                }
-              >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                <span className="truncate">{item.title}</span>
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-      )}
-    </>
+      </div>
+    </header>
   );
 }

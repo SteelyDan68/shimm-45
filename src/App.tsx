@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
 import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
+import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
 import { ProfileCompletionGate } from "@/components/Profile/ProfileCompletionGate";
@@ -60,13 +61,10 @@ const AppRoutes = () => {
               }>
               <Routes>
                <Route path="/" element={
-                (() => {
-                  const userRoles = user ? [] : []; // Will be handled by useAuth roles
-                  if (hasRole('superadmin') || hasRole('admin')) return <Dashboard />;
-                  if (hasRole('coach')) return <CoachDashboardPage />;
-                  if (hasRole('client')) return <ClientDashboard />;
-                  return <Dashboard />;
-                })()
+                <>
+                  <RoleBasedRedirect />
+                  <Dashboard />
+                </>
               } />
               <Route path={NAVIGATION_ROUTES.DASHBOARD} element={<Dashboard />} />
               <Route path={NAVIGATION_ROUTES.CLIENT_DASHBOARD} element={<ClientDashboard />} />

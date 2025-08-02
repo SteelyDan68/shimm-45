@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   Home, 
   Users, 
   User, 
-  Brain, 
-  Database,
-  TrendingUp,
-  Settings
+  Search,
+  ChevronDown
 } from "lucide-react";
 import {
   Sidebar,
@@ -18,54 +15,32 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigation } from '@/hooks/useNavigation';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 
 interface Client {
   id: string;
   name: string;
   category: string;
   status: string;
-  user_id?: string; // Add user_id for new user-centric navigation
+  user_id?: string;
 }
 
-// Navigationsmenyer baserat på roll
-const getMainItems = (hasRole: (role: string) => boolean) => {
-  const items = [
-    { title: "Dashboard", url: "/", icon: Home },
-  ];
-
-  // Lägg till menyalternativ baserat på roll
-  if (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) {
-    items.push(
-      { title: "Alla Användare", url: "/administration", icon: Users },
-      { title: "Intelligence", url: "/intelligence", icon: Brain },
-      { title: "Analys", url: "/analytics", icon: TrendingUp },
-      { title: "Datainsamling", url: "/data-collection", icon: Database }
-    );
-  }
-
-  // Administration synlig för alla utom klienter som har coach/admin behörigheter
-  if (hasRole('superadmin') || hasRole('admin')) {
-    items.push({ title: "Administration", url: "/administration", icon: Settings });
-  } else if (hasRole('coach')) {
-    // Coach får begränsad administration (utan Säkerhet, Automatisering, Data, Stefandata, GDPR)
-    items.push({ title: "Administration", url: "/administration", icon: Settings });
-  }
-
-  return items;
-};
-
 export function AppSidebar() {
-  const { open, openMobile } = useSidebar();
+  const { open } = useSidebar();
   const location = useLocation();
-  const { user, hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const { navigation, isActive } = useNavigation();
   const { clients: unifiedClients } = useUnifiedClients();
-  
-  const mainItems = getMainItems(hasRole);
+  const [openGroups, setOpenGroups] = useState<string[]>(['Huvudmeny']);
   
   // Map unified clients to sidebar format
   const clients = unifiedClients.map(client => ({
@@ -75,69 +50,123 @@ export function AppSidebar() {
     status: client.status,
     user_id: client.id
   }));
-  
+
   const currentPath = location.pathname;
-  const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
+  
+  const toggleGroup = (groupTitle: string) => {
+    setOpenGroups(prev => 
+      prev.includes(groupTitle) 
+        ? prev.filter(g => g !== groupTitle)
+        : [...prev, groupTitle]
+    );
+  };
+
+  const getNavCls = (itemUrl: string) => 
+    isActive(itemUrl) ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
 
 
   return (
-    <Sidebar className={!open ? "w-14" : "w-60"} collapsible="icon">
-      <SidebarContent>
-        {/* Main Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Huvudmeny</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavCls}>
-                       <item.icon className="h-4 w-4" />
-                       {open && <span>{item.title}</span>}
-                     </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+    <Sidebar 
+      variant="sidebar" 
+      collapsible="icon"
+      className="border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30"
+    >
+      <SidebarContent className="overflow-y-auto">
+        {/* Dynamic Navigation Groups */}
+        {navigation.map((group) => (
+          <Collapsible
+            key={group.title}
+            open={openGroups.includes(group.title)}
+            onOpenChange={() => toggleGroup(group.title)}
+          >
+            <SidebarGroup>
+              <SidebarGroupLabel asChild>
+                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-muted/50 transition-colors rounded-md px-2 py-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {group.title}
+                  </span>
+                  {open && (
+                    <ChevronDown className={`h-3 w-3 transition-transform ${
+                      openGroups.includes(group.title) ? 'rotate-180' : ''
+                    }`} />
+                  )}
+                </CollapsibleTrigger>
+              </SidebarGroupLabel>
+              
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {group.items.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild tooltip={!open ? item.title : undefined}>
+                          <NavLink 
+                            to={item.url} 
+                            className={`${getNavCls(item.url)} transition-colors rounded-md`}
+                            title={!open ? item.title : undefined}
+                          >
+                            <item.icon className="h-4 w-4 flex-shrink-0" />
+                            {open && <span className="truncate">{item.title}</span>}
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        ))}
 
-        {/* Clients */}
-        {clients.length > 0 && (
+        {/* Quick Search - Only when expanded */}
+        {open && (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
           <SidebarGroup>
-            <SidebarGroupLabel>Användare</SidebarGroupLabel>
+            <SidebarGroupLabel>Snabbsökning</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {clients.slice(0, open ? 8 : 0).map((client) => (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/search" className={getNavCls("/search")}>
+                      <Search className="h-4 w-4" />
+                      <span>Sök användare</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Recent Clients - Only for coaches/admins when expanded */}
+        {open && clients.length > 0 && (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Senaste användare</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {clients.slice(0, 5).map((client) => (
                   <SidebarMenuItem key={client.id}>
                     <SidebarMenuButton asChild>
                       <NavLink 
                         to={`/user/${client.user_id || client.id}`} 
-                        className={getNavCls}
+                        className={`${getNavCls(`/user/${client.user_id || client.id}`)} group`}
                       >
-                        <User className="h-4 w-4" />
-                         {open && (
-                           <div className="flex-1 min-w-0">
-                             <span className="truncate">{client.name}</span>
-                             <div className="text-xs text-muted-foreground">
-                               {client.category}
-                             </div>
-                           </div>
-                         )}
+                        <User className="h-4 w-4 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="truncate text-sm">{client.name}</span>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {client.category}
+                          </div>
+                        </div>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
                 
-                {clients.length > 8 && open && (
+                {clients.length > 5 && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <NavLink to="/administration" className={getNavCls}>
-                        <span className="text-xs text-muted-foreground">
-                          +{clients.length - 8} fler...
-                        </span>
+                      <NavLink to="/administration" className="text-xs text-muted-foreground hover:text-foreground">
+                        <Users className="h-4 w-4" />
+                        <span>Visa alla ({clients.length})</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
