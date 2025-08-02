@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigation } from "@/hooks/useNavigation";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import {
   LogOut,
   User,
   Settings,
-  HelpCircle
+  HelpCircle,
+  MessageSquare
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,10 +24,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageIcon } from "@/components/Messaging/MessageIcon";
 
 export function TopNavigation() {
-  const { user, signOut, hasRole } = useAuth();
+  const { user, signOut, hasRole, roles } = useAuth();
   const { routes } = useNavigation();
   const { open: sidebarOpen } = useSidebar();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   return (
     <header className="h-16 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-40">
@@ -46,9 +48,22 @@ export function TopNavigation() {
           <GlobalSearchBar variant={isMobile ? "compact" : "full"} className="w-full" />
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-2">
+        {/* Messages & Notifications - More Prominent */}
+        <div className="flex items-center gap-3">
           <MessageIcon />
+          
+          {/* Quick Message Button for Coaches */}
+          {(roles.includes('coach') || roles.includes('admin') || roles.includes('superadmin')) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/messages?action=compose')}
+              className="hidden md:flex items-center gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden lg:inline">Nytt meddelande</span>
+            </Button>
+          )}
           
           {/* Email - Desktop Only */}
           {!isMobile && (

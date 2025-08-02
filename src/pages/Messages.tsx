@@ -1,21 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings } from 'lucide-react';
-import { ConversationList } from '@/components/Messaging/ConversationList';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Settings, MessageSquare, Users, Brain, Plus } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { ConversationList } from '@/components/Messaging/EnhancedConversationList';
 import { ConversationView } from '@/components/Messaging/ConversationView';
 import { ComposeMessage } from '@/components/Messaging/ComposeMessage';
 import { MessagePreferences } from '@/components/Messaging/MessagePreferences';
 import { useMessages } from '@/hooks/useMessages';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Messages() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { hasRole } = useAuth();
   const [selectedConversation, setSelectedConversation] = useState<{
     id: string;
     name: string;
     avatar?: string;
   } | null>(null);
   const [showCompose, setShowCompose] = useState(false);
-  const { refetch } = useMessages();
+  const { refetch, unreadCount } = useMessages();
+
+  // Handle URL actions (like ?action=compose)
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'compose') {
+      setShowCompose(true);
+      setSelectedConversation(null);
+    }
+  }, [searchParams]);
 
   const handleSelectConversation = (id: string, name: string, avatar?: string) => {
     setSelectedConversation({ id, name, avatar });
@@ -43,26 +58,74 @@ export function Messages() {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Meddelanden</h1>
-        <p className="text-muted-foreground">
-          Chatta med dina coaches och klienter
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <MessageSquare className="h-8 w-8 text-primary" />
+              Meddelanden
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="animate-pulse">
+                  {unreadCount} nya
+                </Badge>
+              )}
+            </h1>
+            <p className="text-muted-foreground">
+              {hasRole('coach') ? 'Kommunicera med dina klienter och kollegor' : 
+               hasRole('client') ? 'Chatta med din coach och få stöd' :
+               'Chatta med coaches och klienter'}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {(hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
+              <Button
+                onClick={handleNewMessage}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Nytt meddelande
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="messages" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="messages">Meddelanden</TabsTrigger>
-          <TabsTrigger value="settings">
-            <Settings className="h-4 w-4 mr-2" />
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="messages" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Meddelanden
+            {unreadCount > 0 && (
+              <Badge variant="destructive" className="h-5 w-5 rounded-full p-0 text-xs">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
             Inställningar
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="messages">
-          <Card className="h-[600px]">
+          <Card className="h-[600px] shadow-lg border-2">
             <div className="flex h-full">
-              {/* Conversation List */}
-              <div className="w-80 border-r flex-shrink-0">
+              {/* Enhanced Conversation List */}
+              <div className="w-80 border-r flex-shrink-0 bg-gradient-to-b from-gray-50 to-white">
+                <div className="p-4 border-b bg-white">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg">Konversationer</h3>
+                    {(hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
+                      <Button
+                        size="sm"
+                        onClick={handleNewMessage}
+                        variant="outline"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <ConversationList 
                   onSelectConversation={handleSelectConversation}
                   onNewMessage={handleNewMessage}
@@ -88,17 +151,34 @@ export function Messages() {
                     onClose={handleCloseConversation}
                   />
                 ) : (
-                  <div className="flex-1 flex items-center justify-center text-center">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-24 h-24 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-                        <svg className="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
+                  <div className="flex-1 flex items-center justify-center text-center bg-gradient-to-br from-blue-50 to-purple-50">
+                    <div className="max-w-md mx-auto p-8">
+                      <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                        <MessageSquare className="w-12 h-12 text-blue-600" />
                       </div>
-                      <h3 className="text-lg font-semibold mb-2">Välj en konversation</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Välj en konversation från listan eller starta en ny för att börja chatta.
+                      <h3 className="text-xl font-semibold mb-3 text-gray-800">Välj en konversation</h3>
+                      <p className="text-muted-foreground mb-6 leading-relaxed">
+                        {hasRole('coach') ? 'Starta en konversation med dina klienter för att ge personligt stöd och vägledning.' :
+                         hasRole('client') ? 'Kontakta din coach för att få hjälp och diskutera din utveckling.' :
+                         'Välj en konversation från listan eller starta en ny för att börja chatta.'}
                       </p>
+                      
+                      {(hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
+                        <div className="space-y-3">
+                          <Button
+                            onClick={handleNewMessage}
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Starta ny konversation
+                          </Button>
+                          
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Brain className="h-4 w-4" />
+                            <span>AI-assistans tillgänglig för alla meddelanden</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
