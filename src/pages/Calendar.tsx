@@ -7,17 +7,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, Clock, Users, Plus, ArrowLeft, Video, Phone, Coffee } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Calendar as CalendarIcon, Clock, Users, Plus, ArrowLeft, Video, Phone, Coffee, 
+         Edit, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { CalendarView } from '@/components/Calendar/CalendarView';
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  event_date: string;
+  category: string;
+  created_by: string;
+  created_by_role: string;
+  visible_to_client: boolean;
+  user_id?: string;
+}
 
 export function CalendarPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
   
@@ -25,6 +40,8 @@ export function CalendarPage() {
   const isScheduling = action === 'schedule';
   
   const [loading, setLoading] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [showEventDialog, setShowEventDialog] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -280,34 +297,144 @@ export function CalendarPage() {
     );
   }
 
+  const handleCreateEvent = (date?: Date) => {
+    if (date) {
+      setFormData(prev => ({ ...prev, event_date: date }));
+    }
+    setSearchParams({ action: 'schedule' });
+  };
+
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setShowEventDialog(true);
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('id', eventId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Händelse borttagen",
+        description: "Kalenderhändelsen har tagits bort",
+      });
+
+      setShowEventDialog(false);
+      setSelectedEvent(null);
+      // Trigger calendar refresh by updating search params
+      setSearchParams({});
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort händelsen",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Default calendar overview page
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 max-w-7xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Kalender</h1>
-          <p className="text-muted-foreground">Hantera möten och scheman</p>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <CalendarIcon className="h-8 w-8 text-primary" />
+            Kalender
+          </h1>
+          <p className="text-muted-foreground">
+            Översikt och hantering av möten och scheman
+          </p>
         </div>
-        <Button onClick={() => navigate('/calendar?action=schedule')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Schemalägg möte
-        </Button>
       </div>
 
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Kalendervy kommer snart</h3>
-            <p className="text-muted-foreground mb-4">
-              Här kommer du att kunna se alla schemalagda möten.
-            </p>
-            <Button onClick={() => navigate('/calendar?action=schedule')}>
-              Schemalägg ditt första möte
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <CalendarView 
+        onCreateEvent={handleCreateEvent}
+        onEventClick={handleEventClick}
+      />
+
+      {/* Event Details Dialog */}
+      <Dialog open={showEventDialog} onOpenChange={setShowEventDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5" />
+              Händelsedetaljer
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedEvent && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{selectedEvent.title}</h3>
+                {selectedEvent.description && (
+                  <p className="text-muted-foreground mt-1">{selectedEvent.description}</p>
+                )}
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    {format(new Date(selectedEvent.event_date), 'PPPp', { locale: sv })}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="capitalize">{selectedEvent.category.replace('_', ' ')}</span>
+                </div>
+
+                {selectedEvent.user_id && (
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span>Kopplad till klient</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    // Pre-fill form with existing event data for editing
+                    const eventDate = new Date(selectedEvent.event_date);
+                    setFormData({
+                      title: selectedEvent.title,
+                      description: selectedEvent.description || '',
+                      event_date: eventDate,
+                      time: format(eventDate, 'HH:mm'),
+                      duration: '60', // Default, could be stored in DB
+                      category: selectedEvent.category,
+                      user_id: selectedEvent.user_id || '',
+                      visible_to_client: selectedEvent.visible_to_client
+                    });
+                    setShowEventDialog(false);
+                    setSearchParams({ action: 'schedule', edit: selectedEvent.id });
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Redigera
+                </Button>
+                
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteEvent(selectedEvent.id)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Ta bort
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
