@@ -18,7 +18,6 @@ import UserCrmProfile from "./pages/UserCrmProfile";
 import { ClientDashboard } from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import EditProfilePage from "./pages/EditProfilePage";
-import AdminEditProfilePage from "./pages/AdminEditProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
 import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
@@ -64,8 +63,6 @@ const AppRoutes = () => {
                  </ProfileCompletionGate>
                } />
                 <Route path="/edit-profile" element={<EditProfilePage />} />
-                <Route path="/admin/edit-profile/:userId" element={<AdminEditProfilePage />} />
-                <Route path="/user-profile/:userId" element={<UserProfile />} />
                 <Route path="/client-assessment/:clientId" element={
                  <ProfileCompletionGate requiredForAssessments={true}>
                    <ClientAssessmentPage />

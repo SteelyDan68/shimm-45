@@ -16,7 +16,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AdminUserCreation } from '../UserAdministration/AdminUserCreation';
+// Removed AdminUserCreation - now integrated in CentralUserManager
 import { OnboardingForm } from '../Onboarding/OnboardingForm';
 import { ModularPillarAssessment } from '../FivePillars/ModularPillarAssessment';
 import { HabitFormationCenter } from '../HabitFormation/HabitFormationCenter';
@@ -229,7 +229,13 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AdminUserCreation onUserCreated={handleClientCreated} />
+              <div className="text-center py-8">
+                <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground mb-4">Användarskapa är nu integrerat i Central Användarhantering</p>
+                <Button onClick={() => window.location.href = '/administration'}>
+                  Gå till Central Användarhantering
+                </Button>
+              </div>
             </CardContent>
           </Card>
         );
