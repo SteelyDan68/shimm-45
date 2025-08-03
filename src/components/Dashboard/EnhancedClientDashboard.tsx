@@ -23,8 +23,15 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
     pillarProgress,
     activeDevelopmentPlans,
     overallProgress,
-    getNextUnlockedPillar
+    getNextUnlockedPillar,
+    refreshProgress
   } = usePillarOrchestration();
+
+  // Refresh data när komponenten visas igen
+  const handleShowPillarJourney = () => {
+    refreshProgress(); // Uppdatera all data innan visning
+    setShowPillarJourney(true);
+  };
 
   if (loading) {
     return (
@@ -104,7 +111,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                 </p>
                 <Button 
                   className="w-full bg-blue-600 hover:bg-blue-700"
-                  onClick={() => setShowPillarJourney(true)}
+                  onClick={handleShowPillarJourney}
                 >
                   <ArrowRight className="w-4 h-4 mr-2" />
                   Starta {PILLAR_MODULES[nextPillar].name}
@@ -207,7 +214,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
               </p>
               <Button 
                 className="bg-purple-600 hover:bg-purple-700"
-                onClick={() => setShowPillarJourney(true)}
+                onClick={handleShowPillarJourney}
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Öppna Pillar-resa

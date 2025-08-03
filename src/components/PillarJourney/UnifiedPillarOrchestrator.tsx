@@ -43,7 +43,8 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
     assessments, 
     loading: pillarsLoading,
     getActivatedPillars,
-    getCompletedPillars
+    getCompletedPillars,
+    refetch: refetchPillarData
   } = useUserPillars(user?.id || '');
 
   const { 
@@ -67,9 +68,13 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
     setFlowState('assessment');
   };
 
-  const handleAssessmentComplete = (pillarKey: PillarKey, data: Record<string, any>) => {
+  const handleAssessmentComplete = async (pillarKey: PillarKey, data: Record<string, any>) => {
     console.log('Assessment completed for:', pillarKey, data);
     setAssessmentData(data);
+    
+    // Uppdatera pillar data efter genomförd assessment
+    await refetchPillarData();
+    
     setFlowState('calibration');
 
     toast({
@@ -96,7 +101,10 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
     setFlowState('plan_complete');
   };
 
-  const handleStartNewPillar = () => {
+  const handleStartNewPillar = async () => {
+    // Uppdatera data innan vi återgår till gateway
+    await refetchPillarData();
+    
     setSelectedPillar(null);
     setAssessmentData(null);
     setIntensity(null);
