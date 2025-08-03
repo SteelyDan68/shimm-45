@@ -11,6 +11,7 @@ import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { StefanAIWidget } from './StefanAIWidget';
 
 interface Conversation {
   participantId: string;
@@ -57,18 +58,38 @@ export const ConversationList = ({
       
       // For clients - automatically add their coach even if no messages yet
       if (hasRole('client')) {
-        const userCoach = getCurrentUserCoach();
-        console.log('🔍 Client coach relationship:', userCoach);
+        console.log('🔍 Looking for coach assignments for client:', user.id);
         
-        if (userCoach?.coach_id) {
-          console.log('✅ Adding coach to conversation list:', userCoach.coach_id);
+        // Fetch coach assignments directly from database
+        const { data: coachAssignments, error } = await supabase
+          .from('coach_client_assignments')
+          .select('coach_id')
+          .eq('client_id', user.id)
+          .eq('is_active', true);
+          
+        console.log('🔍 Coach assignments result:', { coachAssignments, error });
+        
+        if (coachAssignments && coachAssignments.length > 0) {
+          const coachId = coachAssignments[0].coach_id;
+          console.log('✅ Adding coach to conversation list:', coachId);
           // Initialize conversation with coach even if no messages
-          if (!conversationMap.has(userCoach.coach_id)) {
-            conversationMap.set(userCoach.coach_id, []);
+          if (!conversationMap.has(coachId)) {
+            conversationMap.set(coachId, []);
           }
         } else {
-          console.warn('❌ No coach found for client:', user.id);
+          console.warn('❌ No coach assignments found for client:', user.id);
         }
+      }
+      
+      // First, get coach assignments for client validation
+      let clientCoachAssignments: any[] = [];
+      if (hasRole('client')) {
+        const { data: assignments } = await supabase
+          .from('coach_client_assignments')
+          .select('coach_id')
+          .eq('client_id', user.id)
+          .eq('is_active', true);
+        clientCoachAssignments = assignments || [];
       }
       
       // Filter messages based on coach-client relationships
@@ -85,10 +106,9 @@ export const ConversationList = ({
           return isCoachClient(user.id, partnerId);
         }
         
-        // Clients can only message their assigned coach
+        // Clients can only message their assigned coach  
         if (hasRole('client')) {
-          const userCoach = getCurrentUserCoach();
-          return userCoach?.coach_id === partnerId;
+          return clientCoachAssignments.some(assignment => assignment.coach_id === partnerId);
         }
         
         return false; // Default: no access
@@ -249,6 +269,17 @@ export const ConversationList = ({
           />
         </div>
       </div>
+
+      
+      {/* Stefan AI Widget - Always visible for clients */}
+      {hasRole('client') && (
+        <div className="p-2">
+          <StefanAIWidget 
+            onSelectConversation={onSelectConversation}
+            selectedConversationId={selectedConversationId}
+          />
+        </div>
+      )}
 
       {/* Conversations */}
       <ScrollArea className="flex-1">

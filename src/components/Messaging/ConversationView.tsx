@@ -11,6 +11,7 @@ import { formatDistanceToNow, format, isSameDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { supabase } from '@/integrations/supabase/client';
+import { StefanConversationView } from './StefanConversationView';
 
 interface ConversationViewProps {
   recipientId: string;
@@ -25,6 +26,10 @@ export const ConversationView = ({
   recipientAvatar, 
   onClose 
 }: ConversationViewProps) => {
+  // Stefan AI special handling
+  if (recipientId === 'stefan-ai') {
+    return <StefanConversationView onClose={onClose} />;
+  }
   const [newMessage, setNewMessage] = useState('');
   const [conversationMessages, setConversationMessages] = useState<Message[]>([]);
   const [isOnline, setIsOnline] = useState(false);
