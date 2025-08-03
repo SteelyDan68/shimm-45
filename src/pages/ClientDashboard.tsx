@@ -264,129 +264,73 @@ export const ClientDashboard = () => {
         <ClientJourneyOrchestrator userId={profile?.id || ''} userName={clientProfile.name} />
       </div>
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Välkommen tillbaka, {clientProfile.name?.split(' ')[0] || profile?.first_name || 'Klient'}!</h1>
-          <p className="text-muted-foreground">Din personliga utveckling och framsteg</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">{clientProfile.category}</Badge>
-          <Badge variant={clientProfile.status === 'active' ? 'default' : 'secondary'}>
-            {clientProfile.status}
-          </Badge>
-        </div>
+      {/* Header - Simplified for 16-year-olds */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold mb-2">Hej {clientProfile.name?.split(' ')[0] || profile?.first_name || 'kille/tjej'}! 👋</h1>
+        <p className="text-muted-foreground">Här kan du se hur du utvecklas och vad du kan göra härnäst</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Genomförda Uppgifter
-              <HelpTooltip content={helpTexts.dashboard.completedTasks} />
-            </CardTitle>
-            <CheckSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completedTasks}</div>
-            <p className="text-xs text-muted-foreground">slutförda tasks</p>
+      {/* Stats Cards - Simple and fun for 16-year-olds */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="text-center">
+          <CardContent className="pt-6">
+            <div className="text-3xl mb-2">✅</div>
+            <div className="text-2xl font-bold text-success">{stats.completedTasks}</div>
+            <p className="text-sm text-muted-foreground">Klara grejer</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Väntande Uppgifter
-              <HelpTooltip content={helpTexts.dashboard.pendingTasks} />
-            </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingTasks}</div>
-            <p className="text-xs text-muted-foreground">att genomföra</p>
+        <Card className="text-center">
+          <CardContent className="pt-6">
+            <div className="text-3xl mb-2">📋</div>
+            <div className="text-2xl font-bold text-primary">{stats.pendingTasks}</div>
+            <p className="text-sm text-muted-foreground">Att göra</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Utvecklingssteg
-              <HelpTooltip content={helpTexts.dashboard.pathEntries} />
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPathEntries}</div>
-            <p className="text-xs text-muted-foreground">dokumenterade steg</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Velocity Score
-              <HelpTooltip content={helpTexts.dashboard.velocityScore} />
-            </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{clientProfile.velocity_score || 'N/A'}</div>
-            <Badge className={getVelocityColor(clientProfile.velocity_score)} variant="secondary">
-              {getVelocityText(clientProfile.velocity_score)}
-            </Badge>
+        <Card className="text-center">
+          <CardContent className="pt-6">
+            <div className="text-3xl mb-2">🚀</div>
+            <div className="text-lg font-bold text-primary">{getVelocityText(clientProfile.velocity_score)}</div>
+            <p className="text-sm text-muted-foreground">Din nivå</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Kapacitetsbarometer och Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            Din nuvarande kapacitet
-            <HelpTooltip content={helpTexts.dashboard.capacityBarometer} />
-          </h2>
-          <CapacityBarometer clientId={clientProfile.id} />
-        </div>
-        
-        {/* Quick Actions för klienter */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-blue-600" />
-              Snabbåtgärder
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => navigate('/edit-profile')}
-              >
-                <User className="h-4 w-4 mr-2" />
-                Uppdatera min profil
-              </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => navigate('/tasks')}
-              >
-                <CheckSquare className="h-4 w-4 mr-2" />
-                Se mina uppgifter
-              </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => navigate('/messages')}
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Kontakta min coach
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Quick Actions - Simplified for 16-year-olds */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">🎯 Vad vill du göra?</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-3">
+            <Button 
+              className="h-16 flex-col gap-2" 
+              variant="outline"
+              onClick={() => navigate('/edit-profile')}
+            >
+              <User className="h-6 w-6" />
+              <span className="text-sm">Min profil</span>
+            </Button>
+            <Button 
+              className="h-16 flex-col gap-2" 
+              variant="outline"
+              onClick={() => navigate('/tasks')}
+            >
+              <CheckSquare className="h-6 w-6" />
+              <span className="text-sm">Mina uppgifter</span>
+            </Button>
+            <Button 
+              className="h-16 flex-col gap-2" 
+              variant="outline"
+              onClick={() => navigate('/messages')}
+            >
+              <MessageSquare className="h-6 w-6" />
+              <span className="text-sm">Chatta</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* AI Recommendations */}
       {clientProfile.logic_state?.recommendation && (
@@ -417,11 +361,11 @@ export const ClientDashboard = () => {
       {/* Main Content Tabs */}
       <Tabs defaultValue={initialTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="enhanced">Översikt</TabsTrigger>
-          <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
-          <TabsTrigger value="journey">Min resa</TabsTrigger>
-          <TabsTrigger value="tasks">Mina Uppgifter</TabsTrigger>
-          <TabsTrigger value="analytics">Analys</TabsTrigger>
+          <TabsTrigger value="enhanced">🏠 Hem</TabsTrigger>
+          <TabsTrigger value="pillars">🎯 Sex Områden</TabsTrigger>
+          <TabsTrigger value="journey">🛤️ Min Resa</TabsTrigger>
+          <TabsTrigger value="tasks">✅ Att Göra</TabsTrigger>
+          <TabsTrigger value="analytics">📊 Mina Stats</TabsTrigger>
         </TabsList>
 
         {/* Enhanced Dashboard - Main Overview */}
@@ -432,7 +376,7 @@ export const ClientDashboard = () => {
           />
         </TabsContent>
 
-        {/* Five Pillars Tab */}
+        {/* Six Pillars Tab */}
         <TabsContent value="pillars" className="space-y-6">
           <ModularPillarDashboard 
             userId={clientProfile.id} 
