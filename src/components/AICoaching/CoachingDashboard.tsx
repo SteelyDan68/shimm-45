@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAdvancedAICoaching } from '@/hooks/useAdvancedAICoaching';
+import { useUnifiedAI } from '@/hooks/useUnifiedAI';
 import { CoachingTimeline } from '@/components/ClientPath/CoachingTimeline';
 import { 
   Brain, 
@@ -24,23 +24,23 @@ import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 export function CoachingDashboard() {
-  const {
-    currentSession,
-    isAnalyzing,
-    recommendations,
-    coachingPlan,
-    sessionHistory,
-    progressEntries,
-    hasActiveSession,
-    sessionDuration,
-    totalSessions,
-    averageSessionRating,
-    startCoachingSession,
-    endCoachingSession,
-    generateCoachingPlan,
-    implementRecommendation,
-    scheduleFollowUp
-  } = useAdvancedAICoaching();
+  const { coachingAnalysis, loading } = useUnifiedAI();
+  
+  // Local state for coaching dashboard
+  const [currentSession, setCurrentSession] = useState<any>(null);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [coachingPlan, setCoachingPlan] = useState<any>(null);
+  const [sessionHistory, setSessionHistory] = useState<any[]>([]);
+  const [progressEntries, setProgressEntries] = useState<any[]>([]);
+  const [sessionDuration, setSessionDuration] = useState(0);
+  
+  // Computed values
+  const hasActiveSession = currentSession !== null;
+  const totalSessions = sessionHistory.length;
+  const averageSessionRating = sessionHistory.length > 0 
+    ? sessionHistory.reduce((acc, s) => acc + (s.userFeedback?.rating || 3), 0) / sessionHistory.length 
+    : 3;
 
   const [sessionFeedback, setSessionFeedback] = useState({ rating: 5, comment: '' });
 

@@ -4,9 +4,9 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { MessageCircle, X, Send, Minimize2, Maximize2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
+import { useUnifiedAI } from '@/hooks/useUnifiedAI';
 
 interface Message {
   id: string;
@@ -32,10 +32,10 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { stefanChat, loading } = useUnifiedAI();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,7 +48,7 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!inputMessage.trim() || isLoading) return;
+    if (!inputMessage.trim() || loading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -58,31 +58,33 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage('');
-    setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('stefan-ai-chat', {
-        body: {
-          message: inputMessage,
-          clientId: clientId,
-          context: null
-        }
+      // Prepare conversation history
+      const conversationHistory = messages.slice(-5).map(msg => ({
+        role: msg.isUser ? 'user' : 'assistant',
+        content: msg.content
+      }));
+
+      const response = await stefanChat({
+        message: currentMessage,
+        conversationHistory
       });
 
-      if (error) throw error;
+      if (response) {
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: response.message,
+          isUser: false,
+          timestamp: new Date()
+        };
 
-      console.log('Stefan AI response:', data); // Debug log
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: data.message || data.response || 'Stefan AI svarade men svaret kunde inte visas.',
-        isUser: false,
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        throw new Error('Stefan AI kunde inte generera ett svar');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -90,8 +92,6 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
         description: "Kunde inte skicka meddelandet. Försök igen.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -174,7 +174,7 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
                     </div>
                   </div>
                 ))}
-                {isLoading && (
+                {loading && (
                   <div className="flex justify-start">
                     <div className="bg-muted p-3 rounded-lg text-sm">
                       <div className="flex items-center gap-1">
@@ -195,13 +195,13 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Skriv ditt meddelande..."
-                  disabled={isLoading}
+                  disabled={loading}
                   className="flex-1"
                 />
                 <Button 
                   type="submit" 
                   size="icon"
-                  disabled={isLoading || !inputMessage.trim()}
+                  disabled={loading || !inputMessage.trim()}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
