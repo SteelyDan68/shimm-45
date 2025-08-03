@@ -224,24 +224,14 @@ export const ConversationList = ({
   if (loading) {
     return (
       <div className="p-4">
-        <div className="text-center mb-4">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
           <p className="text-sm text-muted-foreground">Laddar konversationer...</p>
           {hasRole('client') && (
             <p className="text-xs text-muted-foreground mt-2">
               Hämtar din coach-relation...
             </p>
           )}
-        </div>
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center gap-3 p-3">
-              <div className="w-12 h-12 bg-muted rounded-full animate-pulse" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-muted rounded animate-pulse" />
-                <div className="h-3 bg-muted rounded w-3/4 animate-pulse" />
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     );
