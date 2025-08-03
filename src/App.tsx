@@ -27,6 +27,8 @@ import { TestingPage } from "@/pages/TestingPage";
 import { SixPillars } from "@/pages/SixPillars";
 import { MobileOptimization } from "@/pages/MobileOptimization";
 
+// UNIFIED USER PROFILE - Single Source of Truth
+import { UnifiedUserProfile } from "./components/UnifiedUserProfile";
 import { ClientProfile } from "./pages/ClientProfile";
 import { UserProfile } from "./pages/UserProfile";
 import UserCrmProfile from "./pages/UserCrmProfile";
@@ -118,8 +120,8 @@ const AppRoutes = () => {
                  </div>
                } />
                {/* UNIFIED ROUTING - Single Source of Truth: user_id only */}
-               <Route path="/user/:userId" element={<UserCrmProfile />} />
-               {/* Legacy route for backward compatibility - redirects to unified route */}
+               <Route path="/user/:userId" element={<UnifiedUserProfile />} />
+               {/* Legacy routes for backward compatibility */}
                <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/search" element={<GlobalSearchPage />} />
                <Route path="/collaboration" element={<Collaboration />} />
