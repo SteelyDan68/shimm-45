@@ -17,6 +17,7 @@ import { AutoNotificationSystem } from "@/components/Notifications/AutoNotificat
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
 import { StefanWorkWidget } from "@/components/Stefan/StefanWorkWidget";
+import { StefanWorkTriggersManager } from "@/components/Stefan/StefanWorkTriggersManager";
 import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
@@ -159,6 +160,7 @@ const App = () => (
         <BrowserRouter>
           <UnifiedAuthProvider>
             <StefanContextProvider>
+              <StefanWorkTriggersManager />
               <AnalyticsProvider>
                 <AppRoutes />
                 <StefanWorkWidget />

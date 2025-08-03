@@ -3,7 +3,6 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useStefanPersonality } from '@/hooks/useStefanPersonality';
 import { useUserJourney } from '@/hooks/useUserJourney';
 import { supabase } from '@/integrations/supabase/client';
-import { useStefanWorkTriggers } from '@/hooks/useStefanWorkTriggers';
 
 interface StefanContextData {
   // Current context awareness
@@ -45,9 +44,6 @@ export const StefanContextProvider = ({ children }: StefanContextProviderProps) 
     loading: stefanLoading 
   } = useStefanPersonality();
   const { journeyState } = useUserJourney();
-  
-  // Initialize work-related triggers
-  useStefanWorkTriggers();
   
   const [currentPage, setCurrentPage] = useState('');
   const [currentTask, setCurrentTask] = useState(null);
