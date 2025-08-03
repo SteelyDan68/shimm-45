@@ -119,7 +119,7 @@ export function UnifiedDashboard() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <div className="animate-pulse space-y-4">
           <div className="h-32 bg-muted rounded-lg" />
           <div className="grid gap-4 md:grid-cols-4">
@@ -133,7 +133,7 @@ export function UnifiedDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Welcome Header */}
       <Card className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-200">
         <CardHeader>
