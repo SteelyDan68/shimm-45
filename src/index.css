@@ -272,6 +272,19 @@
       display: none;
     }
   }
+
+  /* Mobile layout optimizations */
+  .mobile-layout {
+    /* Optimize for mobile touch */
+    touch-action: manipulation;
+    /* Improve scrolling performance */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .desktop-layout {
+    /* Desktop-specific optimizations */
+    scroll-behavior: smooth;
+  }
 }
 
 @keyframes fadeInMobile {
