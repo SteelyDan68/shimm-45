@@ -1,5 +1,5 @@
-import { CoachDashboard } from '@/components/CoachDashboard/CoachDashboard';
+import { RealCoachDashboard } from '@/components/CoachDashboard/RealCoachDashboard';
 
 export function CoachDashboardPage() {
-  return <CoachDashboard />;
+  return <RealCoachDashboard />;
 }
