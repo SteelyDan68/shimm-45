@@ -303,16 +303,12 @@ const EnhancedDevelopmentPlanGenerator: React.FC<EnhancedDevelopmentPlanGenerato
       throw calendarError;
     }
 
-    // Save to tasks
     const tasks = activities.map(activity => ({
       user_id: userId,
       title: activity.title,
       description: activity.description,
-      category: activity.category,
-      pillar: activity.pillarKey,
-      estimated_time_minutes: activity.estimatedMinutes,
-      neuroplastic_principle: activity.neuroplasticPrinciple,
-      due_date: activity.scheduledDate.toISOString(),
+      priority: 'medium',
+      deadline: activity.scheduledDate.toISOString(),
       status: 'pending',
       created_by: userId
     }));

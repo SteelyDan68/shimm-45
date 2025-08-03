@@ -133,23 +133,27 @@ export const usePillarOrchestration = () => {
 
   const processDevelopmentPlans = async (tasks: any[]): Promise<DevelopmentPlan[]> => {
     const pillarGroups = tasks.reduce((acc, task) => {
-      if (!task.pillar) return acc;
+      if (!task.title) return acc;
       
-      if (!acc[task.pillar]) {
-        acc[task.pillar] = [];
+      // Simple pillar detection based on task title or metadata
+      const pillarKey = detectPillarFromTask(task);
+      if (!pillarKey) return acc;
+      
+      if (!acc[pillarKey]) {
+        acc[pillarKey] = [];
       }
-      acc[task.pillar].push(task);
+      acc[pillarKey].push(task);
       return acc;
     }, {} as Record<string, any[]>);
 
-    return Object.entries(pillarGroups).map(([pillarKey, pillarTasks]) => {
-      const completedTasks = pillarTasks.filter(t => t.status === 'completed');
-      const oldestTask = pillarTasks.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
-      const newestTask = pillarTasks.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+    return Object.entries(pillarGroups).map(([pillarKey, pillarTasks]: [string, any[]]) => {
+      const completedTasks = pillarTasks.filter((t: any) => t.status === 'completed');
+      const oldestTask = [...pillarTasks].sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
+      const newestTask = [...pillarTasks].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
       
       // Estimate plan duration based on task spread
       const startDate = new Date(oldestTask?.created_at || Date.now());
-      const endDate = new Date(newestTask?.due_date || Date.now());
+      const endDate = new Date(newestTask?.deadline || Date.now());
       const totalWeeks = Math.ceil((endDate.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
       const currentWeek = Math.ceil((Date.now() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
 
@@ -164,6 +168,19 @@ export const usePillarOrchestration = () => {
         lastActivityDate: completedTasks[0]?.updated_at
       };
     });
+  };
+
+  const detectPillarFromTask = (task: any): PillarKey | null => {
+    const title = task.title?.toLowerCase() || '';
+    
+    if (title.includes('self_care') || title.includes('hälsa') || title.includes('välmående')) return 'self_care';
+    if (title.includes('skills') || title.includes('färdigheter') || title.includes('kompetens')) return 'skills';
+    if (title.includes('talent') || title.includes('talang') || title.includes('begåvning')) return 'talent';
+    if (title.includes('brand') || title.includes('varumärke') || title.includes('profil')) return 'brand';
+    if (title.includes('economy') || title.includes('ekonomi') || title.includes('finans')) return 'economy';
+    if (title.includes('open_track') || title.includes('öppet spår') || title.includes('annat')) return 'open_track';
+    
+    return null;
   };
 
   const activatePillar = async (pillarKey: PillarKey) => {
