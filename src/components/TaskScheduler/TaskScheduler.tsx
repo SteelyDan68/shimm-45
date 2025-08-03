@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { AIToTaskConverter } from './AIToTaskConverter';
 import { ManualTaskForm } from './ManualTaskForm';
 import { useTasks } from '@/hooks/useTasks';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Brain, Plus, BarChart3, Zap, Target, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import type { CreateTaskData } from '@/types/tasks';

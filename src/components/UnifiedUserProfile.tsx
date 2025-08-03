@@ -16,9 +16,8 @@ import {
   Phone,
   MapPin
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { useUnifiedPermissions } from '@/hooks/useUnifiedPermissions';
 import { useUserData } from '@/hooks/useUserData';
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 
@@ -49,7 +48,7 @@ export const UnifiedUserProfile = () => {
   // SINGLE SOURCE OF TRUTH: All data fetched via user_id
   const { profile, loading: profileLoading, hasRole, roles } = useUserData(userId);
   const { getExtendedProfile } = useExtendedProfile();
-  const { isSuperAdmin, isAdmin, canManageUsers } = useUnifiedPermissions();
+  const { isSuperAdmin, isAdmin, canManageUsers } = useAuth();
   
   // FORCE DEBUG EVERY RENDER
   console.log('🔥🔥🔥 UnifiedUserProfile: EVERY RENDER DEBUG:', {
@@ -321,7 +320,7 @@ export const UnifiedUserProfile = () => {
           userId={userId!}
           profile={profile}
           extendedProfile={extendedProfile}
-          canEdit={isSuperAdmin || isAdmin}
+          canEdit={isSuperAdmin() || isAdmin()}
           onProfileUpdate={loadUserData}
         />
       )}

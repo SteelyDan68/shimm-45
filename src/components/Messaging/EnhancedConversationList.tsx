@@ -16,7 +16,7 @@ import {
   Filter
 } from 'lucide-react';
 import { useMessages, type Message } from '@/hooks/useMessages';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';

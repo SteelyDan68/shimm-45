@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, MoreVertical, Phone, Video } from 'lucide-react';
 import { useMessages, type Message } from '@/hooks/useMessages';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { formatDistanceToNow, format, isSameDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { HelpTooltip } from '@/components/HelpTooltip';

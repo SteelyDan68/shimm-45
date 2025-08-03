@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ interface MetricCard {
 }
 
 export function UnifiedAnalytics() {
-  const { canViewSystemAnalytics, canViewAllClients } = usePermissions();
+  const { canViewSystemAnalytics, canViewAllClients } = useAuth();
   const [timeRange, setTimeRange] = useState('7d');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState('overview');

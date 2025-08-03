@@ -34,9 +34,8 @@ import {
 
 // Hooks & Types
 import { useToast } from '@/hooks/use-toast';
-import { useAuth, type AppRole } from '@/hooks/useAuth';
+import { useAuth, type AppRole } from '@/providers/UnifiedAuthProvider';
 import { useUnifiedUserData, type UnifiedUser } from '@/hooks/useUnifiedUserData';
-import { useUnifiedPermissions } from '@/hooks/useUnifiedPermissions';
 import { useCoachClientRelationships, type CoachClientRelationship } from '@/hooks/useCoachClientRelationships';
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import type { ExtendedProfileData } from '@/types/extendedProfile';

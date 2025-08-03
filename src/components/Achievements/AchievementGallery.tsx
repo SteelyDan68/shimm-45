@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useProgress } from '@/hooks/useProgress';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { Trophy, Star, Target, Zap, Crown, Lock, Check } from 'lucide-react';
 
 interface AchievementDefinition {

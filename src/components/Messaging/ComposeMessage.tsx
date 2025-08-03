@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Bot, Send } from 'lucide-react';
 import { useMessages } from '@/hooks/useMessages';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 

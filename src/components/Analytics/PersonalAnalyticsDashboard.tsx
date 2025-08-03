@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDailyCheckIn } from '@/hooks/useDailyCheckIn';
 import { useProgress } from '@/hooks/useProgress';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { 
   TrendingUp, 
   TrendingDown, 

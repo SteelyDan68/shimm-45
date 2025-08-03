@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { UniversalAssessmentForm } from '@/components/UniversalAssessment/UniversalAssessmentForm';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, User, Target, Brain } from 'lucide-react';
 

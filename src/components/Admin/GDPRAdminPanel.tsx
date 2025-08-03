@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUnifiedPermissions } from '@/hooks/useUnifiedPermissions';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 
 interface GDPRRequest {
   id: string;
@@ -39,7 +39,7 @@ interface GDPRRequest {
 
 export const GDPRAdminPanel = () => {
   const { toast } = useToast();
-  const { isAdmin } = useUnifiedPermissions();
+  const { isAdmin } = useAuth();
   
   const [exportRequests, setExportRequests] = useState<GDPRRequest[]>([]);
   const [deletionRequests, setDeletionRequests] = useState<GDPRRequest[]>([]);

@@ -13,7 +13,7 @@ import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 import { PathTimeline } from '@/components/ClientPath/PathTimeline';
 import { useUserJourney } from '@/hooks/useUserJourney';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 import { 

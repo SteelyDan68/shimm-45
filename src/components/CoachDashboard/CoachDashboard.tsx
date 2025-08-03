@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { AlertCircle, Users, Plus, Brain, Target, TrendingUp, CheckSquare, MessageSquare, Calendar, Activity } from 'lucide-react';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { useNavigation } from '@/hooks/useNavigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { EnhancedCoachInsights } from './EnhancedCoachInsights';
 import { ClientOverview } from './ClientOverview';
 import { AIRecommendationsPanel } from './AIRecommendationsPanel';

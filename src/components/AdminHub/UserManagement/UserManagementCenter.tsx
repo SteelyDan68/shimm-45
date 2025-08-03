@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useUnifiedUsers } from '@/hooks/useUnifiedUsers';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { CreateUserForm } from '@/components/UserAdministration/CreateUserForm';
 import { SendInvitationForm } from '@/components/InvitationSystem/SendInvitationForm';
 import { UserManagementTabs } from '@/components/UserAdministration/UserManagementTabs';
@@ -23,7 +23,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 export function UserManagementCenter() {
-  const { canCreateUsers, canInviteUsers, canManageUsers } = usePermissions();
+  const { canCreateUsers, canInviteUsers, canManageUsers } = useAuth();
   const { users, loading, getUsersByRole } = useUnifiedUsers();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');

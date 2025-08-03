@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
 import { useDailyCheckIn } from '@/hooks/useDailyCheckIn';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { CheckCircle, Heart, Zap, Brain, Target, TrendingUp } from 'lucide-react';
 import type { DailyCheckIn } from '@/types/gamification';
 

@@ -13,7 +13,7 @@ import {
   Target,
   TrendingUp
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 // Removed AdminUserCreation - now integrated in CentralUserManager

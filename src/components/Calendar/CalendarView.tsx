@@ -18,7 +18,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval,
          isSameMonth, isSameDay, isToday, addMonths, subMonths } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
 interface CalendarEvent {

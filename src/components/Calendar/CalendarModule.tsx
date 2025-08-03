@@ -18,7 +18,7 @@ import {
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { format, addDays, startOfWeek, endOfWeek, isSameDay, isToday, isPast, isFuture } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarGrid } from './CalendarGrid';
 import { CalendarEvent } from './CalendarEvent';

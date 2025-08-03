@@ -57,6 +57,7 @@ interface UnifiedAuthContextType {
   hasRole: (role: AppRole) => boolean;
   hasAnyRole: (checkRoles: AppRole[]) => boolean;
   isAdmin: () => boolean;
+  isSuperAdmin: () => boolean;
   canManageUsers: () => boolean;
 
   // Unified Permissions
@@ -423,6 +424,10 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
     return hasAnyRole(['superadmin', 'admin']);
   }, [hasAnyRole]);
 
+  const isSuperAdmin = useCallback((): boolean => {
+    return hasRole('superadmin');
+  }, [hasRole]);
+
   const canManageUsers = useCallback((): boolean => {
     return hasAnyRole(['superadmin', 'admin', 'coach']);
   }, [hasAnyRole]);
@@ -582,6 +587,7 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
     hasRole,
     hasAnyRole,
     isAdmin,
+    isSuperAdmin,
     canManageUsers,
 
     // Unified Permissions

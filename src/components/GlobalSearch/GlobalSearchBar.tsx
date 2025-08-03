@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { MobileTouchButton, MobileContainer } from '@/components/ui/mobile-responsive';
 import { useGlobalSearch, SearchResult, SearchFilters } from '@/hooks/useGlobalSearch';
 import { useNavigation } from '@/hooks/useNavigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import {
   Dialog,
   DialogContent,

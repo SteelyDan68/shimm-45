@@ -8,7 +8,7 @@ import { useRealtimeCollaboration } from '@/hooks/useRealtimeCollaboration';
 import { RealtimePresence } from './RealtimePresence';
 import { LiveActivityFeed } from './LiveActivityFeed';
 import { CollaborativeEditor } from './CollaborativeEditor';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { 
   Users, 
   Plus, 

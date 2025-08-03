@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Calendar, Clock, Filter, User, Brain, Target, Award, Building, DollarSign, Shield, Eye } from 'lucide-react';
 import { useClientPath } from '@/hooks/useClientPath';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { PathEntry, TimelineEntry, PillarType, PathEntryType } from '@/types/clientPath';
 import { TimelineFilters } from './TimelineFilters';
 import { format } from 'date-fns';

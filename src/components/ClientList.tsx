@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, User, Mail, Phone, Brain } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/components/ui/use-toast';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { ClientLogicCard } from './ClientLogicCard';

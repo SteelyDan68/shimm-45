@@ -27,7 +27,7 @@ import {
   FileText,
   Download
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { supabase } from '@/integrations/supabase/client';

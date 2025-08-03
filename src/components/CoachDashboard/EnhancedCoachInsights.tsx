@@ -10,7 +10,7 @@ import {
   MessageSquare, Target, BarChart3, Heart, ArrowRight, Eye, EyeOff
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useAutonomousCoach } from '@/hooks/useAutonomousCoach';
 
