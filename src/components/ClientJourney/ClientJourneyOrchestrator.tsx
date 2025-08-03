@@ -1,4 +1,4 @@
-import { useState, memo, useCallback, useMemo } from 'react';
+import { useState, memo, useCallback, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { SimplifiedAIInsights } from '@/components/AIAnalysis/SimplifiedAIInsights';
 import { NeuroplasticTaskGenerator } from '@/components/Tasks/NeuroplasticTaskGenerator';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ClientJourneyOrchestratorProps {
   userId: string;
@@ -61,6 +62,58 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
   const [activeInsights, setActiveInsights] = useState<any[]>([]);
   const [generatedTasks, setGeneratedTasks] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // ✅ UX FIX: Auto-sync progress with actual database state
+  useEffect(() => {
+    const syncProgressWithDatabase = async () => {
+      if (!userId) return;
+
+      try {
+        // Check what's actually completed in database
+        const checks = await Promise.all([
+          // Welcome assessment
+          supabase.from('welcome_assessments').select('id').eq('user_id', userId).limit(1),
+          // AI analysis (user journey state)
+          supabase.from('user_journey_states').select('*').eq('user_id', userId).limit(1),
+          // Tasks
+          supabase.from('tasks').select('id').eq('user_id', userId).limit(1)
+        ]);
+
+        const [welcomeData, journeyData, tasksData] = checks;
+        const newCompletedSteps: string[] = [];
+
+        if (welcomeData.data && welcomeData.data.length > 0) {
+          newCompletedSteps.push('welcome_assessment');
+        }
+
+        if (journeyData.data && journeyData.data.length > 0) {
+          const metadata = journeyData.data[0].metadata as any;
+          if (metadata?.ai_analysis_completed_at) {
+            newCompletedSteps.push('ai_analysis');
+          }
+        }
+
+        if (tasksData.data && tasksData.data.length > 0) {
+          newCompletedSteps.push('todo_creation');
+        }
+
+        setCompletedSteps(newCompletedSteps);
+        setJourneyProgress((newCompletedSteps.length / 5) * 100);
+        
+        // Set current step to first incomplete step
+        const allSteps = ['welcome_assessment', 'ai_analysis', 'pillar_selection', 'todo_creation', 'habit_formation'];
+        const nextIncompleteIndex = allSteps.findIndex(step => !newCompletedSteps.includes(step));
+        if (nextIncompleteIndex >= 0) {
+          setCurrentStepIndex(nextIncompleteIndex);
+        }
+
+      } catch (error) {
+        console.error('Error syncing progress:', error);
+      }
+    };
+
+    syncProgressWithDatabase();
+  }, [userId]);
 
   // ✅ OPTIMIZED: Memoized AI integration
   const triggerAssessmentAnalysis = useCallback(async () => {
@@ -185,9 +238,35 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
       estimatedTime: '15-20 min',
       neuroplasticPrinciple: 'Självmedvetenhet och baslinjemätning',
       icon: <Brain className="h-5 w-5" />,
-      action: () => {
-        navigate('/onboarding');
-        setTimeout(() => markStepCompleted('welcome_assessment'), 1000);
+      action: async () => {
+        // Check if welcome assessment is already completed
+        const { data: existingAssessment } = await supabase
+          .from('welcome_assessments')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1);
+        
+        if (existingAssessment && existingAssessment.length > 0) {
+          markStepCompleted('welcome_assessment');
+          toast({
+            title: "Assessment redan genomförd! ✅",
+            description: "Din välkomstbedömning är klar. Går vidare till AI-analys."
+          });
+        } else {
+          navigate('/onboarding');
+          // Check completion after navigation
+          setTimeout(async () => {
+            const { data: newAssessment } = await supabase
+              .from('welcome_assessments')
+              .select('id')
+              .eq('user_id', userId)
+              .limit(1);
+            
+            if (newAssessment && newAssessment.length > 0) {
+              markStepCompleted('welcome_assessment');
+            }
+          }, 2000);
+        }
       }
     },
     {

@@ -29,6 +29,7 @@ import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 import { PillarJourneyOrchestrator } from '@/components/PillarJourney/PillarJourneyOrchestrator';
 import { ClientJourneyOrchestrator } from '@/components/ClientJourney/ClientJourneyOrchestrator';
+import { ProgressFeedbackCard } from '@/components/UserJourney/ProgressFeedbackCard';
 
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
@@ -255,6 +256,9 @@ export const ClientDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* POST-ASSESSMENT PROGRESS FEEDBACK */}
+      <ProgressFeedbackCard className="mb-6" />
+
       {/* REVOLUTIONERANDE KLIENTRESA-ORCHESTRATOR */}
       <div className="mb-6">
         <ClientJourneyOrchestrator userId={profile?.id || ''} userName={clientProfile.name} />

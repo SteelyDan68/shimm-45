@@ -68,12 +68,14 @@ export const OnboardingPage = () => {
   };
 
   const handleOnboardingComplete = () => {
-    // Efter onboarding, gå till insight assessment  
-    if (clientProfile) {
-      navigate(`/client-assessment/${clientProfile.id}`);
-    } else {
-      navigate('/client-dashboard');
-    }
+    // ✅ UX FIX: Tydlig återkoppling efter onboarding
+    // Efter onboarding, gå till dashboard där ProgressFeedbackCard tar över vägledningen
+    navigate('/client-dashboard', { 
+      state: { 
+        showWelcomeMessage: true,
+        justCompletedOnboarding: true 
+      }
+    });
   };
 
   if (loading) {

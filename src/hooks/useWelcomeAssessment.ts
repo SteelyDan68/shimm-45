@@ -78,20 +78,22 @@ export const useWelcomeAssessment = () => {
         return null;
       }
 
-      // Update user journey state
+      // Update user journey state  
       await supabase
         .from('user_journey_states')
         .upsert({
           user_id: user.id,
-          current_phase: 'pillar_selection',
+          current_phase: 'ai_analysis_complete',
           completed_assessments: ['welcome'],
           next_recommended_assessment: aiResult?.next_recommended_pillar || 'self_care',
-          journey_progress: 20,
+          journey_progress: 25,
           last_activity_at: new Date().toISOString(),
           metadata: {
             welcome_completed_at: new Date().toISOString(),
+            ai_analysis_completed_at: new Date().toISOString(),
             lowest_wheel_areas: aiResult?.lowest_areas || [],
             highest_wheel_areas: aiResult?.highest_areas || [],
+            assessment_insights_available: true,
           },
         });
 

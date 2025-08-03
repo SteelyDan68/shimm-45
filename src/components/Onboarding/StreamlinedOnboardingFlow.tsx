@@ -319,11 +319,34 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
                 </Select>
               </div>
 
+              {/* Progress validation feedback */}
+              {!isStepValid('essentials') && (
+                <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-amber-800">
+                    <div className="h-4 w-4 rounded-full bg-amber-200 flex items-center justify-center">
+                      <span className="text-xs font-bold">!</span>
+                    </div>
+                    <span className="text-sm font-medium">Fyll i alla obligatoriska fält för att fortsätta</span>
+                  </div>
+                  <ul className="text-xs text-amber-700 mt-2 ml-6 space-y-1">
+                    {!formData.generalInfo.first_name?.trim() && <li>• Förnamn krävs</li>}
+                    {!formData.generalInfo.last_name?.trim() && <li>• Efternamn krävs</li>}
+                    {!formData.generalInfo.age?.trim() && <li>• Ålder krävs</li>}
+                    {!formData.publicRole.primaryRole && <li>• Huvudroll krävs</li>}
+                    {!formData.lifeMap.location?.trim() && <li>• Ort krävs</li>}
+                  </ul>
+                </div>
+              )}
+
               <div className="flex justify-between pt-4">
                 <Button variant="outline" onClick={handlePrevious}>
                   <ArrowLeft className="w-4 h-4 mr-2" /> Tillbaka
                 </Button>
-                <Button onClick={handleNext} disabled={!isStepValid('essentials')}>
+                <Button 
+                  onClick={handleNext} 
+                  disabled={!isStepValid('essentials')}
+                  className={!isStepValid('essentials') ? 'opacity-50 cursor-not-allowed' : ''}
+                >
                   Nästa <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -389,14 +412,21 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
                 <Button variant="outline" onClick={handlePrevious}>
                   <ArrowLeft className="w-4 h-4 mr-2" /> Tillbaka
                 </Button>
-                <Button 
-                  onClick={handleComplete} 
-                  disabled={!isStepValid('goals') || isLoading}
-                  className="bg-gradient-to-r from-primary to-primary/80"
-                >
-                  {isLoading ? 'Skapar profil...' : 'Skapa min plan'} 
-                  <Sparkles className="w-4 h-4 ml-2" />
-                </Button>
+                <div className="flex flex-col gap-2">
+                  {!isStepValid('goals') && (
+                    <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded text-center">
+                      Fyll i fokusområde och huvudmål för att slutföra
+                    </div>
+                  )}
+                  <Button 
+                    onClick={handleComplete} 
+                    disabled={!isStepValid('goals') || isLoading}
+                    className="bg-gradient-to-r from-primary to-primary/80"
+                  >
+                    {isLoading ? 'Skapar profil...' : 'Skapa min plan'} 
+                    <Sparkles className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
