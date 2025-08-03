@@ -13,6 +13,8 @@ import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
 import { MobileOptimizedLayout, useMobileViewport } from "@/components/ui/mobile-optimized-layout";
+import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation } from "@/components/ui/accessibility";
+import { errorTracker } from "@/utils/productionErrorTracking";
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
 import { ErrorProvider } from "@/hooks/useErrorReporting";
@@ -49,12 +51,32 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { user, hasRole } = useAuth();
+  const { isKeyboardUser, announceToScreenReader } = useKeyboardNavigation();
   
   // Initialize mobile viewport optimizations
   useMobileViewport();
 
+  // Set up error tracking with user context
+  React.useEffect(() => {
+    if (user?.id) {
+      errorTracker.setUserId(user.id);
+    }
+  }, [user?.id]);
+
   return (
-    <Routes>
+    <>
+      {/* Accessibility skip links */}
+      <AccessibleSkipLink href="#main-content">
+        Hoppa till huvudinnehåll
+      </AccessibleSkipLink>
+      <AccessibleSkipLink href="#navigation">
+        Hoppa till navigation
+      </AccessibleSkipLink>
+      
+      {/* Keyboard navigation indicator */}
+      <KeyboardNavigationIndicator isVisible={isKeyboardUser} />
+      
+      <Routes>
       {/* Public routes that don't require authentication */}
       <Route path="/invitation/:token" element={<InvitationSignup />} />
       
@@ -122,6 +144,7 @@ const AppRoutes = () => {
         )
       } />
     </Routes>
+    </>
   );
 };
 
