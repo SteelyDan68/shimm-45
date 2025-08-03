@@ -47,21 +47,44 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
       const score = (formData.exploration_areas.length * 15) + 
         (formData.motivation_level === 'high' ? 30 : 20);
 
-      await supabase.from('pillar_assessments').insert({
+      console.log('Submitting open_track assessment:', {
         user_id: user.id,
         created_by: user.id,
         pillar_key: 'open_track',
         assessment_data: formData,
-        calculated_score: Math.min(score, 100)
+        calculated_score: Math.min(score, 100),
+        insights: {}
       });
+
+      const { data, error } = await supabase.from('pillar_assessments').insert({
+        user_id: user.id,
+        created_by: user.id,
+        pillar_key: 'open_track',
+        assessment_data: formData,
+        calculated_score: Math.min(score, 100),
+        insights: {}
+      });
+
+      if (error) {
+        console.error('Error inserting assessment:', error);
+        throw error;
+      }
+
+      console.log('Assessment saved successfully:', data);
 
       toast({
         title: "Öppna spåret-bedömning genomförd!",
         description: "Din utforskningsresa har dokumenterats.",
       });
 
+      // Force refresh of pillar data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
       onComplete?.();
     } catch (error) {
+      console.error('Full error details:', error);
       toast({
         title: "Fel",
         description: "Kunde inte spara bedömningen.",
