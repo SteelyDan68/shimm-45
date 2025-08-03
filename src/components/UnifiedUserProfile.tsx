@@ -49,6 +49,21 @@ export const UnifiedUserProfile = () => {
   const { getExtendedProfile } = useExtendedProfile();
   const { isSuperAdmin, isAdmin, canManageUsers } = useUnifiedPermissions();
   
+  // DEBUG: Log all permission data 
+  console.log('🔍 UnifiedUserProfile DEBUG - Complete state:', {
+    userId,
+    currentUserId: user?.id,
+    userEmail: user?.email,
+    profileEmail: profile?.email,
+    profileLoading,
+    'useUserData.roles': roles,
+    'useUserData.hasRole': { hasRole },
+    'useUnifiedPermissions.isSuperAdmin': isSuperAdmin,
+    'useUnifiedPermissions.isAdmin': isAdmin,
+    'useUnifiedPermissions.canManageUsers': canManageUsers,
+    'roles type and content': { type: typeof roles, content: roles, length: roles?.length }
+  });
+  
   // Context determines UI behavior
   const context = searchParams.get('context') || 'profile'; // client, assessment, profile
   const tab = searchParams.get('tab');
