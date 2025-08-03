@@ -12,7 +12,7 @@ import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
-import { DataCollectorWidget } from '@/components/DataCollectorWidget';
+
 import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
@@ -272,11 +272,6 @@ export const ClientProfileView = ({
           <SentimentAnalysisWidget 
             sentimentData={sentimentData} 
             onCollectData={loadClientData}
-          />
-          <DataCollectorWidget 
-            clientId={userId}
-            clientName={getUserName()}
-            onDataCollected={loadClientData} 
           />
         </div>
       </TabsContent>

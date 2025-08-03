@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StefanWidget } from '@/components/Stefan/StefanWidget';
 
-import { WelcomeAssessmentReset } from '@/components/Admin/WelcomeAssessmentReset';
+
 import { PillarHeatmap } from '@/components/SixPillars/PillarHeatmap';
 import { AnalyticsDashboard } from '@/components/Analytics/AnalyticsDashboard';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
@@ -137,8 +137,9 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
 
         {/* Journey Tab - Now uses PillarJourneyOrchestrator */}
         <TabsContent value="journey" className="space-y-6">
-          {/* Debug: Welcome Assessment Reset */}
-          <WelcomeAssessmentReset />
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Din utvecklingsresa visas här...</p>
+          </div>
         </TabsContent>
 
         {/* Overview Tab - Heatmap and Statistics */}

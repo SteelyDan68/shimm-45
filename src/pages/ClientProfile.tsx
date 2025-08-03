@@ -19,7 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
 import { SentimentAnalysisWidget } from '@/components/SentimentAnalysisWidget';
-import { DataCollectorWidget } from '@/components/DataCollectorWidget';
+
 import { ClientPathTimeline } from '@/components/ClientPath/ClientPathTimeline';
 import { ManualNoteForm } from '@/components/ClientPath/ManualNoteForm';
 import { InsightAssessment } from '@/components/InsightAssessment/InsightAssessment';
@@ -453,13 +453,8 @@ export const ClientProfile = () => {
         </TabsContent>
 
         {/* Data & Insights Tab */}
-        <TabsContent value="data" className="space-y-6">
-          {/* Live Data Collection */}
-          <DataCollectorWidget 
-            clientId={clientId} 
-            clientName={client.name}
-            onDataCollected={loadClientData}
-          />
+        <TabsContent value="data" className="space-y-6"
+>
           
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Swedish News */}

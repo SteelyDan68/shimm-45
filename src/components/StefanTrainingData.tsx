@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, FileText, File, Trash2, Plus, Brain } from 'lucide-react';
 import { useStefanTrainingData, TrainingDataFormData } from '@/hooks/useStefanTrainingData';
 import { useForm } from 'react-hook-form';
-import StefanTextAnalyzer from './StefanTextAnalyzer';
 import StefanKnowledgeBase from './StefanKnowledgeBase';
 
 const StefanTrainingData: React.FC = () => {
@@ -286,7 +285,9 @@ const StefanTrainingData: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="analyze">
-              <StefanTextAnalyzer data={data} onAnalysisComplete={fetchTrainingData} />
+              <div className="p-4 text-center text-muted-foreground">
+                Textanalys-funktionen kommer snart...
+              </div>
             </TabsContent>
 
             <TabsContent value="knowledge">

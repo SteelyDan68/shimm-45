@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MobileDeviceInfo } from './MobileDeviceInfo';
+
 import { useMobileCapabilities } from '@/hooks/useMobileCapabilities';
 import { 
   Smartphone, 
@@ -293,7 +293,9 @@ export function MobileOptimizationCenter() {
         </TabsContent>
 
         <TabsContent value="device" className="space-y-6">
-          <MobileDeviceInfo />
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Enhetsinformation kommer snart...</p>
+          </div>
         </TabsContent>
 
         <TabsContent value="optimization" className="space-y-6">

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { useErrorReporting } from '@/hooks/useErrorReporting';
+import { useToast } from '@/hooks/use-toast';
 
 export interface SearchResult {
   id: string;
@@ -51,7 +51,7 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
   });
 
   const { user, roles } = useAuth();
-  const { reportError } = useErrorReporting();
+  const { toast } = useToast();
 
   const isAdmin = useMemo(() => 
     roles.includes('superadmin') || roles.includes('admin'), 
@@ -106,10 +106,14 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
         url: `/user/${profile.id}`
       }));
     } catch (error) {
-      reportError(error as Error, 'Search Profiles');
+      toast({
+        title: "Sökfel",
+        description: "Kunde inte söka i profiler",
+        variant: "destructive"
+      });
       return [];
     }
-  }, [reportError]);
+  }, [toast]);
 
   const searchMessages = useCallback(async (query: string): Promise<SearchResult[]> => {
     if (!user) return [];
@@ -143,10 +147,14 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
         url: `/messages?messageId=${message.id}`
       }));
     } catch (error) {
-      reportError(error as Error, 'Search Messages');
+      toast({
+        title: "Sökfel",
+        description: "Kunde inte söka i meddelanden",
+        variant: "destructive"
+      });
       return [];
     }
-  }, [user, reportError]);
+  }, [user, toast]);
 
   const searchTasks = useCallback(async (query: string): Promise<SearchResult[]> => {
     if (!user) return [];
@@ -184,10 +192,14 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
         url: `/tasks?taskId=${task.id}`
       }));
     } catch (error) {
-      reportError(error as Error, 'Search Tasks');
+      toast({
+        title: "Sökfel",
+        description: "Kunde inte söka i uppgifter",
+        variant: "destructive"
+      });
       return [];
     }
-  }, [user, isAdmin, reportError]);
+  }, [user, isAdmin, toast]);
 
   const searchCalendarEvents = useCallback(async (query: string): Promise<SearchResult[]> => {
     if (!user) return [];
@@ -223,10 +235,14 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
         url: `/calendar?eventId=${event.id}`
       }));
     } catch (error) {
-      reportError(error as Error, 'Search Calendar Events');
+      toast({
+        title: "Sökfel",
+        description: "Kunde inte söka i kalenderhändelser",
+        variant: "destructive"
+      });
       return [];
     }
-  }, [user, isAdmin, reportError]);
+  }, [user, isAdmin, toast]);
 
   const searchAssessments = useCallback(async (query: string): Promise<SearchResult[]> => {
     if (!user) return [];
@@ -259,10 +275,14 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
         url: `/client-assessment/${assessment.user_id}?assessmentId=${assessment.id}`
       }));
     } catch (error) {
-      reportError(error as Error, 'Search Assessments');
+      toast({
+        title: "Sökfel",
+        description: "Kunde inte söka i bedömningar",
+        variant: "destructive"
+      });
       return [];
     }
-  }, [user, isAdmin, reportError]);
+  }, [user, isAdmin, toast]);
 
   const searchOrganizations = useCallback(async (query: string): Promise<SearchResult[]> => {
     if (!isAdmin && !isCoach) return [];
@@ -286,10 +306,14 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
         url: `/administration?tab=organizations&orgId=${org.id}`
       }));
     } catch (error) {
-      reportError(error as Error, 'Search Organizations');
+      toast({
+        title: "Sökfel",
+        description: "Kunde inte söka i organisationer",
+        variant: "destructive"
+      });
       return [];
     }
-  }, [isAdmin, isCoach, reportError]);
+  }, [isAdmin, isCoach, toast]);
 
   const search = useCallback(async (query: string, filters?: SearchFilters) => {
     if (!query.trim() || query.length < 2) {
@@ -376,14 +400,18 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
     } catch (error) {
       const errorMsg = 'Ett fel inträffade vid sökning';
       setError(errorMsg);
-      reportError(error as Error, 'Global Search');
+      toast({
+        title: "Sökfel",
+        description: errorMsg,
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
   }, [
     searchProfiles, searchMessages, searchTasks, 
     searchCalendarEvents, searchAssessments, searchOrganizations,
-    addToRecent, reportError
+    addToRecent, toast
   ]);
 
   return {

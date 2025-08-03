@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 
-import { ApiStatusChecker } from '@/components/ApiStatusChecker';
+
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { helpTexts } from '@/data/helpTexts';
 

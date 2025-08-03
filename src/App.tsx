@@ -9,15 +9,11 @@ import { UnifiedAuthProvider, useAuth } from "@/providers/UnifiedAuthProvider";
 import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
 import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
-import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
-import { CookieConsent } from "@/components/CookieConsent";
-import { SecurityHeadersProvider } from "@/components/SecurityHeadersProvider";
 import { MobileOptimizedLayout, useMobileViewport } from "@/components/ui/mobile-optimized-layout";
 import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation } from "@/components/ui/accessibility";
 import { errorTracker } from "@/utils/productionErrorTracking";
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
-import { ErrorProvider } from "@/hooks/useErrorReporting";
 import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
@@ -100,13 +96,8 @@ const AppRoutes = () => {
                   </div>
                 }>
               <Routes>
-               <Route path="/" element={
-                <>
-                  <RoleBasedRedirect />
-                  <Dashboard />
-                </>
-              } />
-              <Route path={NAVIGATION_ROUTES.DASHBOARD} element={<Dashboard />} />
+               <Route path="/" element={<Dashboard />} />
+               <Route path={NAVIGATION_ROUTES.DASHBOARD} element={<Dashboard />} />
               <Route path={NAVIGATION_ROUTES.CLIENT_DASHBOARD} element={<ClientDashboard />} />
                 <Route path={NAVIGATION_ROUTES.ONBOARDING} element={<OnboardingPage />} />
                 <Route path={NAVIGATION_ROUTES.EDIT_PROFILE} element={<EditProfilePage />} />
@@ -159,22 +150,17 @@ const AppRoutes = () => {
 const App = () => (
   <CriticalErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <ErrorProvider>
-        <SecurityHeadersProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <UnifiedAuthProvider>
-                <AnalyticsProvider>
-                  <AppRoutes />
-                  <CookieConsent />
-                </AnalyticsProvider>
-              </UnifiedAuthProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-        </SecurityHeadersProvider>
-      </ErrorProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <UnifiedAuthProvider>
+            <AnalyticsProvider>
+              <AppRoutes />
+            </AnalyticsProvider>
+          </UnifiedAuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   </CriticalErrorBoundary>
 );

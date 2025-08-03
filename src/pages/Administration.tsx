@@ -29,7 +29,7 @@ import { UserManagementTabs } from "@/components/UserAdministration/UserManageme
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 import { SystemHealthDashboard } from "@/components/SystemHealthDashboard";
-import { SystemIntegrityPanel } from "@/components/SystemIntegrityPanel";
+
 import { IntegratedAdminDashboard } from "@/components/Admin/IntegratedAdminDashboard";
 
 import { DataRightsCenter } from "@/components/DataRightsCenter";
@@ -335,12 +335,10 @@ export function Administration() {
                   Övervaka systemets hälsa, API:er och integritet
                 </p>
               </div>
-              <div className="p-6 space-y-6">
+               <div className="p-6 space-y-6">
                 <EnhancedApiStatusChecker />
                 <Separator />
                 <SystemHealthDashboard />
-                <Separator />
-                <SystemIntegrityPanel />
               </div>
             </div>
           </TabsContent>

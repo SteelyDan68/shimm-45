@@ -23,7 +23,7 @@ import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
-import { DataCollectorWidget } from '@/components/DataCollectorWidget';
+
 import { IntelligenceOverview } from '@/components/Intelligence/IntelligenceOverview';
 import { IntelligenceTrends } from '@/components/Intelligence/IntelligenceTrends';
 import { IntelligenceNewsSlider } from '@/components/Intelligence/IntelligenceNewsSlider';
@@ -343,11 +343,9 @@ export const Intelligence = () => {
 
         {/* Data Collection Tab */}
         <TabsContent value="collector" className="space-y-6">
-          <DataCollectorWidget 
-            clientId={userId} 
-            clientName={displayName}
-            onDataCollected={loadIntelligenceData}
-          />
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Datainsamling kommer snart...</p>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
