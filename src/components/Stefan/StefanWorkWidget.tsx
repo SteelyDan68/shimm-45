@@ -153,7 +153,10 @@ export const StefanWorkWidget = () => {
     setIsExpanded(true);
   };
 
-  if (!isAvailable || !showWidget) {
+  console.log('🤖 StefanWorkWidget: Render check', { isAvailable, showWidget, shouldRender: isAvailable && showWidget });
+  
+  if (!showWidget) {
+    console.log('🤖 StefanWorkWidget: Widget hidden - showWidget is false');
     return null;
   }
 
