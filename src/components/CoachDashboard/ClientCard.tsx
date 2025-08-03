@@ -68,7 +68,10 @@ export function ClientCard({ client }: ClientCardProps) {
   }, client.issues[0]);
 
   const handleViewClient = () => {
+    console.log('🔥🔥🔥 ClientCard: CLICK DETECTED - client:', client);
+    console.log('🔥🔥🔥 ClientCard: Navigating to:', `/user/${client.id}?context=client`);
     navigate(`/user/${client.id}?context=client`);
+    console.log('🔥🔥🔥 ClientCard: Navigate called successfully');
   };
 
   return (
