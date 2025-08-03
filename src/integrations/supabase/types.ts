@@ -2396,7 +2396,10 @@ export type Database = {
           created_by: string
           deadline: string | null
           description: string | null
+          estimated_time_minutes: number | null
           id: string
+          neuroplastic_principle: string | null
+          pillar: string | null
           priority: string
           source_path_entry_id: string | null
           status: string
@@ -2411,7 +2414,10 @@ export type Database = {
           created_by: string
           deadline?: string | null
           description?: string | null
+          estimated_time_minutes?: number | null
           id?: string
+          neuroplastic_principle?: string | null
+          pillar?: string | null
           priority?: string
           source_path_entry_id?: string | null
           status?: string
@@ -2426,7 +2432,10 @@ export type Database = {
           created_by?: string
           deadline?: string | null
           description?: string | null
+          estimated_time_minutes?: number | null
           id?: string
+          neuroplastic_principle?: string | null
+          pillar?: string | null
           priority?: string
           source_path_entry_id?: string | null
           status?: string
