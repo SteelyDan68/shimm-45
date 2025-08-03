@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useAIRequestExecutor } from './useAIRequestExecutor';
 import type { AIRequest, AIResponse } from './useAIRequestExecutor';
 

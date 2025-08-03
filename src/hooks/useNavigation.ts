@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth, AppRole } from './useAuth';
+import { useAuth, AppRole } from '@/providers/UnifiedAuthProvider';
 import { 
   getNavigationForRole, 
   getQuickActionsForRole, 

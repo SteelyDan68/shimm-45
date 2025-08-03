@@ -17,7 +17,7 @@ import {
   Zap,
   Trophy
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
 import { useUserPillars } from '@/hooks/useUserPillars';

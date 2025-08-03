@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { supabase } from '@/integrations/supabase/client';
 import { StreamlinedOnboardingFlow } from '@/components/Onboarding/StreamlinedOnboardingFlow';
