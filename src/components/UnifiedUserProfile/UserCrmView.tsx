@@ -25,6 +25,7 @@ import {
   X
 } from 'lucide-react';
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
+import { RealUserData } from './RealUserData';
 import { useToast } from '@/hooks/use-toast';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
 
@@ -126,6 +127,7 @@ export const UserCrmView = ({
           <TabsTrigger value="social">Sociala Plattformar</TabsTrigger>
           <TabsTrigger value="professional">Professionellt</TabsTrigger>
           <TabsTrigger value="personal">Personligt</TabsTrigger>
+          <TabsTrigger value="activity">Aktivitet</TabsTrigger>
         </TabsList>
 
         {/* Grunddata */}
@@ -415,6 +417,10 @@ export const UserCrmView = ({
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="activity" className="space-y-6">
+          <RealUserData userId={userId} profile={profile} />
         </TabsContent>
       </Tabs>
     </div>

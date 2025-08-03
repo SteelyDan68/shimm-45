@@ -10,6 +10,7 @@ import {
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useRealCoachDashboard } from '@/hooks/useRealCoachDashboard';
+import { RealTimeCoachMetrics } from './RealTimeCoachMetrics';
 import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
