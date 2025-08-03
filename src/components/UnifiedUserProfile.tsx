@@ -38,7 +38,9 @@ interface UnifiedUserProfileProps {
  * Role-based access: Respects user permissions and roles
  */
 export const UnifiedUserProfile = () => {
+  console.log('🔥🔥🔥 UnifiedUserProfile: COMPONENT MOUNTED');
   const { userId } = useParams<{ userId: string }>();
+  console.log('🔥🔥🔥 UnifiedUserProfile: PARAMS:', { userId });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
