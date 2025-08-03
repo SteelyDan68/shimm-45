@@ -144,7 +144,13 @@ export const PRDDashboard = () => {
           .order('complexity_score', { ascending: false });
 
         if (compError) throw compError;
-        setComponents(componentsData || []);
+        // Convert Json types to arrays safely
+        const convertedComponents = (componentsData || []).map(comp => ({
+          ...comp,
+          dependencies: Array.isArray(comp.dependencies) ? comp.dependencies : 
+            typeof comp.dependencies === 'string' ? JSON.parse(comp.dependencies) : []
+        }));
+        setComponents(convertedComponents);
 
         // Hämta features
         const { data: featuresData, error: featError } = await supabase
@@ -154,7 +160,17 @@ export const PRDDashboard = () => {
           .order('technical_complexity', { ascending: false });
 
         if (featError) throw featError;
-        setFeatures(featuresData || []);
+        // Convert Json types to arrays safely
+        const convertedFeatures = (featuresData || []).map(feat => ({
+          ...feat,
+          user_roles: Array.isArray(feat.user_roles) ? feat.user_roles : 
+            typeof feat.user_roles === 'string' ? JSON.parse(feat.user_roles) : [],
+          api_endpoints: Array.isArray(feat.api_endpoints) ? feat.api_endpoints : 
+            typeof feat.api_endpoints === 'string' ? JSON.parse(feat.api_endpoints) : [],
+          database_tables: Array.isArray(feat.database_tables) ? feat.database_tables : 
+            typeof feat.database_tables === 'string' ? JSON.parse(feat.database_tables) : []
+        }));
+        setFeatures(convertedFeatures);
 
         // Hämta arkitektur data
         const { data: nodesData, error: nodesError } = await supabase
@@ -176,7 +192,7 @@ export const PRDDashboard = () => {
             data: { 
               label: node.node_label,
               category: node.node_category,
-              ...node.node_data 
+              ...(typeof node.node_data === 'object' && node.node_data !== null ? node.node_data : {})
             },
             style: getNodeStyle(node.node_category)
           }));
