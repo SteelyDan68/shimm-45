@@ -1,56 +1,65 @@
+/**
+ * ENHANCED WELCOME ASSESSMENT CARD WITH PROPER STATE MANAGEMENT
+ * 
+ * 🎯 UX Expert: Clear state transitions med tydliga användarsignaler
+ * 🎨 UI Expert: Visuell representation av alla assessment states
+ * 📊 Data Scientist: Robust state tracking och återhämtning
+ * 🏗️ Solution Architect: Integration med centraliserat state system
+ * 
+ * WORLD-CLASS EXECUTION: Hanterar ALLA assessment states korrekt
+ */
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ActionPrompt } from '@/components/ui/action-prompt';
 import { WelcomeAssessmentForm } from '@/components/WelcomeAssessment/WelcomeAssessmentForm';
-import { useWelcomeAssessmentFixed, AssessmentStatus } from '@/hooks/useWelcomeAssessmentFixed';
-import { CheckCircle, Star, RotateCcw, Clock, AlertCircle, Play } from 'lucide-react';
+import { useAssessmentStateManager, AssessmentStateData } from '@/hooks/useAssessmentStateManager';
+import { CheckCircle, Star, RotateCcw, Clock, AlertCircle, Play, RefreshCw } from 'lucide-react';
+import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 
 interface WelcomeAssessmentCardProps {
   userId: string;
 }
 
 export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) => {
-  const { getAssessmentStatus, clearDraft, loading } = useWelcomeAssessmentFixed();
+  const { getAssessmentState, clearDraft, loading } = useAssessmentStateManager();
   const [showForm, setShowForm] = useState(false);
-  const [assessmentStatus, setAssessmentStatus] = useState<AssessmentStatus | null>(null);
+  const [assessmentState, setAssessmentState] = useState<AssessmentStateData | null>(null);
 
   useEffect(() => {
-    const loadStatus = async () => {
-      const status = await getAssessmentStatus();
-      setAssessmentStatus(status);
-      console.log('🔍 Assessment Status:', status); // Debug log
+    const loadState = async () => {
+      const state = await getAssessmentState('welcome');
+      setAssessmentState(state);
     };
-    loadStatus();
-  }, [getAssessmentStatus]);
+    loadState();
+  }, [getAssessmentState]);
 
-  const handleAssessmentComplete = async () => {
+  const handleAssessmentComplete = () => {
     setShowForm(false);
-    // Reload status to reflect completion
-    const newStatus = await getAssessmentStatus();
-    setAssessmentStatus(newStatus);
+    // Reload state to reflect completion
+    getAssessmentState('welcome').then(setAssessmentState);
   };
 
   const handleStartAssessment = () => {
-    console.log('🚀 Starting assessment'); // Debug log
     setShowForm(true);
   };
 
   const handleResumeAssessment = () => {
-    console.log('▶️ Resuming assessment'); // Debug log
     setShowForm(true);
   };
 
   const handleRestartAssessment = async () => {
-    if (assessmentStatus?.hasInProgress) {
+    if (assessmentState?.state === 'in_progress' || assessmentState?.state === 'expired') {
       const confirmed = window.confirm(
         'Du har ett påbörjat test. Vill du börja om från början? Dina sparade svar kommer att raderas.'
       );
       if (confirmed) {
-        await clearDraft();
-        const newStatus = await getAssessmentStatus();
-        setAssessmentStatus(newStatus);
+        await clearDraft('welcome');
+        const newState = await getAssessmentState('welcome');
+        setAssessmentState(newState);
         setShowForm(true);
       }
     } else {
@@ -58,7 +67,7 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
     }
   };
 
-  if (loading || !assessmentStatus) {
+  if (loading || !assessmentState) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -74,10 +83,13 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
   if (showForm) {
     return <WelcomeAssessmentForm onComplete={handleAssessmentComplete} />;
   }
-  // COMPLETED STATE
-  if (assessmentStatus.hasCompleted && assessmentStatus.latestAssessment) {
-    const assessmentDate = new Date(assessmentStatus.latestAssessment.created_at).toLocaleDateString('sv-SE');
-    const daysSince = Math.floor((Date.now() - new Date(assessmentStatus.latestAssessment.created_at).getTime()) / (1000 * 60 * 60 * 24));
+
+  // COMPLETED STATE - Användaren har slutfört assessmentet
+  if (assessmentState.state === 'completed') {
+    const completedDate = new Date(assessmentState.completed_at!).toLocaleDateString('sv-SE');
+    const daysSince = Math.floor(
+      (Date.now() - new Date(assessmentState.completed_at!).getTime()) / (1000 * 60 * 60 * 24)
+    );
     
     return (
       <Card className="border-success/20 bg-gradient-to-br from-success/10 to-success/20">
@@ -87,7 +99,7 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
             <div className="flex-1">
               <h3 className="font-semibold text-success-foreground">Du har gjort din självkoll! ✅</h3>
               <p className="text-success-foreground/80 text-sm">
-                Senaste: {assessmentDate} ({daysSince} dagar sedan)
+                Slutförd: {completedDate} ({daysSince} dagar sedan)
               </p>
             </div>
           </div>
@@ -113,14 +125,6 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
                 </div>
               )}
               
-              {daysSince < 7 && (
-                <div className="p-2 bg-yellow-50 rounded border-l-4 border-yellow-400 mb-3">
-                  <p className="text-xs text-yellow-800">
-                    ⏰ Du kan alltid göra om den, men mest kul är det efter en vecka när du hunnit utvecklas lite!
-                  </p>
-                </div>
-              )}
-              
               <ActionPrompt
                 title="🔄 Kolla läget igen!"
                 description="Se hur du har utvecklats • Stefan får bättre koll • Nya tips baserat på hur du mår just nu"
@@ -129,6 +133,7 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
                 icon={<RotateCcw className="h-4 w-4" />}
                 variant="default"
                 size="sm"
+                componentName="WelcomeAssessmentCard"
                 className="mb-2"
               />
               
@@ -138,14 +143,8 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
                 onClick={() => {/* Navigate to insights */}}
                 className="w-full"
               >
-                Se mina gamla svar 👀
+                Se mina resultat 👀
               </Button>
-            </div>
-            
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground">
-                💡 Tip: Många gör om den en gång i månaden för att följa sin utveckling
-              </p>
             </div>
           </div>
         </CardContent>
@@ -153,8 +152,12 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
     );
   }
 
-  // IN PROGRESS STATE
-  if (assessmentStatus.hasInProgress) {
+  // IN PROGRESS STATE - Användaren har påbörjat men inte slutfört
+  if (assessmentState.state === 'in_progress') {
+    const hoursIdle = assessmentState.last_activity_at 
+      ? Math.floor((Date.now() - new Date(assessmentState.last_activity_at).getTime()) / (1000 * 60 * 60))
+      : 0;
+
     return (
       <Card className="border-warning/20 bg-gradient-to-br from-warning/10 to-warning/20">
         <CardHeader>
@@ -164,25 +167,38 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Framsteg</span>
+              <span>{assessmentState.completed_steps}/{assessmentState.total_steps} steg</span>
+            </div>
+            <Progress value={assessmentState.completion_percentage} className="h-2" />
+          </div>
+
           <div className="bg-background/50 p-3 rounded-lg">
             <p className="text-sm text-muted-foreground mb-2">
               💾 <strong>Dina svar är sparade!</strong> Du kan fortsätta där du slutade.
             </p>
-            <p className="text-xs text-muted-foreground">
-              Status: {assessmentStatus.statusMessage}
-            </p>
+            {hoursIdle > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Senast aktiv: för {hoursIdle} timmar sedan
+              </p>
+            )}
           </div>
 
-          <ActionPrompt
-            title="Fortsätt där du slutade"
-            description="Du har redan svarat på några frågor - fortsätt där du slutade!"
-            actionText="Fortsätt testet 🎯"
-            onClick={handleResumeAssessment}
-            icon={<Play className="h-4 w-4" />}
-            variant="default"
-            size="default"
-            componentName="WelcomeAssessmentCard"
-          />
+          <div className="flex gap-2">
+            <ActionPrompt
+              title="Fortsätt där du slutade"
+              description={`Du är ${assessmentState.completion_percentage.toFixed(0)}% klar - bara ${5 - assessmentState.completed_steps} steg kvar!`}
+              actionText="Fortsätt testet 🎯"
+              onClick={handleResumeAssessment}
+              icon={<Play className="h-4 w-4" />}
+              variant="default"
+              size="default"
+              componentName="WelcomeAssessmentCard"
+              className="flex-1"
+            />
+          </div>
 
           <Button 
             variant="ghost" 
@@ -190,15 +206,66 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
             onClick={handleRestartAssessment}
             className="w-full text-muted-foreground"
           >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Börja om från början istället
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Börja om från början
           </Button>
         </CardContent>
       </Card>
     );
   }
 
-  // NOT STARTED STATE (default)
+  // EXPIRED STATE - Draft för gammal
+  if (assessmentState.state === 'expired') {
+    return (
+      <Card className="border-destructive/20 bg-gradient-to-br from-destructive/10 to-destructive/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            Påbörjat test har gått ut
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-foreground">
+            Du påbörjade testet för länge sedan. För bästa resultat börjar vi om från början.
+          </p>
+
+          <ActionPrompt
+            title="Börja om med fräscha svar"
+            description="Ett nytt test ger Stefan bättre koll på hur du mår just nu"
+            actionText="Starta om testet 🔄"
+            onClick={handleRestartAssessment}
+            icon={<RefreshCw className="h-4 w-4" />}
+            variant="default"
+            size="lg"
+            componentName="WelcomeAssessmentCard"
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ERROR STATE
+  if (assessmentState.state === 'error') {
+    return (
+      <Card className="border-destructive/20">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 mb-4">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+            <div>
+              <h3 className="font-semibold text-destructive">Problem med testet</h3>
+              <p className="text-sm text-muted-foreground">Ett tekniskt fel uppstod. Försök igen.</p>
+            </div>
+          </div>
+
+          <Button onClick={() => window.location.reload()} className="w-full">
+            Uppdatera sidan
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // NOT STARTED STATE - Default första gången
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-primary/10 to-primary/20">
       <CardHeader>
@@ -236,7 +303,7 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
 
         <ActionPrompt
           title="Kolla läget! 📊"
-          description="Gör nu 👉 Svara på enkla frågor om ditt liv så förstår vi vad du behöver"
+          description="Svara på enkla frågor om ditt liv så förstår vi vad du behöver"
           actionText="Börja nu - det går snabbt! 🚀"
           onClick={handleStartAssessment}
           size="lg"
