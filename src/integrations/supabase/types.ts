@@ -310,6 +310,78 @@ export type Database = {
           },
         ]
       }
+      analytics_aggregations: {
+        Row: {
+          avg_value: number | null
+          created_at: string
+          date: string
+          event_count: number | null
+          event_type: string
+          id: string
+          properties: Json | null
+          updated_at: string
+          user_count: number | null
+        }
+        Insert: {
+          avg_value?: number | null
+          created_at?: string
+          date: string
+          event_count?: number | null
+          event_type: string
+          id?: string
+          properties?: Json | null
+          updated_at?: string
+          user_count?: number | null
+        }
+        Update: {
+          avg_value?: number | null
+          created_at?: string
+          date?: string
+          event_count?: number | null
+          event_type?: string
+          id?: string
+          properties?: Json | null
+          updated_at?: string
+          user_count?: number | null
+        }
+        Relationships: []
+      }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          page_url: string | null
+          properties: Json | null
+          session_id: string
+          timestamp: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          page_url?: string | null
+          properties?: Json | null
+          session_id: string
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          page_url?: string | null
+          properties?: Json | null
+          session_id?: string
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       assessment_form_assignments: {
         Row: {
           assigned_at: string
@@ -2193,6 +2265,10 @@ export type Database = {
       }
     }
     Functions: {
+      aggregate_analytics_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
