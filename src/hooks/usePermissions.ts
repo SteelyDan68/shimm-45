@@ -13,7 +13,10 @@ export const usePermissions = () => {
   const permissions = useMemo(() => ({
     // Data access permissions
     canViewAllClients: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
-    canManageUsers: hasRole('superadmin') || hasRole('admin'),
+    canManageUsers: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
+    canCreateUsers: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
+    canInviteUsers: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
+    canAssignCoaches: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
     canViewIntelligence: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
     canManageSettings: hasRole('superadmin') || hasRole('admin'),
     

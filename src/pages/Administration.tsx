@@ -25,7 +25,7 @@ import {
 import { PRDDashboard } from '@/components/Admin/PRDDashboard';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { CentralUserManager } from "@/components/UserAdministration/CentralUserManager";
+import { UserManagementTabs } from "@/components/UserAdministration/UserManagementTabs";
 import { AssessmentManager } from "@/components/AssessmentEngine/AssessmentManager";
 import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 import { SystemHealthDashboard } from "@/components/SystemHealthDashboard";
@@ -279,13 +279,13 @@ export function Administration() {
                       Användarhantering
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Centraliserad hantering av alla användare i systemet
+                      Hantera användare, skapa nya och tilldela roller
                     </p>
                   </div>
                 </div>
               </div>
               <div className="p-6">
-                <CentralUserManager />
+                <UserManagementTabs />
               </div>
             </div>
               

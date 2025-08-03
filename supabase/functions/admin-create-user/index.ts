@@ -105,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log('User roles found:', userRoles);
-    const hasAdminRole = userRoles?.some(r => ['superadmin', 'admin'].includes(r.role));
+    const hasAdminRole = userRoles?.some(r => ['superadmin', 'admin', 'coach'].includes(r.role));
     console.log('Has admin role:', hasAdminRole, 'for user:', user.id);
     console.log('Checking roles:', userRoles?.map(r => r.role));
     
