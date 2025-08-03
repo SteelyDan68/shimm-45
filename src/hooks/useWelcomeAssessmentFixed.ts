@@ -43,12 +43,12 @@ export const useWelcomeAssessmentFixed = () => {
 
     setLoading(true);
     try {
-      // Check för COMPLETED assessment
+      // Check för COMPLETED assessment (MUST have ai_analysis)
       const { data: completedAssessment, error: completedError } = await supabase
         .from('welcome_assessments')
         .select('*')
         .eq('user_id', user.id)
-        .not('ai_analysis', 'is', null) // Must have AI analysis to be considered complete
+        .not('ai_analysis', 'is', null) // KEY FIX: Must have AI analysis
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -57,14 +57,14 @@ export const useWelcomeAssessmentFixed = () => {
         console.error('Error checking completed assessment:', completedError);
       }
 
-      // Check för IN PROGRESS assessment  
+      // Check för IN PROGRESS från assessment_states table  
       const { data: draftAssessment, error: draftError } = await supabase
-        .from('assessment_form_assignments')
+        .from('assessment_states')
         .select('*')
         .eq('user_id', user.id)
         .eq('assessment_type', 'welcome')
         .is('completed_at', null)
-        .order('created_at', { ascending: false })
+        .order('last_saved_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -72,7 +72,7 @@ export const useWelcomeAssessmentFixed = () => {
         console.error('Error checking draft assessment:', draftError);
       }
 
-      // DECISION LOGIC
+      // DECISION LOGIC - den kritiska logiken
       if (completedAssessment) {
         const daysSince = Math.floor(
           (Date.now() - new Date(completedAssessment.created_at).getTime()) / (1000 * 60 * 60 * 24)
@@ -91,10 +91,10 @@ export const useWelcomeAssessmentFixed = () => {
 
       if (draftAssessment) {
         const hoursOld = Math.floor(
-          (Date.now() - new Date(draftAssessment.created_at).getTime()) / (1000 * 60 * 60)
+          (Date.now() - new Date(draftAssessment.last_saved_at).getTime()) / (1000 * 60 * 60)
         );
 
-        if (hoursOld > 168) { // 7 days
+        if (hoursOld > 168) { // 7 days = expired
           return {
             hasCompleted: false,
             hasInProgress: false,
@@ -160,18 +160,16 @@ export const useWelcomeAssessmentFixed = () => {
     setSubmitting(true);
     try {
       if (isDraft) {
-        // Save as draft
+        // Save as draft with proper JSON conversion
         const { data: draft, error: draftError } = await supabase
-          .from('assessment_form_assignments')
+          .from('assessment_states')
           .upsert({
             user_id: user.id,
             assessment_type: 'welcome',
-            form_data: assessmentData,
+            form_data: assessmentData as any, // JSON conversion
             current_step: 'in_progress',
             auto_save_count: 1,
-            last_activity_at: new Date().toISOString()
-          }, {
-            onConflict: 'user_id,assessment_type'
+            last_saved_at: new Date().toISOString()
           })
           .select()
           .single();
@@ -181,7 +179,7 @@ export const useWelcomeAssessmentFixed = () => {
           return null;
         }
 
-        return draft;
+        return draft as any;
       }
 
       // FINAL SUBMISSION
@@ -232,9 +230,9 @@ export const useWelcomeAssessmentFixed = () => {
         return null;
       }
 
-      // Clean up draft
+      // Clean up draft from assessment_states
       await supabase
-        .from('assessment_form_assignments')
+        .from('assessment_states')
         .delete()
         .eq('user_id', user.id)
         .eq('assessment_type', 'welcome');
@@ -283,7 +281,7 @@ export const useWelcomeAssessmentFixed = () => {
 
     try {
       await supabase
-        .from('assessment_form_assignments')
+        .from('assessment_states')
         .delete()
         .eq('user_id', user.id)
         .eq('assessment_type', 'welcome');
