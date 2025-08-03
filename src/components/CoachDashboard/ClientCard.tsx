@@ -67,11 +67,19 @@ export function ClientCard({ client }: ClientCardProps) {
     return severityOrder[issue.severity] > severityOrder[highest.severity] ? issue : highest;
   }, client.issues[0]);
 
-  const handleViewClient = () => {
+  const handleViewClient = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('🔥🔥🔥 ClientCard: CLICK DETECTED - client:', client);
+    console.log('🔥🔥🔥 ClientCard: client.id (user_id):', client.id);
     console.log('🔥🔥🔥 ClientCard: Navigating to:', `/user/${client.id}?context=client`);
-    navigate(`/user/${client.id}?context=client`);
-    console.log('🔥🔥🔥 ClientCard: Navigate called successfully');
+    
+    try {
+      navigate(`/user/${client.id}?context=client`);
+      console.log('🔥🔥🔥 ClientCard: Navigate called successfully');
+    } catch (error) {
+      console.error('🔥🔥🔥 ClientCard: Navigate error:', error);
+    }
   };
 
   return (

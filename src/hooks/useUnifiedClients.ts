@@ -52,6 +52,7 @@ export const useUnifiedClients = () => {
       } else if (hasRole('coach')) {
         console.log('fetchClients: User is coach, looking for assigned clients');
         // Coach sees only their assigned clients
+        // NOTE: In unified system, client_id = user_id
         const { data: relationships, error: relError } = await supabase
           .from('coach_client_assignments')
           .select('client_id')
@@ -63,8 +64,9 @@ export const useUnifiedClients = () => {
           throw relError;
         }
         
+        // client_id IS user_id in the unified system
         clientUserIds = relationships?.map(r => r.client_id) || [];
-        console.log('fetchClients: Coach found assigned client IDs:', clientUserIds, 'from relationships:', relationships);
+        console.log('fetchClients: Coach found assigned client user_ids:', clientUserIds, 'from relationships:', relationships);
         
       } else if (hasRole('client')) {
         console.log('fetchClients: User is client');
