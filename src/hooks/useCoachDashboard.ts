@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { supabase } from '@/integrations/supabase/client';

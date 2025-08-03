@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { StefanInteraction, UserJourneyState } from '@/types/welcomeAssessment';
 import { STEFAN_PERSONAS, STEFAN_TRIGGER_CONTEXTS } from '@/config/stefanPersonas';
 import { useToast } from '@/hooks/use-toast';

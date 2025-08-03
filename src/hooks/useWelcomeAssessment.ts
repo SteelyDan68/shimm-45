@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { WelcomeAssessmentData, WelcomeAssessmentResult } from '@/types/welcomeAssessment';
 import { useToast } from '@/hooks/use-toast';
 

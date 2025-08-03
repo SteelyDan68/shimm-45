@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { UserJourneyState } from '@/types/welcomeAssessment';
 import { PILLAR_PRIORITY_ORDER } from '@/config/pillarModules';
 import { useToast } from '@/hooks/use-toast';
