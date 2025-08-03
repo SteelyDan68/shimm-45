@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useUnifiedUsers } from '@/hooks/useUnifiedUsers';
 import { usePermissions } from '@/hooks/usePermissions';
 import { CreateUserForm } from '@/components/UserAdministration/CreateUserForm';
@@ -24,8 +25,18 @@ import { Separator } from '@/components/ui/separator';
 export function UserManagementCenter() {
   const { canCreateUsers, canInviteUsers, canManageUsers } = usePermissions();
   const { users, loading, getUsersByRole } = useUnifiedUsers();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState('manage');
+
+  // Handle URL query parameters
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['manage', 'create', 'invite'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const coaches = getUsersByRole('coach');
   const admins = getUsersByRole('admin');
@@ -177,7 +188,7 @@ export function UserManagementCenter() {
           <Separator className="mb-6" />
 
           {/* User Management Tabs */}
-          <Tabs defaultValue="manage" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="manage">Hantera användare</TabsTrigger>
               {canCreateUsers && (

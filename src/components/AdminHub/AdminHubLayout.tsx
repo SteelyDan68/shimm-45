@@ -30,7 +30,7 @@ import {
   SidebarTrigger,
   useSidebar
 } from '@/components/ui/sidebar';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 interface AdminNavigationItem {
   title: string;
@@ -200,19 +200,20 @@ function AdminHeader() {
 
 function QuickActionsPanel() {
   const { canCreateUsers, canInviteUsers, canManageUsers } = usePermissions();
+  const navigate = useNavigate();
   
   const quickActions = [
     ...(canCreateUsers ? [{
       title: "Skapa användare",
       description: "Manuell registrering",
       icon: Users,
-      action: () => {/* Navigate to user creation */}
+      action: () => navigate('/admin-hub/users?tab=create')
     }] : []),
     ...(canInviteUsers ? [{
       title: "Bjud in användare", 
       description: "E-postinbjudan",
       icon: Users,
-      action: () => {/* Navigate to invitation */}
+      action: () => navigate('/admin-hub/users?tab=invite')
     }] : []),
   ];
 
