@@ -48,16 +48,19 @@ export const useAuth = () => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('🔥🔥🔥 useAuth: Auth state change:', { event, sessionExists: !!session, userId: session?.user?.id, userEmail: session?.user?.email });
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('🔥 useAuth: Valid session found, fetching profile and roles for:', session.user.id);
           // Defer profile and roles fetching to avoid deadlock
           setTimeout(() => {
             fetchUserProfile(session.user.id);
             fetchUserRoles(session.user.id);
           }, 0);
         } else {
+          console.log('🔥 useAuth: No session/user, clearing profile and roles');
           setProfile(null);
           setRoles([]);
         }
