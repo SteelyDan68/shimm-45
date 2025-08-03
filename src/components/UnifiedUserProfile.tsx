@@ -54,6 +54,18 @@ export const UnifiedUserProfile = () => {
   const { getExtendedProfile } = useExtendedProfile();
   const { isSuperAdmin, isAdmin, canManageUsers } = useUnifiedPermissions();
   
+  // FORCE DEBUG EVERY RENDER
+  console.log('🔥🔥🔥 UnifiedUserProfile: EVERY RENDER DEBUG:', {
+    userId,
+    currentUserId: user?.id,
+    currentUserEmail: user?.email, 
+    isSuperAdmin,
+    isAdmin,
+    canManageUsers,
+    profileLoading,
+    profile: !!profile
+  });
+  
   // DEBUG: Log all permission data 
   console.log('🔍 UnifiedUserProfile DEBUG - Complete state:', {
     userId,
