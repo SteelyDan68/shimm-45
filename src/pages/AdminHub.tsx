@@ -6,14 +6,10 @@ import { UserManagementTabs } from '@/components/UserAdministration/UserManageme
 import { UnifiedAnalytics } from '@/components/AdminHub/Analytics/UnifiedAnalytics';
 import { StefanControlCenter } from '@/components/AdminHub/AI/StefanControlCenter';
 import { UserManagementCenter } from '@/components/AdminHub/UserManagement/UserManagementCenter';
+import { SystemAdministrationCenter } from '@/components/AdminHub/SystemAdmin/SystemAdministrationCenter';
 
 function AdminSystem() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Systemadministration</h1>
-      <p>Här skulle system administration finnas</p>
-    </div>
-  );
+  return <SystemAdministrationCenter />;
 }
 
 export function AdminHub() {
