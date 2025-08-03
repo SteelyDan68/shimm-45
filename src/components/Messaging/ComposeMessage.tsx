@@ -74,68 +74,91 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
       const isAdmin = roles.includes('admin');
       const isSuperAdmin = roles.includes('superadmin');
 
-      let recipientQuery = supabase
-        .from('profiles')
-        .select(`
-          id, 
-          first_name, 
-          last_name, 
-          email,
-          user_roles:user_roles!inner(role)
-        `)
-        .neq('id', user.id);
+      // For superadmin - get all users without role filtering
+      let recipientQuery;
+      
+      if (isSuperAdmin) {
+        // Superadmins can message EVERYONE - simple query without role restrictions
+        recipientQuery = supabase
+          .from('profiles')
+          .select(`
+            id, 
+            first_name, 
+            last_name, 
+            email
+          `)
+          .neq('id', user.id);
+        console.log('🔍 Superadmin access: fetching all users');
+      } else {
+        // For other roles, include role information for filtering
+        recipientQuery = supabase
+          .from('profiles')
+          .select(`
+            id, 
+            first_name, 
+            last_name, 
+            email,
+            user_roles:user_roles!inner(role)
+          `)
+          .neq('id', user.id);
+      }
 
-      if (isClient) {
-        // Clients can only message their coaches
-        const { data: relationships } = await supabase
-          .from('coach_client_assignments')
-          .select('coach_id')
-          .eq('client_id', user.id)
-          .eq('is_active', true);
+      // Apply role-based filtering only for non-superadmins
+      if (!isSuperAdmin) {
+        if (isClient) {
+          // Clients can only message their coaches
+          const { data: relationships } = await supabase
+            .from('coach_client_assignments')
+            .select('coach_id')
+            .eq('client_id', user.id)
+            .eq('is_active', true);
 
-        const coachIds = relationships?.map(r => r.coach_id) || [];
-        if (coachIds.length > 0) {
-          recipientQuery = recipientQuery.in('id', coachIds);
-        } else {
-          setRecipients([]);
-          return;
+          const coachIds = relationships?.map(r => r.coach_id) || [];
+          if (coachIds.length > 0) {
+            recipientQuery = recipientQuery.in('id', coachIds);
+          } else {
+            setRecipients([]);
+            return;
+          }
+        } else if (isCoach) {
+          // Coaches can message their clients and other coaches/admins
+          const { data: relationships } = await supabase
+            .from('coach_client_assignments')
+            .select('client_id')
+            .eq('coach_id', user.id)
+            .eq('is_active', true);
+
+          const clientIds = relationships?.map(r => r.client_id) || [];
+          
+          // Get all coaches and admins
+          const { data: coachesAndAdmins } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .in('role', ['coach', 'admin']);
+
+          const coachAndAdminIds = coachesAndAdmins?.map(r => r.user_id) || [];
+          const allowedIds = [...clientIds, ...coachAndAdminIds];
+          
+          if (allowedIds.length > 0) {
+            recipientQuery = recipientQuery.in('id', allowedIds);
+          } else {
+            setRecipients([]);
+            return;
+          }
+        } else if (isAdmin) {
+          // Admins can message anyone except superadmins
+          recipientQuery = recipientQuery.not('user_roles.role', 'eq', 'superadmin');
         }
-      } else if (isCoach) {
-        // Coaches can message their clients and other coaches/admins
-        const { data: relationships } = await supabase
-          .from('coach_client_assignments')
-          .select('client_id')
-          .eq('coach_id', user.id)
-          .eq('is_active', true);
-
-        const clientIds = relationships?.map(r => r.client_id) || [];
-        
-        // Get all coaches and admins
-        const { data: coachesAndAdmins } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .in('role', ['coach', 'admin']);
-
-        const coachAndAdminIds = coachesAndAdmins?.map(r => r.user_id) || [];
-        const allowedIds = [...clientIds, ...coachAndAdminIds];
-        
-        if (allowedIds.length > 0) {
-          recipientQuery = recipientQuery.in('id', allowedIds);
-        } else {
-          setRecipients([]);
-          return;
-        }
-      } else if (isAdmin) {
-        // Admins can message anyone except superadmins
-        recipientQuery = recipientQuery.not('user_roles.role', 'eq', 'superadmin');
-      } else if (isSuperAdmin) {
-        // Superadmins can message EVERYONE - no restrictions at all
-        console.log('🔍 Superadmin access: can message all users');
       }
 
       const { data, error } = await recipientQuery;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching recipients:', error);
+        throw error;
+      }
+      
+      console.log('🔍 Recipients found:', data?.length || 0);
       setRecipients(data || []);
     } catch (error) {
       console.error('Error fetching recipients:', error);

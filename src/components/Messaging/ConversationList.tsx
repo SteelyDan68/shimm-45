@@ -49,7 +49,10 @@ export const ConversationList = ({
   }, [messages, user]);
 
   const buildConversations = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       console.log('🔍 Building conversations for user:', user.id);
