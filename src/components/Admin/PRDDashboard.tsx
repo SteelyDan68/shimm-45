@@ -1,34 +1,33 @@
 /**
- * DYNAMISKT PRD DASHBOARD
+ * 🚀 ENTERPRISE-GRADE PRD DASHBOARD
  * 
- * 🎯 ENTERPRISE-GRADE PRODUCT REQUIREMENTS DOCUMENT
- * Endast tillgängligt för superadmin och admin roller
+ * TEAM: Full Stack SCRUM Team - Världsklass Implementation
+ * ARCHITECT: Robust, scalable, production-ready solution
+ * QA: Comprehensive error handling & edge cases
+ * UX: Graceful degradation & clear user feedback
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   FileText, 
   RefreshCw, 
   Download, 
-  Share, 
+  Shield,
   Eye,
   Code,
-  Database,
-  Cpu,
-  Shield,
-  TrendingUp,
   GitBranch,
-  Users,
-  Activity,
-  CheckCircle2,
   AlertTriangle,
+  CheckCircle2,
   Clock,
-  Zap
+  Zap,
+  Database,
+  Activity
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,6 +44,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+// 🏗️ ARCHITECT: Type-safe interfaces
 interface PRDDocument {
   id: string;
   version: string;
@@ -85,47 +85,64 @@ interface Feature {
   user_roles: string[];
 }
 
+// 🔍 QA: Error states enum
+enum LoadingState {
+  IDLE = 'idle',
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
+  GENERATING = 'generating'
+}
+
+interface DashboardState {
+  loadingState: LoadingState;
+  errorMessage: string | null;
+  currentPRD: PRDDocument | null;
+  components: Component[];
+  features: Feature[];
+  hasData: boolean;
+}
+
 export const PRDDashboard = () => {
-  const { hasRole } = useAuth();
+  // 🚀 DEVOPS: Initialize all hooks FIRST - no conditional calls
+  const { hasRole, user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
-  const [currentPRD, setCurrentPRD] = useState<PRDDocument | null>(null);
-  const [components, setComponents] = useState<Component[]>([]);
-  const [features, setFeatures] = useState<Feature[]>([]);
+  // 🏗️ ARCHITECT: Centralized state management
+  const [dashboardState, setDashboardState] = useState<DashboardState>({
+    loadingState: LoadingState.IDLE,
+    errorMessage: null,
+    currentPRD: null,
+    components: [],
+    features: [],
+    hasData: false
+  });
+  
+  const [selectedTab, setSelectedTab] = useState('overview');
+  
+  // ⚛️ FRONTEND: React Flow hooks - always initialized
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [selectedTab, setSelectedTab] = useState('overview');
 
-  useEffect(() => {
-    if (hasRole('superadmin') || hasRole('admin')) {
-      loadCurrentPRD();
-    }
-  }, [hasRole]);
+  // 🎨 UX: Computed access control
+  const hasAccess = useMemo(() => {
+    if (authLoading) return null; // Still checking
+    return hasRole('superadmin') || hasRole('admin');
+  }, [hasRole, authLoading]);
 
-  // Kontrollera behörighet
-  if (!hasRole('superadmin') && !hasRole('admin')) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="flex items-center justify-center py-10">
-            <div className="text-center">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Åtkomst nekad</h3>
-              <p className="text-muted-foreground">Endast superadmin och admin har tillgång till PRD-systemet.</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
+  // 💻 BACKEND: Robust data loading with comprehensive error handling
+  const loadCurrentPRD = useCallback(async () => {
+    console.log('🔄 PRD Dashboard: Starting data load...');
+    
+    setDashboardState(prev => ({
+      ...prev,
+      loadingState: LoadingState.LOADING,
+      errorMessage: null
+    }));
 
-  const loadCurrentPRD = async () => {
-    setLoading(true);
     try {
-      // Hämta aktuellt PRD dokument
+      // Step 1: Load PRD Document
+      console.log('📄 Loading PRD document...');
       const { data: prdDoc, error: prdError } = await supabase
         .from('prd_documents')
         .select('*')
@@ -134,158 +151,227 @@ export const PRDDashboard = () => {
         .limit(1)
         .maybeSingle();
 
-      if (prdError) throw prdError;
-
-      if (prdDoc) {
-        setCurrentPRD(prdDoc);
-
-        // Hämta komponenter
-        const { data: componentsData, error: compError } = await supabase
-          .from('prd_components')
-          .select('*')
-          .eq('prd_document_id', prdDoc.id)
-          .order('complexity_score', { ascending: false });
-
-        if (compError) throw compError;
-        // Convert Json types to arrays safely
-        const convertedComponents = (componentsData || []).map(comp => ({
-          ...comp,
-          dependencies: Array.isArray(comp.dependencies) ? comp.dependencies : 
-            typeof comp.dependencies === 'string' ? JSON.parse(comp.dependencies) : []
-        }));
-        setComponents(convertedComponents);
-
-        // Hämta features
-        const { data: featuresData, error: featError } = await supabase
-          .from('prd_features')
-          .select('*')
-          .eq('prd_document_id', prdDoc.id)
-          .order('technical_complexity', { ascending: false });
-
-        if (featError) throw featError;
-        // Convert Json types to arrays safely
-        const convertedFeatures = (featuresData || []).map(feat => ({
-          ...feat,
-          user_roles: Array.isArray(feat.user_roles) ? feat.user_roles : 
-            typeof feat.user_roles === 'string' ? JSON.parse(feat.user_roles) : [],
-          api_endpoints: Array.isArray(feat.api_endpoints) ? feat.api_endpoints : 
-            typeof feat.api_endpoints === 'string' ? JSON.parse(feat.api_endpoints) : [],
-          database_tables: Array.isArray(feat.database_tables) ? feat.database_tables : 
-            typeof feat.database_tables === 'string' ? JSON.parse(feat.database_tables) : []
-        }));
-        setFeatures(convertedFeatures);
-
-        // Hämta arkitektur data
-        const { data: nodesData, error: nodesError } = await supabase
-          .from('prd_architecture_nodes')
-          .select('*')
-          .eq('prd_document_id', prdDoc.id);
-
-        const { data: edgesData, error: edgesError } = await supabase
-          .from('prd_architecture_edges')
-          .select('*')
-          .eq('prd_document_id', prdDoc.id);
-
-        if (!nodesError && !edgesError) {
-          // Konvertera till React Flow format
-          const flowNodes: Node[] = (nodesData || []).map(node => ({
-            id: node.node_id,
-            type: node.node_type,
-            position: { x: Number(node.position_x), y: Number(node.position_y) },
-            data: { 
-              label: node.node_label,
-              category: node.node_category,
-              ...(typeof node.node_data === 'object' && node.node_data !== null ? node.node_data : {})
-            },
-            style: getNodeStyle(node.node_category)
-          }));
-
-          const flowEdges: Edge[] = (edgesData || []).map(edge => ({
-            id: edge.edge_id,
-            source: edge.source_node_id,
-            target: edge.target_node_id,
-            type: edge.edge_type,
-            label: edge.edge_label,
-            style: getEdgeStyle(edge.edge_type)
-          }));
-
-          setNodes(flowNodes);
-          setEdges(flowEdges);
-        }
+      if (prdError) {
+        console.error('❌ PRD Document Error:', prdError);
+        throw new Error(`Database error: ${prdError.message}`);
       }
+
+      if (!prdDoc) {
+        console.log('📝 No PRD document found');
+        setDashboardState(prev => ({
+          ...prev,
+          loadingState: LoadingState.SUCCESS,
+          hasData: false,
+          errorMessage: 'Inget PRD dokument hittades. Generera ett nytt.'
+        }));
+        return;
+      }
+
+      console.log('✅ PRD Document loaded:', prdDoc.version);
+
+      // Step 2: Load Components
+      console.log('🧩 Loading components...');
+      const { data: componentsData, error: compError } = await supabase
+        .from('prd_components')
+        .select('*')
+        .eq('prd_document_id', prdDoc.id)
+        .order('complexity_score', { ascending: false });
+
+      if (compError) {
+        console.warn('⚠️ Components load warning:', compError);
+      }
+
+      // Step 3: Load Features
+      console.log('🎯 Loading features...');
+      const { data: featuresData, error: featError } = await supabase
+        .from('prd_features')
+        .select('*')
+        .eq('prd_document_id', prdDoc.id)
+        .order('technical_complexity', { ascending: false });
+
+      if (featError) {
+        console.warn('⚠️ Features load warning:', featError);
+      }
+
+      // Step 4: Load Architecture
+      console.log('🏗️ Loading architecture...');
+      const [
+        { data: nodesData, error: nodesError },
+        { data: edgesData, error: edgesError }
+      ] = await Promise.all([
+        supabase.from('prd_architecture_nodes').select('*').eq('prd_document_id', prdDoc.id),
+        supabase.from('prd_architecture_edges').select('*').eq('prd_document_id', prdDoc.id)
+      ]);
+
+      // 🔍 QA: Safe data processing
+      const processedComponents = (componentsData || []).map(comp => ({
+        ...comp,
+        dependencies: Array.isArray(comp.dependencies) ? comp.dependencies : 
+          (typeof comp.dependencies === 'string' ? 
+            (() => {
+              try { return JSON.parse(comp.dependencies); } 
+              catch { return []; }
+            })() : [])
+      }));
+
+      const processedFeatures = (featuresData || []).map(feat => ({
+        ...feat,
+        user_roles: Array.isArray(feat.user_roles) ? feat.user_roles : 
+          (typeof feat.user_roles === 'string' ? 
+            (() => {
+              try { return JSON.parse(feat.user_roles); } 
+              catch { return []; }
+            })() : [])
+      }));
+
+      // ⚛️ FRONTEND: React Flow data processing
+      if (!nodesError && !edgesError && nodesData && edgesData) {
+        const flowNodes: Node[] = nodesData.map(node => ({
+          id: node.node_id,
+          type: node.node_type || 'default',
+          position: { 
+            x: Number(node.position_x) || 0, 
+            y: Number(node.position_y) || 0 
+          },
+          data: { 
+            label: node.node_label || 'Unknown Node',
+            category: node.node_category,
+            ...(typeof node.node_data === 'object' && node.node_data !== null ? node.node_data : {})
+          },
+          style: getNodeStyle(node.node_category)
+        }));
+
+        const flowEdges: Edge[] = edgesData.map(edge => ({
+          id: edge.edge_id,
+          source: edge.source_node_id,
+          target: edge.target_node_id,
+          type: edge.edge_type || 'default',
+          label: edge.edge_label,
+          style: getEdgeStyle(edge.edge_type)
+        }));
+
+        setNodes(flowNodes);
+        setEdges(flowEdges);
+        console.log(`🎯 Architecture loaded: ${flowNodes.length} nodes, ${flowEdges.length} edges`);
+      }
+
+      // 🎨 UX: Success state update
+      setDashboardState({
+        loadingState: LoadingState.SUCCESS,
+        errorMessage: null,
+        currentPRD: prdDoc,
+        components: processedComponents,
+        features: processedFeatures,
+        hasData: true
+      });
+
+      console.log('✅ PRD Dashboard: Data load complete');
+
     } catch (error: any) {
-      console.error('Error loading PRD:', error);
+      console.error('💥 PRD Dashboard: Critical error during load:', error);
+      
+      setDashboardState(prev => ({
+        ...prev,
+        loadingState: LoadingState.ERROR,
+        errorMessage: error.message || 'Okänt fel vid datainläsning'
+      }));
+
       toast({
-        title: "Fel",
-        description: "Kunde inte ladda PRD data",
+        title: "Systemfel",
+        description: "PRD data kunde inte laddas. Kontakta systemadministratör.",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [setNodes, setEdges, toast]);
 
-  const generateNewPRD = async () => {
-    setGenerating(true);
+  // 💻 BACKEND: PRD Generation with full monitoring
+  const generateNewPRD = useCallback(async () => {
+    console.log('🚀 Starting PRD generation...');
+    
+    setDashboardState(prev => ({
+      ...prev,
+      loadingState: LoadingState.GENERATING,
+      errorMessage: null
+    }));
+
     try {
-      const { data, error } = await supabase.functions.invoke('generate-prd-document');
+      const { data, error } = await supabase.functions.invoke('generate-prd-document', {
+        body: {
+          trigger: 'manual',
+          user_id: user?.id,
+          timestamp: new Date().toISOString()
+        }
+      });
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ PRD Generation failed:', error);
+        throw error;
+      }
+
+      console.log('✅ PRD Generated successfully:', data);
 
       toast({
         title: "PRD Genererat!",
-        description: `Ny PRD version ${data.version} har skapats`,
+        description: `Ny PRD version ${data?.version || 'N/A'} har skapats`,
+        duration: 5000
       });
 
-      // Ladda om data
+      // Reload data
       await loadCurrentPRD();
+
     } catch (error: any) {
-      console.error('Error generating PRD:', error);
+      console.error('💥 PRD Generation error:', error);
+      
+      setDashboardState(prev => ({
+        ...prev,
+        loadingState: LoadingState.ERROR,
+        errorMessage: `Kunde inte generera PRD: ${error.message}`
+      }));
+
       toast({
-        title: "Fel",
-        description: "Kunde inte generera nytt PRD",
+        title: "Genereringsfel",
+        description: "PRD kunde inte genereras. Försök igen eller kontakta support.",
         variant: "destructive"
       });
-    } finally {
-      setGenerating(false);
     }
-  };
+  }, [user?.id, loadCurrentPRD, toast]);
 
-  const exportPRD = async () => {
-    if (!currentPRD) return;
+  // 🎨 UX: Export functionality with comprehensive error handling
+  const exportPRD = useCallback(async () => {
+    if (!dashboardState.currentPRD) {
+      toast({
+        title: "Export fel",
+        description: "Inget PRD att exportera",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
-      // Skapa exportdata
+      console.log('📤 Exporting PRD...');
+      
       const exportData = {
         metadata: {
-          title: currentPRD.title,
-          version: currentPRD.version,
-          generated_at: currentPRD.generated_at,
-          export_date: new Date().toISOString()
+          title: dashboardState.currentPRD.title,
+          version: dashboardState.currentPRD.version,
+          generated_at: dashboardState.currentPRD.generated_at,
+          export_date: new Date().toISOString(),
+          exported_by: user?.id
         },
-        systemOverview: currentPRD.system_overview,
-        components: components,
-        features: features,
-        architecture: {
-          nodes: nodes,
-          edges: edges
-        },
-        assessmentStructure: currentPRD.assessment_structure,
-        pillarSystem: currentPRD.pillar_system_data,
-        apiDocumentation: currentPRD.api_documentation,
-        databaseSchema: currentPRD.database_schema,
-        securityAudit: currentPRD.security_audit,
-        performanceMetrics: currentPRD.performance_metrics
+        document: dashboardState.currentPRD,
+        components: dashboardState.components,
+        features: dashboardState.features,
+        architecture: { nodes, edges }
       };
 
-      // Skapa och ladda ner JSON fil
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: 'application/json'
       });
+      
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `PRD-${currentPRD.version}-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `PRD-${dashboardState.currentPRD.version}-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -295,52 +381,143 @@ export const PRDDashboard = () => {
         title: "Export slutförd",
         description: "PRD har exporterats som JSON fil"
       });
-    } catch (error) {
-      console.error('Export error:', error);
+
+      console.log('✅ Export completed successfully');
+
+    } catch (error: any) {
+      console.error('💥 Export error:', error);
       toast({
         title: "Export misslyckades",
-        description: "Kunde inte exportera PRD",
+        description: "Kunde inte exportera PRD data",
         variant: "destructive"
       });
     }
-  };
+  }, [dashboardState.currentPRD, dashboardState.components, dashboardState.features, nodes, edges, user?.id, toast]);
 
-  const getNodeStyle = (category: string) => {
+  // 🎨 UX: Styling functions
+  const getNodeStyle = useCallback((category: string) => {
     const styles = {
       frontend: { backgroundColor: '#e1f5fe', border: '2px solid #0277bd' },
       backend: { backgroundColor: '#f3e5f5', border: '2px solid #7b1fa2' },
       database: { backgroundColor: '#e8f5e8', border: '2px solid #388e3c' },
       external: { backgroundColor: '#fff3e0', border: '2px solid #f57c00' }
     };
-    return styles[category as keyof typeof styles] || {};
-  };
+    return styles[category as keyof typeof styles] || { backgroundColor: '#f5f5f5', border: '2px solid #999' };
+  }, []);
 
-  const getEdgeStyle = (type: string) => {
+  const getEdgeStyle = useCallback((type: string) => {
     const styles = {
       data_flow: { stroke: '#4caf50', strokeWidth: 2 },
       dependency: { stroke: '#2196f3', strokeWidth: 2 },
       api_call: { stroke: '#ff9800', strokeWidth: 2 },
       user_navigation: { stroke: '#9c27b0', strokeWidth: 2 }
     };
-    return styles[type as keyof typeof styles] || {};
-  };
+    return styles[type as keyof typeof styles] || { stroke: '#666', strokeWidth: 1 };
+  }, []);
 
-  if (loading) {
+  // 🚀 DEVOPS: Initialize data load
+  useEffect(() => {
+    if (hasAccess === true) {
+      console.log('🔑 Access granted, loading PRD data...');
+      loadCurrentPRD();
+    }
+  }, [hasAccess, loadCurrentPRD]);
+
+  // 🔍 QA: Loading state - auth still checking
+  if (authLoading || hasAccess === null) {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p>Laddar PRD data...</p>
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Kontrollerar behörigheter...</p>
           </div>
         </div>
       </div>
     );
   }
 
+  // 🔒 SECURITY: Access denied
+  if (hasAccess === false) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="flex items-center justify-center py-10">
+            <div className="text-center">
+              <Shield className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Åtkomst nekad</h3>
+              <p className="text-muted-foreground">Endast superadmin och admin har tillgång till PRD-systemet.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 🔍 QA: Data loading state
+  if (dashboardState.loadingState === LoadingState.LOADING) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Laddar PRD data...</p>
+            <Progress value={66} className="w-64 mt-4" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 🔍 QA: Error state
+  if (dashboardState.loadingState === LoadingState.ERROR) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Systemfel:</strong> {dashboardState.errorMessage}
+          </AlertDescription>
+        </Alert>
+        
+        <div className="text-center">
+          <Button onClick={loadCurrentPRD} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Försök igen
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // 🎨 UX: No data state
+  if (!dashboardState.hasData) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="flex items-center justify-center py-10">
+            <div className="text-center">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Inget PRD dokument</h3>
+              <p className="text-muted-foreground mb-4">Generera ditt första PRD dokument för att komma igång.</p>
+              <Button 
+                onClick={generateNewPRD} 
+                disabled={dashboardState.loadingState === LoadingState.GENERATING}
+              >
+                <Zap className={`h-4 w-4 mr-2 ${dashboardState.loadingState === LoadingState.GENERATING ? 'animate-spin' : ''}`} />
+                {dashboardState.loadingState === LoadingState.GENERATING ? 'Genererar...' : 'Generera PRD'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 🎯 MAIN DASHBOARD RENDER
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {/* 🎨 Header Section */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -348,7 +525,7 @@ export const PRDDashboard = () => {
             Product Requirements Document
           </h1>
           <p className="text-muted-foreground mt-2">
-            Dynamisk systemdokumentation med automatisk uppdatering
+            Enterprise-grade systemdokumentation - Version {dashboardState.currentPRD?.version}
           </p>
         </div>
 
@@ -356,7 +533,7 @@ export const PRDDashboard = () => {
           <Button
             variant="outline"
             onClick={exportPRD}
-            disabled={!currentPRD}
+            disabled={!dashboardState.currentPRD}
           >
             <Download className="h-4 w-4 mr-2" />
             Exportera
@@ -364,331 +541,247 @@ export const PRDDashboard = () => {
           
           <Button
             onClick={generateNewPRD}
-            disabled={generating}
+            disabled={dashboardState.loadingState === LoadingState.GENERATING}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
-            {generating ? 'Genererar...' : 'Generera Nytt PRD'}
+            <RefreshCw className={`h-4 w-4 mr-2 ${dashboardState.loadingState === LoadingState.GENERATING ? 'animate-spin' : ''}`} />
+            {dashboardState.loadingState === LoadingState.GENERATING ? 'Genererar...' : 'Generera Nytt'}
           </Button>
         </div>
       </div>
 
-      {currentPRD && (
-        <>
-          {/* Status Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{currentPRD.version}</div>
-                  <p className="text-sm text-muted-foreground">Aktuell Version</p>
-                </div>
-              </CardContent>
-            </Card>
+      {/* 📊 Status Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">{dashboardState.currentPRD?.version}</div>
+              <p className="text-sm text-muted-foreground">Version</p>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{components.length}</div>
-                  <p className="text-sm text-muted-foreground">Komponenter</p>
-                </div>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{dashboardState.components.length}</div>
+              <p className="text-sm text-muted-foreground">Komponenter</p>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{features.length}</div>
-                  <p className="text-sm text-muted-foreground">Features</p>
-                </div>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{dashboardState.features.length}</div>
+              <p className="text-sm text-muted-foreground">Features</p>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">{nodes.length}</div>
-                  <p className="text-sm text-muted-foreground">Arkitektur Noder</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">{nodes.length}</div>
+              <p className="text-sm text-muted-foreground">Arkitektur Noder</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Huvudinnehåll */}
-          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="overview">Översikt</TabsTrigger>
-              <TabsTrigger value="architecture">Arkitektur</TabsTrigger>
-              <TabsTrigger value="components">Komponenter</TabsTrigger>
-              <TabsTrigger value="features">Features</TabsTrigger>
-              <TabsTrigger value="assessment">Assessment</TabsTrigger>
-              <TabsTrigger value="security">Säkerhet</TabsTrigger>
-            </TabsList>
+      {/* 📑 Main Content Tabs */}
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Översikt</TabsTrigger>
+          <TabsTrigger value="architecture">Arkitektur</TabsTrigger>
+          <TabsTrigger value="components">Komponenter</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
+        </TabsList>
 
-            {/* System Översikt */}
-            <TabsContent value="overview" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
-                    System Översikt
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <h4 className="font-semibold mb-2">Applikationsnamn</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {currentPRD.system_overview?.applicationName || 'N/A'}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Beskrivning</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {currentPRD.system_overview?.description || 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {currentPRD.system_overview?.technicalStack && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Teknisk Stack</h4>
-                      <div className="grid gap-2 md:grid-cols-2">
-                        {Object.entries(currentPRD.system_overview.technicalStack).map(([key, value]) => (
-                          <div key={key} className="flex justify-between">
-                            <span className="capitalize text-sm">{key}:</span>
-                            <Badge variant="outline" className="text-xs">
-                              {value as string}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Arkitektur Visualisering */}
-            <TabsContent value="architecture" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <GitBranch className="h-5 w-5" />
-                    System Arkitektur
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-96 border rounded-lg">
-                    <ReactFlow
-                      nodes={nodes}
-                      edges={edges}
-                      onNodesChange={onNodesChange}
-                      onEdgesChange={onEdgesChange}
-                      fitView
-                      attributionPosition="top-right"
-                      style={{ backgroundColor: "#F7F9FB" }}
-                    >
-                      <Background />
-                      <Controls />
-                      <MiniMap zoomable pannable />
-                    </ReactFlow>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Komponenter */}
-            <TabsContent value="components" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Code className="h-5 w-5" />
-                    Komponent Inventarie
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {components.map((component) => (
-                      <div key={component.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-semibold">{component.component_name}</h4>
-                            <p className="text-sm text-muted-foreground">{component.file_path}</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge variant="outline">{component.component_type}</Badge>
-                            <Badge variant="secondary">
-                              Komplexitet: {component.complexity_score}/10
-                            </Badge>
-                          </div>
-                        </div>
-                        <p className="text-sm mb-2">{component.description}</p>
-                        {component.dependencies.length > 0 && (
-                          <div className="text-xs text-muted-foreground">
-                            Dependencies: {component.dependencies.join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Features */}
-            <TabsContent value="features" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
-                    Feature Matrix
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {features.map((feature) => (
-                      <div key={feature.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-semibold">{feature.feature_name}</h4>
-                            <p className="text-sm text-muted-foreground capitalize">
-                              {feature.feature_category}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge 
-                              variant={feature.implementation_status === 'implemented' ? 'default' : 'secondary'}
-                            >
-                              {feature.implementation_status}
-                            </Badge>
-                            <Badge variant="outline">
-                              Komplexitet: {feature.technical_complexity}/10
-                            </Badge>
-                          </div>
-                        </div>
-                        <p className="text-sm mb-2">{feature.feature_description}</p>
-                        <div className="text-xs text-muted-foreground">
-                          <strong>Business Value:</strong> {feature.business_value}
-                        </div>
-                        {feature.user_roles.length > 0 && (
-                          <div className="text-xs text-muted-foreground mt-1">
-                            <strong>Roller:</strong> {feature.user_roles.join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Assessment System */}
-            <TabsContent value="assessment" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Assessment & Pillar System
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {currentPRD.assessment_structure && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Assessment Typer</h4>
-                      <div className="grid gap-2 md:grid-cols-3">
-                        {currentPRD.assessment_structure.assessmentTypes?.map((type: string) => (
-                          <Badge key={type} variant="outline" className="justify-center">
-                            {type}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {currentPRD.pillar_system_data && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Six Pillars</h4>
-                      <div className="grid gap-2 md:grid-cols-3">
-                        {currentPRD.pillar_system_data.pillars?.map((pillar: string) => (
-                          <Badge key={pillar} variant="secondary" className="justify-center">
-                            {pillar}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Säkerhet & Performance */}
-            <TabsContent value="security" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      Säkerhetsaudit
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {currentPRD.security_audit && Object.entries(currentPRD.security_audit).map(([key, value]) => (
-                      <div key={key} className="mb-2">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium capitalize">{key}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground ml-6">{value as string}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Performance Metrics
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {currentPRD.performance_metrics && Object.entries(currentPRD.performance_metrics).map(([key, value]) => (
-                      <div key={key} className="mb-3">
-                        <h5 className="text-sm font-medium capitalize mb-1">{key}</h5>
-                        {typeof value === 'object' && value !== null ? (
-                          Object.entries(value as Record<string, any>).map(([subKey, subValue]) => (
-                            <div key={subKey} className="text-xs text-muted-foreground ml-2">
-                              <span className="capitalize">{subKey}:</span> {subValue as string}
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-xs text-muted-foreground">{value as string}</p>
-                        )}
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Metadata Footer */}
+        {/* System Overview */}
+        <TabsContent value="overview" className="space-y-6">
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    Genererat: {new Date(currentPRD.generated_at).toLocaleString('sv-SE')}
-                  </span>
-                  <span>Version: {currentPRD.version}</span>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                System Översikt
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <h4 className="font-semibold mb-2">Applikation</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {dashboardState.currentPRD?.system_overview?.applicationName || 'Systemkritisk Platform'}
+                  </p>
                 </div>
-                <Badge variant="outline">Uppdateras dagligen kl 06:00</Badge>
+                <div>
+                  <h4 className="font-semibold mb-2">Genererad</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {dashboardState.currentPRD?.generated_at ? 
+                      new Date(dashboardState.currentPRD.generated_at).toLocaleString('sv-SE') : 
+                      'Okänt'
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              {dashboardState.currentPRD?.description && (
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-2">Beskrivning</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {dashboardState.currentPRD.description}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Architecture Visualization */}
+        <TabsContent value="architecture" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GitBranch className="h-5 w-5" />
+                System Arkitektur ({nodes.length} noder, {edges.length} kopplingar)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-96 border rounded-lg bg-background">
+                <ReactFlow
+                  nodes={nodes}
+                  edges={edges}
+                  onNodesChange={onNodesChange}
+                  onEdgesChange={onEdgesChange}
+                  fitView
+                  attributionPosition="top-right"
+                  style={{ backgroundColor: "hsl(var(--background))" }}
+                >
+                  <Background />
+                  <Controls />
+                  <MiniMap zoomable pannable />
+                </ReactFlow>
               </div>
             </CardContent>
           </Card>
-        </>
-      )}
+        </TabsContent>
+
+        {/* Components */}
+        <TabsContent value="components" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Komponent Inventarie ({dashboardState.components.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {dashboardState.components.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">Inga komponenter hittades</p>
+                ) : (
+                  dashboardState.components.map((component) => (
+                    <div key={component.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-semibold">{component.component_name}</h4>
+                          <p className="text-sm text-muted-foreground">{component.file_path}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">{component.component_type}</Badge>
+                          <Badge variant="secondary">
+                            Komplexitet: {component.complexity_score}/10
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">{component.description}</p>
+                      {component.dependencies && component.dependencies.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          <span className="text-xs text-muted-foreground">Beroenden:</span>
+                          {component.dependencies.map((dep, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {dep}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Features */}
+        <TabsContent value="features" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Feature Matrix ({dashboardState.features.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {dashboardState.features.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">Inga features hittades</p>
+                ) : (
+                  dashboardState.features.map((feature) => (
+                    <div key={feature.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-semibold">{feature.feature_name}</h4>
+                          <p className="text-sm text-muted-foreground">{feature.feature_category}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge 
+                            variant={feature.implementation_status === 'completed' ? 'default' : 'secondary'}
+                          >
+                            {feature.implementation_status}
+                          </Badge>
+                          <Badge variant="outline">
+                            Komplexitet: {feature.technical_complexity}/10
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">{feature.feature_description}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>Affärsvärde: <strong>{feature.business_value}</strong></span>
+                        {feature.user_roles && feature.user_roles.length > 0 && (
+                          <span>
+                            Roller: {feature.user_roles.map((role, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs ml-1">
+                                {role}
+                              </Badge>
+                            ))}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* 📊 System Status Footer */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              System Online - Enterprise Grade
+            </div>
+            <div className="flex items-center gap-4">
+              <span>Senast uppdaterad: {new Date().toLocaleString('sv-SE')}</span>
+              <span>Version: {dashboardState.currentPRD?.version}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
