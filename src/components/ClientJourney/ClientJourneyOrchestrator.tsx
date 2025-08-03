@@ -16,7 +16,7 @@ import {
   Route,
   PlayCircle
 } from 'lucide-react';
-import { useUnifiedAI } from '@/hooks/useUnifiedAI';
+import { useAIRequestExecutor } from '@/hooks/useAIRequestExecutor';
 import { useTasks } from '@/hooks/useTasks';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -51,7 +51,7 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
   // ✅ HOOKS AT TOP LEVEL - CORRECTLY IMPLEMENTED
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { assessmentAnalysis, loading: aiLoading } = useUnifiedAI();
+  const { executeAIRequest, loading: aiLoading } = useAIRequestExecutor();
   const { createTask, tasks, loading: tasksLoading } = useTasks();
   
   // ✅ REAL STATE MANAGEMENT
@@ -74,19 +74,23 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
         pillarKey: 'self_care'
       };
 
-      const result = await assessmentAnalysis({
-        assessmentType: 'welcome_assessment',
-        scores: mockAssessmentData.scores,
-        responses: mockAssessmentData.responses,
-        pillarKey: mockAssessmentData.pillarKey
+      const result = await executeAIRequest({
+        action: 'assessment_analysis',
+        data: {
+          assessmentType: 'welcome_assessment',
+          scores: mockAssessmentData.scores,
+          responses: mockAssessmentData.responses,
+          pillarKey: mockAssessmentData.pillarKey
+        },
+        priority: 'high'
       });
 
-      if (result) {
+      if (result.success && result.data) {
         // Transform AI analysis into insights format
         const insights = [{
           category: 'utvecklingsområde' as const,
           title: 'AI-analys genomförd',
-          description: result.analysis.substring(0, 150) + '...',
+          description: result.data.analysis?.substring(0, 150) + '...' || 'Analys genomförd',
           actionable_steps: [
             'Granska dina personliga rekommendationer',
             'Välj utvecklingsområden att fokusera på',
@@ -115,7 +119,7 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
     } finally {
       setIsProcessing(false);
     }
-  }, [assessmentAnalysis, isProcessing, aiLoading, toast]);
+  }, [executeAIRequest, isProcessing, aiLoading, toast]);
 
   // ✅ OPTIMIZED: Memoized task creation
   const handleCreateTasks = useCallback(async (insights: any[]) => {
