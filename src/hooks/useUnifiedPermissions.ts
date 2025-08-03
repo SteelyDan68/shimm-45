@@ -246,10 +246,29 @@ export const useUnifiedPermissions = () => {
   const canAccessGamification = hasFeature('gamification');
   const canAccessAdvancedAnalytics = hasFeature('advanced-analytics');
   const canAccessSystemSettings = hasFeature('system-settings');
-  const isAdmin = roles.includes('admin') || roles.includes('superadmin');
-  const isSuperAdmin = roles.includes('superadmin');
-  const isCoach = roles.includes('coach');
-  const isClient = roles.includes('client');
+  const isAdmin = useMemo(() => {
+    const result = roles.includes('admin') || roles.includes('superadmin');
+    console.log('🔥 useUnifiedPermissions.isAdmin result:', result, 'roles:', roles);
+    return result;
+  }, [roles]);
+  
+  const isSuperAdmin = useMemo(() => {
+    const result = roles.includes('superadmin');
+    console.log('🔥🔥🔥 useUnifiedPermissions.isSuperAdmin result:', result, 'roles:', roles);
+    return result;
+  }, [roles]);
+  
+  const isCoach = useMemo(() => {
+    const result = roles.includes('coach');
+    console.log('🔥 useUnifiedPermissions.isCoach result:', result, 'roles:', roles);
+    return result;
+  }, [roles]);
+  
+  const isClient = useMemo(() => {
+    const result = roles.includes('client');
+    console.log('🔥 useUnifiedPermissions.isClient result:', result, 'roles:', roles);
+    return result;
+  }, [roles]);
 
   return {
     hasPermission,

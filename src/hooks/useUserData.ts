@@ -108,10 +108,11 @@ export const useUserData = (userId?: string) => {
   useEffect(() => {
     // Only fetch when targetUserId is available
     if (targetUserId) {
-      console.log('useUserData: Triggering fetchData for targetUserId:', targetUserId);
+      console.log('🔥 useUserData: Triggering fetchData for targetUserId:', targetUserId);
+      console.log('🔥 useUserData: Current user context:', { userId: user?.id, email: user?.email });
       fetchData();
     } else {
-      console.log('useUserData: Waiting for targetUserId');
+      console.log('❌ useUserData: Waiting for targetUserId - current state:', { targetUserId, userId, userIdFromParams: user?.id });
     }
   }, [targetUserId]);
 
