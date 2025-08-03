@@ -38,7 +38,6 @@ serve(async (req) => {
         receiver_id: receiverId,
         content,
         subject,
-        message_type: messageType,
         is_read: false
       })
       .select(`
