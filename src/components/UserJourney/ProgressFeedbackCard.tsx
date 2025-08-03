@@ -72,33 +72,32 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
           const steps = [
             {
               id: 'view_insights',
-              title: 'Granska dina AI-insikter',
+              title: '🤖 Se vad Stefan tänker om dig',
               description: 'Stefan har analyserat din bedömning och skapat personliga rekommendationer',
               action: () => {
-                // For now, navigate to six-pillars where they can see their results
-                navigate('/six-pillars');
+                navigate('/ai-insights');
                 setShowCard(false);
               },
-              icon: <Brain className="h-5 w-5 text-blue-600" />,
+              icon: <Brain className="h-5 w-5 text-primary" />,
               estimatedTime: '5 min'
             },
             {
               id: 'select_pillars',
-              title: 'Välj utvecklingsområden',
-              description: 'Aktivera de pelare du vill fokusera på först',
+              title: '🎯 Välj vad du vill utveckla',
+              description: 'Aktivera de områden du vill fokusera på först',
               action: () => {
-                navigate('/six-pillars');
+                navigate('/client-dashboard?tab=pillars');
                 setShowCard(false);
               },
-              icon: <Target className="h-5 w-5 text-green-600" />,
+              icon: <Target className="h-5 w-5 text-success" />,
               estimatedTime: '10 min'
             },
             {
               id: 'start_tasks',
-              title: 'Påbörja dina första uppgifter',
-              description: 'Få konkreta, genomförbara steg för din utveckling',
+              title: '✅ Börja göra saker',
+              description: 'Få konkreta uppgifter du kan göra för att utvecklas',
               action: () => {
-                navigate('/tasks');
+                navigate('/client-dashboard?tab=tasks');
                 setShowCard(false);
               },
               icon: <CheckCircle2 className="h-5 w-5 text-purple-600" />,
@@ -144,11 +143,11 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
               <CheckCircle2 className="h-6 w-6 text-emerald-600" />
             </div>
             <div>
-              <CardTitle className="text-xl text-emerald-900">
-                Fantastiskt! Din bedömning är genomförd! 🎉
+              <CardTitle className="text-xl text-success-foreground">
+                Bra jobbat! Du är klar! 🎉
               </CardTitle>
-              <p className="text-emerald-700 text-sm mt-1">
-                Stefan AI har analyserat dina svar och förberett din personliga utvecklingsplan
+              <p className="text-success-foreground/80 text-sm mt-1">
+                Stefan har kollat på dina svar och gjort en plan bara för dig
               </p>
             </div>
           </div>
@@ -166,37 +165,37 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
       <CardContent className="space-y-6">
         {/* Vad som just hänt */}
         <div className="bg-white/60 p-4 rounded-lg border border-emerald-100">
-          <h3 className="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
+          <h3 className="font-semibold text-success-foreground mb-2 flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
             Vad som precis hänt:
           </h3>
-          <ul className="space-y-1 text-sm text-emerald-700">
-            <li>✅ Din välkomstbedömning är analyserad av Stefan AI</li>
-            <li>✅ Personliga utvecklingsinsikter har skapats</li>
-            <li>✅ Rekommendationer för nästa steg är redo</li>
-            <li>✅ Din utvecklingsresa har officiellt börjat!</li>
+          <ul className="space-y-1 text-sm text-success-foreground/80">
+            <li>✅ Stefan har kollat igenom alla dina svar</li>
+            <li>✅ Han har hittat vad du är bra på och vad du kan bli bättre på</li>
+            <li>✅ Nu har du en plan för vad du ska göra härnäst</li>
+            <li>✅ Du kan börja utvecklas på riktigt! 🚀</li>
           </ul>
         </div>
 
         {/* Vad nyttan var */}
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-          <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+          <h3 className="font-semibold text-primary-foreground mb-2 flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Nyttan med din bedömning:
+            Varför det här var smart:
           </h3>
-          <ul className="space-y-1 text-sm text-blue-700">
-            <li>🎯 Identifierat dina starkaste och svagaste livsområden</li>
-            <li>🧠 AI-analys har skapat skräddarsydda rekommendationer</li>
-            <li>📈 Baseline etablerad för att mäta din framtida utveckling</li>
-            <li>⚡ Neuroplastiska principer tillämpade på dina specifika behov</li>
+          <ul className="space-y-1 text-sm text-primary-foreground/80">
+            <li>🎯 Nu vet vi vilka områden i ditt liv som fungerar bra och vilka som behöver hjälp</li>
+            <li>🧠 Stefan har gjort en personlig plan baserat på exakt hur DU mår</li>
+            <li>📈 Vi kan se hur du utvecklas framöver</li>
+            <li>⚡ Du får tips som faktiskt funkar för just dig</li>
           </ul>
         </div>
 
         {/* Nästa steg */}
         <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
             <ArrowRight className="h-4 w-4" />
-            Dina nästa steg:
+            Vad gör du nu?
           </h3>
           
           {nextSteps.map((step, index) => (
@@ -231,18 +230,18 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
         <div className="flex gap-3 pt-4 border-t border-emerald-100">
           <Button 
             onClick={handleContinueJourney}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+            className="flex-1 bg-success hover:bg-success/90"
             size="lg"
           >
             <Brain className="h-4 w-4 mr-2" />
-            Fortsätt min resa
+            Se vad Stefan tänker! 🤖
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
           
           <Button 
             variant="outline"
             onClick={handleDismiss}
-            className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            className="border-success/20 text-success-foreground hover:bg-success/10"
           >
             Senare
           </Button>

@@ -45,6 +45,7 @@ import { IntelligenceHubPage } from "./pages/IntelligenceHub";
 import { TasksPage } from "./pages/Tasks";
 import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChat";
+import { AIInsights } from "./pages/AIInsights";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -130,8 +131,9 @@ const AppRoutes = () => {
               <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
-              <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
-              <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
+               <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
+               <Route path="/ai-insights" element={<AIInsights />} />
+               <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
               <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys</h1><p className="text-muted-foreground">Analytiska insikter om dina klienter finns i varje klientprofil.</p></div>} />
               <Route path="/data-collection" element={<div className="p-6"><h1 className="text-2xl font-bold">Datainsamling</h1><p className="text-muted-foreground">Datainsamlingsverktyg finns integrerade i klientprofilerna.</p></div>} />
               <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter</h1><p className="text-muted-foreground">Automatiska veckobrev skickas varje måndag. Mer rapportfunktionalitet utvecklas.</p></div>} />
