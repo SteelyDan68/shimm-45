@@ -3,24 +3,9 @@ import { AdminHubLayout } from '@/components/AdminHub/AdminHubLayout';
 import { UnifiedDashboard } from '@/components/AdminHub/UnifiedDashboard';
 import { UserManagementTabs } from '@/components/UserAdministration/UserManagementTabs';
 
-// Placeholder components - dessa skulle implementeras i nästa fas
-function AdminAnalytics() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Unified Analytics</h1>
-      <p>Här skulle en konsoliderad analytics-dashboard finnas</p>
-    </div>
-  );
-}
-
-function AdminAI() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Stefan AI Control Center</h1>
-      <p>Här skulle Stefan AI management finnas</p>
-    </div>
-  );
-}
+import { UnifiedAnalytics } from '@/components/AdminHub/Analytics/UnifiedAnalytics';
+import { StefanControlCenter } from '@/components/AdminHub/AI/StefanControlCenter';
+import { UserManagementCenter } from '@/components/AdminHub/UserManagement/UserManagementCenter';
 
 function AdminSystem() {
   return (
@@ -36,9 +21,9 @@ export function AdminHub() {
     <Routes>
       <Route path="/" element={<AdminHubLayout />}>
         <Route index element={<UnifiedDashboard />} />
-        <Route path="users" element={<UserManagementTabs />} />
-        <Route path="analytics" element={<AdminAnalytics />} />
-        <Route path="ai" element={<AdminAI />} />
+        <Route path="users" element={<UserManagementCenter />} />
+        <Route path="analytics" element={<UnifiedAnalytics />} />
+        <Route path="ai" element={<StefanControlCenter />} />
         <Route path="system" element={<AdminSystem />} />
       </Route>
     </Routes>
