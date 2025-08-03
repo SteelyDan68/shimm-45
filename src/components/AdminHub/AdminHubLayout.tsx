@@ -17,7 +17,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { 
   Sidebar, 
   SidebarContent, 
@@ -59,6 +58,54 @@ const ADMIN_NAVIGATION: AdminNavigationGroup[] = [
         roles: ["superadmin", "admin", "coach"]
       }
     ]
+  },
+  {
+    title: "Användarhantering", 
+    roles: ["superadmin", "admin", "coach"],
+    items: [
+      {
+        title: "Hantera användare",
+        url: "/admin-hub/users",
+        icon: Users,
+        roles: ["superadmin", "admin", "coach"]
+      }
+    ]
+  },
+  {
+    title: "Analys & Insikter",
+    roles: ["superadmin", "admin", "coach"], 
+    items: [
+      {
+        title: "Analytics",
+        url: "/admin-hub/analytics",
+        icon: BarChart3,
+        roles: ["superadmin", "admin", "coach"]
+      }
+    ]
+  },
+  {
+    title: "AI & Automation",
+    roles: ["superadmin", "admin", "coach"],
+    items: [
+      {
+        title: "Stefan AI Center",
+        url: "/admin-hub/ai",
+        icon: Brain,
+        roles: ["superadmin", "admin", "coach"]
+      }
+    ]
+  },
+  {
+    title: "System",
+    roles: ["superadmin", "admin"],
+    items: [
+      {
+        title: "Systemadministration", 
+        url: "/admin-hub/system",
+        icon: Settings,
+        roles: ["superadmin", "admin"]
+      }
+    ]
   }
 ];
 
@@ -77,15 +124,7 @@ function AdminSidebar() {
       : "hover:bg-muted/50";
 
   return (
-    <Sidebar 
-      className={cn(
-        "shrink-0 border-r",
-        collapsed ? "w-16" : "w-64"
-      )}
-      style={{ 
-        "--sidebar-width": collapsed ? "4rem" : "16rem" 
-      } as React.CSSProperties}
-    >
+    <Sidebar className={collapsed ? "w-16" : "w-64"}>
       <SidebarContent>
         {ADMIN_NAVIGATION.filter(hasAccess).map((group) => (
           <SidebarGroup key={group.title}>
@@ -128,7 +167,7 @@ function AdminHeader() {
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center gap-4 pl-2 pr-6">
+      <div className="flex h-16 items-center gap-4 px-6">
         <SidebarTrigger className="ml-0" />
         
         <div className="flex items-center gap-2">
@@ -224,13 +263,13 @@ export function AdminHubLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full">
         <AdminSidebar />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           <AdminHeader />
           
-          <main className="flex-1 p-6">
+          <main className="flex-1 overflow-auto p-6">
             <Outlet />
           </main>
         </div>
