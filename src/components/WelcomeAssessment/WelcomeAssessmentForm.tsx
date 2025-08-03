@@ -36,18 +36,24 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
     quickWins: {},
   });
 
-  // Säkerhetshantering för assessment
-  const { safeSubmit, safeNavigate, safeAutoSave, updateLastInteraction } = useAssessmentSafety({
+  // Säkerhetshantering för assessment med förbättrad state management
+  const { safeSubmit, safeNavigate, manualSave, updateLastInteraction, clearDraftState } = useAssessmentSafety({
     isActive: true,
     hasUnsavedChanges,
+    assessmentType: 'welcome',
+    currentStep: currentStep,
+    formData: assessmentData,
     preventAccidentalSubmission: true,
+    autoSaveInterval: 30000,
+    onStateRestore: (restoredData) => {
+      setAssessmentData(restoredData as any);
+      setIsDraft(true);
+      setHasUnsavedChanges(true);
+    },
     onBeforeExit: async () => {
       const shouldExit = window.confirm(
-        'Du har en pågående bedömning. Vill du verkligen lämna sidan? Dina ändringar sparas som utkast.'
+        'Du har en pågående bedömning. Vill du verkligen lämna sidan? Dina ändringar sparas automatiskt.'
       );
-      if (shouldExit && hasUnsavedChanges) {
-        await saveProgress();
-      }
       return shouldExit;
     }
   });
@@ -155,7 +161,7 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
     }
   };
 
-  const goToNextStep = () => {
+  const goToNextStep = async () => {
     if (!canProceedToNextStep()) {
       toast({
         title: "Ofullständigt steg",
@@ -168,28 +174,26 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
     const steps: AssessmentStep[] = ['wheel_of_life', 'adaptive', 'free_text', 'quick_wins', 'review'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
-      setCurrentStep(steps[currentIndex + 1]);
-      // Spara progress automatiskt
-      saveProgress();
+      const nextStep = steps[currentIndex + 1];
+      await safeNavigate(() => setCurrentStep(nextStep), nextStep, false);
     }
   };
 
-  const goToPreviousStep = () => {
+  const goToPreviousStep = async () => {
     const steps: AssessmentStep[] = ['wheel_of_life', 'adaptive', 'free_text', 'quick_wins', 'review'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex > 0) {
-      setCurrentStep(steps[currentIndex - 1]);
+      const prevStep = steps[currentIndex - 1];
+      await safeNavigate(() => setCurrentStep(prevStep), prevStep, false);
     }
   };
 
   const saveProgress = async () => {
-    try {
-      // Bara local save för nu - ingen backend för utkast
+    const success = await manualSave();
+    if (success) {
       setHasUnsavedChanges(false);
-      console.log('Progress saved locally');
-    } catch (error) {
-      console.error('Error saving progress:', error);
     }
+    return success;
   };
 
   const handleSubmit = async () => {
@@ -358,35 +362,68 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
         {renderStepContent()}
 
         <div className="flex justify-between pt-6 border-t">
-          <Button
-            variant="outline"
-            onClick={goToPreviousStep}
-            disabled={currentStep === 'wheel_of_life'}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Föregående
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={goToPreviousStep}
+              disabled={currentStep === 'wheel_of_life'}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Föregående
+            </Button>
+            
+            {hasUnsavedChanges && (
+              <Button
+                variant="ghost"
+                onClick={saveProgress}
+                className="flex items-center gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Spara
+              </Button>
+            )}
+          </div>
 
-          {currentStep === 'review' ? (
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex items-center gap-2"
-            >
-              {submitting ? 'Slutför bedömning...' : 'Slutför bedömning'}
-              <CheckCircle className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              onClick={goToNextStep}
-              disabled={!canProceedToNextStep()}
-              className="flex items-center gap-2"
-            >
-              Nästa
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {isDraft && (
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  const confirmed = window.confirm(
+                    'Är du säker på att du vill avbryta bedömningen? All data raderas.'
+                  );
+                  if (confirmed) {
+                    await clearDraftState();
+                    window.location.href = '/client-dashboard';
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                Avbryt bedömning
+              </Button>
+            )}
+            
+            {currentStep === 'review' ? (
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="flex items-center gap-2"
+              >
+                {submitting ? 'Slutför bedömning...' : 'Slutför bedömning'}
+                <CheckCircle className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={goToNextStep}
+                disabled={!canProceedToNextStep()}
+                className="flex items-center gap-2"
+              >
+                Nästa
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

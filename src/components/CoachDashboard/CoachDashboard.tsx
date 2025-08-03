@@ -10,6 +10,7 @@ import { AlertCircle, Users, Plus, Brain, Target, TrendingUp, CheckSquare, Messa
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
+import { EnhancedCoachInsights } from './EnhancedCoachInsights';
 
 export function CoachDashboard() {
   const {
@@ -156,6 +157,9 @@ export function CoachDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Enhanced AI Coach Insights */}
+      <EnhancedCoachInsights />
 
       {/* Client Filters and List */}
       <Card>

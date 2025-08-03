@@ -382,6 +382,50 @@ export type Database = {
         }
         Relationships: []
       }
+      assessment_events: {
+        Row: {
+          assessment_state_id: string | null
+          event_data: Json
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          session_id: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          assessment_state_id?: string | null
+          event_data?: Json
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          assessment_state_id?: string | null
+          event_data?: Json
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_events_assessment_state_id_fkey"
+            columns: ["assessment_state_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_states"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_form_assignments: {
         Row: {
           assigned_at: string
@@ -567,6 +611,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      assessment_states: {
+        Row: {
+          abandoned_at: string | null
+          assessment_key: string | null
+          assessment_type: string
+          auto_save_count: number
+          completed_at: string | null
+          created_at: string
+          current_step: string
+          form_data: Json
+          id: string
+          is_draft: boolean
+          last_saved_at: string
+          metadata: Json
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          abandoned_at?: string | null
+          assessment_key?: string | null
+          assessment_type: string
+          auto_save_count?: number
+          completed_at?: string | null
+          created_at?: string
+          current_step: string
+          form_data?: Json
+          id?: string
+          is_draft?: boolean
+          last_saved_at?: string
+          metadata?: Json
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          abandoned_at?: string | null
+          assessment_key?: string | null
+          assessment_type?: string
+          auto_save_count?: number
+          completed_at?: string | null
+          created_at?: string
+          current_step?: string
+          form_data?: Json
+          id?: string
+          is_draft?: boolean
+          last_saved_at?: string
+          metadata?: Json
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      autonomous_triggers: {
+        Row: {
+          action_taken: string | null
+          ai_intervention: Json | null
+          condition_met_at: string
+          created_at: string
+          id: string
+          resolution_status: string
+          resolved_at: string | null
+          trigger_data: Json
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          ai_intervention?: Json | null
+          condition_met_at?: string
+          created_at?: string
+          id?: string
+          resolution_status?: string
+          resolved_at?: string | null
+          trigger_data?: Json
+          trigger_type: string
+          user_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          ai_intervention?: Json | null
+          condition_met_at?: string
+          created_at?: string
+          id?: string
+          resolution_status?: string
+          resolved_at?: string | null
+          trigger_data?: Json
+          trigger_type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       calendar_events: {
         Row: {
@@ -804,6 +941,60 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coach_insights: {
+        Row: {
+          acknowledged_at: string | null
+          action_points: Json
+          ai_generated: boolean
+          client_id: string
+          coach_id: string
+          created_at: string
+          data_sources: Json
+          description: string
+          expires_at: string | null
+          id: string
+          insight_type: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          action_points?: Json
+          ai_generated?: boolean
+          client_id: string
+          coach_id: string
+          created_at?: string
+          data_sources?: Json
+          description: string
+          expires_at?: string | null
+          id?: string
+          insight_type: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          action_points?: Json
+          ai_generated?: boolean
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          data_sources?: Json
+          description?: string
+          expires_at?: string | null
+          id?: string
+          insight_type?: string
+          priority?: string
+          status?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -2138,6 +2329,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_journey_tracking: {
+        Row: {
+          ai_summary: string | null
+          coach_notes: string | null
+          created_at: string
+          current_assessment_state_id: string | null
+          id: string
+          intervention_flags: Json
+          journey_phase: string
+          last_activity_at: string
+          overall_progress: number
+          risk_indicators: Json
+          updated_at: string
+          user_id: string
+          wellness_score: number | null
+        }
+        Insert: {
+          ai_summary?: string | null
+          coach_notes?: string | null
+          created_at?: string
+          current_assessment_state_id?: string | null
+          id?: string
+          intervention_flags?: Json
+          journey_phase?: string
+          last_activity_at?: string
+          overall_progress?: number
+          risk_indicators?: Json
+          updated_at?: string
+          user_id: string
+          wellness_score?: number | null
+        }
+        Update: {
+          ai_summary?: string | null
+          coach_notes?: string | null
+          created_at?: string
+          current_assessment_state_id?: string | null
+          id?: string
+          intervention_flags?: Json
+          journey_phase?: string
+          last_activity_at?: string
+          overall_progress?: number
+          risk_indicators?: Json
+          updated_at?: string
+          user_id?: string
+          wellness_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_journey_tracking_current_assessment_state_id_fkey"
+            columns: ["current_assessment_state_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_states"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
