@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,20 +54,72 @@ export const UnifiedUserProfile = () => {
   const tab = searchParams.get('tab');
   const pillar = searchParams.get('pillar');
   
-  // SUPERADMIN GOD MODE: Always allow superadmin access
-  const canViewProfile = isSuperAdmin || userId === user?.id || isAdmin || canManageUsers;
+  // 🚨 SUPERADMIN GOD MODE: ABSOLUTE ACCESS TO EVERYTHING
+  const canViewProfile = useMemo(() => {
+    // EMERGENCY SUPERADMIN CHECKS - Multiple layers for maximum reliability
+    
+    // 1. Check from useUnifiedPermissions (primary check)
+    if (isSuperAdmin) {
+      console.log('🔥 PRIMARY SUPERADMIN GOD MODE - isSuperAdmin = true');
+      return true;
+    }
+    
+    // 2. Direct role array check (backup check)
+    if (user?.id && roles && roles.includes('superadmin' as any)) {
+      console.log('🔥 BACKUP SUPERADMIN GOD MODE - roles array contains superadmin');
+      return true;
+    }
+    
+    // 3. Emergency hardcoded superadmin check for Stefan
+    if (user?.email === 'stefan.hallgren@gmail.com') {
+      console.log('🔥 EMERGENCY HARDCODED SUPERADMIN ACCESS for Stefan');
+      return true;
+    }
+    
+    // 4. Self-access always allowed
+    if (userId === user?.id) {
+      console.log('✅ Self-access granted');
+      return true;
+    }
+    
+    // 5. Admin access
+    if (isAdmin) {
+      console.log('✅ Admin access granted');
+      return true;
+    }
+    
+    // 6. Other permissions
+    if (canManageUsers) {
+      console.log('✅ User management permission granted');
+      return true;
+    }
+    
+    console.log('❌ Access denied - no valid permissions found');
+    console.log('DEBUG INFO:', {
+      isSuperAdmin,
+      userEmail: user?.email,
+      userId,
+      currentUserId: user?.id,
+      roles,
+      isAdmin,
+      canManageUsers
+    });
+    return false;
+  }, [user?.id, user?.email, userId, roles, isSuperAdmin, isAdmin, canManageUsers]);
   
   const [extendedProfile, setExtendedProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  console.log('🔄 UnifiedUserProfile:', {
+  console.log('🔄 UnifiedUserProfile DEBUG:', {
     userId,
+    currentUserId: user?.id,
     context,
-    tab,
-    pillar,
     userRoles: roles,
+    isSuperAdmin,
+    isAdmin,
+    canManageUsers,
     canViewProfile,
-    isSuperAdmin
+    'roles.includes(superadmin)': roles.includes('superadmin' as any)
   });
 
   useEffect(() => {
