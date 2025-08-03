@@ -87,9 +87,20 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
         }
 
         if (journeyData.data && journeyData.data.length > 0) {
-          const metadata = journeyData.data[0].metadata as any;
+          const journeyState = journeyData.data[0];
+          const metadata = journeyState.metadata as any;
           if (metadata?.ai_analysis_completed_at) {
             newCompletedSteps.push('ai_analysis');
+          }
+          
+          // Use actual journey progress from database
+          const dbProgress = journeyState.journey_progress || 0;
+          setJourneyProgress(dbProgress);
+          
+          // Check if pillar selection is done (based on completed_assessments)
+          const completedAssessments = journeyState.completed_assessments as any[];
+          if (completedAssessments && completedAssessments.length > 1) {
+            newCompletedSteps.push('pillar_selection');
           }
         }
 
@@ -98,14 +109,11 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
         }
 
         setCompletedSteps(newCompletedSteps);
-        setJourneyProgress((newCompletedSteps.length / 5) * 100);
         
-        // Set current step to first incomplete step
+        // Set current step to first incomplete step OR last step if all complete
         const allSteps = ['welcome_assessment', 'ai_analysis', 'pillar_selection', 'todo_creation', 'habit_formation'];
         const nextIncompleteIndex = allSteps.findIndex(step => !newCompletedSteps.includes(step));
-        if (nextIncompleteIndex >= 0) {
-          setCurrentStepIndex(nextIncompleteIndex);
-        }
+        setCurrentStepIndex(nextIncompleteIndex >= 0 ? nextIncompleteIndex : allSteps.length - 1);
 
       } catch (error) {
         console.error('Error syncing progress:', error);
@@ -213,21 +221,6 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
     }
   }, [userId, createTask, tasksLoading, toast]);
 
-  const markStepCompleted = useCallback((stepId: string) => {
-    if (!completedSteps.includes(stepId)) {
-      setCompletedSteps(prev => [...prev, stepId]);
-      
-      // Update progress
-      const newProgress = ((completedSteps.length + 1) / journeySteps.length) * 100;
-      setJourneyProgress(newProgress);
-      
-      // Move to next step
-      if (currentStepIndex < journeySteps.length - 1) {
-        setCurrentStepIndex(currentStepIndex + 1);
-      }
-    }
-  }, [completedSteps, currentStepIndex]);
-
   // ✅ OPTIMIZED: Memoized journey steps
   const journeySteps: JourneyStep[] = useMemo(() => [
     {
@@ -315,7 +308,25 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
         markStepCompleted('habit_formation');
       }
     }
-  ], [completedSteps, currentStepIndex, navigate, markStepCompleted, triggerAssessmentAnalysis, handleCreateTasks, activeInsights]);
+  ], [completedSteps, currentStepIndex, navigate, triggerAssessmentAnalysis, handleCreateTasks, activeInsights, userId, toast]);
+
+  const markStepCompleted = useCallback((stepId: string) => {
+    if (!completedSteps.includes(stepId)) {
+      const newCompletedSteps = [...completedSteps, stepId];
+      setCompletedSteps(newCompletedSteps);
+      
+      // Update progress
+      const newProgress = (newCompletedSteps.length / journeySteps.length) * 100;
+      setJourneyProgress(newProgress);
+      
+      // Move to next step
+      const allSteps = ['welcome_assessment', 'ai_analysis', 'pillar_selection', 'todo_creation', 'habit_formation'];
+      const nextIncompleteIndex = allSteps.findIndex(step => !newCompletedSteps.includes(step));
+      if (nextIncompleteIndex >= 0) {
+        setCurrentStepIndex(nextIncompleteIndex);
+      }
+    }
+  }, [completedSteps, journeySteps]);
 
   const currentStep = journeySteps[currentStepIndex];
   

@@ -52,13 +52,20 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
         // Kontrollera om assessment är klar men användaren inte har fått feedback
         const progress = await getJourneyProgress();
         
-        // Visa feedback-kort om assessment är klar men progress < 30%
-        const shouldShow = progress > 15 && progress < 50 && 
+        // Visa feedback-kort om assessment är klar men progress < 50% OCH insights finns
+        const shouldShow = progress >= 15 && progress < 50 && 
           journeyState?.metadata?.assessment_insights_available;
         
         setShowCard(shouldShow);
-        setAssessmentCompleted(progress > 15);
+        setAssessmentCompleted(progress >= 15);
         setProgressPercentage(progress);
+        
+        console.log('ProgressFeedbackCard debug:', {
+          progress,
+          shouldShow,
+          metadata: journeyState?.metadata,
+          insights_available: journeyState?.metadata?.assessment_insights_available
+        });
         
         if (shouldShow) {
           // Definiera nästa steg baserat på var användaren befinner sig
@@ -67,7 +74,11 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
               id: 'view_insights',
               title: 'Granska dina AI-insikter',
               description: 'Stefan har analyserat din bedömning och skapat personliga rekommendationer',
-              action: () => navigate('/ai-insights'),
+              action: () => {
+                // For now, navigate to six-pillars where they can see their results
+                navigate('/six-pillars');
+                setShowCard(false);
+              },
               icon: <Brain className="h-5 w-5 text-blue-600" />,
               estimatedTime: '5 min'
             },
@@ -75,7 +86,10 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
               id: 'select_pillars',
               title: 'Välj utvecklingsområden',
               description: 'Aktivera de pelare du vill fokusera på först',
-              action: () => navigate('/six-pillars'),
+              action: () => {
+                navigate('/six-pillars');
+                setShowCard(false);
+              },
               icon: <Target className="h-5 w-5 text-green-600" />,
               estimatedTime: '10 min'
             },
@@ -83,7 +97,10 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
               id: 'start_tasks',
               title: 'Påbörja dina första uppgifter',
               description: 'Få konkreta, genomförbara steg för din utveckling',
-              action: () => navigate('/tasks'),
+              action: () => {
+                navigate('/tasks');
+                setShowCard(false);
+              },
               icon: <CheckCircle2 className="h-5 w-5 text-purple-600" />,
               estimatedTime: '15 min'
             }
