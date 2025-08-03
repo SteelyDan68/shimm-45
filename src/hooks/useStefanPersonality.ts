@@ -5,6 +5,23 @@ import { StefanInteraction, UserJourneyState } from '@/types/welcomeAssessment';
 import { STEFAN_PERSONAS, STEFAN_TRIGGER_CONTEXTS } from '@/config/stefanPersonas';
 import { useToast } from '@/hooks/use-toast';
 
+// Fallback messages when AI is unavailable
+const getFallbackMessage = (persona: string, context: string, interactionType: string): string => {
+  const contextMessages: Record<string, string> = {
+    task_stagnation: 'Hej! Jag märkte att du har några uppgifter som varit igång ett tag. Behöver du hjälp med att komma vidare?',
+    progress_milestone: 'Fantastiskt! Du har gjort riktigt bra framsteg. Fortsätt så!',
+    calendar_low: 'Jag ser att din kalender är ganska tom. Vill du att vi planerar några aktiviteter tillsammans?',
+    calendar_high: 'Du har en fullspäckad kalender! Kom ihåg att ta pauser och ta hand om dig själv.',
+    inactivity: 'Hej igen! Jag har saknat dig. Hur mår du idag?',
+    contextual_help: 'Jag är här för att hjälpa dig. Vad kan jag göra för dig?',
+    user_question: 'Tack för din fråga! Låt mig tänka på det och komma tillbaka till dig.',
+    celebration: 'Grattis till dina framsteg! Du gör ett fantastiskt jobb.',
+    motivation: 'Du är starkare än du tror och kapabel till mer än du föreställer dig. Fortsätt kämpa!'
+  };
+
+  return contextMessages[context] || 'Hej! Stefan här. Jag är tillfälligt otillgänglig men vill att du vet att jag är här för dig.';
+};
+
 export const useStefanPersonality = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -101,32 +118,32 @@ export const useStefanPersonality = () => {
       let messageContent = customMessage;
       
       if (!messageContent) {
-        const { data: aiResponse, error: aiError } = await supabase.functions.invoke(
-          'stefan-ai-chat',
-          {
-            body: {
-              user_id: user.id,
-              persona: selectedPersona,
-              context: context,
-              context_data: contextData,
-              interaction_type: interactionType,
-              journey_state: journeyState,
-              recent_interactions: recentInteractions.slice(0, 3), // Last 3 interactions for context
-            },
+        try {
+          const { data: aiResponse, error: aiError } = await supabase.functions.invoke(
+            'stefan-ai-chat',
+            {
+              body: {
+                user_id: user.id,
+                persona: selectedPersona,
+                context: context,
+                context_data: contextData,
+                interaction_type: interactionType,
+                journey_state: journeyState,
+                recent_interactions: recentInteractions.slice(0, 3), // Last 3 interactions for context
+              },
+            }
+          );
+
+          if (aiError) {
+            console.warn('Stefan AI temporarily unavailable, using fallback message:', aiError);
+            messageContent = getFallbackMessage(selectedPersona, context, interactionType);
+          } else {
+            messageContent = aiResponse?.message;
           }
-        );
-
-        if (aiError) {
-          console.error('Stefan AI error:', aiError);
-          toast({
-            title: "Stefan kunde inte svara",
-            description: "Ett fel uppstod när Stefan försökte prata med dig",
-            variant: "destructive",
-          });
-          return null;
+        } catch (error) {
+          console.warn('Stefan AI error, using fallback message:', error);
+          messageContent = getFallbackMessage(selectedPersona, context, interactionType);
         }
-
-        messageContent = aiResponse?.message;
       }
 
       // Save the interaction
