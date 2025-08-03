@@ -11,6 +11,9 @@ import { HelpTooltip } from '@/components/HelpTooltip';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
 import { EnhancedCoachInsights } from './EnhancedCoachInsights';
+import { ClientOverview } from './ClientOverview';
+import { AIRecommendationsPanel } from './AIRecommendationsPanel';
+import { ProgressMetrics } from './ProgressMetrics';
 
 export function CoachDashboard() {
   const {
@@ -160,6 +163,14 @@ export function CoachDashboard() {
 
       {/* Enhanced AI Coach Insights */}
       <EnhancedCoachInsights />
+
+      {/* New Dashboard Components */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ClientOverview />
+        <ProgressMetrics />
+      </div>
+      
+      <AIRecommendationsPanel />
 
       {/* Client Filters and List */}
       <Card>

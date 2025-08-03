@@ -6,10 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft, Home, Save } from 'lucide-react';
 import { PillarKey } from '@/types/sixPillarsModular';
 import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
+import { useAssessmentSafety } from '@/hooks/useAssessmentSafety';
+import { useAutonomousCoach } from '@/hooks/useAutonomousCoach';
 import { BreadcrumbNavigation } from '@/components/Navigation/BreadcrumbNavigation';
 import { OpenTrackAssessmentForm } from './OpenTrackAssessmentForm';
 import { useNavigate } from 'react-router-dom';
@@ -34,7 +36,25 @@ export const ModularPillarAssessment = ({
   const { submitPillarAssessment, loading } = useSixPillarsModular(targetId!);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [comments, setComments] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const navigate = useNavigate();
+  const { logActivity } = useAutonomousCoach();
+
+  // Assessment Safety Hook för robust state management
+  const assessmentSafety = useAssessmentSafety({
+    isActive: true,
+    hasUnsavedChanges,
+    assessmentType: 'pillar',
+    assessmentKey: pillarKey,
+    currentStep: '1',
+    formData: { ...answers, comments },
+    onStateRestore: (restoredData) => {
+      setAnswers(restoredData.answers || {});
+      setComments(restoredData.comments || '');
+    },
+    preventAccidentalSubmission: true,
+    autoSaveInterval: 30000
+  });
 
   const pillarConfig = PILLAR_MODULES[pillarKey];
 
@@ -70,23 +90,41 @@ export const ModularPillarAssessment = ({
       }
     });
     setAnswers(defaultAnswers);
-  }, [pillarKey]);
+    
+    // Logga pillar assessment start
+    logActivity('pillar_assessment_started', {
+      pillar_key: pillarKey,
+      pillar_name: pillarConfig.name
+    });
+  }, [pillarKey, logActivity]);
 
   const handleAnswerChange = (questionKey: string, value: any) => {
     setAnswers(prev => ({
       ...prev,
       [questionKey]: value
     }));
+    setHasUnsavedChanges(true);
+    assessmentSafety.updateLastInteraction();
   };
 
   const handleSubmit = async () => {
-    // Calculate score using the pillar's scoring function
-    const calculatedScore = pillarConfig.scoreCalculation(answers);
-    
-    const result = await submitPillarAssessment(pillarKey, answers, calculatedScore);
-    if (result && onComplete) {
-      onComplete();
-    }
+    await assessmentSafety.safeSubmit(async () => {
+      // Calculate score using the pillar's scoring function
+      const calculatedScore = pillarConfig.scoreCalculation(answers);
+      
+      // Logga submission försök
+      await logActivity('pillar_assessment_submitted', {
+        pillar_key: pillarKey,
+        calculated_score: calculatedScore,
+        answers_count: Object.keys(answers).length
+      });
+      
+      const result = await submitPillarAssessment(pillarKey, answers, calculatedScore);
+      if (result && onComplete) {
+        setHasUnsavedChanges(false);
+        onComplete();
+      }
+    }, true);
   };
 
   const getScorePreview = () => {
@@ -238,14 +276,26 @@ export const ModularPillarAssessment = ({
           </ul>
         </div>
 
-        <Button 
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full"
-          size="lg"
-        >
-          {loading ? "Sparar och analyserar..." : "Slutför bedömning & Få AI-analys"}
-        </Button>
+        <div className="flex gap-4">
+          <Button 
+            variant="outline"
+            onClick={() => assessmentSafety.manualSave()}
+            disabled={loading}
+            className="flex-1"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Spara och fortsätt senare
+          </Button>
+          
+          <Button 
+            onClick={handleSubmit}
+            disabled={loading}
+            className="flex-1"
+            size="lg"
+          >
+            {loading ? "Sparar och analyserar..." : "Slutför bedömning & Få AI-analys"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
     </div>
