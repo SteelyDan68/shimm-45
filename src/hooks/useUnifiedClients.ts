@@ -117,16 +117,16 @@ export const useUnifiedClients = () => {
 
       if (relError) throw relError;
 
-      // Create a map of client_id to coach_id
-      const clientCoachMap = new Map();
+      // Create a map of user_id to coach_id (since client_id = user_id in unified system)
+      const userCoachMap = new Map();
       relationships?.forEach(rel => {
-        clientCoachMap.set(rel.client_id, rel.coach_id);
+        userCoachMap.set(rel.client_id, rel.coach_id); // client_id IS user_id
       });
 
       // Map to unified client format
       const unifiedClients: UnifiedClient[] = (profiles || []).map(profile => ({
-        id: profile.id,
-        user_id: profile.id,
+        id: profile.id,        // This is user_id (SINGLE SOURCE OF TRUTH)
+        user_id: profile.id,   // Explicit user_id for clarity
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unnamed User',
         email: profile.email || '',
         first_name: profile.first_name,
@@ -137,7 +137,7 @@ export const useUnifiedClients = () => {
         logic_state: profile.logic_state,
         client_category: profile.client_category,
         client_status: profile.client_status,
-        coach_id: clientCoachMap.get(profile.id) || null, // Add coach relationship
+        coach_id: userCoachMap.get(profile.id) || null, // Use user_id (profile.id)
       }));
 
       console.log('fetchClients: Final unified clients:', unifiedClients);
