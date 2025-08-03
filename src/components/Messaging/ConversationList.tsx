@@ -40,7 +40,7 @@ export const ConversationList = ({
   const { isCoachClient, getCurrentUserClients, getCurrentUserCoach } = useCoachClientRelationships();
 
   useEffect(() => {
-    if (user && messages.length > 0) {
+    if (user) {
       buildConversations();
     }
   }, [messages, user]);
@@ -49,8 +49,23 @@ export const ConversationList = ({
     if (!user) return;
 
     try {
+      console.log('Building conversations for user:', user.id, 'roles:', { hasCoach: hasRole('coach'), hasClient: hasRole('client') });
+      
       // Group messages by conversation partner, but only allow authorized conversations
       const conversationMap = new Map<string, Message[]>();
+      
+      // For clients - automatically add their coach even if no messages yet
+      if (hasRole('client')) {
+        const userCoach = getCurrentUserCoach();
+        console.log('Client coach relationship:', userCoach);
+        
+        if (userCoach?.coach_id) {
+          // Initialize conversation with coach even if no messages
+          if (!conversationMap.has(userCoach.coach_id)) {
+            conversationMap.set(userCoach.coach_id, []);
+          }
+        }
+      }
       
       // Filter messages based on coach-client relationships
       const filteredMessages = messages.filter(message => {
@@ -86,6 +101,8 @@ export const ConversationList = ({
 
       // Get participant profiles
       const participantIds = Array.from(conversationMap.keys());
+      console.log('Participant IDs to fetch:', participantIds);
+      
       if (participantIds.length === 0) {
         setConversations([]);
         setLoading(false);
@@ -98,35 +115,61 @@ export const ConversationList = ({
         .in('id', participantIds);
 
       if (error) throw error;
+      console.log('Fetched profiles:', profiles);
 
       // Build conversation objects
       const convs: Conversation[] = [];
       
       conversationMap.forEach((msgs, participantId) => {
         const profile = profiles?.find(p => p.id === participantId);
-        if (!profile) return;
-
-        // Sort messages by date (newest first)
-        const sortedMsgs = msgs.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-
-        const lastMessage = sortedMsgs[0];
-        const unreadCount = msgs.filter(m => 
-          m.receiver_id === user.id && !m.is_read
-        ).length;
+        if (!profile) {
+          console.log('Profile not found for participant:', participantId);
+          return;
+        }
 
         const participantName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
           profile.email || 'Okänd användare';
 
-        convs.push({
-          participantId,
-          participantName,
-          participantAvatar: profile.avatar_url,
-          lastMessage,
-          unreadCount,
-          isOnline: Math.random() > 0.5 // Mock online status
-        });
+        // If there are messages, use the latest one
+        if (msgs.length > 0) {
+          // Sort messages by date (newest first)
+          const sortedMsgs = msgs.sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          const lastMessage = sortedMsgs[0];
+          const unreadCount = msgs.filter(m => 
+            m.receiver_id === user.id && !m.is_read
+          ).length;
+
+          convs.push({
+            participantId,
+            participantName,
+            participantAvatar: profile.avatar_url,
+            lastMessage,
+            unreadCount,
+            isOnline: Math.random() > 0.5 // Mock online status
+          });
+        } else {
+          // No messages yet - create placeholder conversation (for coach-client without messages)
+          convs.push({
+            participantId,
+            participantName: hasRole('client') ? `${participantName} (Coach)` : participantName,
+            participantAvatar: profile.avatar_url,
+            lastMessage: {
+              id: 'placeholder',
+              sender_id: participantId,
+              receiver_id: user.id,
+              content: 'Ingen konversation ännu - skriv ditt första meddelande!',
+              created_at: new Date().toISOString(),
+              is_read: true,
+              updated_at: new Date().toISOString(),
+              is_ai_assisted: false
+            },
+            unreadCount: 0,
+            isOnline: Math.random() > 0.5 // Mock online status
+          });
+        }
       });
 
       // Sort conversations by last message time
@@ -200,7 +243,7 @@ export const ConversationList = ({
         <div className="p-2">
           {filteredConversations.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              {searchQuery ? 'Inga konversationer hittades' : 'Inga konversationer ännu'}
+              {searchQuery ? 'Inga konversationer hittades' : hasRole('client') ? 'Din coach kommer att visas här när relationen är konfigurerad' : 'Inga konversationer ännu'}
             </div>
           ) : (
             filteredConversations.map((conversation) => (

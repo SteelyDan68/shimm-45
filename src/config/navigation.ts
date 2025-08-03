@@ -150,7 +150,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Intelligence Center",
         url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
         icon: Brain,
-        roles: ["superadmin", "admin", "coach", "client"]
+        roles: ["superadmin", "admin", "coach"]
       },
       {
         title: "Stefan AI",
