@@ -16,6 +16,10 @@ export interface UserRelationship {
   coach_email?: string;
   client_name?: string;
   client_email?: string;
+  
+  // Backwards compatibility
+  coach_id: string;
+  client_id: string;
 }
 
 export interface RelationshipStats {
@@ -62,7 +66,10 @@ export const useCoachClientRelationships = () => {
         coach_name: 'Okänd coach', // Will be set below
         coach_email: '',
         client_name: 'Okänd klient', // Will be set below
-        client_email: ''
+        client_email: '',
+        // Backwards compatibility
+        coach_id: rel.coach_id,
+        client_id: rel.client_id
       }));
 
       setRelationships(enrichedRelationships);
