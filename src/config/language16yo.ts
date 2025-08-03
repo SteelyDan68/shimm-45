@@ -11,6 +11,11 @@
 export const LANGUAGE_16YO = {
   // Journey Steps - Main progression
   journey: {
+    start: "Kom igång med din utveckling",
+    progress: "Du gör framsteg!",
+    complete: "Grattis! Du har slutfört denna del",
+    next_step: "Nästa steg i din resa",
+    pillar_principle: "Fokusera på ett område i taget för bästa resultat",
     welcome_assessment: {
       title: "Kolla läget! 📊",
       description: "Svara på enkla frågor om ditt liv så förstår vi vad du behöver",
@@ -45,7 +50,12 @@ export const LANGUAGE_16YO = {
 
   // Status labels
   status: {
+    ready: "Redo att börja",
+    not_started: "Inte påbörjat",
+    in_progress: "Pågående",
     completed: "Klart! ✅",
+    expired: "Gått ut",
+    pending: "Väntar",
     current: "Gör nu 👉",
     upcoming: "Snart 📅"
   },
@@ -53,18 +63,25 @@ export const LANGUAGE_16YO = {
   // Common UI elements
   ui: {
     buttons: {
-      start: "Kör igång! 🚀",
-      continue: "Fortsätt 👉",
-      complete: "Jag är klar! ✅",
-      skip: "Hoppa över",
-      back: "Tillbaka",
+      start: "Börja",
+      continue: "Fortsätt",
+      complete: "Slutför",
       save: "Spara",
+      cancel: "Avbryt",
       next: "Nästa",
       previous: "Föregående",
+      submit: "Skicka",
+      restart: "Börja om",
+      skip: "Hoppa över",
+      back: "Tillbaka",
       view_results: "Se mina resultat 👀",
       try_again: "Försök igen",
       get_help: "Behöver hjälp? 🤔"
     },
+    start_now: "Börja nu - det går snabbt! 🚀",
+    continue: "Fortsätt testet 🎯",
+    restart: "Börja om från början",
+    take_again: "Gör om bedömningen",
     loading: {
       analyzing: "Stefan kollar dina svar...",
       creating: "Skapar dina uppgifter...",
