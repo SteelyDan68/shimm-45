@@ -98,6 +98,12 @@ export const PRDDashboard = () => {
   const [generating, setGenerating] = useState(false);
   const [selectedTab, setSelectedTab] = useState('overview');
 
+  useEffect(() => {
+    if (hasRole('superadmin') || hasRole('admin')) {
+      loadCurrentPRD();
+    }
+  }, [hasRole]);
+
   // Kontrollera behörighet
   if (!hasRole('superadmin') && !hasRole('admin')) {
     return (
@@ -114,10 +120,7 @@ export const PRDDashboard = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    loadCurrentPRD();
-  }, []);
+  
 
   const loadCurrentPRD = async () => {
     setLoading(true);
