@@ -11,7 +11,7 @@ export const usePermissions = () => {
   const { hasRole, user } = useAuth();
 
   const permissions = useMemo(() => ({
-    // Data access permissions
+    // Data access permissions  
     canViewAllClients: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
     canManageUsers: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
     canCreateUsers: hasRole('superadmin') || hasRole('admin') || hasRole('coach'),
