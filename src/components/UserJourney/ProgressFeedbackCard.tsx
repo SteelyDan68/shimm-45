@@ -164,12 +164,12 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
 
       <CardContent className="space-y-6">
         {/* Vad som just hänt */}
-        <div className="bg-white/60 p-4 rounded-lg border border-emerald-100">
-          <h3 className="font-semibold text-success-foreground mb-2 flex items-center gap-2">
+        <div className="bg-white p-4 rounded-lg border border-emerald-100 shadow-sm">
+          <h3 className="font-semibold text-emerald-700 mb-2 flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
             Vad som precis hänt:
           </h3>
-          <ul className="space-y-1 text-sm text-success-foreground/80">
+          <ul className="space-y-1 text-sm text-gray-700">
             <li>✅ Stefan har kollat igenom alla dina svar</li>
             <li>✅ Han har hittat vad du är bra på och vad du kan bli bättre på</li>
             <li>✅ Nu har du en plan för vad du ska göra härnäst</li>
@@ -178,12 +178,12 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
         </div>
 
         {/* Vad nyttan var */}
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-          <h3 className="font-semibold text-primary-foreground mb-2 flex items-center gap-2">
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 shadow-sm">
+          <h3 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
             Varför det här var smart:
           </h3>
-          <ul className="space-y-1 text-sm text-primary-foreground/80">
+          <ul className="space-y-1 text-sm text-gray-700">
             <li>🎯 Nu vet vi vilka områden i ditt liv som fungerar bra och vilka som behöver hjälp</li>
             <li>🧠 Stefan har gjort en personlig plan baserat på exakt hur DU mår</li>
             <li>📈 Vi kan se hur du utvecklas framöver</li>
