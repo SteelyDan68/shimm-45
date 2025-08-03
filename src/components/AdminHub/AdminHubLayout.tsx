@@ -59,54 +59,6 @@ const ADMIN_NAVIGATION: AdminNavigationGroup[] = [
         roles: ["superadmin", "admin", "coach"]
       }
     ]
-  },
-  {
-    title: "Användarhantering", 
-    roles: ["superadmin", "admin", "coach"],
-    items: [
-      {
-        title: "Hantera användare",
-        url: "/admin-hub/users",
-        icon: Users,
-        roles: ["superadmin", "admin", "coach"]
-      }
-    ]
-  },
-  {
-    title: "Analys & Insikter",
-    roles: ["superadmin", "admin", "coach"], 
-    items: [
-      {
-        title: "Analytics",
-        url: "/admin-hub/analytics",
-        icon: BarChart3,
-        roles: ["superadmin", "admin", "coach"]
-      }
-    ]
-  },
-  {
-    title: "AI & Automation",
-    roles: ["superadmin", "admin", "coach"],
-    items: [
-      {
-        title: "Stefan AI Center",
-        url: "/admin-hub/ai",
-        icon: Brain,
-        roles: ["superadmin", "admin", "coach"]
-      }
-    ]
-  },
-  {
-    title: "System",
-    roles: ["superadmin", "admin"],
-    items: [
-      {
-        title: "Systemadministration", 
-        url: "/admin-hub/system",
-        icon: Settings,
-        roles: ["superadmin", "admin"]
-      }
-    ]
   }
 ];
 
