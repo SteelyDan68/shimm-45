@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStefanContext } from '@/providers/StefanContextProvider';
 import { useStefanPersonality } from '@/hooks/useStefanPersonality';
 import { 
@@ -120,8 +121,8 @@ export const StefanWorkWidget = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 max-w-sm">
-      <Card className="border-blue-200 bg-gradient-to-br from-blue-50/95 to-indigo-50/95 backdrop-blur-sm shadow-lg">
+    <div className="fixed bottom-6 right-6 z-50 max-w-sm max-h-[calc(100vh-6rem)] flex flex-col">
+      <Card className="border-blue-200 bg-gradient-to-br from-blue-50/95 to-indigo-50/95 backdrop-blur-sm shadow-lg flex flex-col max-h-full">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           {/* Stefan Header - Always Visible */}
           <div className="p-4">
@@ -184,16 +185,19 @@ export const StefanWorkWidget = () => {
             )}
           </div>
 
-          <CollapsibleContent>
-            <CardContent className="pt-0 space-y-4">
-              {/* Latest Stefan Message */}
-              {latestInteraction && (
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <p className="text-sm leading-relaxed">
-                    {latestInteraction.message_content}
-                  </p>
-                </div>
-              )}
+          <CollapsibleContent className="flex-1 min-h-0">
+            <ScrollArea className="max-h-[60vh]">
+              <CardContent className="pt-0 space-y-4">
+                {/* Latest Stefan Message */}
+                {latestInteraction && (
+                  <div className="bg-white/70 p-3 rounded-lg">
+                    <p className="text-sm leading-relaxed">
+                      {latestInteraction.message_content.length > 300 
+                        ? `${latestInteraction.message_content.substring(0, 300)}...` 
+                        : latestInteraction.message_content}
+                    </p>
+                  </div>
+                )}
 
               {/* Contextual Quick Actions */}
               <div className="space-y-2">
@@ -281,8 +285,9 @@ export const StefanWorkWidget = () => {
                     </span>
                   </div>
                 </div>
-              )}
-            </CardContent>
+               )}
+              </CardContent>
+            </ScrollArea>
           </CollapsibleContent>
         </Collapsible>
       </Card>
