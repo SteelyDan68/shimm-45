@@ -11,7 +11,7 @@ import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { StefanAIWidget } from './StefanAIWidget';
+
 
 interface Conversation {
   participantId: string;
@@ -266,16 +266,6 @@ export const ConversationList = ({
         </div>
       </div>
 
-      
-      {/* Stefan AI Widget - Always visible for clients */}
-      {hasRole('client') && (
-        <div className="p-2">
-          <StefanAIWidget 
-            onSelectConversation={onSelectConversation}
-            selectedConversationId={selectedConversationId}
-          />
-        </div>
-      )}
 
       {/* Conversations */}
       <ScrollArea className="flex-1">

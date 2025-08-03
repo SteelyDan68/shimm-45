@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { StefanWidget } from '@/components/Stefan/StefanWidget';
+
 
 
 import { PillarHeatmap } from '@/components/SixPillars/PillarHeatmap';
@@ -107,8 +107,6 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
         </CardHeader>
       </Card>
 
-      {/* Stefan Widget - Always Visible */}
-      <StefanWidget userId={userId} />
 
       {/* Main Dashboard Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
