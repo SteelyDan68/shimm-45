@@ -158,6 +158,13 @@ export const useUserPillars = (userId: string) => {
       .map(activation => activation.pillar_key);
   };
 
+  const getCompletedPillars = () => {
+    return assessments
+      .filter(assessment => assessment.calculated_score !== null)
+      .map(assessment => assessment.pillar_key)
+      .filter((pillarKey, index, arr) => arr.indexOf(pillarKey) === index); // Remove duplicates
+  };
+
   const getLatestAssessment = (pillarKey: PillarKey) => {
     return assessments.find(assessment => assessment.pillar_key === pillarKey);
   };
@@ -178,5 +185,6 @@ export const useUserPillars = (userId: string) => {
     getLatestAssessment,
     isPillarActive,
     refetch: fetchData,
+    getCompletedPillars,
   };
 };

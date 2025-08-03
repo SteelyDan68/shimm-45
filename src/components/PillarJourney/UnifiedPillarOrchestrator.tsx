@@ -42,7 +42,8 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
     activations, 
     assessments, 
     loading: pillarsLoading,
-    getActivatedPillars
+    getActivatedPillars,
+    getCompletedPillars
   } = useUserPillars(user?.id || '');
 
   const { 
@@ -50,7 +51,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
     hasCompletedWelcomeAssessment 
   } = useWelcomeAssessment();
 
-  const completedPillars = getActivatedPillars();
+  const completedPillars = getCompletedPillars();
   
   // Simple recommended pillar - start with self_care
   const getRecommendedPillar = (): PillarKey => {

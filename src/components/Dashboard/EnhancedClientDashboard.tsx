@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
   className = ""
 }) => {
   const { user } = useAuth();
+  const [showPillarJourney, setShowPillarJourney] = useState(false);
   const {
     loading,
     pillarProgress,
@@ -101,7 +102,10 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                 <p className="text-sm text-blue-500">
                   {PILLAR_MODULES[nextPillar].description}
                 </p>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={() => setShowPillarJourney(true)}
+                >
                   <ArrowRight className="w-4 h-4 mr-2" />
                   Starta {PILLAR_MODULES[nextPillar].name}
                 </Button>
@@ -164,17 +168,54 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
       </div>
 
       {/* Main Pillar Journey */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-purple-600" />
-            Din Pillar-Utvecklingsresa
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <UnifiedPillarOrchestrator />
-        </CardContent>
-      </Card>
+      {showPillarJourney && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-600" />
+                Din Pillar-Utvecklingsresa
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowPillarJourney(false)}
+              >
+                Stäng
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <UnifiedPillarOrchestrator />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pillar Journey Quick Access */}
+      {!showPillarJourney && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-600" />
+              Pillar-Utvecklingsresa
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground">
+                Upptäck och utveckla alla områden i ditt liv genom våra sex pillars.
+              </p>
+              <Button 
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={() => setShowPillarJourney(true)}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Öppna Pillar-resa
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

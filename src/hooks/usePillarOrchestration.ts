@@ -325,6 +325,18 @@ export const usePillarOrchestration = () => {
     return null; // All pillars completed
   };
 
+  const getCompletedPillars = (): PillarKey[] => {
+    return pillarProgress
+      .filter(progress => progress.isCompleted)
+      .map(progress => progress.pillarKey);
+  };
+
+  const hasCompletedAssessment = (pillarKey: PillarKey): boolean => {
+    return pillarProgress.some(progress => 
+      progress.pillarKey === pillarKey && progress.isCompleted
+    );
+  };
+
   const canAccessPillar = (pillarKey: PillarKey): boolean => {
     const pillarOrder: PillarKey[] = ['self_care', 'skills', 'talent', 'brand', 'economy', 'open_track'];
     const currentIndex = pillarOrder.indexOf(pillarKey);
@@ -352,6 +364,8 @@ export const usePillarOrchestration = () => {
     getPillarStatus,
     getNextUnlockedPillar,
     canAccessPillar,
+    getCompletedPillars,
+    hasCompletedAssessment,
     refreshProgress: loadPillarProgress
   };
 };
