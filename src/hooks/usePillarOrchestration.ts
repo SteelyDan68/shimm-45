@@ -66,11 +66,16 @@ export const usePillarOrchestration = () => {
         
         return {
           pillarKey,
-          isCompleted: !!latestAssessment,
+          isCompleted: !!latestAssessment && latestAssessment.calculated_score !== null,
           isActive: !!latestAssessment,
           lastAssessmentDate: latestAssessment?.created_at,
           completionPercentage: totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0,
-          nextRecommendedAction: getNextRecommendedAction(pillarKey, !!latestAssessment, !!latestAssessment, pillarTasks)
+          nextRecommendedAction: getNextRecommendedAction(
+            pillarKey, 
+            !!latestAssessment, 
+            !!latestAssessment && latestAssessment.calculated_score !== null, 
+            pillarTasks
+          )
         };
       });
 

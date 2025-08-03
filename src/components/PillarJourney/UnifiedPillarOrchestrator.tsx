@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Target, Sparkles } from 'lucide-react';
 import { PILLAR_MODULES } from '@/config/pillarModules';
+import { AllPillarsCompletedCelebration } from './AllPillarsCompletedCelebration';
 
 type FlowState = 
   | 'gateway'           // Show pillar selection
@@ -53,6 +54,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
   } = useWelcomeAssessment();
 
   const completedPillars = getCompletedPillars();
+  const allPillarsCompleted = completedPillars.length === 6;
   
   // Simple recommended pillar - start with self_care
   const getRecommendedPillar = (): PillarKey => {
@@ -112,6 +114,29 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
     setGeneratedActivities([]);
     setFlowState('gateway');
   };
+
+  // Show celebration if all pillars are completed
+  if (allPillarsCompleted && flowState === 'gateway') {
+    return (
+      <div className={`max-w-6xl mx-auto p-6 ${className}`}>
+        <AllPillarsCompletedCelebration
+          completedPillars={completedPillars}
+          onContinueToNextPhase={() => {
+            // Navigate to advanced coaching phase
+            console.log('Continuing to advanced coaching phase');
+          }}
+          onExploreAdvancedFeatures={() => {
+            // Navigate to premium features
+            console.log('Exploring advanced features');
+          }}
+          onScheduleCheckIn={() => {
+            // Navigate to calendar scheduling
+            console.log('Scheduling check-in');
+          }}
+        />
+      </div>
+    );
+  }
 
   // Loading state
   if (pillarsLoading || welcomeLoading) {
