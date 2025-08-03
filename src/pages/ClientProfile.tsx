@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useUnifiedPermissions } from '@/hooks/useUnifiedPermissions';
 import { useClientLogic } from '@/hooks/useClientLogic';
 import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,7 +45,8 @@ interface Client {
 export const ClientProfile = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
-  const { user, canManageUsers } = useAuth();
+  const { user } = useAuth();
+  const { isSuperAdmin, isAdmin, canManageUsers } = useUnifiedPermissions();
   const { toast } = useToast();
   
   const [client, setClient] = useState<Client | null>(null);
@@ -95,13 +97,18 @@ export const ClientProfile = () => {
     
     setLoading(true);
     try {
-      // Load client info
-      const { data: clientData, error: clientError } = await supabase
+      // SUPERADMIN GOD MODE: Load client info with proper permissions
+      const query = supabase
         .from('profiles')
         .select('*')
-        .eq('id', clientId)
-        .eq('id', user.id) // Use user.id instead of user_id
-        .maybeSingle();
+        .eq('id', clientId);
+
+      // SUPERADMIN GOD MODE: Only restrict to own profile if NOT superadmin/admin
+      if (!isSuperAdmin && !isAdmin) {
+        query.eq('id', user.id);
+      }
+
+      const { data: clientData, error: clientError } = await query.maybeSingle();
 
       if (clientError) {
         console.error('Error loading client:', clientError);
@@ -115,11 +122,20 @@ export const ClientProfile = () => {
       }
 
       if (!clientData) {
-        toast({
-          title: "Klient hittades inte",
-          description: "Du har inte behörighet att se denna klient",
-          variant: "destructive",
-        });
+        // SUPERADMIN GOD MODE: Show special message for superadmin
+        if (isSuperAdmin) {
+          toast({
+            title: "⚡ Superadmin Åtkomst",
+            description: "Som superadmin har du full åtkomst, men denna användare finns inte i systemet.",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Klient hittades inte",
+            description: "Du har inte behörighet att se denna klient",
+            variant: "destructive",
+          });
+        }
         navigate('/');
         return;
       }
@@ -470,7 +486,7 @@ export const ClientProfile = () => {
         {/* Development Tab */}
         <TabsContent value="development" className="space-y-6">
           {/* Manual Note Form for Admins/Managers */}
-          {canManageUsers() && (
+          {canManageUsers && (
             <div className="mb-4">
               <ManualNoteForm clientId={clientId!} />
             </div>
