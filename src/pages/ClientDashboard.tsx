@@ -361,13 +361,31 @@ export const ClientDashboard = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue={initialTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="enhanced">🏠 Hem</TabsTrigger>
-          <TabsTrigger value="suggestions">💡 Stefans Tips</TabsTrigger>
-          <TabsTrigger value="pillars">🎯 Sex Områden</TabsTrigger>
-          <TabsTrigger value="journey">🛤️ Min Resa</TabsTrigger>
-          <TabsTrigger value="tasks">✅ Att Göra</TabsTrigger>
-          <TabsTrigger value="analytics">📊 Mina Stats</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 h-auto p-1">
+          <TabsTrigger value="enhanced" className="text-xs p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <span className="hidden sm:inline">🏠 Hem</span>
+            <span className="sm:hidden">🏠</span>
+          </TabsTrigger>
+          <TabsTrigger value="suggestions" className="text-xs p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <span className="hidden sm:inline">💡 Stefans Tips</span>
+            <span className="sm:hidden">💡</span>
+          </TabsTrigger>
+          <TabsTrigger value="pillars" className="text-xs p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <span className="hidden sm:inline">🎯 Sex Områden</span>
+            <span className="sm:hidden">🎯</span>
+          </TabsTrigger>
+          <TabsTrigger value="journey" className="text-xs p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <span className="hidden sm:inline">🛤️ Min Resa</span>
+            <span className="sm:hidden">🛤️</span>
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className="text-xs p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <span className="hidden sm:inline">✅ Att Göra</span>
+            <span className="sm:hidden">✅</span>
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <span className="hidden sm:inline">📊 Mina Stats</span>
+            <span className="sm:hidden">📊</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Enhanced Dashboard - Main Overview */}

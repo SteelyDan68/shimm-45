@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ActionPrompt } from '@/components/ui/action-prompt';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
@@ -200,26 +201,16 @@ export const IntelligentPillarSuggestions = ({ onPillarSelected }: IntelligentPi
 
   if (suggestions.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
-            Vad vill du utveckla?
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Vi kunde inte skapa personliga förslag. Kolla alla utvecklingsområden istället.
-          </p>
-          <Button 
-            onClick={() => navigate('/client-dashboard?tab=pillars')}
-            className="w-full"
-          >
-            Se alla utvecklingsområden
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        </CardContent>
-      </Card>
+      <ActionPrompt
+        title="🎯 Hitta din grej!"
+        description="Stefan behöver lite mer info från dig för att hitta perfekta utvecklingsområden. Men inga problem - vi har samlat alla områden här så du kan kolla runt!"
+        actionText="Utforska alla områden 🚀"
+        targetRoute="/client-dashboard?tab=pillars"
+        icon={<Target className="h-4 w-4" />}
+        variant="default"
+        size="lg"
+        className="bg-gradient-to-br from-primary/10 to-primary/20 border-primary/30"
+      />
     );
   }
 
