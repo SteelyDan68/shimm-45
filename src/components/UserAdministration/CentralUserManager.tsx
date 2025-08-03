@@ -88,11 +88,9 @@ export function CentralUserManager() {
    */
   const {
     canManageUsers,
-    canManageRoles, 
-    canAccessGamification,
     isAdmin,
     isSuperAdmin
-  } = useUnifiedPermissions();
+  } = useAuth();
 
   // SUPERADMIN GOD MODE - NEVER DENY ACCESS TO SUPERADMIN
   const hasUserManagementAccess = useMemo(() => {

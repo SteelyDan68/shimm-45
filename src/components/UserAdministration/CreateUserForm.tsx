@@ -33,7 +33,7 @@ interface CreateUserData {
 
 export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => {
   const { user } = useAuth();
-  const { canCreateUsers, canAssignCoaches } = usePermissions();
+  const { canCreateUsers, canAssignCoaches } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [coaches, setCoaches] = useState<any[]>([]);

@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 
 /**
  * Progress Calculation Service
