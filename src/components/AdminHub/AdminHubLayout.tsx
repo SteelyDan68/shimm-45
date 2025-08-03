@@ -261,20 +261,18 @@ export function AdminHubLayout() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AdminSidebar />
+    <div className="min-h-screen flex w-full">
+      <AdminSidebar />
+      
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Using TopNavigation from AppLayout */}
         
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Removed AdminHeader - using TopNavigation from AppLayout instead */}
-          
-          <main className="flex-1 overflow-auto p-6">
-            <Outlet />
-          </main>
-        </div>
-        
-        <QuickActionsPanel />
+        <main className="flex-1 overflow-auto p-6">
+          <Outlet />
+        </main>
       </div>
-    </SidebarProvider>
+      
+      <QuickActionsPanel />
+    </div>
   );
 }
