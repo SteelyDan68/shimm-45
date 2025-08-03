@@ -25,15 +25,18 @@ serve(async (req) => {
     const { 
       recommendation_text, 
       client_id, 
+      user_id,
       assessment_type,
       assessment_result,
       journey_progress,
       current_phase,
-      weeks = 3 
+      weeks = 3,
+      comprehensive = false
     } = await req.json();
 
-    if (!recommendation_text || !client_id) {
-      throw new Error('Missing required fields: recommendation_text, client_id');
+    const userId = user_id || client_id; // Support both parameter names
+    if (!recommendation_text || !userId) {
+      throw new Error('Missing required fields: recommendation_text, user_id/client_id');
     }
 
     // Kontrollera AI-tillgänglighet
@@ -42,7 +45,7 @@ serve(async (req) => {
       throw new Error('Inga AI-tjänster tillgängliga');
     }
 
-    console.log('Generating planning for client:', client_id);
+    console.log('Generating planning for user:', userId);
     console.log('Recommendation text length:', recommendation_text.length);
 
     // Generate autonomous coaching plan using AI
@@ -135,8 +138,8 @@ Returnera ENDAST en giltig JSON-array:
       try {
         // Create calendar event for autonomous coaching
         const eventData = {
-          user_id: client_id,
-          created_by: client_id,
+          user_id: userId,
+          created_by: userId,
           title: activity.title,
           description: activity.description,
           event_date: activity.event_date,
@@ -160,8 +163,8 @@ Returnera ENDAST en giltig JSON-array:
 
         // Create corresponding autonomous task
         const taskData = {
-          user_id: client_id,
-          created_by: client_id,
+          user_id: userId,
+          created_by: userId,
           title: activity.title,
           description: activity.description,
           deadline: activity.event_date,
@@ -185,8 +188,8 @@ Returnera ENDAST en giltig JSON-array:
 
         // Create path entry for autonomous coaching tracking
         const pathEntryData = {
-          user_id: client_id,
-          created_by: client_id,
+          user_id: userId,
+          created_by: userId,
           type: 'autonomous_task',
           title: `Autonom uppgift: ${activity.title}`,
           details: `AI-genererad utvecklingsuppgift: ${activity.description}`,

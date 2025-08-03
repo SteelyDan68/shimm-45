@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,9 @@ import {
   Phone,
   Coffee,
   Plus,
-  Filter
+  Filter,
+  Brain,
+  Target
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, 
          isSameMonth, isSameDay, isToday, addMonths, subMonths } from 'date-fns';
@@ -31,6 +33,10 @@ interface CalendarEvent {
   created_by_role: string;
   visible_to_client: boolean;
   user_id?: string;
+  task_id?: string;
+  task_status?: string;
+  task_priority?: string;
+  ai_generated?: boolean;
 }
 
 interface CalendarViewProps {
@@ -51,7 +57,10 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
   const monthEnd = endOfMonth(currentDate);
   const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryIcon = (category: string, event?: any) => {
+    if (category === 'task') {
+      return event?.ai_generated ? <Brain className="h-3 w-3" /> : <Target className="h-3 w-3" />;
+    }
     switch (category) {
       case 'coaching': return <Users className="h-3 w-3" />;
       case 'video_call': return <Video className="h-3 w-3" />;
@@ -61,7 +70,16 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
     }
   };
 
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = (category: string, event?: any) => {
+    if (category === 'task') {
+      if (event?.task_status === 'completed') {
+        return 'bg-green-100 text-green-800 border-green-200';
+      }
+      if (event?.ai_generated) {
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      }
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    }
     switch (category) {
       case 'coaching': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'video_call': return 'bg-green-100 text-green-800 border-green-200';
@@ -71,30 +89,34 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
     }
   };
 
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
+    if (!user?.id) return;
+
     try {
       setLoading(true);
       
-      let query = supabase
-        .from('calendar_events')
-        .select('*')
-        .gte('event_date', monthStart.toISOString())
-        .lte('event_date', monthEnd.toISOString())
-        .order('event_date', { ascending: true });
+      // Load both calendar events and tasks with deadlines
+      const [eventsResponse, tasksResponse] = await Promise.all([
+        supabase
+          .from('calendar_events')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('event_date', monthStart.toISOString())
+          .lte('event_date', monthEnd.toISOString())
+          .order('event_date', { ascending: true }),
+        
+        supabase
+          .from('tasks')
+          .select('*')
+          .eq('user_id', user.id)
+          .not('deadline', 'is', null)
+          .gte('deadline', monthStart.toISOString())
+          .lte('deadline', monthEnd.toISOString())
+          .order('deadline', { ascending: true })
+      ]);
 
-      // Filter based on user role and permissions
-      if (hasRole('client')) {
-        // Clients see only their own events or events visible to clients
-        query = query.or(`user_id.eq.${user?.id},and(visible_to_client.eq.true,user_id.eq.${user?.id})`);
-      } else if (hasRole('coach')) {
-        // Coaches see events they created or events for their clients
-        query = query.or(`created_by.eq.${user?.id},created_by_role.eq.coach`);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error loading events:', error);
+      if (eventsResponse.error) {
+        console.error('Error loading events:', eventsResponse.error);
         toast({
           title: "Fel",
           description: "Kunde inte ladda kalenderhändelser",
@@ -103,17 +125,42 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
         return;
       }
 
-      setEvents(data || []);
+      if (tasksResponse.error) {
+        console.error('Error loading tasks:', tasksResponse.error);
+      }
+
+      // Combine events and tasks
+      const calendarEvents = eventsResponse.data || [];
+      const tasks = tasksResponse.data || [];
+      
+      // Convert tasks to calendar events
+      const taskEvents = tasks.map(task => ({
+        id: `task-${task.id}`,
+        title: task.title,
+        description: task.description,
+        event_date: task.deadline,
+        category: 'task',
+        created_by: task.created_by,
+        created_by_role: 'client',
+        visible_to_client: true,
+        user_id: task.user_id,
+        task_id: task.id,
+        task_status: task.status,
+        task_priority: task.priority,
+        ai_generated: task.ai_generated
+      }));
+
+      setEvents([...calendarEvents, ...taskEvents]);
     } catch (error) {
       console.error('Error in loadEvents:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, monthStart, monthEnd, toast]);
 
   useEffect(() => {
     loadEvents();
-  }, [currentDate, user]);
+  }, [loadEvents]);
 
   const getEventsForDay = (date: Date) => {
     return events.filter(event => 
@@ -244,17 +291,25 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
                             hover:shadow-sm transition-shadow
                             ${getCategoryColor(event.category)}
                           `}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEventClick?.(event);
-                          }}
-                        >
-                          <div className="flex items-center gap-1">
-                            {getCategoryIcon(event.category)}
-                            <span className="truncate">
-                              {format(new Date(event.event_date), 'HH:mm')} {event.title}
-                            </span>
-                          </div>
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             onEventClick?.(event);
+                           }}
+                         >
+                           <div className="flex items-center gap-1">
+                             {getCategoryIcon(event.category, event)}
+                             <span className="truncate">
+                               {event.category === 'task' 
+                                 ? `${event.title} ${event.task_status === 'completed' ? '✓' : ''}`
+                                 : `${format(new Date(event.event_date), 'HH:mm')} ${event.title}`
+                               }
+                             </span>
+                             {event.ai_generated && (
+                               <Badge variant="secondary" className="text-[10px] px-1 py-0">
+                                 AI
+                               </Badge>
+                             )}
+                           </div>
                         </div>
                       ))}
                       
@@ -294,7 +349,7 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
                   onClick={() => onEventClick?.(event)}
                 >
                   <div className="flex items-center gap-2">
-                    {getCategoryIcon(event.category)}
+                    {getCategoryIcon(event.category, event)}
                     <Clock className="h-3 w-3 text-muted-foreground" />
                   </div>
                   
@@ -305,9 +360,14 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
                     </div>
                   </div>
                   
-                  <Badge variant="outline" className={getCategoryColor(event.category)}>
-                    {event.category}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={getCategoryColor(event.category, event)}>
+                      {event.category === 'task' ? 'Uppgift' : event.category}
+                    </Badge>
+                    {event.ai_generated && (
+                      <Badge variant="secondary" className="text-xs">AI</Badge>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

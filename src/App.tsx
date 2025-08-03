@@ -12,6 +12,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { MobileOptimizedLayout, useMobileViewport } from "@/components/ui/mobile-optimized-layout";
 import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation } from "@/components/ui/accessibility";
 import { errorTracker } from "@/utils/productionErrorTracking";
+import { AutoNotificationSystem } from "@/components/Notifications/AutoNotificationSystem";
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
 import { Dashboard } from "./pages/Dashboard";
@@ -156,9 +157,10 @@ const App = () => (
         <BrowserRouter>
           <UnifiedAuthProvider>
             <AnalyticsProvider>
-              <AppRoutes />
-            </AnalyticsProvider>
-          </UnifiedAuthProvider>
+               <AppRoutes />
+               <AutoNotificationSystem />
+             </AnalyticsProvider>
+           </UnifiedAuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

@@ -15,6 +15,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { LiveTaskList } from '@/components/Tasks/LiveTaskList';
 
 export function TasksPage() {
   const navigate = useNavigate();
@@ -220,32 +221,24 @@ export function TasksPage() {
 
   // Default tasks overview page
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Uppgifter</h1>
-          <p className="text-muted-foreground">Hantera uppgifter för dig och dina klienter</p>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <CheckSquare className="w-8 h-8 text-primary" />
+            Uppgifter
+          </h1>
+          <p className="text-muted-foreground">
+            Dina personliga utvecklingsuppgifter och AI-genererade rekommendationer
+          </p>
         </div>
         <Button onClick={() => navigate('/tasks?action=create')}>
           <Plus className="mr-2 h-4 w-4" />
-          Ny uppgift
+          Skapa uppgift
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Uppgiftslista kommer snart</h3>
-            <p className="text-muted-foreground mb-4">
-              Här kommer du att kunna se och hantera alla uppgifter.
-            </p>
-            <Button onClick={() => navigate('/tasks?action=create')}>
-              Skapa din första uppgift
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <LiveTaskList />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,9 @@ import {
   BarChart3,
   Heart
 } from 'lucide-react';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AllPillarsCompletedCelebrationProps {
   completedPillars: string[];
@@ -36,6 +39,72 @@ export const AllPillarsCompletedCelebration: React.FC<AllPillarsCompletedCelebra
   onScheduleCheckIn
 }) => {
   const [currentTab, setCurrentTab] = useState('celebration');
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  // Automatically trigger AI planning when component mounts
+  useEffect(() => {
+    if (user?.id && completedPillars.length === 6) {
+      generateComprehensivePlan();
+    }
+  }, [user?.id]);
+
+  const generateComprehensivePlan = async () => {
+    if (!user?.id) return;
+    
+    setIsGeneratingPlan(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-planning', {
+        body: {
+          user_id: user.id,
+          recommendation_text: `Användaren har genomfört alla 6 pillars och är redo för Fas 2: Integrerad Livsutveckling. 
+                               Skapa en holistisk utvecklingsplan som fokuserar på synergieffekter mellan alla områden:
+                               1. Hälsa & Välmående - grund för allt annat
+                               2. Färdigheter - verktyg för framgång  
+                               3. Talang & Passion - drivkraft och energi
+                               4. Varumärke & Position - extern påverkan
+                               5. Ekonomi - resurser och trygghet
+                               6. Öppet Spår - innovation och kreativitet
+                               
+                               Fokusera på dagliga små vinnare, korskorrelationer mellan pillars och 
+                               neuroplastisk förstärkning genom repetition och variation.`,
+          weeks: 4,
+          comprehensive: true
+        }
+      });
+
+      if (error) {
+        console.error('Error generating comprehensive plan:', error);
+        toast({
+          title: "AI-planering misslyckades",
+          description: "Vi kunde inte generera din utvecklingsplan automatiskt.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "🎉 Fas 2 Aktiverad!",
+        description: `${data.events_created} aktiviteter och ${data.tasks_created} uppgifter har lagts till i din kalender och uppgiftslista.`,
+        duration: 5000
+      });
+
+      // Dispatch events to update other components
+      window.dispatchEvent(new CustomEvent('calendar-updated'));
+      window.dispatchEvent(new CustomEvent('tasks-updated'));
+
+    } catch (error) {
+      console.error('Error in generateComprehensivePlan:', error);
+      toast({
+        title: "Fel vid AI-planering",
+        description: "Ett fel inträffade vid skapandet av utvecklingsplanen.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingPlan(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -154,9 +223,19 @@ export const AllPillarsCompletedCelebration: React.FC<AllPillarsCompletedCelebra
               <Button 
                 onClick={onExploreAdvancedFeatures}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                disabled={isGeneratingPlan}
               >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Utforska Dina Nya Funktioner
+                {isGeneratingPlan ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                    Genererar AI-plan...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Utforska Dina Nya Funktioner
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
