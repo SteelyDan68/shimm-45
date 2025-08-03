@@ -16,7 +16,7 @@ import { useAutonomousCoach } from '@/hooks/useAutonomousCoach';
 
 interface CoachInsight {
   id: string;
-  client_id: string;
+  user_id: string;
   insight_type: string;
   title: string;
   description: string;

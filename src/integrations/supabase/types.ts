@@ -785,7 +785,6 @@ export type Database = {
           acknowledged_at: string | null
           action_points: Json
           ai_generated: boolean
-          client_id: string
           coach_id: string
           created_at: string
           data_sources: Json
@@ -797,12 +796,12 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          user_id: string
         }
         Insert: {
           acknowledged_at?: string | null
           action_points?: Json
           ai_generated?: boolean
-          client_id: string
           coach_id: string
           created_at?: string
           data_sources?: Json
@@ -814,12 +813,12 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          user_id: string
         }
         Update: {
           acknowledged_at?: string | null
           action_points?: Json
           ai_generated?: boolean
-          client_id?: string
           coach_id?: string
           created_at?: string
           data_sources?: Json
@@ -831,6 +830,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -12,7 +12,7 @@ import { sv } from 'date-fns/locale';
 
 interface AIRecommendation {
   id: string;
-  client_id: string;
+  user_id: string;
   insight_type: string;
   title: string;
   description: string;
@@ -53,7 +53,7 @@ export function AIRecommendationsPanel() {
       if (error) throw error;
 
       // Hämta profile data separat
-      const clientIds = insights?.map(i => i.client_id) || [];
+      const clientIds = insights?.map(i => i.user_id) || [];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, first_name, last_name')
@@ -62,7 +62,7 @@ export function AIRecommendationsPanel() {
       // Kombinera data
       const data = insights?.map(insight => ({
         ...insight,
-        profiles: profiles?.find(p => p.id === insight.client_id)
+        profiles: profiles?.find(p => p.id === insight.user_id)
       })) || [];
 
       if (error) throw error;

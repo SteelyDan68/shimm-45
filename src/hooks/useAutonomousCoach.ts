@@ -17,7 +17,7 @@ export interface AutonomousTrigger {
 export interface CoachInsight {
   id: string;
   coach_id: string;
-  client_id: string;
+  user_id: string;
   insight_type: string;
   title: string;
   description: string;
@@ -237,7 +237,7 @@ export const useAutonomousCoach = (userId?: string) => {
 
       await supabase.from('coach_insights').insert({
         coach_id: coachAssignment.coach_id,
-        client_id: trigger.user_id,
+        user_id: trigger.user_id,
         insight_type: trigger.trigger_type,
         title: interventionData.insight_title,
         description: interventionData.insight_description,
