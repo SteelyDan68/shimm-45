@@ -43,6 +43,16 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // DEBUG: Log every time roles change
+  useEffect(() => {
+    console.log('🔥🔥🔥 useAuth: ROLES CHANGED:', {
+      roles,
+      roleCount: roles.length,
+      user: user?.id,
+      userEmail: user?.email
+    });
+  }, [roles, user?.id, user?.email]);
+
 
   useEffect(() => {
     // Set up auth state listener
