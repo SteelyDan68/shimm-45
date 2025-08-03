@@ -126,7 +126,7 @@ export const useRealDataBindings = () => {
           
           // Active pillars
           supabase
-            .from('client_pillar_activations')
+            .from('user_pillar_activations')
             .select('pillar_key')
             .eq('user_id', client.id)
             .eq('is_active', true)

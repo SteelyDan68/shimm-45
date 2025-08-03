@@ -747,174 +747,6 @@ export type Database = {
         }
         Relationships: []
       }
-      client_data_cache: {
-        Row: {
-          author: string | null
-          client_id: string | null
-          competitive_insights: Json | null
-          created_at: string
-          data: Json
-          data_quality_score: number | null
-          data_type: string
-          expires_at: string | null
-          id: string
-          image: string | null
-          last_sentiment_analysis: Json | null
-          metadata: Json | null
-          platform: string | null
-          snippet: string | null
-          source: string
-          title: string | null
-          url: string | null
-          user_id: string
-        }
-        Insert: {
-          author?: string | null
-          client_id?: string | null
-          competitive_insights?: Json | null
-          created_at?: string
-          data: Json
-          data_quality_score?: number | null
-          data_type: string
-          expires_at?: string | null
-          id?: string
-          image?: string | null
-          last_sentiment_analysis?: Json | null
-          metadata?: Json | null
-          platform?: string | null
-          snippet?: string | null
-          source: string
-          title?: string | null
-          url?: string | null
-          user_id: string
-        }
-        Update: {
-          author?: string | null
-          client_id?: string | null
-          competitive_insights?: Json | null
-          created_at?: string
-          data?: Json
-          data_quality_score?: number | null
-          data_type?: string
-          expires_at?: string | null
-          id?: string
-          image?: string | null
-          last_sentiment_analysis?: Json | null
-          metadata?: Json | null
-          platform?: string | null
-          snippet?: string | null
-          source?: string
-          title?: string | null
-          url?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      client_data_containers: {
-        Row: {
-          container_type: string
-          created_at: string
-          created_by: string
-          id: string
-          metadata: Json | null
-          updated_at: string
-          user_id: string | null
-          version: number
-          xml_content: unknown
-        }
-        Insert: {
-          container_type: string
-          created_at?: string
-          created_by: string
-          id?: string
-          metadata?: Json | null
-          updated_at?: string
-          user_id?: string | null
-          version?: number
-          xml_content: unknown
-        }
-        Update: {
-          container_type?: string
-          created_at?: string
-          created_by?: string
-          id?: string
-          metadata?: Json | null
-          updated_at?: string
-          user_id?: string | null
-          version?: number
-          xml_content?: unknown
-        }
-        Relationships: []
-      }
-      client_pillar_activations: {
-        Row: {
-          activated_at: string
-          activated_by: string
-          client_id: string | null
-          deactivated_at: string | null
-          id: string
-          is_active: boolean
-          pillar_key: string
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          activated_at?: string
-          activated_by: string
-          client_id?: string | null
-          deactivated_at?: string | null
-          id?: string
-          is_active?: boolean
-          pillar_key: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          activated_at?: string
-          activated_by?: string
-          client_id?: string | null
-          deactivated_at?: string | null
-          id?: string
-          is_active?: boolean
-          pillar_key?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      client_pillar_assignments: {
-        Row: {
-          assigned_at: string
-          assigned_by: string
-          client_id: string
-          id: string
-          is_active: boolean
-          pillar_type: string
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          assigned_at?: string
-          assigned_by: string
-          client_id: string
-          id?: string
-          is_active?: boolean
-          pillar_type: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          assigned_at?: string
-          assigned_by?: string
-          client_id?: string
-          id?: string
-          is_active?: boolean
-          pillar_type?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       coach_client_assignments: {
         Row: {
           assigned_at: string
@@ -2750,6 +2582,102 @@ export type Database = {
         }
         Relationships: []
       }
+      user_data_cache: {
+        Row: {
+          author: string | null
+          competitive_insights: Json | null
+          created_at: string
+          data: Json
+          data_quality_score: number | null
+          data_type: string
+          expires_at: string | null
+          id: string
+          image: string | null
+          last_sentiment_analysis: Json | null
+          metadata: Json | null
+          platform: string | null
+          snippet: string | null
+          source: string
+          title: string | null
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          author?: string | null
+          competitive_insights?: Json | null
+          created_at?: string
+          data: Json
+          data_quality_score?: number | null
+          data_type: string
+          expires_at?: string | null
+          id?: string
+          image?: string | null
+          last_sentiment_analysis?: Json | null
+          metadata?: Json | null
+          platform?: string | null
+          snippet?: string | null
+          source: string
+          title?: string | null
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          author?: string | null
+          competitive_insights?: Json | null
+          created_at?: string
+          data?: Json
+          data_quality_score?: number | null
+          data_type?: string
+          expires_at?: string | null
+          id?: string
+          image?: string | null
+          last_sentiment_analysis?: Json | null
+          metadata?: Json | null
+          platform?: string | null
+          snippet?: string | null
+          source?: string
+          title?: string | null
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_data_containers: {
+        Row: {
+          container_type: string
+          created_at: string
+          created_by: string
+          id: string
+          metadata: Json | null
+          updated_at: string
+          user_id: string | null
+          version: number
+          xml_content: unknown
+        }
+        Insert: {
+          container_type: string
+          created_at?: string
+          created_by: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string
+          user_id?: string | null
+          version?: number
+          xml_content: unknown
+        }
+        Update: {
+          container_type?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string
+          user_id?: string | null
+          version?: number
+          xml_content?: unknown
+        }
+        Relationships: []
+      }
       user_journey_states: {
         Row: {
           completed_assessments: Json | null
@@ -2848,6 +2776,69 @@ export type Database = {
           },
         ]
       }
+      user_pillar_activations: {
+        Row: {
+          activated_at: string
+          activated_by: string
+          deactivated_at: string | null
+          id: string
+          is_active: boolean
+          pillar_key: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          activated_at?: string
+          activated_by: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          pillar_key: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          pillar_key?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_pillar_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          id: string
+          is_active: boolean
+          pillar_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          id?: string
+          is_active?: boolean
+          pillar_type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          id?: string
+          is_active?: boolean
+          pillar_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -2878,37 +2869,37 @@ export type Database = {
       weekly_email_logs: {
         Row: {
           client_email: string
-          client_id: string | null
           created_at: string | null
           email_id: string | null
           error_message: string | null
           id: string
           sent_at: string | null
           status: string
+          user_id: string | null
           week_end_date: string
           week_start_date: string
         }
         Insert: {
           client_email: string
-          client_id?: string | null
           created_at?: string | null
           email_id?: string | null
           error_message?: string | null
           id?: string
           sent_at?: string | null
           status?: string
+          user_id?: string | null
           week_end_date: string
           week_start_date: string
         }
         Update: {
           client_email?: string
-          client_id?: string | null
           created_at?: string | null
           email_id?: string | null
           error_message?: string | null
           id?: string
           sent_at?: string | null
           status?: string
+          user_id?: string | null
           week_end_date?: string
           week_start_date?: string
         }
@@ -3025,6 +3016,15 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      get_user_roles_and_relationships: {
+        Args: { target_user_id: string }
+        Returns: {
+          user_id: string
+          roles: Database["public"]["Enums"]["app_role"][]
+          coach_relationships: string[]
+          client_relationships: string[]
+        }[]
       }
       halfvec_avg: {
         Args: { "": number[] }

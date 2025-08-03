@@ -83,7 +83,7 @@ export const RealUserData = ({ userId, profile }: RealUserDataProps) => {
         
         // Active pillars
         supabase
-          .from('client_pillar_activations')
+          .from('user_pillar_activations')
           .select('pillar_key')
           .eq('user_id', userId)
           .eq('is_active', true)

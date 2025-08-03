@@ -37,7 +37,7 @@ export const useUserPillars = (userId: string) => {
     
     try {
       const { data, error } = await supabase
-        .from('client_pillar_activations')
+        .from('user_pillar_activations')
         .select('*')
         .eq('user_id', userId)
         .order('activated_at', { ascending: false });
@@ -97,7 +97,7 @@ export const useUserPillars = (userId: string) => {
 
     try {
       const { error } = await supabase
-        .from('client_pillar_activations')
+        .from('user_pillar_activations')
         .insert({
           user_id: userId,
           pillar_key: pillarKey,
@@ -127,7 +127,7 @@ export const useUserPillars = (userId: string) => {
 
     try {
       const { error } = await supabase
-        .from('client_pillar_activations')
+        .from('user_pillar_activations')
         .update({ 
           is_active: false,
           deactivated_at: new Date().toISOString()

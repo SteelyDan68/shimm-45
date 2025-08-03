@@ -56,7 +56,7 @@ export const useUnifiedUserManagement = () => {
   const getUserData = useCallback(async (userId: string, dataType?: string) => {
     try {
       let query = supabase
-        .from('client_data_cache')
+        .from('user_data_cache')
         .select('*')
         .eq('user_id', userId)  // ✅ SINGLE SOURCE OF TRUTH: user_id
         .order('created_at', { ascending: false });

@@ -176,7 +176,7 @@ export const useRealCoachDashboard = () => {
             
           // Pillar activations
           supabase
-            .from('client_pillar_activations')
+            .from('user_pillar_activations')
             .select('*')
             .eq('user_id', clientId),
             

@@ -54,7 +54,7 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
 
       // Fetch cache data for intelligence metrics
       const { data: cacheData, error: cacheError } = await supabase
-        .from('client_data_cache')
+        .from('user_data_cache')
         .select('*')
         .eq('client_id', userId)
         .order('created_at', { ascending: false });

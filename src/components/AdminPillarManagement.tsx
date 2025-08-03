@@ -94,7 +94,7 @@ export const AdminPillarManagement = () => {
 
     try {
       const { data, error } = await supabase
-        .from('client_pillar_activations')
+        .from('user_pillar_activations')
         .select('pillar_key, is_active, activated_at')
         .eq('user_id', selectedClient.id);
 

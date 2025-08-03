@@ -65,7 +65,7 @@ export const useSixPillarsModular = (clientId?: string) => {
     
     try {
       const { data, error } = await supabase
-        .from('client_pillar_activations')
+        .from('user_pillar_activations')
         .select('*')
         .eq('user_id', clientId)
         .eq('is_active', true);
@@ -100,7 +100,7 @@ export const useSixPillarsModular = (clientId?: string) => {
     try {
       setLoading(true);
       const { error } = await supabase
-        .from('client_pillar_activations')
+        .from('user_pillar_activations')
         .upsert({
           user_id: clientId,
           pillar_key: pillarKey,
@@ -133,7 +133,7 @@ export const useSixPillarsModular = (clientId?: string) => {
     try {
       setLoading(true);
       const { error } = await supabase
-        .from('client_pillar_activations')
+        .from('user_pillar_activations')
         .update({ 
           is_active: false,
           deactivated_at: new Date().toISOString()

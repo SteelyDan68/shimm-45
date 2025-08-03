@@ -149,7 +149,7 @@ export const useUnifiedUserData = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('client_data_cache')
+        .from('user_data_cache')
         .select('*')
         .eq('user_id', userId)  // Now using user_id instead of client_id
         .order('created_at', { ascending: false });
