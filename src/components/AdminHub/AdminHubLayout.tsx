@@ -266,11 +266,13 @@ export function AdminHubLayout() {
       <div className="min-h-screen flex w-full">
         <AdminSidebar />
         
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 max-w-full">
           <AdminHeader />
           
-          <main className="flex-1 overflow-auto p-6">
-            <Outlet />
+          <main className="flex-1 overflow-auto p-6 w-full">
+            <div className="w-full max-w-none">
+              <Outlet />
+            </div>
           </main>
         </div>
         
