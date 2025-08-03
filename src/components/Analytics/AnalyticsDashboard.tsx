@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { useRealAnalytics } from '@/hooks/useRealAnalytics';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileContainer, MobileGrid, MobileStack } from '@/components/ui/mobile-responsive';
 import { ResponsiveChart, MobileStatsCard } from '@/components/ui/mobile-charts';
@@ -37,15 +37,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const isMobile = useIsMobile();
   const { 
     analyticsData, 
-    performanceMetrics, 
     isLoading, 
     timeRange, 
     setTimeRange,
-    insights,
     exportAnalytics 
-  } = useAnalytics();
+  } = useRealAnalytics();
 
-  if (isLoading || !analyticsData || !performanceMetrics) {
+  if (isLoading || !analyticsData) {
     return (
       <MobileContainer className="space-y-6">
         <MobileGrid columns={isMobile ? 1 : 2}>
@@ -117,7 +115,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <MobileStatsCard
           title="Velocity Score"
           value={analyticsData.velocityScore}
-          subtitle={`Produktivitet: ${performanceMetrics.productivityScore}%`}
+          subtitle={`Konsistens: ${analyticsData.consistencyScore}%`}
           icon={<Zap className="h-4 w-4" />}
         />
         <MobileStatsCard
@@ -135,9 +133,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </MobileGrid>
 
       {/* Insights */}
-      {insights.length > 0 && (
+      {analyticsData.insights.length > 0 && (
         <MobileGrid columns={isMobile ? 1 : 2}>
-          {insights.map((insight, index) => (
+          {analyticsData.insights.map((insight, index) => (
             <Card key={index} className={`
               ${insight.type === 'success' ? 'border-green-200 bg-green-50' : ''}
               ${insight.type === 'warning' ? 'border-orange-200 bg-orange-50' : ''}
@@ -249,12 +247,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm">Engagemangsnivå:</span>
                 <Badge 
-                  variant={performanceMetrics.engagementLevel === 'high' ? 'default' : 
-                          performanceMetrics.engagementLevel === 'medium' ? 'secondary' : 'outline'}
+                  variant={analyticsData.consistencyScore > 80 ? 'default' : 
+                          analyticsData.consistencyScore > 60 ? 'secondary' : 'outline'}
                   className="capitalize"
                 >
-                  {performanceMetrics.engagementLevel === 'high' ? 'Hög' :
-                   performanceMetrics.engagementLevel === 'medium' ? 'Medium' : 'Låg'}
+                  {analyticsData.consistencyScore > 80 ? 'Hög' :
+                   analyticsData.consistencyScore > 60 ? 'Medium' : 'Låg'}
                 </Badge>
               </div>
               <div>
@@ -269,30 +267,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </Card>
       </MobileGrid>
 
-      {/* AI Recommendations */}
-      {performanceMetrics.recommendations.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Stefan's Rekommendationer
-            </CardTitle>
-            <CardDescription>
-              Baserat på din aktivitet och framsteg
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {performanceMetrics.recommendations.map((rec, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p className="text-sm">{rec}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </MobileContainer>
   );
 };

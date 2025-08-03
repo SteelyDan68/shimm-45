@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, CheckCircle, Circle, Send } from 'lucide-react';
-import { useAssessmentEngine } from '@/hooks/useAssessmentEngine';
+import { useRealAssessments } from '@/hooks/useRealAssessments';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -19,13 +19,14 @@ interface AssessmentManagerProps {
 
 export const AssessmentManager = ({ clientId, clientName }: AssessmentManagerProps) => {
   const { 
-    formDefinitions, 
-    assignments, 
-    assignForm, 
-    removeAssignment, 
-    loading, 
-    getAssignedForms 
-  } = useAssessmentEngine(clientId);
+    assessmentData,
+    isLoading: loading
+  } = useRealAssessments();
+  
+  const formDefinitions = assessmentData?.formDefinitions || [];
+  const assignments = assessmentData?.assignedForms || [];
+  
+  const getAssignedForms = () => assignments.map(a => a.form_definition_id);
   
   const [selectedDueDate, setSelectedDueDate] = useState<Date | undefined>();
   const [showDueDateFor, setShowDueDateFor] = useState<string | null>(null);
@@ -33,14 +34,16 @@ export const AssessmentManager = ({ clientId, clientName }: AssessmentManagerPro
   const assignedFormIds = getAssignedForms();
 
   const handleAssignForm = async (formDefinitionId: string) => {
-    await assignForm(formDefinitionId, selectedDueDate);
+    // TODO: Implement form assignment with real API
+    console.log('Assigning form:', formDefinitionId, 'with due date:', selectedDueDate);
     setSelectedDueDate(undefined);
     setShowDueDateFor(null);
   };
 
   const handleToggleAssignment = async (formDefinitionId: string, isAssigned: boolean) => {
     if (isAssigned) {
-      await removeAssignment(formDefinitionId);
+      // TODO: Implement form removal with real API  
+      console.log('Removing assignment for form:', formDefinitionId);
     } else {
       setShowDueDateFor(formDefinitionId);
     }
