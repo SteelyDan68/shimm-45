@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserData } from "@/hooks/useUserData";
 import { useExtendedProfile } from "@/hooks/useExtendedProfile";
 import { useToast } from "@/hooks/use-toast";
+import { useUnifiedPermissions } from "@/hooks/useUnifiedPermissions";
 import type { ExtendedProfileData } from "@/types/extendedProfile";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,24 +41,25 @@ export default function UserCrmProfile() {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const { profile, loading: profileLoading, hasRole, isAdmin } = useUserData(userId);
+  const { profile, loading: profileLoading, hasRole } = useUserData(userId);
   const { getExtendedProfile, saveExtendedProfile } = useExtendedProfile();
+  const { isSuperAdmin, isAdmin } = useUnifiedPermissions();
   
   const [extendedProfile, setExtendedProfile] = useState<ExtendedProfileData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<ExtendedProfileData>({});
   const [loadingExtended, setLoadingExtended] = useState(true);
 
-  // Access control - Users can view their own profile, admins can view all profiles  
+  // SUPERADMIN GOD MODE: Always allow superadmin access, then admin, then own profile
   console.log('🔍 UserCrmProfile access check:', { 
     userId, 
     userAuthId: user?.id, 
-    isAdmin: isAdmin(),
+    isSuperAdmin,
+    isAdmin,
     isOwn: userId === user?.id,
-    hasClientRole: hasRole('client'),
-    canView: userId === user?.id || isAdmin()
+    hasClientRole: hasRole('client')
   });
-  const canViewProfile = userId === user?.id || isAdmin();
+  const canViewProfile = isSuperAdmin || userId === user?.id || isAdmin;
   
   useEffect(() => {
     console.log('🔍 Access control result:', { canViewProfile, userId, userAuthId: user?.id });
@@ -173,7 +175,7 @@ export default function UserCrmProfile() {
           </div>
         </div>
         
-        {isAdmin() && (
+        {(isSuperAdmin || isAdmin) && (
           <div className="flex gap-2">
             {isEditing ? (
               <>
