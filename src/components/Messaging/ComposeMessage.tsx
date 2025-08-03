@@ -129,8 +129,8 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
         // Admins can message anyone except superadmins
         recipientQuery = recipientQuery.not('user_roles.role', 'eq', 'superadmin');
       } else if (isSuperAdmin) {
-        // Superadmins can message EVERYONE - no restrictions
-        // Remove any filtering for superadmins
+        // Superadmins can message EVERYONE - no restrictions at all
+        console.log('🔍 Superadmin access: can message all users');
       }
 
       const { data, error } = await recipientQuery;

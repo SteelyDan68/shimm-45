@@ -43,6 +43,8 @@ export const ConversationList = ({
   useEffect(() => {
     if (user) {
       buildConversations();
+    } else {
+      setLoading(false); // Don't show loading if no user
     }
   }, [messages, user]);
 
@@ -128,6 +130,7 @@ export const ConversationList = ({
       console.log('Participant IDs to fetch:', participantIds);
       
       if (participantIds.length === 0) {
+        console.log('🔍 No conversation participants found');
         setConversations([]);
         setLoading(false);
         return;
