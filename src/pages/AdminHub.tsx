@@ -17,10 +17,6 @@ export function AdminHub() {
     <Routes>
       <Route path="/" element={<AdminHubLayout />}>
         <Route index element={<UnifiedDashboard />} />
-        <Route path="users" element={<UserManagementCenter />} />
-        <Route path="analytics" element={<UnifiedAnalytics />} />
-        <Route path="ai" element={<StefanControlCenter />} />
-        <Route path="system" element={<AdminSystem />} />
       </Route>
     </Routes>
   );

@@ -172,7 +172,7 @@ export function UnifiedDashboard() {
       {/* Key Metrics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* User Metrics */}
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin-hub/users')}>
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/coach-dashboard')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               Användare som behöver uppmärksamhet
@@ -213,7 +213,7 @@ export function UnifiedDashboard() {
         )}
 
         {/* AI Recommendations */}
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin-hub/ai')}>
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/stefan-chat')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               Nya AI-rekommendationer
@@ -322,48 +322,28 @@ export function UnifiedDashboard() {
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-yellow-600" />
             Snabbåtgärder
-            <HelpTooltip content="De vanligaste administrativa uppgifterna för snabb åtkomst" />
+            <HelpTooltip content="Huvudfunktioner för coaching och systemövervakning" />
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-2">
             <Button 
               variant="outline" 
-              onClick={() => navigate('/admin-hub/users')}
-              className="justify-start gap-2"
+              onClick={() => navigate('/coach-dashboard')}
+              className="justify-start gap-2 h-12"
             >
               <Users className="h-4 w-4" />
-              Hantera användare
+              Coaching Dashboard
             </Button>
             
             <Button 
               variant="outline" 
-              onClick={() => navigate('/admin-hub/analytics')}
-              className="justify-start gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Visa analytics
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/admin-hub/ai')}
-              className="justify-start gap-2"
+              onClick={() => navigate('/stefan-chat')}
+              className="justify-start gap-2 h-12"
             >
               <Brain className="h-4 w-4" />
-              Stefan AI Center
+              Stefan AI Chat
             </Button>
-            
-            {(isAdmin || isSuperAdmin) && (
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/admin-hub/system')}
-                className="justify-start gap-2"
-              >
-                <Activity className="h-4 w-4" />
-                Systemhälsa
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
