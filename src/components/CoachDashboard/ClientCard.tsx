@@ -68,7 +68,7 @@ export function ClientCard({ client }: ClientCardProps) {
   }, client.issues[0]);
 
   const handleViewClient = () => {
-    navigate(`/client/${client.id}`);
+    navigate(`/user/${client.id}?context=client`);
   };
 
   return (

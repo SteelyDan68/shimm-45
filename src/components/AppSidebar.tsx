@@ -146,8 +146,8 @@ export function AppSidebar() {
                   <SidebarMenuItem key={client.id}>
                     <SidebarMenuButton asChild>
                       <NavLink 
-                        to={`/client/${client.user_id || client.id}`} 
-                        className={`${getNavCls(`/client/${client.user_id || client.id}`)} group`}
+                        to={`/user/${client.user_id || client.id}?context=client`} 
+                        className={`${getNavCls(`/user/${client.user_id || client.id}`)} group`}
                       >
                         <User className="h-4 w-4 flex-shrink-0" />
                         <div className="flex-1 min-w-0">

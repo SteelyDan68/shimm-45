@@ -34,12 +34,13 @@ export const useNavigation = () => {
     navigate(defaultRoute);
   };
 
-  const navigateToUser = (userId: string) => {
-    navigate(NAVIGATION_ROUTES.USER_PROFILE(userId));
+  const navigateToUser = (userId: string, context?: string) => {
+    navigate(NAVIGATION_ROUTES.USER_PROFILE(userId, context));
   };
 
+  // Legacy support - redirects to unified user route
   const navigateToClient = (clientId: string) => {
-    navigate(NAVIGATION_ROUTES.CLIENT_PROFILE(clientId));
+    navigate(NAVIGATION_ROUTES.USER_PROFILE(clientId, 'client'));
   };
 
   const navigateToIntelligence = (userId?: string) => {
@@ -50,8 +51,8 @@ export const useNavigation = () => {
     }
   };
 
-  const navigateToAssessment = (clientId: string) => {
-    navigate(NAVIGATION_ROUTES.CLIENT_ASSESSMENT(clientId));
+  const navigateToAssessment = (userId: string) => {
+    navigate(NAVIGATION_ROUTES.USER_ASSESSMENT(userId));
   };
 
   const canAccess = (item: NavigationItem): boolean => {

@@ -111,14 +111,16 @@ const AppRoutes = () => {
                 <Route path="/client-assessment/:clientId" element={<ClientAssessmentPage />} />
               
                <Route path={NAVIGATION_ROUTES.COACH_DASHBOARD} element={<CoachDashboardPage />} />
-               <Route path={NAVIGATION_ROUTES.CLIENTS} element={
+               <Route path={NAVIGATION_ROUTES.USERS} element={
                  <div className="p-6">
-                   <h1 className="text-2xl font-bold mb-6">Klienter</h1>
+                   <h1 className="text-2xl font-bold mb-6">Användare</h1>
                    <ClientList refreshTrigger={0} />
                  </div>
                } />
-               <Route path="/client/:clientId" element={<ClientProfile />} />
+               {/* UNIFIED ROUTING - Single Source of Truth: user_id only */}
                <Route path="/user/:userId" element={<UserCrmProfile />} />
+               {/* Legacy route for backward compatibility - redirects to unified route */}
+               <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/search" element={<GlobalSearchPage />} />
                <Route path="/collaboration" element={<Collaboration />} />
                 <Route path="/ai-coaching" element={<AICoaching />} />

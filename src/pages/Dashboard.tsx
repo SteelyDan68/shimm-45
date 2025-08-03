@@ -276,8 +276,8 @@ export const Dashboard = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => navigate(`/client/${client.id}`)}
-                        title="Öppna klientprofil"
+                        onClick={() => navigate(`/user/${client.id}?context=client`)}
+                        title="Öppna användarprofil"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -312,9 +312,9 @@ export const Dashboard = () => {
             <div className="mt-4 text-center">
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/clients')}
+                onClick={() => navigate('/users')}
               >
-                Visa alla klienter ({clients.length})
+                Visa alla användare ({clients.length})
               </Button>
             </div>
           )}

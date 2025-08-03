@@ -61,9 +61,9 @@ export const PillarHeatmap = ({
       return;
     }
     
-    // Default navigation for coach view
+    // Default navigation for coach view - UNIFIED ROUTING
     if (isCoachView && clientId) {
-      navigate(`/client/${clientId}?tab=pillars&pillar=${pillar.pillar_key}`);
+      navigate(`/user/${clientId}?context=client&tab=pillars&pillar=${pillar.pillar_key}`);
     }
   };
 

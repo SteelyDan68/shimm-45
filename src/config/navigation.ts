@@ -38,12 +38,11 @@ export const NAVIGATION_ROUTES = {
   CLIENT_DASHBOARD: "/client-dashboard", 
   COACH_DASHBOARD: "/coach",
   
-  // User management
+  // User management - SINGLE SOURCE OF TRUTH: ONLY user_id
   ADMIN_HUB: "/admin-hub",
   ADMINISTRATION: "/administration",
-  CLIENTS: "/clients",
-  USER_PROFILE: (id: string) => `/user/${id}`,
-  CLIENT_PROFILE: (id: string) => `/client/${id}`,
+  USERS: "/users",
+  USER_PROFILE: (id: string, context?: string) => `/user/${id}${context ? `?context=${context}` : ''}`,
   EDIT_PROFILE: "/edit-profile",
   
   // Features
@@ -56,9 +55,9 @@ export const NAVIGATION_ROUTES = {
   INTELLIGENCE_HUB: "/intelligence-hub",
   STEFAN_CHAT: "/stefan-chat",
   
-  // Assessment
+  // Assessment - UNIFIED: user_id only
   ONBOARDING: "/onboarding",
-  CLIENT_ASSESSMENT: (id: string) => `/client-assessment/${id}`,
+  USER_ASSESSMENT: (id: string) => `/user/${id}?context=assessment`,
   
   // Analytics & Reports
   ANALYTICS: "/analytics",
@@ -118,8 +117,8 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin"]
       },
       {
-        title: "Klienter", 
-        url: NAVIGATION_ROUTES.CLIENTS,
+        title: "Användare", 
+        url: NAVIGATION_ROUTES.USERS,
         icon: Users,
         roles: ["superadmin", "admin", "coach"]
       }
