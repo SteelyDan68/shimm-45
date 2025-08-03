@@ -89,9 +89,15 @@ export const useMessages = () => {
     }
   };
 
-  // Send message with enhanced notification system
   const sendMessage = async (receiverId: string, content: string, subject?: string, parentMessageId?: string) => {
     if (!user) return false;
+
+    console.log('🔍 Sending message:', { 
+      receiverId, 
+      contentLength: content.length, 
+      subject, 
+      userId: user.id 
+    });
 
     try {
       // Use the new enhanced send-realtime-message function
@@ -104,7 +110,12 @@ export const useMessages = () => {
         }
       });
 
-      if (error) throw error;
+      console.log('🔍 Edge function response:', { data, error });
+
+      if (error) {
+        console.error('🚨 Edge function error:', error);
+        throw error;
+      }
 
       // Send enhanced notification for message received
       try {
@@ -122,11 +133,13 @@ export const useMessages = () => {
             }
           }
         });
+        console.log('✅ Notification sent successfully');
       } catch (notificationError) {
         console.error('Failed to send notification:', notificationError);
         // Don't fail the message sending if notification fails
       }
 
+      console.log('✅ Message sent successfully:', data);
       toast({
         title: "Meddelande skickat",
         description: "Ditt meddelande har skickats framgångsrikt"
@@ -135,10 +148,16 @@ export const useMessages = () => {
       await fetchMessages();
       return true;
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('🚨 Error sending message:', error);
+      
+      let errorMessage = "Kunde inte skicka meddelandet";
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      
       toast({
         title: "Fel", 
-        description: "Kunde inte skicka meddelandet",
+        description: errorMessage,
         variant: "destructive"
       });
       return false;

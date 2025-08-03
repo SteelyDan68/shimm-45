@@ -21,14 +21,26 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''))
     
     if (authError || !user) {
+      console.error('Auth error:', authError)
       throw new Error('Unauthorized')
     }
 
-    const { receiverId, content, subject, messageType = 'text' } = await req.json()
+    const requestBody = await req.json()
+    console.log('📨 Request body:', requestBody)
+    
+    const { receiverId, content, subject } = requestBody
 
     if (!receiverId || !content) {
+      console.error('Missing fields:', { receiverId: !!receiverId, content: !!content })
       throw new Error('Missing required fields: receiverId and content')
     }
+
+    console.log('✅ Starting message insert:', {
+      sender_id: user.id,
+      receiver_id: receiverId,
+      content_length: content.length,
+      subject
+    })
 
     // Insert the message
     const { data: message, error: insertError } = await supabaseClient
@@ -47,7 +59,12 @@ serve(async (req) => {
       `)
       .single()
 
-    if (insertError) throw insertError
+    if (insertError) {
+      console.error('Database insert error:', insertError)
+      throw insertError
+    }
+
+    console.log('✅ Message inserted successfully:', message.id)
 
     // Send real-time notification to receiver
     await supabaseClient
@@ -61,6 +78,8 @@ serve(async (req) => {
           receiver_id: receiverId
         }
       })
+
+    console.log('✅ Real-time notification sent')
 
     // Get receiver's notification preferences
     const { data: receiverPrefs } = await supabaseClient
@@ -97,6 +116,7 @@ serve(async (req) => {
               messageContent: content,
             }
           })
+          console.log('✅ Email notification sent')
         } catch (emailError) {
           console.error('Failed to send email notification:', emailError)
         }
@@ -111,9 +131,16 @@ serve(async (req) => {
     })
 
   } catch (error) {
-    console.error('Error in send-realtime-message:', error)
+    console.error('🚨 Error in send-realtime-message:', error)
+    console.error('🚨 Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
+    
     return new Response(JSON.stringify({
-      error: error.message
+      error: error.message,
+      details: 'Check edge function logs for more information'
     }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
