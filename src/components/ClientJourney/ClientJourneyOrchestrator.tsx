@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -47,7 +47,7 @@ interface JourneyStep {
  * - Actual data flow and state management
  * - Production-ready UX with clear progression
  */
-export const ClientJourneyOrchestrator = ({ userId, userName, className }: ClientJourneyOrchestratorProps) => {
+export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: ClientJourneyOrchestratorProps) => {
   // ✅ HOOKS AT TOP LEVEL - CORRECTLY IMPLEMENTED
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -62,8 +62,8 @@ export const ClientJourneyOrchestrator = ({ userId, userName, className }: Clien
   const [generatedTasks, setGeneratedTasks] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // ✅ REAL AI INTEGRATION
-  const triggerAssessmentAnalysis = async () => {
+  // ✅ OPTIMIZED: Memoized AI integration
+  const triggerAssessmentAnalysis = useCallback(async () => {
     if (isProcessing || aiLoading) return;
     
     setIsProcessing(true);
@@ -115,10 +115,10 @@ export const ClientJourneyOrchestrator = ({ userId, userName, className }: Clien
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [assessmentAnalysis, isProcessing, aiLoading, toast]);
 
-  // ✅ REAL TASK CREATION
-  const handleCreateTasks = async (insights: any[]) => {
+  // ✅ OPTIMIZED: Memoized task creation
+  const handleCreateTasks = useCallback(async (insights: any[]) => {
     if (tasksLoading) return;
 
     try {
@@ -154,9 +154,9 @@ export const ClientJourneyOrchestrator = ({ userId, userName, className }: Clien
         variant: "destructive"
       });
     }
-  };
+  }, [userId, createTask, tasksLoading, toast]);
 
-  const markStepCompleted = (stepId: string) => {
+  const markStepCompleted = useCallback((stepId: string) => {
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps(prev => [...prev, stepId]);
       
@@ -169,10 +169,10 @@ export const ClientJourneyOrchestrator = ({ userId, userName, className }: Clien
         setCurrentStepIndex(currentStepIndex + 1);
       }
     }
-  };
+  }, [completedSteps, currentStepIndex]);
 
-  // ✅ FUNCTIONAL JOURNEY STEPS
-  const journeySteps: JourneyStep[] = [
+  // ✅ OPTIMIZED: Memoized journey steps
+  const journeySteps: JourneyStep[] = useMemo(() => [
     {
       id: 'welcome_assessment',
       title: 'Upptäck var du står idag',
@@ -232,17 +232,19 @@ export const ClientJourneyOrchestrator = ({ userId, userName, className }: Clien
         markStepCompleted('habit_formation');
       }
     }
-  ];
+  ], [completedSteps, currentStepIndex, navigate, markStepCompleted, triggerAssessmentAnalysis, handleCreateTasks, activeInsights]);
 
   const currentStep = journeySteps[currentStepIndex];
-  const getStatusColor = (status: string) => {
+  
+  // ✅ OPTIMIZED: Memoized status color calculation
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
       case 'current': return 'bg-blue-100 text-blue-800';
       case 'upcoming': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-600';
     }
-  };
+  }, []);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -417,4 +419,6 @@ export const ClientJourneyOrchestrator = ({ userId, userName, className }: Clien
       </Card>
     </div>
   );
-};
+});
+
+ClientJourneyOrchestrator.displayName = 'ClientJourneyOrchestrator';

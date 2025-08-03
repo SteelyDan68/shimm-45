@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,7 +49,7 @@ interface NeuroplasticTaskGeneratorProps {
  * - UI/UX Expert: Motiverande progress visualization
  * - Data Scientist: Evidence-based habit formation tracking
  */
-export const NeuroplasticTaskGenerator = ({ 
+export const NeuroplasticTaskGenerator = memo(({ 
   userId, 
   assessmentInsights = [], 
   onTasksCreated,
@@ -63,8 +63,8 @@ export const NeuroplasticTaskGenerator = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'selection' | 'customization' | 'confirmation'>('selection');
 
-  // Neuroplastiska principer för task-skapande
-  const neuroplasticPrinciples = {
+  // ✅ OPTIMIZED: Memoized neuroplastic principles
+  const neuroplasticPrinciples = useMemo(() => ({
     repetition: {
       name: 'Repetition & Förstärkning',
       description: 'Daglig repetition stärker neuronala banor',
@@ -95,10 +95,10 @@ export const NeuroplasticTaskGenerator = ({
       icon: <Target className="h-4 w-4" />,
       color: 'bg-red-50 text-red-700'
     }
-  };
+  }), []);
 
-  // Generera neuroplastiska uppgifter baserat på insights
-  const generateNeuroplasticTasks = async () => {
+  // ✅ OPTIMIZED: Memoized task generation
+  const generateNeuroplasticTasks = useCallback(async () => {
     setIsGenerating(true);
     
     try {
@@ -227,17 +227,17 @@ export const NeuroplasticTaskGenerator = ({
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [toast]);
 
-  const toggleTaskSelection = (taskId: string) => {
+  const toggleTaskSelection = useCallback((taskId: string) => {
     setSelectedTasks(prev => 
       prev.includes(taskId) 
         ? prev.filter(id => id !== taskId)
         : [...prev, taskId]
     );
-  };
+  }, []);
 
-  const createSelectedTasks = async () => {
+  const createSelectedTasks = useCallback(async () => {
     const tasksToCreate = generatedTasks.filter(task => selectedTasks.includes(task.id));
     
     try {
@@ -268,19 +268,19 @@ export const NeuroplasticTaskGenerator = ({
         variant: "destructive"
       });
     }
-  };
+  }, [generatedTasks, selectedTasks, userId, createTask, toast, onTasksCreated]);
 
-  const getDifficultyColor = (level: number) => {
+  const getDifficultyColor = useCallback((level: number) => {
     if (level <= 2) return 'bg-green-100 text-green-800';
     if (level <= 3) return 'bg-yellow-100 text-yellow-800';
     return 'bg-red-100 text-red-800';
-  };
+  }, []);
 
-  const getMilestoneColor = (days: number) => {
+  const getMilestoneColor = useCallback((days: number) => {
     if (days === 7) return 'bg-blue-100 text-blue-800';
     if (days === 21) return 'bg-purple-100 text-purple-800';
     return 'bg-green-100 text-green-800';
-  };
+  }, []);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -459,4 +459,6 @@ export const NeuroplasticTaskGenerator = ({
       )}
     </div>
   );
-};
+});
+
+NeuroplasticTaskGenerator.displayName = 'NeuroplasticTaskGenerator';
