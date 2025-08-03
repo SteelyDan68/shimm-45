@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PillarKey } from '@/types/sixPillarsModular';
@@ -36,15 +36,6 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return;
 
     try {
-      // Fetch pillar activations
-      const { data: activations, error: activationsError } = await supabase
-        .from('user_pillar_activations')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('activated_at', { ascending: false });
-
-      if (activationsError) throw activationsError;
-
       // Fetch latest assessments for each pillar
       const { data: assessments, error: assessmentsError } = await supabase
         .from('pillar_assessments')
@@ -67,9 +58,8 @@ export const usePillarOrchestration = () => {
       const allPillars: PillarKey[] = ['self_care', 'skills', 'talent', 'brand', 'economy', 'open_track'];
       
       const progressData: PillarProgress[] = allPillars.map(pillarKey => {
-        const activation = activations?.find(a => a.pillar_key === pillarKey && a.is_active);
         const latestAssessment = assessments?.find(a => a.pillar_key === pillarKey);
-        const pillarTasks = tasks?.filter(t => t.title?.includes(pillarKey)) || [];
+        const pillarTasks = tasks?.filter(t => detectPillarFromTask(t) === pillarKey) || [];
         
         const completedTasks = pillarTasks.filter(t => t.status === 'completed').length;
         const totalTasks = pillarTasks.length;
@@ -77,10 +67,10 @@ export const usePillarOrchestration = () => {
         return {
           pillarKey,
           isCompleted: !!latestAssessment,
-          isActive: !!activation,
+          isActive: !!latestAssessment,
           lastAssessmentDate: latestAssessment?.created_at,
           completionPercentage: totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0,
-          nextRecommendedAction: getNextRecommendedAction(pillarKey, !!activation, !!latestAssessment, pillarTasks)
+          nextRecommendedAction: getNextRecommendedAction(pillarKey, !!latestAssessment, !!latestAssessment, pillarTasks)
         };
       });
 
@@ -171,6 +161,12 @@ export const usePillarOrchestration = () => {
   };
 
   const detectPillarFromTask = (task: any): PillarKey | null => {
+    // Check the pillar field first (from new schema)
+    if (task.pillar) {
+      return task.pillar as PillarKey;
+    }
+    
+    // Fallback to title analysis
     const title = task.title?.toLowerCase() || '';
     
     if (title.includes('self_care') || title.includes('hälsa') || title.includes('välmående')) return 'self_care';
@@ -187,16 +183,18 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return false;
 
     try {
-      const { error } = await supabase
-        .from('user_pillar_activations')
+      // For now, just create a simple pillar assessment to "activate" it
+      const { error: assessmentError } = await supabase
+        .from('pillar_assessments')
         .insert({
           user_id: user.id,
           pillar_key: pillarKey,
-          is_active: true,
-          activated_by: user.id
+          assessment_data: { activated: true, activation_date: new Date().toISOString() },
+          insights: {},
+          created_by: user.id
         });
 
-      if (error) throw error;
+      if (assessmentError) throw assessmentError;
 
       await loadPillarProgress();
       

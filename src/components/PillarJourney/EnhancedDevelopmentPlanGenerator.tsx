@@ -310,7 +310,11 @@ const EnhancedDevelopmentPlanGenerator: React.FC<EnhancedDevelopmentPlanGenerato
       priority: 'medium',
       deadline: activity.scheduledDate.toISOString(),
       status: 'pending',
-      created_by: userId
+      created_by: userId,
+      pillar: activity.pillarKey,
+      neuroplastic_principle: activity.neuroplasticPrinciple,
+      estimated_time_minutes: activity.estimatedMinutes,
+      ai_generated: true
     }));
 
     const { error: tasksError } = await supabase
