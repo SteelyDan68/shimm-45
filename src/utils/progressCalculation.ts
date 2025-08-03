@@ -43,7 +43,7 @@ export const calculateUserDevelopmentProgress = async (userId: string): Promise<
 
     // 3. Hämta pillar aktivering och framsteg (25% vikt)
     const { data: pillarActivations } = await supabase
-      .from('client_pillar_activations')
+      .from('user_pillar_activations')
       .select('pillar_key, is_active')
       .eq('user_id', userId)
       .eq('is_active', true);

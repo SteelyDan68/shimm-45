@@ -20,7 +20,7 @@ export const useXmlContainers = () => {
       const xmlContent = generateXmlFromData(containerType, data);
       
       const { data: container, error } = await supabase
-        .from('client_data_containers')
+        .from('user_data_containers')
         .insert({
           user_id: clientId,
           container_type: containerType,
@@ -66,7 +66,7 @@ export const useXmlContainers = () => {
     
     try {
       let query = supabase
-        .from('client_data_containers')
+        .from('user_data_containers')
         .select('*')
         .eq('user_id', clientId)
         .order('created_at', { ascending: false });
@@ -105,7 +105,7 @@ export const useXmlContainers = () => {
     try {
       // Get current container to determine type and version
       const { data: currentContainer, error: fetchError } = await supabase
-        .from('client_data_containers')
+        .from('user_data_containers')
         .select('*')
         .eq('id', containerId)
         .single();
@@ -117,7 +117,7 @@ export const useXmlContainers = () => {
       const xmlContent = generateXmlFromData(currentContainer.container_type as ContainerType, data);
       
       const { error } = await supabase
-        .from('client_data_containers')
+        .from('user_data_containers')
         .update({
           xml_content: xmlContent,
           metadata: {

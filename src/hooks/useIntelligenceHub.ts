@@ -56,7 +56,7 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
       const { data: cacheData, error: cacheError } = await supabase
         .from('user_data_cache')
         .select('*')
-        .eq('client_id', userId)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (cacheError) {
@@ -440,9 +440,9 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
-          table: 'client_data_cache'
+          table: 'user_data_cache'
         }, (payload) => {
-          const userId = (payload.new as any)?.client_id;
+          const userId = (payload.new as any)?.user_id;
           if (userId && profiles.some(p => p.userId === userId)) {
             refreshProfile(userId);
           }

@@ -95,7 +95,7 @@ export class XmlContainerSync {
     try {
       // Check if container already exists
       const { data: existingContainer, error: fetchError } = await supabase
-        .from('client_data_containers')
+        .from('user_data_containers')
         .select('id, version')
         .eq('user_id', clientId)
         .eq('container_type', containerType)
@@ -112,7 +112,7 @@ export class XmlContainerSync {
       if (existingContainer) {
         // Update existing container
         const { error: updateError } = await supabase
-          .from('client_data_containers')
+          .from('user_data_containers')
           .update({
             xml_content: xmlContent,
             metadata: {
@@ -130,7 +130,7 @@ export class XmlContainerSync {
       } else {
         // Create new container
         const { error: insertError } = await supabase
-          .from('client_data_containers')
+          .from('user_data_containers')
           .insert({
             user_id: clientId,
             container_type: containerType,
