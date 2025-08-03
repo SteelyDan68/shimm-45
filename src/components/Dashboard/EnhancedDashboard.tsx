@@ -139,13 +139,6 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
         <TabsContent value="journey" className="space-y-6">
           {/* Debug: Welcome Assessment Reset */}
           <WelcomeAssessmentReset />
-          
-          <div className="text-center py-8 text-muted-foreground">
-            <p className="mb-4">Din utvecklingsresa hanteras nu via Five Pillars-systemet med intelligenta rekommendationer</p>
-            <Button onClick={() => window.location.href = '/client-dashboard?tab=pillars'}>
-              Gå till Five Pillars
-            </Button>
-          </div>
         </TabsContent>
 
         {/* Overview Tab - Heatmap and Statistics */}
@@ -258,20 +251,13 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
             
             <div className="flex gap-2">
               <Button
-                variant={selectedTab === 'journey' ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
-                onClick={() => setSelectedTab('journey')}
+                onClick={() => window.location.href = '/client-dashboard?tab=journey'}
               >
                 <MapPin className="h-4 w-4 mr-1" />
-                Se reseguide
+                Se din resa
               </Button>
-              
-              {journeyState?.next_recommended_assessment && (
-                <Button size="sm">
-                  <Target className="h-4 w-4 mr-1" />
-                  Gör bedömning
-                </Button>
-              )}
             </div>
           </div>
         </CardContent>
