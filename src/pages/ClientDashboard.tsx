@@ -30,6 +30,7 @@ import { helpTexts } from '@/data/helpTexts';
 import { PillarJourneyOrchestrator } from '@/components/PillarJourney/PillarJourneyOrchestrator';
 import { ClientJourneyOrchestrator } from '@/components/ClientJourney/ClientJourneyOrchestrator';
 import { ProgressFeedbackCard } from '@/components/UserJourney/ProgressFeedbackCard';
+import { IntelligentPillarSuggestions } from '@/components/UserJourney/IntelligentPillarSuggestions';
 
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
@@ -360,8 +361,9 @@ export const ClientDashboard = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue={initialTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="enhanced">🏠 Hem</TabsTrigger>
+          <TabsTrigger value="suggestions">💡 Stefans Tips</TabsTrigger>
           <TabsTrigger value="pillars">🎯 Sex Områden</TabsTrigger>
           <TabsTrigger value="journey">🛤️ Min Resa</TabsTrigger>
           <TabsTrigger value="tasks">✅ Att Göra</TabsTrigger>
@@ -373,6 +375,16 @@ export const ClientDashboard = () => {
           <EnhancedDashboard 
             userId={clientProfile.id} 
             userName={clientProfile.name} 
+          />
+        </TabsContent>
+
+        {/* Intelligent Pillar Suggestions Tab */}
+        <TabsContent value="suggestions" className="space-y-6">
+          <IntelligentPillarSuggestions 
+            onPillarSelected={(pillarKey) => {
+              // Efter att användaren väljer en pillar, navigera till pillars fliken
+              navigate(`/client-dashboard?tab=pillars&active=${pillarKey}`);
+            }}
           />
         </TabsContent>
 

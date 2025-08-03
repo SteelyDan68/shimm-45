@@ -83,10 +83,10 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
             },
             {
               id: 'select_pillars',
-              title: '🎯 Välj vad du vill utveckla',
-              description: 'Aktivera de områden du vill fokusera på först',
+              title: '🎯 Se Stefans förslag på vad du ska utveckla',
+              description: 'Få personliga förslag baserat på din bedömning',
               action: () => {
-                navigate('/client-dashboard?tab=pillars');
+                navigate('/client-dashboard?tab=suggestions');
                 setShowCard(false);
               },
               icon: <Target className="h-5 w-5 text-success" />,
