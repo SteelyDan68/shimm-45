@@ -56,33 +56,77 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
   }
 
   if (completed && latestAssessment) {
-    // Show re-assessment option with updated text for 16-year target audience
+    // Enhanced re-assessment option with clear value proposition for 16-year-olds
     const assessmentDate = new Date(latestAssessment.created_at).toLocaleDateString('sv-SE');
+    const daysSince = Math.floor((Date.now() - new Date(latestAssessment.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    
     return (
       <Card className="border-success/20 bg-gradient-to-br from-success/10 to-success/20">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-4">
             <CheckCircle className="h-8 w-8 text-success" />
             <div className="flex-1">
-              <h3 className="font-semibold text-success-foreground">Bra jobbat! ✨</h3>
+              <h3 className="font-semibold text-success-foreground">Du har gjort din självkoll! ✅</h3>
               <p className="text-success-foreground/80 text-sm">
-                Du gjorde din självbedömning {assessmentDate}
+                Senaste: {assessmentDate} ({daysSince} dagar sedan)
               </p>
             </div>
           </div>
           
-          <div className="mt-4 p-3 rounded-lg bg-background/50">
-            <p className="text-sm text-muted-foreground mb-3">
-              💡 <strong>Vill du kolla läget igen?</strong> Gör en ny självbedömning för att se hur du har utvecklats!
-            </p>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowForm(true)}
-              className="text-xs"
-            >
-              Gör ny bedömning
-            </Button>
+          <div className="space-y-3">
+            <div className="p-4 rounded-lg bg-background/60 border border-primary/20">
+              <h4 className="font-medium text-foreground mb-2">🔄 Vill du kolla läget igen?</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                <strong>Varför det är smart:</strong>
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 mb-4">
+                <li>📈 Se hur du har utvecklats sedan sist</li>
+                <li>🎯 Stefan får bättre koll på vad du behöver nu</li>
+                <li>💡 Nya tips baserat på hur du mår just nu</li>
+                <li>🚀 Uppdaterad plan för vad du ska satsa på</li>
+              </ul>
+              
+              {daysSince >= 7 && (
+                <div className="p-2 bg-blue-50 rounded border-l-4 border-blue-400 mb-3">
+                  <p className="text-xs text-blue-800">
+                    💪 <strong>Perfect timing!</strong> Det har gått {daysSince} dagar - perfekt för att se din utveckling!
+                  </p>
+                </div>
+              )}
+              
+              {daysSince < 7 && (
+                <div className="p-2 bg-yellow-50 rounded border-l-4 border-yellow-400 mb-3">
+                  <p className="text-xs text-yellow-800">
+                    ⏰ Du kan alltid göra om den, men mest kul är det efter en vecka när du hunnit utvecklas lite!
+                  </p>
+                </div>
+              )}
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={() => setShowForm(true)}
+                  className="flex-1"
+                >
+                  Ja, kolla läget igen! 🔄
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {/* Navigate to insights */}}
+                  className="flex-1"
+                >
+                  Se mina gamla svar 👀
+                </Button>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">
+                💡 Tip: Många gör om den en gång i månaden för att följa sin utveckling
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
