@@ -129,18 +129,18 @@ const App = () => (
   <CriticalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ErrorProvider>
-        <AnalyticsProvider>
-          <SecurityHeadersProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+        <SecurityHeadersProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AnalyticsProvider>
                 <AppRoutes />
                 <CookieConsent />
-              </BrowserRouter>
-            </TooltipProvider>
-          </SecurityHeadersProvider>
-        </AnalyticsProvider>
+              </AnalyticsProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </SecurityHeadersProvider>
       </ErrorProvider>
     </QueryClientProvider>
   </CriticalErrorBoundary>
