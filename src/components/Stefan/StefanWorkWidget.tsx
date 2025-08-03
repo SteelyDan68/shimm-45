@@ -11,6 +11,7 @@ import { useStefanPersonality } from '@/hooks/useStefanPersonality';
 import { useUserJourney } from '@/hooks/useUserJourney';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useTasks } from '@/hooks/useTasks';
+import { useStefanMockData } from '@/hooks/useStefanMockData';
 import { 
   MessageCircle, 
   ChevronUp, 
@@ -46,13 +47,17 @@ export const StefanWorkWidget = () => {
   const { recentInteractions, getCurrentPersonaInfo, loading } = useStefanPersonality();
   const { journeyState } = useUserJourney();
   const { tasks, loading: tasksLoading } = useTasks();
+  const { mockInteractions, addMockInteraction, isUsingMockData } = useStefanMockData();
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [questionText, setQuestionText] = useState('');
   const [showQuestionInput, setShowQuestionInput] = useState(false);
 
   const currentPersona = getCurrentPersonaInfo();
-  const latestInteraction = recentInteractions[0];
+  
+  // Use mock data when AI is not working
+  const displayInteractions = recentInteractions?.length > 0 ? recentInteractions : mockInteractions;
+  const latestInteraction = displayInteractions[0];
 
   // Auto-show widget when there are new interactions
   useEffect(() => {
@@ -85,30 +90,45 @@ export const StefanWorkWidget = () => {
     const page = currentPage.split('/')[1] || 'dashboard';
     const prompts = [];
 
+    // Enhanced prompts that work with mock data when AI is unavailable
+    const createMockAction = (type: string, context: string) => {
+      return () => {
+        if (recentInteractions?.length > 0) {
+          // Use real AI when available
+          triggerContextualHelp(context);
+        } else {
+          // Use mock data when AI is unavailable
+          const mockResponse = addMockInteraction(type, context);
+          setIsExpanded(true);
+        }
+      };
+    };
+
     switch (page) {
       case 'tasks':
         prompts.push(
-          { text: 'Hjälp mig prioritera', action: () => triggerContextualHelp('task_prioritization') },
-          { text: 'Jag har kört fast', action: () => triggerContextualHelp('task_stuck') },
-          { text: 'Motivera mig', action: () => requestMotivation('task_motivation') }
+          { text: 'Hjälp mig prioritera', action: createMockAction('contextual_help', 'task_prioritization') },
+          { text: 'Jag har kört fast', action: createMockAction('contextual_help', 'struggling_tasks') },
+          { text: 'Motivera mig', action: createMockAction('motivation', 'task_motivation') }
         );
         break;
       case 'calendar':
         prompts.push(
-          { text: 'Planera min vecka', action: () => triggerContextualHelp('weekly_planning') },
-          { text: 'Förbered inför möte', action: () => triggerContextualHelp('meeting_preparation') }
+          { text: 'Planera min vecka', action: createMockAction('contextual_help', 'weekly_planning') },
+          { text: 'Förbered inför möte', action: createMockAction('contextual_help', 'meeting_preparation') }
         );
         break;
       case 'client-dashboard':
+      case 'ai-coaching':
         prompts.push(
-          { text: 'Översikt av framsteg', action: () => triggerContextualHelp('progress_overview') },
-          { text: 'Nästa steg?', action: () => triggerContextualHelp('next_steps') }
+          { text: 'Översikt av framsteg', action: createMockAction('contextual_help', 'progress_overview') },
+          { text: 'Nästa steg?', action: createMockAction('contextual_help', 'next_steps') }
         );
         break;
       default:
         prompts.push(
-          { text: 'Vad ska jag göra nu?', action: () => triggerContextualHelp('general_guidance') },
-          { text: 'Uppmuntran tack', action: () => requestMotivation() }
+          { text: 'Vad ska jag göra nu?', action: createMockAction('contextual_help', 'general_guidance') },
+          { text: 'Uppmuntran tack', action: createMockAction('motivation', 'general') }
         );
     }
 
@@ -148,6 +168,11 @@ export const StefanWorkWidget = () => {
                     <Badge variant="secondary" className="text-xs">
                       {currentPersona?.name.split(' ')[1] || 'Mentor'}
                     </Badge>
+                    {recentInteractions?.length === 0 && (
+                      <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
+                        Demo
+                      </Badge>
+                    )}
                   </div>
                   {latestInteraction && (
                     <p className="text-xs text-muted-foreground">
