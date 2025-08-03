@@ -39,6 +39,7 @@ export const NAVIGATION_ROUTES = {
   COACH_DASHBOARD: "/coach",
   
   // User management
+  ADMIN_HUB: "/admin-hub",
   ADMINISTRATION: "/administration",
   CLIENTS: "/clients",
   USER_PROFILE: (id: string) => `/user/${id}`,
@@ -105,7 +106,13 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     roles: ["superadmin", "admin", "coach"],
     items: [
       {
-        title: "Administration",
+        title: "Admin Hub",
+        url: NAVIGATION_ROUTES.ADMIN_HUB,
+        icon: Settings,
+        roles: ["superadmin", "admin", "coach"]
+      },
+      {
+        title: "Administration (Legacy)",
         url: NAVIGATION_ROUTES.ADMINISTRATION,
         icon: Settings,
         roles: ["superadmin", "admin"]
@@ -201,10 +208,10 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
 export const QUICK_ACTIONS = {
   superadmin: [
     {
-      title: "Lägg till användare",
+      title: "Hantera användare",
       description: "Skapa nya användare i systemet",
       icon: Users,
-      url: NAVIGATION_ROUTES.ADMINISTRATION,
+      url: NAVIGATION_ROUTES.ADMIN_HUB,
       variant: "default" as const
     },
     {
@@ -218,16 +225,16 @@ export const QUICK_ACTIONS = {
       title: "Systemöversikt",
       description: "Övervaka systemhälsa och prestanda",
       icon: Settings,
-      url: NAVIGATION_ROUTES.ADMINISTRATION,
+      url: NAVIGATION_ROUTES.ADMIN_HUB,
       variant: "outline" as const
     }
   ],
   admin: [
     {
-      title: "Lägg till användare",
+      title: "Hantera användare",
       description: "Skapa nya användare i systemet",
       icon: Users,
-      url: NAVIGATION_ROUTES.ADMINISTRATION,
+      url: NAVIGATION_ROUTES.ADMIN_HUB,
       variant: "default" as const
     },
     {
@@ -241,16 +248,16 @@ export const QUICK_ACTIONS = {
       title: "Organisationsöversikt",
       description: "Hantera organisationen och medlemmar",
       icon: Building2,
-      url: NAVIGATION_ROUTES.ADMINISTRATION,
+      url: NAVIGATION_ROUTES.ADMIN_HUB,
       variant: "outline" as const
     }
   ],
   coach: [
     {
-      title: "Lägg till klient",
+      title: "Hantera klienter",
       description: "Registrera nya klienter",
       icon: Users,
-      url: NAVIGATION_ROUTES.ADMINISTRATION,
+      url: NAVIGATION_ROUTES.ADMIN_HUB,
       variant: "default" as const
     },
     {

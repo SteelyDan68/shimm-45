@@ -37,6 +37,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
 import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
+import { AdminHub } from "./pages/AdminHub";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
 import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
@@ -128,7 +129,8 @@ const AppRoutes = () => {
                <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
                <Route path="/intelligence/:userId" element={<Intelligence />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
-              <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
+               <Route path="/admin-hub/*" element={<AdminHub />} />
+               <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
                <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
