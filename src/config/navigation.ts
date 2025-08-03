@@ -111,12 +111,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach"]
       },
       {
-        title: "Administration (Legacy)",
-        url: NAVIGATION_ROUTES.ADMINISTRATION,
-        icon: Settings,
-        roles: ["superadmin", "admin"]
-      },
-      {
         title: "Användare", 
         url: NAVIGATION_ROUTES.USERS,
         icon: Users,

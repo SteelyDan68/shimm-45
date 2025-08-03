@@ -56,51 +56,69 @@ export const UnifiedUserProfile = () => {
   
   // 🚨 SUPERADMIN GOD MODE: ABSOLUTE ACCESS TO EVERYTHING
   const canViewProfile = useMemo(() => {
-    // EMERGENCY SUPERADMIN CHECKS - Multiple layers for maximum reliability
+    console.log('🔍 SUPERADMIN ACCESS CHECK START for user:', userId);
+    console.log('🔍 Current user:', user?.id, user?.email);
+    console.log('🔍 User roles:', roles);
+    console.log('🔍 isSuperAdmin:', isSuperAdmin);
+    console.log('🔍 isAdmin:', isAdmin);
+    console.log('🔍 canManageUsers:', canManageUsers);
+
+    // SUPERADMIN GOD MODE - Multiple layers for absolute access
     
-    // 1. Check from useUnifiedPermissions (primary check)
+    // 1. PRIMARY: Check from useUnifiedPermissions
     if (isSuperAdmin) {
-      console.log('🔥 PRIMARY SUPERADMIN GOD MODE - isSuperAdmin = true');
+      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - isSuperAdmin = true');
       return true;
     }
     
-    // 2. Direct role array check (backup check)
-    if (user?.id && roles && roles.includes('superadmin' as any)) {
-      console.log('🔥 BACKUP SUPERADMIN GOD MODE - roles array contains superadmin');
+    // 2. BACKUP: Direct role array check 
+    if (roles?.includes('superadmin' as any)) {
+      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - roles contains superadmin');
       return true;
     }
     
-    // 3. Emergency hardcoded superadmin check for Stefan
+    // 3. EMERGENCY: Hardcoded superadmin access for Stefan
     if (user?.email === 'stefan.hallgren@gmail.com') {
-      console.log('🔥 EMERGENCY HARDCODED SUPERADMIN ACCESS for Stefan');
+      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - Emergency hardcoded access');
       return true;
     }
+
+    // 4. EMERGENCY: Check if user has any superadmin-related roles
+    if (user?.id && roles) {
+      const roleStrings = roles.map(r => String(r).toLowerCase());
+      if (roleStrings.includes('superadmin')) {
+        console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - string match in roles');
+        return true;
+      }
+    }
     
-    // 4. Self-access always allowed
+    // 5. Self-access
     if (userId === user?.id) {
       console.log('✅ Self-access granted');
       return true;
     }
     
-    // 5. Admin access
+    // 6. Admin access
     if (isAdmin) {
       console.log('✅ Admin access granted');
       return true;
     }
     
-    // 6. Other permissions
+    // 7. Other permissions
     if (canManageUsers) {
       console.log('✅ User management permission granted');
       return true;
     }
     
-    console.log('❌ Access denied - no valid permissions found');
-    console.log('DEBUG INFO:', {
+    console.log('❌❌❌ ACCESS DENIED - This should NEVER happen for superadmin!');
+    console.log('❌ Full DEBUG INFO:', {
       isSuperAdmin,
       userEmail: user?.email,
       userId,
       currentUserId: user?.id,
       roles,
+      roleTypes: roles?.map(r => typeof r),
+      stringRoles: roles?.map(r => String(r)),
       isAdmin,
       canManageUsers
     });
