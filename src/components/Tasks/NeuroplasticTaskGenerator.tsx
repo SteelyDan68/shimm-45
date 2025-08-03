@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
+import { NeuroplasticityTooltip, ScienceTooltip } from '@/components/ui/enhanced-tooltip';
 import { 
   Brain, 
   Target, 
@@ -13,7 +14,9 @@ import {
   RefreshCw,
   CheckCircle2,
   Plus,
-  Flame
+  Flame,
+  Info,
+  Lightbulb
 } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 import { useToast } from '@/hooks/use-toast';
@@ -404,7 +407,14 @@ export const NeuroplasticTaskGenerator = memo(({
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="font-medium">Neuroplastisk princip:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Hjärnvänlig metod:</span>
+                            <ScienceTooltip content={`${neuroplasticPrinciples[task.neuroplastic_principle].description} - Denna metod hjälper din hjärna skapa starka kopplingar för varaktig förändring.`}>
+                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
+                                <Info className="h-3 w-3" />
+                              </Button>
+                            </ScienceTooltip>
+                          </div>
                           <div className={`inline-flex items-center gap-1 ml-2 px-2 py-1 rounded ${neuroplasticPrinciples[task.neuroplastic_principle].color}`}>
                             {neuroplasticPrinciples[task.neuroplastic_principle].icon}
                             {neuroplasticPrinciples[task.neuroplastic_principle].name}
@@ -438,7 +448,7 @@ export const NeuroplasticTaskGenerator = memo(({
             <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
               <CardContent className="pt-6 text-center space-y-4">
                 <h3 className="text-lg font-semibold">
-                  Perfekt! Du har valt {selectedTasks.length} neuroplastiska uppgifter
+                  Perfekt! Du har valt {selectedTasks.length} smarta uppgifter som hjälper din hjärna växa! 🧠💪
                 </h3>
                 <p className="text-muted-foreground">
                   Dessa uppgifter kommer att hjälpa din hjärna att skapa nya, positiva mönster under de kommande veckorna.

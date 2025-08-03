@@ -169,5 +169,15 @@ export const helpTexts = {
     backButton: "Gå tillbaka till föregående sida eller vy.",
     homeButton: "Snabb åtkomst till din huvud-dashboard.",
     tabs: "Växla mellan olika vyer och funktioner inom samma område."
+  },
+
+  // Neuroplasticitet & Hjärnforskning (16-års-anpassat)
+  neuroplasticity: {
+    simple: "Din hjärna blir starkare när du tränar den - precis som en muskel! 🧠💪",
+    detailed: "Forskare har visat att hjärnan skapar nya kopplingar när vi övar. Det kallas neuroplasticitet - vi kallar det 'hjärnvänlig träning'",
+    taskGeneration: "Dessa uppgifter är designade enligt hjärnforskning för att hjälpa dig lära och växa på riktigt. Små steg → stora förändringar! 🚀",
+    progressTracking: "Vi mäter hur din hjärna utvecklas genom små, konkreta framsteg baserat på vetenskaplig forskning 📊🧠",
+    scienceBase: "Baserat på 30+ års hjärnforskning från Stanford, Harvard och MIT",
+    principles: "Hjärnvänliga metoder som hjälper din hjärna skapa nya kopplingar för varaktig förändring"
   }
 } as const;
