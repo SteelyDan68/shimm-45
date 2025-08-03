@@ -337,7 +337,7 @@ export const useRealAssessments = () => {
             form_definition_id: formDefinitionId,
             answers: finalAnswers,
             comments: comments,
-            client_id: user.id
+            user_id: user.id
           }
         }
       );

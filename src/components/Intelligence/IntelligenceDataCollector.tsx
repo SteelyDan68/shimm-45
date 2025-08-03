@@ -126,7 +126,7 @@ export function IntelligenceDataCollector({
       
       const { data, error } = await supabase.functions.invoke('data-collector', {
         body: { 
-          client_id: profile.userId,
+          user_id: profile.userId,
           timestamp: new Date().toISOString(),
           force_refresh: true
         }

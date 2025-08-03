@@ -4,7 +4,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
 export interface RealClientOutcome {
-  client_id: string;
+  user_id: string;
   client_name: string;
   overall_progress: number;
   active_pillars: number;
@@ -181,7 +181,7 @@ export const useRealDataBindings = () => {
         ));
 
         return {
-          client_id: client.id,
+          user_id: client.id,
           client_name: `${client.first_name || ''} ${client.last_name || ''}`.trim() || client.email || 'Okänd',
           overall_progress: journeyState.data?.journey_progress || 0,
           active_pillars: activePillarCount,

@@ -245,7 +245,7 @@ export const RealTimeCoachMetrics = ({ coachId }: RealTimeCoachMetricsProps) => 
               {myClients
                 .sort((a, b) => (b.needs_attention ? 1 : 0) - (a.needs_attention ? 1 : 0))
                 .map(client => (
-                <div key={client.client_id} className={`p-3 rounded-lg border transition-colors ${
+                <div key={client.user_id} className={`p-3 rounded-lg border transition-colors ${
                   client.needs_attention ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:bg-gray-50'
                 }`}>
                   <div className="flex items-center justify-between mb-2">

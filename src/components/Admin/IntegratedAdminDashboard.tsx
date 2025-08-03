@@ -36,7 +36,7 @@ import { HelpTooltip } from '@/components/HelpTooltip';
 import { useToast } from '@/hooks/use-toast';
 
 interface ClientOutcome {
-  client_id: string;
+  user_id: string;
   client_name: string;
   overall_progress: number;
   active_pillars: number;
@@ -282,7 +282,7 @@ export const IntegratedAdminDashboard = ({ onNavigateToTab }: IntegratedAdminDas
                 .sort((a, b) => (b.needs_attention ? 1 : 0) - (a.needs_attention ? 1 : 0))
                 .slice(0, 10)
                 .map(outcome => (
-                <div key={outcome.client_id} className={`p-3 rounded-lg border ${
+                <div key={outcome.user_id} className={`p-3 rounded-lg border ${
                   outcome.needs_attention ? 'border-red-200 bg-red-50' : 'border-gray-200'
                 }`}>
                   <div className="flex items-center justify-between mb-2">
