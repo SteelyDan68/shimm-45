@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth, usePermissions } from '@/providers/UnifiedAuthProvider';
 import { useStefanKnowledgeBase } from '@/hooks/useStefanKnowledgeBase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

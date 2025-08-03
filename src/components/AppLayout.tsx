@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/providers/UnifiedAuthProvider";
 import { TopNavigation } from "@/components/TopNavigation";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AutoBreadcrumbs } from "@/components/Navigation/AutoBreadcrumbs";

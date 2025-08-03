@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/providers/UnifiedAuthProvider';
 import { Card } from '@/components/ui/card';
 
 // Clean AdminHubLayout - removes redundant sidebar and floating elements

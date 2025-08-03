@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getDefaultRouteForRole } from '@/config/navigation';
