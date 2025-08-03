@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useAIServiceCircuitBreaker } from '@/hooks/useCircuitBreaker';
+import { useAnalytics } from '@/components/Analytics/AnalyticsProvider';
 
 // Unified AI request types
 export type AIAction = 
@@ -144,8 +145,10 @@ export const useUnifiedAI = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const circuitBreaker = useAIServiceCircuitBreaker();
+  const analytics = useAnalytics();
 
   const executeAIRequest = useCallback(async (request: AIRequest): Promise<AIResponse> => {
+    const startTime = Date.now(); // Move startTime declaration to scope that's accessible in catch block
     setLoading(true);
     setError(null);
 
@@ -177,7 +180,19 @@ export const useUnifiedAI = () => {
         return data as AIResponse;
       });
 
+      const processingTime = Date.now() - startTime;
       console.log(`✅ Unified AI: ${request.action} completed in ${result.processingTime}ms using ${result.aiModel}`);
+      
+      // Track AI performance analytics
+      analytics.trackAIInteraction({
+        function_name: request.action,
+        response_time_ms: processingTime,
+        success: true,
+        model_used: result.aiModel,
+        input_size: JSON.stringify(request.data).length,
+        output_size: JSON.stringify(result.data).length,
+        tokens_used: result.tokens
+      });
       
       return result;
 
@@ -186,6 +201,17 @@ export const useUnifiedAI = () => {
       setError(errorMessage);
       
       console.error(`❌ Unified AI Error (${request.action}):`, err);
+      
+      // Track AI error analytics
+      analytics.trackAIInteraction({
+        function_name: request.action,
+        response_time_ms: Date.now() - startTime,
+        success: false,
+        error_message: errorMessage,
+        model_used: 'unknown',
+        input_size: JSON.stringify(request.data).length,
+        output_size: 0
+      });
       
       // Check if it's a circuit breaker error (service unavailable)
       if (errorMessage.includes('temporärt otillgänglig')) {
@@ -212,7 +238,7 @@ export const useUnifiedAI = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, toast, circuitBreaker.unifiedAI]);
+  }, [user?.id, toast, circuitBreaker.unifiedAI, analytics]);
 
   // ============= STEFAN CHAT =============
   const stefanChat = useCallback(async (data: StefanChatData): Promise<StefanChatResponse | null> => {

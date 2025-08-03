@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AnalyticsProvider } from '@/components/Analytics/AnalyticsProvider';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
@@ -118,16 +119,18 @@ const App = () => (
   <CriticalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ErrorProvider>
-        <SecurityHeadersProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppRoutes />
-              <CookieConsent />
-            </BrowserRouter>
-          </TooltipProvider>
-        </SecurityHeadersProvider>
+        <AnalyticsProvider>
+          <SecurityHeadersProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppRoutes />
+                <CookieConsent />
+              </BrowserRouter>
+            </TooltipProvider>
+          </SecurityHeadersProvider>
+        </AnalyticsProvider>
       </ErrorProvider>
     </QueryClientProvider>
   </CriticalErrorBoundary>

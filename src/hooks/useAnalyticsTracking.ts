@@ -86,22 +86,29 @@ export const useAnalyticsTracking = () => {
     interactionBufferRef.current = [];
 
     try {
-      // Using direct database insert to avoid types issues
-      const { error } = await supabase.rpc('insert_analytics_events', {
-        events_data: events.map(event => ({
-          ...event,
-          user_id: user?.id || null,
-          session_id: sessionIdRef.current,
-          timestamp: event.timestamp || new Date().toISOString(),
-          page_url: window.location.href,
-          user_agent: navigator.userAgent
-        }))
+      // Using direct HTTP call to bypass TypeScript issues with new table
+      const eventsPayload = events.map(event => ({
+        ...event,
+        user_id: user?.id || null,
+        session_id: sessionIdRef.current,
+        timestamp: event.timestamp || new Date().toISOString(),
+        page_url: window.location.href,
+        user_agent: navigator.userAgent
+      }));
+
+      const response = await fetch(`https://gcoorbcglxczmukzcmqs.supabase.co/rest/v1/analytics_events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb29yYmNnbHhjem11a3pjbXFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4MTE3NzYsImV4cCI6MjA2OTM4Nzc3Nn0.5gNGvMZ6aG3UXoYR6XbJPqn8L8ktMYaFbZIQ4mZTFf4',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(eventsPayload)
       });
 
-      if (error) {
-        console.error('Analytics flush error:', error);
-        // Re-add events to buffer if failed
-        interactionBufferRef.current.unshift(...events);
+      if (!response.ok) {
+        throw new Error(`Analytics insert failed: ${response.statusText}`);
       }
     } catch (error) {
       console.error('Analytics network error:', error);

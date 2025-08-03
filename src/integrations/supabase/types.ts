@@ -2344,6 +2344,10 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
+      insert_analytics_events: {
+        Args: { events_data: Json }
+        Returns: undefined
+      }
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean
