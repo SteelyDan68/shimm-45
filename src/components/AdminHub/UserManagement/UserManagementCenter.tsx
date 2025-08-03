@@ -118,7 +118,7 @@ export function UserManagementCenter() {
         </Card>
       </div>
 
-      {/* Search and Filter Bar */}
+      {/* Main User Management Section */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -145,8 +145,10 @@ export function UserManagementCenter() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        
+        <CardContent className="space-y-6">
+          {/* Search and Filter Bar */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -174,10 +176,10 @@ export function UserManagementCenter() {
             </div>
           </div>
 
-          <Separator className="mb-6" />
+          <Separator />
 
-          {/* User Management Tabs */}
-          <Tabs defaultValue="manage" className="w-full">
+          {/* User Management Tabs - Simplified */}
+          <Tabs defaultValue="manage">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="manage">Hantera användare</TabsTrigger>
               {canCreateUsers && (
@@ -188,39 +190,31 @@ export function UserManagementCenter() {
               )}
             </TabsList>
 
-            <TabsContent value="manage" className="space-y-4">
+            <TabsContent value="manage" className="mt-6">
               <UserManagementTabs />
             </TabsContent>
 
             {canCreateUsers && (
-              <TabsContent value="create" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Skapa ny användare</CardTitle>
-                    <CardDescription>
-                      Skapa en användare manuellt med fullständig profilinformation
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <CreateUserForm />
-                  </CardContent>
-                </Card>
+              <TabsContent value="create" className="mt-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Skapa ny användare</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Skapa en användare manuellt med fullständig profilinformation
+                  </p>
+                  <CreateUserForm />
+                </div>
               </TabsContent>
             )}
 
             {canInviteUsers && (
-              <TabsContent value="invite" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Bjud in användare</CardTitle>
-                    <CardDescription>
-                      Skicka e-postinbjudningar till nya användare
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <SendInvitationForm />
-                  </CardContent>
-                </Card>
+              <TabsContent value="invite" className="mt-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Bjud in användare</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Skicka e-postinbjudningar till nya användare
+                  </p>
+                  <SendInvitationForm />
+                </div>
               </TabsContent>
             )}
           </Tabs>
