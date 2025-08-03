@@ -87,12 +87,18 @@ export const useUserData = (userId?: string) => {
     if (!targetUserId) return;
 
     try {
+      console.log('🔥 useUserData.fetchRoles: Starting for userId:', targetUserId);
       const { data, error } = await supabase
         .from('user_roles')
         .select('*')
         .eq('user_id', targetUserId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔥 useUserData.fetchRoles: Error:', error);
+        throw error;
+      }
+      
+      console.log('🔥 useUserData.fetchRoles: Success! Raw data:', data);
       setRoles(data || []);
     } catch (error) {
       console.error('Error fetching roles:', error);
