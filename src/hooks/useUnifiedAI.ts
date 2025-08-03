@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useAIServiceCircuitBreaker } from '@/hooks/useCircuitBreaker';
 
 // Unified AI request types
 export type AIAction = 
@@ -142,6 +143,7 @@ export const useUnifiedAI = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const circuitBreaker = useAIServiceCircuitBreaker();
 
   const executeAIRequest = useCallback(async (request: AIRequest): Promise<AIResponse> => {
     setLoading(true);
@@ -150,29 +152,34 @@ export const useUnifiedAI = () => {
     try {
       console.log(`🤖 Unified AI: Processing ${request.action}`);
       
-      const { data, error: functionError } = await supabase.functions.invoke('unified-ai-orchestrator', {
-        body: {
-          action: request.action,
-          data: request.data,
-          context: {
-            userId: user?.id,
-            language: 'sv',
-            priority: request.priority || 'medium'
+      // Use circuit breaker for resilience
+      const result = await circuitBreaker.unifiedAI.executeWithCircuitBreaker(async () => {
+        const { data, error: functionError } = await supabase.functions.invoke('unified-ai-orchestrator', {
+          body: {
+            action: request.action,
+            data: request.data,
+            context: {
+              userId: user?.id,
+              language: 'sv',
+              priority: request.priority || 'medium'
+            }
           }
+        });
+
+        if (functionError) {
+          throw new Error(functionError.message || 'AI-tjänst misslyckades');
         }
+
+        if (!data.success) {
+          throw new Error(data.error || 'AI-analys misslyckades');
+        }
+
+        return data as AIResponse;
       });
 
-      if (functionError) {
-        throw new Error(functionError.message || 'AI-tjänst misslyckades');
-      }
-
-      if (!data.success) {
-        throw new Error(data.error || 'AI-analys misslyckades');
-      }
-
-      console.log(`✅ Unified AI: ${request.action} completed in ${data.processingTime}ms using ${data.aiModel}`);
+      console.log(`✅ Unified AI: ${request.action} completed in ${result.processingTime}ms using ${result.aiModel}`);
       
-      return data as AIResponse;
+      return result;
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Okänt fel uppstod';
@@ -180,11 +187,21 @@ export const useUnifiedAI = () => {
       
       console.error(`❌ Unified AI Error (${request.action}):`, err);
       
-      toast({
-        title: "AI-tjänst fel",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      // Check if it's a circuit breaker error (service unavailable)
+      if (errorMessage.includes('temporärt otillgänglig')) {
+        toast({
+          title: "AI-tjänst temporärt otillgänglig",
+          description: "Systemet försöker återansluta automatiskt. Försök igen om en stund.",
+          variant: "destructive",
+          duration: 8000
+        });
+      } else {
+        toast({
+          title: "AI-tjänst fel",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
 
       return {
         success: false,
@@ -195,7 +212,7 @@ export const useUnifiedAI = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, toast]);
+  }, [user?.id, toast, circuitBreaker.unifiedAI]);
 
   // ============= STEFAN CHAT =============
   const stefanChat = useCallback(async (data: StefanChatData): Promise<StefanChatResponse | null> => {
@@ -291,17 +308,14 @@ export const useUnifiedAI = () => {
     status: 'healthy' | 'degraded' | 'down';
   }> => {
     try {
-      const response = await executeAIRequest({
-        action: 'stefan_chat',
-        data: { message: 'Hälsokontroll' },
-        priority: 'low'
-      });
-
+      const overallStatus = circuitBreaker.getOverallStatus();
+      
       return {
-        openai: response.aiModel === 'openai',
-        gemini: response.aiModel === 'gemini',
-        primary: response.aiModel,
-        status: response.success ? 'healthy' : 'degraded'
+        openai: overallStatus.services.openai.isHealthy,
+        gemini: overallStatus.services.gemini.isHealthy,
+        primary: overallStatus.services.unifiedAI.isHealthy ? 
+          (overallStatus.services.openai.isHealthy ? 'openai' : 'gemini') : 'none',
+        status: overallStatus.overall as 'healthy' | 'degraded' | 'down'
       };
     } catch {
       return {
@@ -311,7 +325,7 @@ export const useUnifiedAI = () => {
         status: 'down'
       };
     }
-  }, [executeAIRequest]);
+  }, [circuitBreaker]);
 
   return {
     // State
@@ -329,7 +343,10 @@ export const useUnifiedAI = () => {
     assessmentAnalysis,
     messageAssistant,
     planningGeneration,
-    habitAnalysis
+    habitAnalysis,
+    
+    // Circuit breaker status
+    circuitBreakerStatus: circuitBreaker.getOverallStatus()
   };
 };
 
