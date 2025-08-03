@@ -25,11 +25,10 @@ import {
   Save,
   X
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/providers/UnifiedAuthProvider";
 import { useUserData } from "@/hooks/useUserData";
 import { useExtendedProfile } from "@/hooks/useExtendedProfile";
 import { useToast } from "@/hooks/use-toast";
-import { useUnifiedPermissions } from "@/hooks/useUnifiedPermissions";
 import type { ExtendedProfileData } from "@/types/extendedProfile";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +42,7 @@ export default function UserCrmProfile() {
   
   const { profile, loading: profileLoading, hasRole } = useUserData(userId);
   const { getExtendedProfile, saveExtendedProfile } = useExtendedProfile();
-  const { isSuperAdmin, isAdmin } = useUnifiedPermissions();
+  const { isSuperAdmin, isAdmin } = useAuth();
   
   const [extendedProfile, setExtendedProfile] = useState<ExtendedProfileData | null>(null);
   const [isEditing, setIsEditing] = useState(false);

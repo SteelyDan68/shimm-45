@@ -11,9 +11,8 @@ import {
   RefreshCw,
   Settings
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { useUnifiedPermissions } from '@/hooks/useUnifiedPermissions';
 import { useClientLogic } from '@/hooks/useClientLogic';
 import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,7 +45,7 @@ export const ClientProfile = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isSuperAdmin, isAdmin, canManageUsers } = useUnifiedPermissions();
+  const { isSuperAdmin, isAdmin, canManageUsers } = useAuth();
   const { toast } = useToast();
   
   const [client, setClient] = useState<Client | null>(null);

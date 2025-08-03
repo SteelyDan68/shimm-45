@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { X, Plus } from 'lucide-react';
-import type { AppRole } from '@/hooks/useAuth';
+import type { AppRole } from '@/providers/UnifiedAuthProvider';
 
 const roleLabels: Record<AppRole, string> = {
   superadmin: "Superadministratör",

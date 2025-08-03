@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ActionPrompt } from '@/components/ui/action-prompt';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
 import { useUserJourney } from '@/hooks/useUserJourney';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';

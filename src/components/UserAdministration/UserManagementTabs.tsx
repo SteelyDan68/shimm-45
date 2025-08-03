@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Mail, Users, Settings } from "lucide-react";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/providers/UnifiedAuthProvider";
 import { SendInvitationForm } from "@/components/InvitationSystem/SendInvitationForm";
 import { CreateUserForm } from "./CreateUserForm";
 import { CentralUserManager } from "./CentralUserManager";
@@ -13,7 +13,7 @@ interface UserManagementTabsProps {
 }
 
 export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) => {
-  const { canCreateUsers, canInviteUsers, canManageUsers } = usePermissions();
+  const { canCreateUsers, canInviteUsers, canManageUsers } = useAuth();
   const [activeTab, setActiveTab] = useState("manage");
 
   const handleUserCreated = () => {
