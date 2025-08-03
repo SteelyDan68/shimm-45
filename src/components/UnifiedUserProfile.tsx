@@ -56,11 +56,8 @@ export const UnifiedUserProfile = () => {
     userEmail: user?.email,
     profileEmail: profile?.email,
     profileLoading,
-    'useUserData.roles': roles,
-    'useUserData.hasRole': { hasRole },
-    'useUnifiedPermissions.isSuperAdmin': isSuperAdmin,
-    'useUnifiedPermissions.isAdmin': isAdmin,
-    'useUnifiedPermissions.canManageUsers': canManageUsers,
+    'TARGET_USER_roles (from useUserData)': roles,
+    'CURRENT_USER_permissions (from useUnifiedPermissions)': { isSuperAdmin, isAdmin, canManageUsers },
     'roles type and content': { type: typeof roles, content: roles, length: roles?.length }
   });
   
@@ -70,56 +67,40 @@ export const UnifiedUserProfile = () => {
   const pillar = searchParams.get('pillar');
   
   // 🚨 SUPERADMIN GOD MODE: ABSOLUTE ACCESS TO EVERYTHING
+  // CRITICAL FIX: Use CURRENT USER permissions, not target user roles!
   const canViewProfile = useMemo(() => {
-    console.log('🔍 SUPERADMIN ACCESS CHECK START for user:', userId);
-    console.log('🔍 Current user:', user?.id, user?.email);
-    console.log('🔍 User roles:', roles);
-    console.log('🔍 isSuperAdmin:', isSuperAdmin);
-    console.log('🔍 isAdmin:', isAdmin);
-    console.log('🔍 canManageUsers:', canManageUsers);
+    console.log('🔍 SUPERADMIN ACCESS CHECK START for target user:', userId);
+    console.log('🔍 Current user (checking permissions):', user?.id, user?.email);
+    console.log('🔍 Current user permissions from useUnifiedPermissions:', { isSuperAdmin, isAdmin, canManageUsers });
 
     // SUPERADMIN GOD MODE - Multiple layers for absolute access
+    // CRITICAL: Check CURRENT USER permissions, not target user roles!
     
-    // 1. PRIMARY: Check from useUnifiedPermissions
+    // 1. PRIMARY: Check current user's superadmin status
     if (isSuperAdmin) {
-      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - isSuperAdmin = true');
+      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - Current user isSuperAdmin = true');
       return true;
     }
     
-    // 2. BACKUP: Direct role array check 
-    if (roles?.includes('superadmin' as any)) {
-      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - roles contains superadmin');
-      return true;
-    }
-    
-    // 3. EMERGENCY: Hardcoded superadmin access for Stefan
+    // 2. EMERGENCY: Hardcoded superadmin access for Stefan
     if (user?.email === 'stefan.hallgren@gmail.com') {
-      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - Emergency hardcoded access');
+      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - Emergency hardcoded access for Stefan');
       return true;
     }
 
-    // 4. EMERGENCY: Check if user has any superadmin-related roles
-    if (user?.id && roles) {
-      const roleStrings = roles.map(r => String(r).toLowerCase());
-      if (roleStrings.includes('superadmin')) {
-        console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - string match in roles');
-        return true;
-      }
+    // 3. BACKUP: Admin access
+    if (isAdmin) {
+      console.log('🔥🔥🔥 ADMIN ACCESS GRANTED');
+      return true;
     }
     
-    // 5. Self-access
+    // 4. Self-access
     if (userId === user?.id) {
       console.log('✅ Self-access granted');
       return true;
     }
     
-    // 6. Admin access
-    if (isAdmin) {
-      console.log('✅ Admin access granted');
-      return true;
-    }
-    
-    // 7. Other permissions
+    // 5. User management permissions
     if (canManageUsers) {
       console.log('✅ User management permission granted');
       return true;
@@ -127,18 +108,14 @@ export const UnifiedUserProfile = () => {
     
     console.log('❌❌❌ ACCESS DENIED - This should NEVER happen for superadmin!');
     console.log('❌ Full DEBUG INFO:', {
-      isSuperAdmin,
-      userEmail: user?.email,
-      userId,
-      currentUserId: user?.id,
-      roles,
-      roleTypes: roles?.map(r => typeof r),
-      stringRoles: roles?.map(r => String(r)),
-      isAdmin,
-      canManageUsers
+      'Current user (who is checking)': { userId: user?.id, email: user?.email },
+      'Target user (being viewed)': userId,
+      'Current user permissions': { isSuperAdmin, isAdmin, canManageUsers },
+      'Target user roles': roles,
+      'Should be accessible': 'YES, because current user is superadmin'
     });
     return false;
-  }, [user?.id, user?.email, userId, roles, isSuperAdmin, isAdmin, canManageUsers]);
+  }, [user?.id, user?.email, userId, isSuperAdmin, isAdmin, canManageUsers]);
   
   const [extendedProfile, setExtendedProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
