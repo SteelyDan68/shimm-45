@@ -2,6 +2,7 @@ import { useState, memo, useCallback, useMemo, useEffect } from 'react';
 import { LANGUAGE_16YO, formatTimeFor16YO } from '@/config/language16yo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ActionPrompt } from '@/components/ui/action-prompt';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -400,24 +401,15 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
               </div>
               
               {currentStep.action && currentStep.status === 'current' && (
-                <Button 
+                <ActionPrompt
+                  title={currentStep.title}
+                  description={currentStep.description}
+                  actionText={isProcessing || aiLoading || tasksLoading ? "Bearbetar..." : "Börja nu"}
                   onClick={currentStep.action}
                   disabled={isProcessing || aiLoading || tasksLoading}
-                  className="flex items-center gap-2"
-                >
-                  {(isProcessing || aiLoading || tasksLoading) ? (
-                    <>
-                      <Zap className="h-4 w-4 animate-spin" />
-                      Bearbetar... (Debug: proc:{isProcessing ? 'Y' : 'N'} ai:{aiLoading ? 'Y' : 'N'} tasks:{tasksLoading ? 'Y' : 'N'})
-                    </>
-                  ) : (
-                    <>
-                      <PlayCircle className="h-4 w-4" />
-                      Börja nu
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
+                  loading={isProcessing || aiLoading || tasksLoading}
+                  icon={<PlayCircle className="h-4 w-4" />}
+                />
               )}
             </div>
           </CardContent>

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { ActionPrompt } from '@/components/ui/action-prompt';
 import { WelcomeAssessmentForm } from '@/components/WelcomeAssessment/WelcomeAssessmentForm';
 import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
 import { useUserJourney } from '@/hooks/useUserJourney';
-import { CheckCircle, Clock, Star, ArrowRight } from 'lucide-react';
+import { CheckCircle, Star, RotateCcw } from 'lucide-react';
 
 interface WelcomeAssessmentCardProps {
   userId: string;
@@ -102,24 +101,25 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
                 </div>
               )}
               
-              <div className="flex gap-2">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={() => setShowForm(true)}
-                  className="flex-1"
-                >
-                  Ja, kolla läget igen! 🔄
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {/* Navigate to insights */}}
-                  className="flex-1"
-                >
-                  Se mina gamla svar 👀
-                </Button>
-              </div>
+              <ActionPrompt
+                title="🔄 Kolla läget igen!"
+                description="Se hur du har utvecklats • Stefan får bättre koll • Nya tips baserat på hur du mår just nu"
+                actionText="Ja, kolla läget igen!"
+                onClick={() => setShowForm(true)}
+                icon={<RotateCcw className="h-4 w-4" />}
+                variant="default"
+                size="sm"
+                className="mb-2"
+              />
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {/* Navigate to insights */}}
+                className="w-full"
+              >
+                Se mina gamla svar 👀
+              </Button>
             </div>
             
             <div className="text-center">
@@ -168,13 +168,13 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
           </p>
         </div>
 
-        <Button 
+        <ActionPrompt
+          title="Kolla läget! 📊"
+          description="Gör nu 👉 Svara på enkla frågor om ditt liv så förstår vi vad du behöver"
+          actionText="Börja nu - det går snabbt! 🚀"
           onClick={() => setShowForm(true)}
-          className="w-full"
           size="lg"
-        >
-          Börja nu - det går snabbt! 🚀
-        </Button>
+        />
       </CardContent>
     </Card>
   );
