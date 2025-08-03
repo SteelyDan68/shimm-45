@@ -81,8 +81,14 @@ export const UnifiedUserProfile = () => {
   const pillar = searchParams.get('pillar');
   
   // 🚨 SUPERADMIN GOD MODE: ABSOLUTE ACCESS TO EVERYTHING
-  // CRITICAL FIX: Use CURRENT USER permissions, not target user roles!
+  // CRITICAL FIX: Wait for user data to load before checking permissions
   const canViewProfile = useMemo(() => {
+    // WAIT FOR USER DATA TO LOAD
+    if (!user || !user.id) {
+      console.log('🔍 WAITING FOR USER DATA TO LOAD...');
+      return false; // Don't block access, just wait
+    }
+    
     console.log('🔍 SUPERADMIN ACCESS CHECK START for target user:', userId);
     console.log('🔍 Current user (checking permissions):', user?.id, user?.email);
     console.log('🔍 Current user permissions from useUnifiedPermissions:', { isSuperAdmin, isAdmin, canManageUsers });
@@ -211,7 +217,8 @@ export const UnifiedUserProfile = () => {
     }
   };
 
-  if (profileLoading || loading) {
+  // Show loading while user auth data is loading OR profile is loading
+  if (!user || !user.id || profileLoading || loading) {
     return (
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -220,7 +227,11 @@ export const UnifiedUserProfile = () => {
             Tillbaka
           </Button>
         </div>
-        <div className="text-center py-8">Laddar profil...</div>
+        <div className="text-center py-8">
+          Laddar profil... 
+          {!user && <div className="text-sm text-muted-foreground mt-2">Väntar på användardata...</div>}
+          {profileLoading && <div className="text-sm text-muted-foreground mt-2">Laddar profildata...</div>}
+        </div>
       </div>
     );
   }
