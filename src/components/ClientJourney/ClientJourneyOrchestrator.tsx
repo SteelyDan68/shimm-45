@@ -1,4 +1,5 @@
 import { useState, memo, useCallback, useMemo, useEffect } from 'react';
+import { LANGUAGE_16YO, formatTimeFor16YO } from '@/config/language16yo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -225,11 +226,11 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
   const journeySteps: JourneyStep[] = useMemo(() => [
     {
       id: 'welcome_assessment',
-      title: 'Upptäck var du står idag',
-      description: 'En omfattande bedömning av ditt nuvarande läge',
+      title: LANGUAGE_16YO.journey.welcome_assessment.title,
+      description: LANGUAGE_16YO.journey.welcome_assessment.description,
       status: completedSteps.includes('welcome_assessment') ? 'completed' : (currentStepIndex === 0 ? 'current' : 'upcoming'),
-      estimatedTime: '15-20 min',
-      neuroplasticPrinciple: 'Självmedvetenhet och baslinjemätning',
+      estimatedTime: LANGUAGE_16YO.journey.welcome_assessment.estimatedTime,
+      neuroplasticPrinciple: LANGUAGE_16YO.journey.welcome_assessment.principle,
       icon: <Brain className="h-5 w-5" />,
       action: async () => {
         // Check if welcome assessment is already completed
@@ -264,21 +265,21 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
     },
     {
       id: 'ai_analysis',
-      title: 'AI analyserar dina resultat',
-      description: 'Stefan AI skapar personliga insikter baserat på dina svar',
+      title: LANGUAGE_16YO.journey.ai_analysis.title,
+      description: LANGUAGE_16YO.journey.ai_analysis.description,
       status: completedSteps.includes('ai_analysis') ? 'completed' : (currentStepIndex === 1 ? 'current' : 'upcoming'),
-      estimatedTime: '2-3 min',
-      neuroplasticPrinciple: 'Mönsterigenkänning och prioritering',
+      estimatedTime: LANGUAGE_16YO.journey.ai_analysis.estimatedTime,
+      neuroplasticPrinciple: LANGUAGE_16YO.journey.ai_analysis.principle,
       icon: <Lightbulb className="h-5 w-5" />,
       action: triggerAssessmentAnalysis
     },
     {
       id: 'pillar_selection',
-      title: 'Välj dina utvecklingsområden',
-      description: 'Aktivera de pelare som är viktigast för din utveckling',
+      title: LANGUAGE_16YO.journey.pillar_selection.title,
+      description: LANGUAGE_16YO.journey.pillar_selection.description,
       status: completedSteps.includes('pillar_selection') ? 'completed' : (currentStepIndex === 2 ? 'current' : 'upcoming'),
-      estimatedTime: '5-10 min',
-      neuroplasticPrinciple: 'Fokuserad utveckling för maximal neuroplasticitet',
+      estimatedTime: LANGUAGE_16YO.journey.pillar_selection.estimatedTime,
+      neuroplasticPrinciple: LANGUAGE_16YO.journey.pillar_selection.principle,
       icon: <Target className="h-5 w-5" />,
       action: () => {
         navigate('/six-pillars');
@@ -287,21 +288,21 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
     },
     {
       id: 'todo_creation',
-      title: 'Få dina första utvecklingsuppgifter',
-      description: 'AI skapar konkreta, genomförbara uppgifter baserat på dina mål',
+      title: LANGUAGE_16YO.journey.task_creation.title,
+      description: LANGUAGE_16YO.journey.task_creation.description,
       status: completedSteps.includes('todo_creation') ? 'completed' : (currentStepIndex === 3 ? 'current' : 'upcoming'),
-      estimatedTime: '3-5 min',
-      neuroplasticPrinciple: 'Små, konkreta steg för sustainable habit formation',
+      estimatedTime: LANGUAGE_16YO.journey.task_creation.estimatedTime,
+      neuroplasticPrinciple: LANGUAGE_16YO.journey.task_creation.principle,
       icon: <CheckCircle className="h-5 w-5" />,
       action: () => handleCreateTasks(activeInsights)
     },
     {
       id: 'habit_formation',
-      title: 'Börja din neuroplastiska resa',
-      description: '21-dagars intensivperiod för att etablera nya neuronala banor',
+      title: LANGUAGE_16YO.journey.habit_formation.title,
+      description: LANGUAGE_16YO.journey.habit_formation.description,
       status: completedSteps.includes('habit_formation') ? 'completed' : (currentStepIndex === 4 ? 'current' : 'upcoming'),
-      estimatedTime: '5-10 min/dag',
-      neuroplasticPrinciple: 'Daglig repetition för neuronal omstrukturering',
+      estimatedTime: LANGUAGE_16YO.journey.habit_formation.estimatedTime,
+      neuroplasticPrinciple: LANGUAGE_16YO.journey.habit_formation.principle,
       icon: <Zap className="h-5 w-5" />,
       action: () => {
         navigate('/tasks');
@@ -455,7 +456,7 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Din utvecklingsöversikt
+            🛤️ Din utvecklingsresa
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -473,8 +474,8 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{step.title}</span>
                       <Badge variant="outline" className={getStatusColor(step.status)}>
-                        {step.status === 'completed' ? 'Klar' : 
-                         step.status === 'current' ? 'Aktuell' : 'Kommande'}
+                        {step.status === 'completed' ? LANGUAGE_16YO.status.completed : 
+                         step.status === 'current' ? LANGUAGE_16YO.status.current : LANGUAGE_16YO.status.upcoming}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{step.description}</p>
@@ -492,7 +493,7 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-green-600" />
-            Neuroplastiska milstolpar
+            🏆 Dina framsteg & mål
           </CardTitle>
         </CardHeader>
         <CardContent>
