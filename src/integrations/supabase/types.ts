@@ -1833,6 +1833,293 @@ export type Database = {
         }
         Relationships: []
       }
+      prd_architecture_edges: {
+        Row: {
+          created_at: string
+          edge_data: Json | null
+          edge_id: string
+          edge_label: string | null
+          edge_type: string | null
+          id: string
+          prd_document_id: string | null
+          source_node_id: string
+          style_config: Json | null
+          target_node_id: string
+        }
+        Insert: {
+          created_at?: string
+          edge_data?: Json | null
+          edge_id: string
+          edge_label?: string | null
+          edge_type?: string | null
+          id?: string
+          prd_document_id?: string | null
+          source_node_id: string
+          style_config?: Json | null
+          target_node_id: string
+        }
+        Update: {
+          created_at?: string
+          edge_data?: Json | null
+          edge_id?: string
+          edge_label?: string | null
+          edge_type?: string | null
+          id?: string
+          prd_document_id?: string | null
+          source_node_id?: string
+          style_config?: Json | null
+          target_node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prd_architecture_edges_prd_document_id_fkey"
+            columns: ["prd_document_id"]
+            isOneToOne: false
+            referencedRelation: "prd_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prd_architecture_nodes: {
+        Row: {
+          created_at: string
+          id: string
+          node_category: string | null
+          node_data: Json | null
+          node_id: string
+          node_label: string
+          node_type: string
+          position_x: number
+          position_y: number
+          prd_document_id: string | null
+          style_config: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          node_category?: string | null
+          node_data?: Json | null
+          node_id: string
+          node_label: string
+          node_type: string
+          position_x?: number
+          position_y?: number
+          prd_document_id?: string | null
+          style_config?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          node_category?: string | null
+          node_data?: Json | null
+          node_id?: string
+          node_label?: string
+          node_type?: string
+          position_x?: number
+          position_y?: number
+          prd_document_id?: string | null
+          style_config?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prd_architecture_nodes_prd_document_id_fkey"
+            columns: ["prd_document_id"]
+            isOneToOne: false
+            referencedRelation: "prd_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prd_components: {
+        Row: {
+          complexity_score: number | null
+          component_name: string
+          component_type: string
+          created_at: string
+          dependencies: Json | null
+          description: string | null
+          file_path: string | null
+          functionality: Json | null
+          id: string
+          last_modified: string | null
+          maintenance_notes: string | null
+          prd_document_id: string | null
+          props_interface: Json | null
+          usage_count: number | null
+        }
+        Insert: {
+          complexity_score?: number | null
+          component_name: string
+          component_type: string
+          created_at?: string
+          dependencies?: Json | null
+          description?: string | null
+          file_path?: string | null
+          functionality?: Json | null
+          id?: string
+          last_modified?: string | null
+          maintenance_notes?: string | null
+          prd_document_id?: string | null
+          props_interface?: Json | null
+          usage_count?: number | null
+        }
+        Update: {
+          complexity_score?: number | null
+          component_name?: string
+          component_type?: string
+          created_at?: string
+          dependencies?: Json | null
+          description?: string | null
+          file_path?: string | null
+          functionality?: Json | null
+          id?: string
+          last_modified?: string | null
+          maintenance_notes?: string | null
+          prd_document_id?: string | null
+          props_interface?: Json | null
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prd_components_prd_document_id_fkey"
+            columns: ["prd_document_id"]
+            isOneToOne: false
+            referencedRelation: "prd_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prd_documents: {
+        Row: {
+          api_documentation: Json
+          architecture_data: Json
+          assessment_structure: Json
+          component_inventory: Json
+          created_at: string
+          database_schema: Json
+          deployment_info: Json
+          description: string | null
+          feature_matrix: Json
+          generated_at: string
+          generated_by: string | null
+          id: string
+          is_current: boolean
+          performance_metrics: Json
+          pillar_system_data: Json
+          security_audit: Json
+          system_overview: Json
+          title: string
+          updated_at: string
+          user_flow_data: Json
+          version: string
+        }
+        Insert: {
+          api_documentation?: Json
+          architecture_data?: Json
+          assessment_structure?: Json
+          component_inventory?: Json
+          created_at?: string
+          database_schema?: Json
+          deployment_info?: Json
+          description?: string | null
+          feature_matrix?: Json
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_current?: boolean
+          performance_metrics?: Json
+          pillar_system_data?: Json
+          security_audit?: Json
+          system_overview?: Json
+          title?: string
+          updated_at?: string
+          user_flow_data?: Json
+          version: string
+        }
+        Update: {
+          api_documentation?: Json
+          architecture_data?: Json
+          assessment_structure?: Json
+          component_inventory?: Json
+          created_at?: string
+          database_schema?: Json
+          deployment_info?: Json
+          description?: string | null
+          feature_matrix?: Json
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_current?: boolean
+          performance_metrics?: Json
+          pillar_system_data?: Json
+          security_audit?: Json
+          system_overview?: Json
+          title?: string
+          updated_at?: string
+          user_flow_data?: Json
+          version?: string
+        }
+        Relationships: []
+      }
+      prd_features: {
+        Row: {
+          api_endpoints: Json | null
+          business_value: string | null
+          created_at: string
+          database_tables: Json | null
+          feature_category: string
+          feature_description: string | null
+          feature_name: string
+          id: string
+          implementation_status: string
+          last_updated: string | null
+          prd_document_id: string | null
+          related_components: Json | null
+          technical_complexity: number | null
+          user_roles: Json | null
+        }
+        Insert: {
+          api_endpoints?: Json | null
+          business_value?: string | null
+          created_at?: string
+          database_tables?: Json | null
+          feature_category: string
+          feature_description?: string | null
+          feature_name: string
+          id?: string
+          implementation_status?: string
+          last_updated?: string | null
+          prd_document_id?: string | null
+          related_components?: Json | null
+          technical_complexity?: number | null
+          user_roles?: Json | null
+        }
+        Update: {
+          api_endpoints?: Json | null
+          business_value?: string | null
+          created_at?: string
+          database_tables?: Json | null
+          feature_category?: string
+          feature_description?: string | null
+          feature_name?: string
+          id?: string
+          implementation_status?: string
+          last_updated?: string | null
+          prd_document_id?: string | null
+          related_components?: Json | null
+          technical_complexity?: number | null
+          user_roles?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prd_features_prd_document_id_fkey"
+            columns: ["prd_document_id"]
+            isOneToOne: false
+            referencedRelation: "prd_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: Json | null

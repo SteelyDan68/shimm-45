@@ -22,6 +22,7 @@ import {
   Key,
   Activity
 } from "lucide-react";
+import { PRDAdminDashboard } from '@/components/PRD/PRDAdminDashboard';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { CentralUserManager } from "@/components/UserAdministration/CentralUserManager";
@@ -205,7 +206,7 @@ export function Administration() {
         <Tabs defaultValue="dashboard" className="space-y-8">
           {/* Navigation Tabs */}
           <div className="bg-card rounded-lg border p-1 mb-8">
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-6 gap-1">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 gap-1">
               <TabsTrigger 
                 value="dashboard" 
                 className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
@@ -247,6 +248,13 @@ export function Administration() {
               >
                 <FileText className="h-4 w-4 flex-shrink-0" />
                 <span className="hidden sm:inline">GDPR</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="prd" 
+                className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
+              >
+                <FileText className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">PRD System</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -438,6 +446,10 @@ export function Administration() {
             </div>
           </TabsContent>
 
+          {/* PRD SYSTEM TAB - ENDAST för superadmin och admin */}
+          <TabsContent value="prd" className="space-y-6 mt-12">
+            <PRDAdminDashboard />
+          </TabsContent>
 
         </Tabs>
       </div>
