@@ -163,11 +163,24 @@ INSTRUKTIONER:
 - Anpassa längden baserat på interaktionstyp (${interaction_type})`;
 
     // Determine message based on interaction type
-    let userMessage = message;
-    if (interaction_type === 'proactive' && !message) {
-      userMessage = `Skapa ett proaktivt meddelande baserat på kontext: ${context}`;
+    let userMessage = message || '';
+    if (interaction_type === 'proactive' && !userMessage) {
+      userMessage = `Skapa ett proaktivt meddelande baserat på kontext: ${context || 'allmän check-in'}`;
     } else if (interaction_type === 'assessment_completion') {
       userMessage = `Användaren har slutfört en bedömning. Ge feedback och nästa steg baserat på resultaten.`;
+    } else if (interaction_type === 'contextual_help') {
+      userMessage = `Användaren behöver hjälp med: ${context || 'allmän vägledning'}`;
+    } else if (interaction_type === 'user_question') {
+      userMessage = userMessage || 'Användaren har en fråga men inget specifikt meddelande skickades';
+    } else if (interaction_type === 'celebration') {
+      userMessage = `Fira användarens framsteg: ${context || 'allmän uppmuntran'}`;
+    } else if (interaction_type === 'motivation') {
+      userMessage = `Ge motivation till användaren: ${context || 'allmän motivation'}`;
+    }
+    
+    // Ensure we always have a message
+    if (!userMessage) {
+      userMessage = 'Hej Stefan! Hur mår du idag?';
     }
 
     // Call OpenAI with enhanced context including memory injection

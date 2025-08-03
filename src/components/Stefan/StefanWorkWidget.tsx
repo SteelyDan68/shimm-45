@@ -8,6 +8,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStefanContext } from '@/providers/StefanContextProvider';
 import { useStefanPersonality } from '@/hooks/useStefanPersonality';
+import { useUserJourney } from '@/hooks/useUserJourney';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useTasks } from '@/hooks/useTasks';
 import { 
   MessageCircle, 
   ChevronUp, 
@@ -21,12 +24,14 @@ import {
   HelpCircle,
   TrendingUp,
   Zap,
-  X
+  X,
+  CheckCircle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 export const StefanWorkWidget = () => {
+  const { user } = useAuth();
   const {
     showWidget,
     setShowWidget,
@@ -39,6 +44,9 @@ export const StefanWorkWidget = () => {
   } = useStefanContext();
   
   const { recentInteractions, getCurrentPersonaInfo, loading } = useStefanPersonality();
+  const { journeyState } = useUserJourney();
+  const { tasks, loading: tasksLoading } = useTasks();
+  
   const [isExpanded, setIsExpanded] = useState(false);
   const [questionText, setQuestionText] = useState('');
   const [showQuestionInput, setShowQuestionInput] = useState(false);
@@ -218,6 +226,40 @@ export const StefanWorkWidget = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Journey Context Card */}
+              {journeyState && (
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-blue-800 mb-2">
+                    <Target className="h-4 w-4" />
+                    <span className="text-xs font-medium">Din resa</span>
+                  </div>
+                  <div className="space-y-1 text-xs text-blue-700">
+                    <p>Fas: <span className="font-medium">{journeyState.current_phase}</span></p>
+                    <p>Framsteg: <span className="font-medium">{journeyState.journey_progress}%</span></p>
+                    {journeyState.next_recommended_assessment && (
+                      <p>Nästa: <span className="font-medium">{journeyState.next_recommended_assessment}</span></p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Task Context Card */}
+              {tasks && !tasksLoading && (
+                <div className="bg-gray-50 border border-gray-200 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-gray-800 mb-2">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-xs font-medium">Uppgifter idag</span>
+                  </div>
+                  <div className="space-y-1 text-xs text-gray-700">
+                    <p>Aktiva: <span className="font-medium">{tasks.filter(t => t.status === 'planned' || t.status === 'in_progress').length}</span></p>
+                    <p>Klara: <span className="font-medium">{tasks.filter(t => t.status === 'completed').length}</span></p>
+                    {tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length > 0 && (
+                      <p className="text-red-600">Hög prioritet: <span className="font-medium">{tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length}</span></p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Struggling Task Alert */}
               {userActivity.strugglingTasks.length > 0 && (
