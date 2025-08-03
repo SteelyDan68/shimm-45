@@ -49,7 +49,8 @@ export const ConversationList = ({
     if (!user) return;
 
     try {
-      console.log('Building conversations for user:', user.id, 'roles:', { hasCoach: hasRole('coach'), hasClient: hasRole('client') });
+      console.log('🔍 Building conversations for user:', user.id);
+      console.log('🔍 User roles:', { hasCoach: hasRole('coach'), hasClient: hasRole('client'), hasAdmin: hasRole('admin') });
       
       // Group messages by conversation partner, but only allow authorized conversations
       const conversationMap = new Map<string, Message[]>();
@@ -57,13 +58,16 @@ export const ConversationList = ({
       // For clients - automatically add their coach even if no messages yet
       if (hasRole('client')) {
         const userCoach = getCurrentUserCoach();
-        console.log('Client coach relationship:', userCoach);
+        console.log('🔍 Client coach relationship:', userCoach);
         
         if (userCoach?.coach_id) {
+          console.log('✅ Adding coach to conversation list:', userCoach.coach_id);
           // Initialize conversation with coach even if no messages
           if (!conversationMap.has(userCoach.coach_id)) {
             conversationMap.set(userCoach.coach_id, []);
           }
+        } else {
+          console.warn('❌ No coach found for client:', user.id);
         }
       }
       
@@ -200,8 +204,16 @@ export const ConversationList = ({
   if (loading) {
     return (
       <div className="p-4">
+        <div className="text-center mb-4">
+          <p className="text-sm text-muted-foreground">Laddar konversationer...</p>
+          {hasRole('client') && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Hämtar din coach-relation...
+            </p>
+          )}
+        </div>
         <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <div key={i} className="flex items-center gap-3 p-3">
               <div className="w-12 h-12 bg-muted rounded-full animate-pulse" />
               <div className="flex-1 space-y-2">
@@ -243,7 +255,19 @@ export const ConversationList = ({
         <div className="p-2">
           {filteredConversations.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              {searchQuery ? 'Inga konversationer hittades' : hasRole('client') ? 'Din coach kommer att visas här när relationen är konfigurerad' : 'Inga konversationer ännu'}
+              {searchQuery ? 
+                'Inga konversationer hittades' : 
+                hasRole('client') ? 
+                  'Din coach kommer att visas här. Kontakta admin om ingen coach syns.' : 
+                  'Inga konversationer ännu'
+              }
+              {hasRole('client') && !searchQuery && (
+                <div className="mt-4 text-xs">
+                  <p>Debug info:</p>
+                  <p>User ID: {user?.id}</p>
+                  <p>Roles: {hasRole('coach') ? 'coach' : ''} {hasRole('client') ? 'client' : ''}</p>
+                </div>
+              )}
             </div>
           ) : (
             filteredConversations.map((conversation) => (
