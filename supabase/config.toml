@@ -74,6 +74,9 @@ verify_jwt = true
 [functions.unified-ai-orchestrator]
 verify_jwt = true
 
+[functions.generate-prd-document]
+verify_jwt = false
+
 [edge_runtime]
 policy = "per_worker"
 inspector_port = 8083
