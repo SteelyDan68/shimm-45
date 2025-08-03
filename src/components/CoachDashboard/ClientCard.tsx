@@ -75,7 +75,7 @@ export function ClientCard({ client }: ClientCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer group">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer group" onClick={handleViewClient}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div>
