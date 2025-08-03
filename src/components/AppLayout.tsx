@@ -20,7 +20,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   }
 
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
+    <SidebarProvider defaultOpen={!isMobile} open={undefined}>
       <div className="min-h-screen flex w-full bg-background">
         {/* Sidebar - Desktop Navigation */}
         <AppSidebar />

@@ -33,8 +33,8 @@ export function TopNavigation() {
   return (
     <header className="h-16 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-40">
       <div className="flex h-full items-center gap-4 px-4">
-        {/* Sidebar Toggle */}
-        <SidebarTrigger className="h-8 w-8" />
+        {/* Sidebar Toggle - Ensure it's properly contained */}
+        <SidebarTrigger className="h-8 w-8 flex-shrink-0" />
         
         {/* Logo - Hidden on mobile when sidebar is open */}
         <div className={`flex items-center ${isMobile && sidebarOpen ? 'hidden' : ''}`}>

@@ -69,7 +69,7 @@ export function AppSidebar() {
     <Sidebar 
       variant="sidebar" 
       collapsible="icon"
-      className="border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30"
+      className="border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 z-30"
     >
       <SidebarContent className="overflow-y-auto">
         {/* Dynamic Navigation Groups */}
