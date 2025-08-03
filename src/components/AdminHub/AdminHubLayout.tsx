@@ -8,7 +8,6 @@ import {
   BarChart3, 
   Brain, 
   Settings,
-  Menu,
   Search,
   Bell,
   Zap
@@ -128,7 +127,8 @@ function AdminHeader() {
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center gap-4 pl-6 pr-6">
+      <div className="flex h-16 items-center gap-4 pl-2 pr-6">
+        <SidebarTrigger className="ml-0" />
         
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold">Admin Hub</h1>
