@@ -32,8 +32,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 export const StefanWorkWidget = () => {
-  console.log('🤖 StefanWorkWidget: Component rendering');
-  
   const { user } = useAuth();
   const {
     showWidget,
@@ -45,13 +43,6 @@ export const StefanWorkWidget = () => {
     requestMotivation,
     isAvailable
   } = useStefanContext();
-  
-  console.log('🤖 StefanWorkWidget: Context values', {
-    showWidget,
-    currentPage,
-    isAvailable,
-    userExists: !!user
-  });
   
   const { recentInteractions, getCurrentPersonaInfo, loading } = useStefanPersonality();
   const { journeyState } = useUserJourney();
@@ -153,10 +144,7 @@ export const StefanWorkWidget = () => {
     setIsExpanded(true);
   };
 
-  console.log('🤖 StefanWorkWidget: Render check', { isAvailable, showWidget, shouldRender: isAvailable && showWidget });
-  
   if (!showWidget) {
-    console.log('🤖 StefanWorkWidget: Widget hidden - showWidget is false');
     return null;
   }
 

@@ -23,21 +23,12 @@ const getFallbackMessage = (persona: string, context: string, interactionType: s
 };
 
 export const useStefanPersonality = () => {
-  console.log('🤖 useStefanPersonality: Hook initializing');
-  
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [currentPersona, setCurrentPersona] = useState<string>('mentor');
   const [recentInteractions, setRecentInteractions] = useState<StefanInteraction[]>([]);
   const [journeyState, setJourneyState] = useState<UserJourneyState | null>(null);
-
-  console.log('🤖 useStefanPersonality: State', {
-    loading,
-    currentPersona,
-    recentInteractionsCount: recentInteractions.length,
-    userExists: !!user
-  });
 
   // Load user's journey state and recent Stefan interactions
   const loadUserContext = useCallback(async () => {

@@ -60,12 +60,10 @@ export const StefanContextProvider = ({ children }: StefanContextProviderProps) 
   useEffect(() => {
     const path = window.location.pathname;
     setCurrentPage(path);
-    console.log('🤖 StefanContextProvider: Page changed to', path);
     
     // Auto-show Stefan widget on relevant pages
     const workPages = ['/tasks', '/calendar', '/client-dashboard'];
     const shouldShow = workPages.some(page => path.includes(page));
-    console.log('🤖 StefanContextProvider: Should show widget?', shouldShow, 'for path', path);
     setShowWidget(shouldShow);
   }, [window.location.pathname]);
 
