@@ -303,10 +303,10 @@ export const useTasks = (clientId?: string) => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && clientId) {
       fetchTasks();
     }
-  }, [clientId, filters, user]);
+  }, [clientId, user?.id]); // Remove filters dependency to prevent excessive re-fetching
 
   return {
     tasks,

@@ -66,18 +66,6 @@ export const useAnalyticsTracking = () => {
     }
   }, []);
 
-  // Flush analytics buffer periodically
-  useEffect(() => {
-    const flushInterval = setInterval(() => {
-      flushAnalyticsBuffer();
-    }, 10000); // Flush every 10 seconds
-
-    return () => {
-      clearInterval(flushInterval);
-      flushAnalyticsBuffer(); // Flush on unmount
-    };
-  }, []);
-
   // Flush analytics buffer to Supabase
   const flushAnalyticsBuffer = useCallback(async () => {
     if (interactionBufferRef.current.length === 0) return;
@@ -117,8 +105,30 @@ export const useAnalyticsTracking = () => {
     }
   }, [user?.id]);
 
-  // Track generic analytics event
+  // Flush analytics buffer periodically - REDUCED FREQUENCY
+  useEffect(() => {
+    const flushInterval = setInterval(() => {
+      if (interactionBufferRef.current.length > 0) {
+        flushAnalyticsBuffer();
+      }
+    }, 30000); // Flush every 30 seconds instead of 10
+
+    return () => {
+      clearInterval(flushInterval);
+      if (interactionBufferRef.current.length > 0) {
+        flushAnalyticsBuffer(); // Flush on unmount
+      }
+    };
+  }, [flushAnalyticsBuffer]);
+
+  // Track generic analytics event - THROTTLED
   const trackEvent = useCallback((event: AnalyticsEvent, properties: Record<string, any> = {}) => {
+    // Throttle non-critical events
+    if (!['error_occurred', 'assessment_completed'].includes(event) && 
+        interactionBufferRef.current.length > 50) {
+      return; // Skip if buffer is too full
+    }
+
     const eventData: AnalyticsEventData = {
       event,
       properties: {
@@ -130,12 +140,12 @@ export const useAnalyticsTracking = () => {
 
     interactionBufferRef.current.push(eventData);
 
-    // Flush immediately for critical events
-    if (['error_occurred', 'assessment_completed', 'ai_interaction'].includes(event)) {
+    // Flush immediately for critical events only
+    if (['error_occurred', 'assessment_completed'].includes(event)) {
       if (flushTimeoutRef.current) {
         clearTimeout(flushTimeoutRef.current);
       }
-      flushTimeoutRef.current = setTimeout(flushAnalyticsBuffer, 1000);
+      flushTimeoutRef.current = setTimeout(flushAnalyticsBuffer, 2000);
     }
   }, [flushAnalyticsBuffer]);
 

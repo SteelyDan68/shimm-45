@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useRoleCache } from '@/hooks/useRoleCache';
 import { usePillarOrchestration } from '@/hooks/usePillarOrchestration';
 import { useTasks } from '@/hooks/useTasks';
 import { useNavigate } from 'react-router-dom';
@@ -22,11 +23,12 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
   className = ""
 }) => {
   const { user } = useAuth();
+  const { isClient } = useRoleCache(); // Use cached role check
   const navigate = useNavigate();
   const [showPillarJourney, setShowPillarJourney] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const { tasks, loading: tasksLoading } = useTasks();
+  const { tasks, loading: tasksLoading } = useTasks(isClient ? user?.id : undefined);
   
   const {
     loading,
@@ -37,9 +39,11 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
     refreshProgress
   } = usePillarOrchestration();
 
-  // Load calendar events
+  // Load calendar events with memoization
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
+    
+    let isMounted = true;
     
     const loadCalendarEvents = async () => {
       try {
@@ -52,15 +56,22 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
           .limit(5);
 
         if (error) throw error;
-        setCalendarEvents(events || []);
-        setUpcomingEvents(events?.slice(0, 3) || []);
+        
+        if (isMounted) {
+          setCalendarEvents(events || []);
+          setUpcomingEvents(events?.slice(0, 3) || []);
+        }
       } catch (error) {
         console.error('Error loading calendar events:', error);
       }
     };
 
     loadCalendarEvents();
-  }, [user]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]); // Only depend on user.id
 
   // Refresh data när komponenten visas igen
   const handleShowPillarJourney = () => {
