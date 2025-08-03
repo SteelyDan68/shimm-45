@@ -183,8 +183,15 @@ INSTRUKTIONER:
       userMessage = 'Hej Stefan! Hur mår du idag?';
     }
 
-    // Call OpenAI with enhanced context including memory injection
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call OpenAI with enhanced context including memory injection and timeout
+    console.log('Making request to OpenAI API...');
+    
+    // Create timeout promise for OpenAI request
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('OpenAI API timeout after 25 seconds')), 25000)
+    );
+    
+    const openAIPromise = fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
@@ -211,13 +218,22 @@ INSTRUKTIONER:
       }),
     });
 
+    const response = await Promise.race([openAIPromise, timeoutPromise]);
+
     if (!response.ok) {
       const error = await response.text();
+      console.error('OpenAI API error:', error);
       throw new Error(`OpenAI API error: ${error}`);
     }
 
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
+
+    if (!aiResponse) {
+      throw new Error('No response content from OpenAI');
+    }
+
+    console.log('OpenAI response received successfully');
 
     return new Response(JSON.stringify({ 
       message: aiResponse,
@@ -232,8 +248,14 @@ INSTRUKTIONER:
 
   } catch (error) {
     console.error('Error in stefan-ai-chat function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    
+    // Return a fallback message if AI fails
+    return new Response(JSON.stringify({ 
+      message: "Hej! Stefan här. Jag har några tekniska utmaningar just nu, men jag är här för dig. Kan du formulera om din fråga så försöker jag igen?",
+      error: error.message,
+      fallback: true
+    }), {
+      status: 200, // Return 200 with fallback message instead of 500
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
