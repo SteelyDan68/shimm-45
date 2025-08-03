@@ -86,16 +86,17 @@ export const useAnalyticsTracking = () => {
     interactionBufferRef.current = [];
 
     try {
-      const { error } = await supabase
-        .from('analytics_events')
-        .insert(events.map(event => ({
+      // Using direct database insert to avoid types issues
+      const { error } = await supabase.rpc('insert_analytics_events', {
+        events_data: events.map(event => ({
           ...event,
           user_id: user?.id || null,
           session_id: sessionIdRef.current,
           timestamp: event.timestamp || new Date().toISOString(),
           page_url: window.location.href,
           user_agent: navigator.userAgent
-        })));
+        }))
+      });
 
       if (error) {
         console.error('Analytics flush error:', error);
