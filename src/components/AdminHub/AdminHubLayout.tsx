@@ -17,6 +17,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { 
   Sidebar, 
   SidebarContent, 
@@ -124,7 +125,15 @@ function AdminSidebar() {
       : "hover:bg-muted/50";
 
   return (
-    <Sidebar className={collapsed ? "w-16" : "w-64"}>
+    <Sidebar 
+      className={cn(
+        "shrink-0 border-r",
+        collapsed ? "w-16" : "w-64"
+      )}
+      style={{ 
+        "--sidebar-width": collapsed ? "4rem" : "16rem" 
+      } as React.CSSProperties}
+    >
       <SidebarContent>
         {ADMIN_NAVIGATION.filter(hasAccess).map((group) => (
           <SidebarGroup key={group.title}>
