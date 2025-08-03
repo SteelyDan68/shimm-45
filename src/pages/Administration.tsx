@@ -22,7 +22,7 @@ import {
   Key,
   Activity
 } from "lucide-react";
-import { PRDAdminDashboard } from '@/components/PRD/PRDAdminDashboard';
+import { PRDDashboard } from '@/components/Admin/PRDDashboard';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { CentralUserManager } from "@/components/UserAdministration/CentralUserManager";
@@ -448,7 +448,7 @@ export function Administration() {
 
           {/* PRD SYSTEM TAB - ENDAST för superadmin och admin */}
           <TabsContent value="prd" className="space-y-6 mt-12">
-            <PRDAdminDashboard />
+            <PRDDashboard />
           </TabsContent>
 
         </Tabs>
