@@ -317,7 +317,7 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
                   {(isProcessing || aiLoading || tasksLoading) ? (
                     <>
                       <Zap className="h-4 w-4 animate-spin" />
-                      Bearbetar...
+                      Bearbetar... (Debug: proc:{isProcessing ? 'Y' : 'N'} ai:{aiLoading ? 'Y' : 'N'} tasks:{tasksLoading ? 'Y' : 'N'})
                     </>
                   ) : (
                     <>
