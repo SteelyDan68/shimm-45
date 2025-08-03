@@ -2789,69 +2789,6 @@ export type Database = {
       }
     }
     Views: {
-      client_data_cache_legacy: {
-        Row: {
-          author: string | null
-          client_id: string | null
-          competitive_insights: Json | null
-          created_at: string | null
-          data: Json | null
-          data_quality_score: number | null
-          data_type: string | null
-          expires_at: string | null
-          id: string | null
-          image: string | null
-          last_sentiment_analysis: Json | null
-          metadata: Json | null
-          platform: string | null
-          snippet: string | null
-          source: string | null
-          title: string | null
-          url: string | null
-          user_id: string | null
-        }
-        Insert: {
-          author?: string | null
-          client_id?: string | null
-          competitive_insights?: Json | null
-          created_at?: string | null
-          data?: Json | null
-          data_quality_score?: number | null
-          data_type?: string | null
-          expires_at?: string | null
-          id?: string | null
-          image?: string | null
-          last_sentiment_analysis?: Json | null
-          metadata?: Json | null
-          platform?: string | null
-          snippet?: string | null
-          source?: string | null
-          title?: string | null
-          url?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          author?: string | null
-          client_id?: string | null
-          competitive_insights?: Json | null
-          created_at?: string | null
-          data?: Json | null
-          data_quality_score?: number | null
-          data_type?: string | null
-          expires_at?: string | null
-          id?: string | null
-          image?: string | null
-          last_sentiment_analysis?: Json | null
-          metadata?: Json | null
-          platform?: string | null
-          snippet?: string | null
-          source?: string | null
-          title?: string | null
-          url?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       error_statistics: {
         Row: {
           affected_users: number | null
@@ -2860,21 +2797,6 @@ export type Database = {
           error_date: string | null
           severity: string | null
           unique_errors: number | null
-        }
-        Relationships: []
-      }
-      user_context_view: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          email: string | null
-          first_name: string | null
-          last_name: string | null
-          permission_level: number | null
-          primary_role: string | null
-          roles: Database["public"]["Enums"]["app_role"][] | null
-          updated_at: string | null
-          user_id: string | null
         }
         Relationships: []
       }
