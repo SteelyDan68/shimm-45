@@ -1576,6 +1576,164 @@ export type Database = {
           },
         ]
       }
+      notification_delivery_log: {
+        Row: {
+          attempted_at: string
+          created_at: string
+          delivered_at: string | null
+          delivery_metadata: Json | null
+          delivery_method: string
+          error_message: string | null
+          id: string
+          notification_id: string
+          status: string
+        }
+        Insert: {
+          attempted_at?: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_metadata?: Json | null
+          delivery_method: string
+          error_message?: string | null
+          id?: string
+          notification_id: string
+          status: string
+        }
+        Update: {
+          attempted_at?: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_metadata?: Json | null
+          delivery_method?: string
+          error_message?: string | null
+          id?: string
+          notification_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_delivery_log_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          assessment_deadline_reminders: boolean
+          browser_notifications: boolean
+          coaching_milestone_alerts: boolean
+          coaching_session_reminders: boolean
+          created_at: string
+          deadline_reminder_hours: number
+          digest_frequency: string
+          email_notifications: boolean
+          id: string
+          internal_notifications: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          reminder_time: string
+          updated_at: string
+          user_id: string
+          weekend_notifications: boolean
+        }
+        Insert: {
+          assessment_deadline_reminders?: boolean
+          browser_notifications?: boolean
+          coaching_milestone_alerts?: boolean
+          coaching_session_reminders?: boolean
+          created_at?: string
+          deadline_reminder_hours?: number
+          digest_frequency?: string
+          email_notifications?: boolean
+          id?: string
+          internal_notifications?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          reminder_time?: string
+          updated_at?: string
+          user_id: string
+          weekend_notifications?: boolean
+        }
+        Update: {
+          assessment_deadline_reminders?: boolean
+          browser_notifications?: boolean
+          coaching_milestone_alerts?: boolean
+          coaching_session_reminders?: boolean
+          created_at?: string
+          deadline_reminder_hours?: number
+          digest_frequency?: string
+          email_notifications?: boolean
+          id?: string
+          internal_notifications?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          reminder_time?: string
+          updated_at?: string
+          user_id?: string
+          weekend_notifications?: boolean
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          browser_sent: boolean
+          category: string
+          content: string
+          created_at: string
+          email_sent: boolean
+          id: string
+          is_read: boolean
+          metadata: Json | null
+          notification_type: string
+          priority: string
+          read_at: string | null
+          scheduled_for: string | null
+          sent_at: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          browser_sent?: boolean
+          category?: string
+          content: string
+          created_at?: string
+          email_sent?: boolean
+          id?: string
+          is_read?: boolean
+          metadata?: Json | null
+          notification_type: string
+          priority?: string
+          read_at?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          browser_sent?: boolean
+          category?: string
+          content?: string
+          created_at?: string
+          email_sent?: boolean
+          id?: string
+          is_read?: boolean
+          metadata?: Json | null
+          notification_type?: string
+          priority?: string
+          read_at?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       organization_members: {
         Row: {
           id: string

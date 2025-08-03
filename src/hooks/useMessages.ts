@@ -89,63 +89,42 @@ export const useMessages = () => {
     }
   };
 
-  // Send message
+  // Send message with enhanced notification system
   const sendMessage = async (receiverId: string, content: string, subject?: string, parentMessageId?: string) => {
     if (!user) return false;
 
     try {
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          sender_id: user.id,
-          receiver_id: receiverId,
+      // Use the new enhanced send-realtime-message function
+      const { data, error } = await supabase.functions.invoke('send-realtime-message', {
+        body: {
+          receiverId,
           content,
           subject,
-          parent_message_id: parentMessageId
-        });
+          messageType: 'text'
+        }
+      });
 
       if (error) throw error;
 
-      // Get receiver info to check if they want email notifications
-      const { data: receiverProfile } = await supabase
-        .from('profiles')
-        .select('email, first_name, last_name')
-        .eq('id', receiverId)
-        .single();
-
-      const { data: receiverPrefs } = await supabase
-        .from('message_preferences')
-        .select('email_notifications')
-        .eq('user_id', receiverId)
-        .single();
-
-      // Send email notification if user has opted in (default is true)
-      if (receiverProfile?.email && (receiverPrefs?.email_notifications !== false)) {
-        // Get sender name
-        const { data: senderProfile } = await supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', user.id)
-          .single();
-
-        const senderName = senderProfile 
-          ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() || user.email
-          : user.email;
-
-        // Send notification email via edge function
-        try {
-          await supabase.functions.invoke('send-message-notification', {
-            body: {
-              receiverEmail: receiverProfile.email,
-              senderName,
-              subject,
-              messageContent: content,
+      // Send enhanced notification for message received
+      try {
+        await supabase.functions.invoke('send-enhanced-notification', {
+          body: {
+            userId: receiverId,
+            type: 'message_received',
+            title: subject ? `Nytt meddelande: ${subject}` : 'Du har fått ett nytt meddelande',
+            content: content.length > 100 ? content.substring(0, 100) + '...' : content,
+            priority: 'normal',
+            metadata: {
+              sender_id: user.id,
+              message_type: 'text',
+              has_subject: !!subject
             }
-          });
-        } catch (emailError) {
-          console.error('Failed to send email notification:', emailError);
-          // Don't fail the message sending if email fails
-        }
+          }
+        });
+      } catch (notificationError) {
+        console.error('Failed to send notification:', notificationError);
+        // Don't fail the message sending if notification fails
       }
 
       toast({
@@ -158,7 +137,7 @@ export const useMessages = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: "Fel",
+        title: "Fel", 
         description: "Kunde inte skicka meddelandet",
         variant: "destructive"
       });
