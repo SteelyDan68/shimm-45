@@ -174,6 +174,7 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
           actionText="Börja nu - det går snabbt! 🚀"
           onClick={() => setShowForm(true)}
           size="lg"
+          componentName="WelcomeAssessmentCard"
         />
       </CardContent>
     </Card>

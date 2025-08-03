@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useNavigation } from '@/hooks/useNavigation';
 import { ArrowRight, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { validateAndExecuteNavigation } from '@/utils/navigationValidator';
 
 interface ActionPromptProps {
   title: string;
@@ -17,6 +18,7 @@ interface ActionPromptProps {
   className?: string;
   disabled?: boolean;
   loading?: boolean;
+  componentName?: string; // For navigation validation
 }
 
 export const ActionPrompt: React.FC<ActionPromptProps> = ({
@@ -30,11 +32,25 @@ export const ActionPrompt: React.FC<ActionPromptProps> = ({
   icon,
   className,
   disabled = false,
-  loading = false
+  loading = false,
+  componentName = 'UnknownComponent'
 }) => {
   const { navigateTo } = useNavigation();
 
   const handleAction = () => {
+    // Validate navigation before executing
+    const isValid = validateAndExecuteNavigation(
+      componentName,
+      actionText,
+      targetRoute,
+      onClick
+    );
+    
+    if (!isValid) {
+      console.error(`🚨 Navigation blocked for safety in ${componentName}`);
+      return;
+    }
+    
     if (onClick) {
       onClick();
     } else if (targetRoute) {

@@ -395,7 +395,10 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
                   );
                   if (confirmed) {
                     await clearDraftState();
-                    window.location.href = '/client-dashboard';
+                    // Call onComplete with null to signal cancellation
+                    if (onComplete) {
+                      onComplete(null);
+                    }
                   }
                 }}
                 className="flex items-center gap-2"
