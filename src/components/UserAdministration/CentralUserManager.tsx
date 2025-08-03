@@ -95,11 +95,15 @@ export function CentralUserManager() {
     isSuperAdmin
   } = useUnifiedPermissions();
 
-  // Master permission check - FIX: Direktkontroll utan useUnifiedPermissions
+  // SUPERADMIN GOD MODE - NEVER DENY ACCESS TO SUPERADMIN
   const hasUserManagementAccess = useMemo(() => {
+    // SUPERADMIN HAS ABSOLUTE GOD MODE ACCESS TO EVERYTHING
+    if (isSuperAdmin) return true;
+    
+    // For other roles, check normal permissions
     const currentRoles = roles || [];
-    return currentRoles.includes('superadmin') || currentRoles.includes('admin');
-  }, [roles]);
+    return currentRoles.includes('admin') || canManageUsers;
+  }, [roles, isSuperAdmin, canManageUsers]);
 
   /**
    * ========================================================================
@@ -542,6 +546,7 @@ export function CentralUserManager() {
    * ========================================================================
    */
   
+  // CRITICAL: SUPERADMIN GOD MODE - NEVER SHOW ACCESS DENIED TO SUPERADMIN
   if (!hasUserManagementAccess) {
     return (
       <Card>
@@ -549,7 +554,17 @@ export function CentralUserManager() {
           <div className="text-center space-y-4">
             <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Ingen behörighet</h3>
-            <p className="text-muted-foreground">Du har inte behörighet att hantera användare.</p>
+            <p className="text-muted-foreground">
+              {isSuperAdmin 
+                ? "KRITISKT FEL: Superadmin ska ALDRIG nekas åtkomst! Kontakta systemadministratör."
+                : "Du har inte behörighet att hantera användare."
+              }
+            </p>
+            {isSuperAdmin && (
+              <p className="text-destructive font-bold">
+                🚨 GOD MODE FAILURE - Detta ska ALDRIG hända för superadmin!
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

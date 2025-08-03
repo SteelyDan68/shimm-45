@@ -2890,6 +2890,10 @@ export type Database = {
         Args: { _user_id: string; _organization_id: string }
         Returns: boolean
       }
+      is_superadmin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       ivfflat_bit_support: {
         Args: { "": unknown }
         Returns: unknown
@@ -2925,6 +2929,10 @@ export type Database = {
       sparsevec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      superadmin_god_mode: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
       user_has_any_role: {
         Args: { _user_id: string }

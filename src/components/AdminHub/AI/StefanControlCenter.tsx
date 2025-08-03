@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStefanKnowledgeBase } from '@/hooks/useStefanKnowledgeBase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +42,7 @@ interface StefanInteraction {
 }
 
 export function StefanControlCenter() {
+  const { hasRole } = useAuth();
   const { canViewSystemAnalytics, canManageSettings } = usePermissions();
   const { analyzedData, loading } = useStefanKnowledgeBase();
   const [selectedTab, setSelectedTab] = useState('overview');
@@ -357,7 +359,10 @@ export function StefanControlCenter() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  Du har inte behörighet att hantera AI-träning
+                  {hasRole('superadmin') 
+                    ? "🚨 SUPERADMIN GOD MODE: Du ska ha full åtkomst här - kontakta utvecklare"
+                    : "Du har inte behörighet att hantera AI-träning"
+                  }
                 </div>
               )}
             </CardContent>

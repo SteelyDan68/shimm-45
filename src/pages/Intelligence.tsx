@@ -110,7 +110,8 @@ export const Intelligence = () => {
         return;
       }
 
-      if (!profileData) {
+      // SUPERADMIN GOD MODE: Let superadmin access any user, even if not found initially
+      if (!profileData && !hasRole('superadmin')) {
         toast({
           title: "Användare hittades inte",
           description: "Du har inte behörighet att se denna användare",
@@ -170,10 +171,20 @@ export const Intelligence = () => {
     );
   }
 
+  // SUPERADMIN GOD MODE: Display special message for superadmin if user not found
   if (!userProfile) {
     return (
       <div className="p-6">
-        <div className="text-center py-8">Användare hittades inte</div>
+        <div className="text-center py-8">
+          {hasRole('superadmin') ? (
+            <>
+              <h2 className="text-xl font-semibold mb-2">⚡ Superadmin Åtkomst</h2>
+              <p className="text-muted-foreground">Som superadmin har du full åtkomst, men denna användare finns inte i systemet.</p>
+            </>
+          ) : (
+            'Användare hittades inte'
+          )}
+        </div>
       </div>
     );
   }

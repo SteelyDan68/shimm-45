@@ -275,6 +275,7 @@ export const GDPRAdminPanel = () => {
     setIsDialogOpen(true);
   };
 
+  // SUPERADMIN GOD MODE: Never deny access to superadmin
   if (!isAdmin) {
     return (
       <Card>
@@ -283,6 +284,7 @@ export const GDPRAdminPanel = () => {
             <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Ingen behörighet</h3>
             <p className="text-muted-foreground">Du har inte behörighet att hantera GDPR-förfrågningar.</p>
+            {/* Note: Superadmin check is already in isAdmin from useUnifiedPermissions */}
           </div>
         </CardContent>
       </Card>
