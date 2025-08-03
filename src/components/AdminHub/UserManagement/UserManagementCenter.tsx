@@ -129,7 +129,7 @@ export function UserManagementCenter() {
         </Card>
       </div>
 
-      {/* Search and Filter Bar */}
+      {/* Streamlined User Management Interface */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -139,24 +139,10 @@ export function UserManagementCenter() {
                 Hantera användare, roller och relationer
               </CardDescription>
             </div>
-            
-            <div className="flex gap-2">
-              {canCreateUsers && (
-                <Button size="sm" variant="outline">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Skapa användare
-                </Button>
-              )}
-              {canInviteUsers && (
-                <Button size="sm" variant="outline">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Bjud in
-                </Button>
-              )}
-            </div>
           </div>
         </CardHeader>
         <CardContent>
+          {/* Search and Filter Bar */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -185,19 +171,44 @@ export function UserManagementCenter() {
             </div>
           </div>
 
-          <Separator className="mb-6" />
-
-          {/* User Management Tabs */}
+          {/* Simplified Action Tabs with Clear CTAs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="manage">Hantera användare</TabsTrigger>
-              {canCreateUsers && (
-                <TabsTrigger value="create">Skapa användare</TabsTrigger>
-              )}
-              {canInviteUsers && (
-                <TabsTrigger value="invite">Bjud in användare</TabsTrigger>
-              )}
-            </TabsList>
+            <div className="flex items-center justify-between mb-4">
+              <TabsList className="grid grid-cols-3 w-auto">
+                <TabsTrigger value="manage" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Hantera
+                </TabsTrigger>
+                {canCreateUsers && (
+                  <TabsTrigger value="create" className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Skapa
+                  </TabsTrigger>
+                )}
+                {canInviteUsers && (
+                  <TabsTrigger value="invite" className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Bjud in
+                  </TabsTrigger>
+                )}
+              </TabsList>
+              
+              {/* Quick Action Buttons */}
+              <div className="flex gap-2">
+                {canCreateUsers && activeTab !== 'create' && (
+                  <Button size="sm" onClick={() => setActiveTab('create')}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Ny användare
+                  </Button>
+                )}
+                {canInviteUsers && activeTab !== 'invite' && (
+                  <Button size="sm" variant="outline" onClick={() => setActiveTab('invite')}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Bjud in via e-post
+                  </Button>
+                )}
+              </div>
+            </div>
 
             <TabsContent value="manage" className="space-y-4">
               <UserManagementTabs />
@@ -209,7 +220,7 @@ export function UserManagementCenter() {
                   <CardHeader>
                     <CardTitle>Skapa ny användare</CardTitle>
                     <CardDescription>
-                      Skapa en användare manuellt med fullständig profilinformation
+                      Registrera en användare direkt i systemet med fullständig profilinformation
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -225,7 +236,7 @@ export function UserManagementCenter() {
                   <CardHeader>
                     <CardTitle>Bjud in användare</CardTitle>
                     <CardDescription>
-                      Skicka e-postinbjudningar till nya användare
+                      Skicka säkra e-postinbjudningar till nya användare som skapar sitt eget konto
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
