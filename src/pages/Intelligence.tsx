@@ -17,7 +17,7 @@ import {
   Eye,
   BarChart3
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useClientData } from '@/hooks/useClientData';
 import { supabase } from '@/integrations/supabase/client';

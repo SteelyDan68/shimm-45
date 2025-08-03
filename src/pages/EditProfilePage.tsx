@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import { ExtendedProfileForm } from '@/components/Profile/ExtendedProfileForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

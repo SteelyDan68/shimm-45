@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarView } from '@/components/Calendar/CalendarView';
 

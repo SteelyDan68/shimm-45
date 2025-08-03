@@ -10,7 +10,7 @@ import { ConversationView } from '@/components/Messaging/ConversationView';
 import { ComposeMessage } from '@/components/Messaging/ComposeMessage';
 import { MessagePreferences } from '@/components/Messaging/MessagePreferences';
 import { useMessages } from '@/hooks/useMessages';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 
 export function Messages() {
   const [searchParams, setSearchParams] = useSearchParams();

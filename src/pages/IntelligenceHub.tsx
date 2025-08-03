@@ -20,7 +20,7 @@ import {
 import { IntelligenceSearchPanel } from '@/components/Intelligence/IntelligenceSearchPanel';
 import { IntelligenceProfileView } from '@/components/Intelligence/IntelligenceProfileView';
 import { useIntelligenceHub } from '@/hooks/useIntelligenceHub';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
 export function IntelligenceHubPage() {
