@@ -52,7 +52,7 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
   const { toast } = useToast();
   const navigate = useNavigate();
   const { executeAIRequest, loading: aiLoading } = useAIRequestExecutor();
-  const { createTask, tasks, loading: tasksLoading } = useTasks();
+  const { createTask, tasks, loading: tasksLoading } = useTasks(userId);
   
   // ✅ REAL STATE MANAGEMENT
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
