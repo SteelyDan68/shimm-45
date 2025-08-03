@@ -15,6 +15,7 @@ import { sv } from 'date-fns/locale';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useStefanContext } from '@/providers/StefanContextProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarView } from '@/components/Calendar/CalendarView';
 
@@ -35,6 +36,7 @@ export function CalendarPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { triggerContextualHelp } = useStefanContext();
   
   const action = searchParams.get('action');
   const isScheduling = action === 'schedule';
@@ -90,6 +92,12 @@ export function CalendarPage() {
       toast({
         title: "Möte schemalagt",
         description: "Mötet har schemalagts framgångsrikt",
+      });
+
+      // Trigger Stefan acknowledgment for event creation
+      await triggerContextualHelp('event_scheduled', { 
+        event_title: formData.title,
+        event_date: eventDateTime.toISOString()
       });
 
       navigate('/coach');

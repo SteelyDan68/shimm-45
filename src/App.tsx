@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnalyticsProvider } from '@/components/Analytics/AnalyticsProvider';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UnifiedAuthProvider, useAuth } from "@/providers/UnifiedAuthProvider";
+import { StefanContextProvider } from "@/providers/StefanContextProvider";
 import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
 import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
@@ -15,6 +16,7 @@ import { errorTracker } from "@/utils/productionErrorTracking";
 import { AutoNotificationSystem } from "@/components/Notifications/AutoNotificationSystem";
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
+import { StefanWorkWidget } from "@/components/Stefan/StefanWorkWidget";
 import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
@@ -156,10 +158,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <UnifiedAuthProvider>
-            <AnalyticsProvider>
-               <AppRoutes />
-               <AutoNotificationSystem />
-             </AnalyticsProvider>
+            <StefanContextProvider>
+              <AnalyticsProvider>
+                <AppRoutes />
+                <StefanWorkWidget />
+                <AutoNotificationSystem />
+              </AnalyticsProvider>
+            </StefanContextProvider>
            </UnifiedAuthProvider>
         </BrowserRouter>
       </TooltipProvider>

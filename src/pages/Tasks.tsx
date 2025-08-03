@@ -15,6 +15,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useStefanContext } from '@/providers/StefanContextProvider';
 import { LiveTaskList } from '@/components/Tasks/LiveTaskList';
 
 export function TasksPage() {
@@ -23,6 +24,7 @@ export function TasksPage() {
   const { toast } = useToast();
   const { createTask, loading } = useTasks();
   const { user } = useAuth();
+  const { triggerContextualHelp } = useStefanContext();
   
   const action = searchParams.get('action');
   const isCreating = action === 'create';
@@ -62,6 +64,9 @@ export function TasksPage() {
         title: "Uppgift skapad",
         description: "Uppgiften har tilldelats framgångsrikt",
       });
+
+      // Trigger Stefan celebration for task creation
+      await triggerContextualHelp('task_created', { task_title: formData.title });
 
       navigate('/coach');
     } catch (error) {
