@@ -139,11 +139,12 @@ export const ConversationList = ({
         const coachIds = coachAssignments?.map(r => r.coach_id) || [];
         allowedPartnerIds = new Set(coachIds);
         
-        console.log('🔍 Client: Can message', coachIds.length, 'assigned coaches');
+        console.log('🔍 Client: Can message', coachIds.length, 'assigned coaches:', coachIds);
         
         // Pre-populate coach conversations even if no messages yet
         coachIds.forEach(coachId => {
           conversationMap.set(coachId, []);
+          console.log('🔍 Pre-populating conversation for coach:', coachId);
         });
         
       } else {
