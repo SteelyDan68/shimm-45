@@ -5,7 +5,7 @@ import { AutoBreadcrumbs } from "@/components/Navigation/AutoBreadcrumbs";
 import { MobileContainer } from "@/components/ui/mobile-responsive";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import StefanAIChat from "./StefanAIChat";
+import { EnhancedStefanWidget } from "@/components/Stefan/EnhancedStefanWidget";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -39,8 +39,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           </main>
         </div>
         
-        {/* AI Chat Widget */}
-        <StefanAIChat />
+        {/* Enhanced Stefan AI Widget */}
+        <EnhancedStefanWidget />
       </div>
     </SidebarProvider>
   );

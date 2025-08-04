@@ -1229,6 +1229,54 @@ export type Database = {
         }
         Relationships: []
       }
+      context_insights: {
+        Row: {
+          acted_upon: boolean | null
+          action_taken: string | null
+          confidence_score: number | null
+          created_at: string
+          data_sources: Json
+          description: string
+          generated_at: string
+          id: string
+          insight_type: string
+          metadata: Json | null
+          title: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          acted_upon?: boolean | null
+          action_taken?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          data_sources?: Json
+          description: string
+          generated_at?: string
+          id?: string
+          insight_type: string
+          metadata?: Json | null
+          title: string
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          acted_upon?: boolean | null
+          action_taken?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          data_sources?: Json
+          description?: string
+          generated_at?: string
+          id?: string
+          insight_type?: string
+          metadata?: Json | null
+          title?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           conversation_type: string
@@ -2342,6 +2390,54 @@ export type Database = {
           },
         ]
       }
+      proactive_interventions: {
+        Row: {
+          content: string
+          context_snapshot: Json
+          created_at: string
+          delivered_at: string | null
+          delivery_method: string
+          effectiveness_score: number | null
+          id: string
+          intervention_type: string
+          scheduled_for: string
+          trigger_condition: string
+          updated_at: string
+          user_id: string
+          user_response: string | null
+        }
+        Insert: {
+          content: string
+          context_snapshot?: Json
+          created_at?: string
+          delivered_at?: string | null
+          delivery_method?: string
+          effectiveness_score?: number | null
+          id?: string
+          intervention_type: string
+          scheduled_for?: string
+          trigger_condition: string
+          updated_at?: string
+          user_id: string
+          user_response?: string | null
+        }
+        Update: {
+          content?: string
+          context_snapshot?: Json
+          created_at?: string
+          delivered_at?: string | null
+          delivery_method?: string
+          effectiveness_score?: number | null
+          id?: string
+          intervention_type?: string
+          scheduled_for?: string
+          trigger_condition?: string
+          updated_at?: string
+          user_id?: string
+          user_response?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: Json | null
@@ -2576,33 +2672,48 @@ export type Database = {
       stefan_interactions: {
         Row: {
           ai_analysis: string | null
+          ai_confidence_score: number | null
           context_data: Json | null
           created_at: string
+          emotional_state: string | null
+          followup_at: string | null
           id: string
           interaction_type: string
           message_content: string | null
+          priority_level: number | null
+          requires_followup: boolean | null
           stefan_persona: string
           user_id: string
           user_response: string | null
         }
         Insert: {
           ai_analysis?: string | null
+          ai_confidence_score?: number | null
           context_data?: Json | null
           created_at?: string
+          emotional_state?: string | null
+          followup_at?: string | null
           id?: string
           interaction_type: string
           message_content?: string | null
+          priority_level?: number | null
+          requires_followup?: boolean | null
           stefan_persona?: string
           user_id: string
           user_response?: string | null
         }
         Update: {
           ai_analysis?: string | null
+          ai_confidence_score?: number | null
           context_data?: Json | null
           created_at?: string
+          emotional_state?: string | null
+          followup_at?: string | null
           id?: string
           interaction_type?: string
           message_content?: string | null
+          priority_level?: number | null
+          requires_followup?: boolean | null
           stefan_persona?: string
           user_id?: string
           user_response?: string | null
@@ -2761,6 +2872,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_behavior_patterns: {
+        Row: {
+          first_detected: string
+          id: string
+          is_active: boolean | null
+          last_confirmed: string
+          metadata: Json | null
+          pattern_data: Json
+          pattern_strength: number | null
+          pattern_type: string
+          prediction_accuracy: number | null
+          user_id: string
+        }
+        Insert: {
+          first_detected?: string
+          id?: string
+          is_active?: boolean | null
+          last_confirmed?: string
+          metadata?: Json | null
+          pattern_data?: Json
+          pattern_strength?: number | null
+          pattern_type: string
+          prediction_accuracy?: number | null
+          user_id: string
+        }
+        Update: {
+          first_detected?: string
+          id?: string
+          is_active?: boolean | null
+          last_confirmed?: string
+          metadata?: Json | null
+          pattern_data?: Json
+          pattern_strength?: number | null
+          pattern_type?: string
+          prediction_accuracy?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_coaching_preferences: {
         Row: {
           avoid_topics: Json | null
@@ -2845,6 +2995,42 @@ export type Database = {
           updated_at?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_context_events: {
+        Row: {
+          context_data: Json
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          page_url: string | null
+          session_id: string | null
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          context_data?: Json
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          page_url?: string | null
+          session_id?: string | null
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          context_data?: Json
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          page_url?: string | null
+          session_id?: string | null
+          timestamp?: string
+          user_id?: string
         }
         Relationships: []
       }

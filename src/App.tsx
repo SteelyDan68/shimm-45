@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnalyticsProvider } from '@/components/Analytics/AnalyticsProvider';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UnifiedAuthProvider, useAuth } from "@/providers/UnifiedAuthProvider";
-import { StefanContextProvider } from "@/providers/StefanContextProvider";
+import { EnhancedStefanContextProvider } from "@/providers/EnhancedStefanContextProvider";
 import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
 import { Auth } from "@/pages/Auth";
 import { AppLayout } from "@/components/AppLayout";
@@ -154,12 +154,12 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <UnifiedAuthProvider>
-            <StefanContextProvider>
+            <EnhancedStefanContextProvider>
               <AnalyticsProvider>
                 <AppRoutes />
                 <AutoNotificationSystem />
               </AnalyticsProvider>
-            </StefanContextProvider>
+            </EnhancedStefanContextProvider>
            </UnifiedAuthProvider>
         </BrowserRouter>
       </TooltipProvider>
