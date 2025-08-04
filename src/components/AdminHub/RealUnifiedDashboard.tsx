@@ -26,9 +26,9 @@ import { HelpTooltip } from '@/components/HelpTooltip';
 import { useUnifiedDataLayer } from '@/hooks/useUnifiedDataLayer';
 
 /**
- * REAL UNIFIED DASHBOARD
- * Ersätter ALL mockdata med riktiga databas-metrics
- * Använder useUnifiedDataLayer för att hämta faktisk systemdata
+ * LIVE UNIFIED DASHBOARD
+ * Ersätter ALL mockdata med live databas-metrics
+ * Använder useUnifiedDataLayer för att hämta realtids systemdata
  */
 export function RealUnifiedDashboard() {
   const { user, profile, roles, hasRole } = useAuth();
@@ -51,15 +51,15 @@ export function RealUnifiedDashboard() {
   } = useUnifiedDataLayer();
 
   const getRoleBasedGreeting = () => {
-    if (isSuperAdmin) return "Superadmin Kontrollcenter";
-    if (isAdmin) return "Admin Dashboard"; 
+    if (isSuperAdmin) return "Systemövervakningscentral";
+    if (isAdmin) return "Administrationspanel";
     if (isCoach) return "Coach Översikt";
     return "Dashboard";
   };
 
   const getRoleBasedDescription = () => {
-    if (isSuperAdmin) return "Fullständig systemkontroll med riktiga data";
-    if (isAdmin) return "Användarhantering baserat på faktisk systemdata";
+    if (isSuperAdmin) return "Fullständig systemkontroll med live dataanalys";
+    if (isAdmin) return "Användarhantering med realtidsmetriker";
     if (isCoach) return "Klientöversikt med verkliga framstegsmätningar";
     return "Systemöversikt";
   };
@@ -83,7 +83,7 @@ export function RealUnifiedDashboard() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Laddar riktiga systemdata...</p>
+            <p className="text-muted-foreground">Laddar live systemmetrik...</p>
             <p className="text-sm text-muted-foreground mt-1">
               Hämtar metrics från databas-tabeller
             </p>
@@ -132,9 +132,9 @@ export function RealUnifiedDashboard() {
                     {getRoleBasedGreeting()}
                   </Badge>
                   <Badge variant="outline" className="bg-green-50 text-green-700">
-                    RIKTIGA DATA
+                    LIVE DATA
                   </Badge>
-                  <HelpTooltip content="Dashboard med faktiska systemmetriker från databasen - ingen mockdata!" />
+                  <HelpTooltip content="Dashboard med real-time systemmetriker från databasen" />
                 </CardTitle>
                 <p className="text-muted-foreground">
                   {getRoleBasedDescription()}
@@ -188,8 +188,8 @@ export function RealUnifiedDashboard() {
         <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin-hub/users')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
-              Totala användare (RIKTIGT)
-              <HelpTooltip content="Faktiskt antal användare från profiles-tabellen" />
+              Registrerade användare
+              <HelpTooltip content="Totalt antal användare i systemet" />
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -275,8 +275,8 @@ export function RealUnifiedDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Bedömningsaktivitet
-              <HelpTooltip content="Riktiga metrics från assessment_states och assessment_rounds" />
+              Bedömningsöversikt
+              <HelpTooltip content="Aktuella bedömningar och genomförande" />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -298,8 +298,8 @@ export function RealUnifiedDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-blue-600" />
-              Uppgiftsgenomförande
-              <HelpTooltip content="Verklig statistik från tasks-tabellen" />
+              Uppgiftshantering
+              <HelpTooltip content="Översikt av uppgifter och genomförande" />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -318,8 +318,8 @@ export function RealUnifiedDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-purple-600" />
-              Live Aktivitet
-              <HelpTooltip content="Real-time data från user_journey_tracking" />
+              Användaraktivitet
+              <HelpTooltip content="Real-time användardata" />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -341,9 +341,9 @@ export function RealUnifiedDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-yellow-600" />
-            Live Systemstatus
-            <Badge variant="outline" className="text-xs">
-              Realtid
+            Systemstatus
+            <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+              Real-time
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -371,24 +371,11 @@ export function RealUnifiedDashboard() {
           </div>
           
           <div className="mt-4 text-xs text-center text-muted-foreground">
-            🔴 Live data • Senast uppdaterad: {new Date(realtimeData.lastUpdate).toLocaleTimeString('sv-SE')}
+            📊 Live data • Senast uppdaterad: {new Date(realtimeData.lastUpdate).toLocaleTimeString('sv-SE')}
           </div>
         </CardContent>
       </Card>
 
-      {/* DEBUG INFO FÖR DEVELOPMENT */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="border-dashed">
-          <CardHeader>
-            <CardTitle className="text-sm">🔧 Development Debug Info</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="text-xs bg-muted p-2 rounded overflow-auto">
-              {JSON.stringify(metrics, null, 2)}
-            </pre>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

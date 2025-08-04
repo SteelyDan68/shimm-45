@@ -36,7 +36,7 @@ export function UnifiedAnalytics() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState('overview');
 
-  // Mock data - skulle ersättas med riktig analytics hook
+  // TODO: Integrera med useUnifiedDataLayer för live analytics data
   const metrics: MetricCard[] = [
     {
       title: "Aktiva användare",

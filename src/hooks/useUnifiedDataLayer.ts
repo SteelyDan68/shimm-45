@@ -355,7 +355,7 @@ export const useUnifiedDataLayer = () => {
           console.log('✅ UnifiedDataLayer: Edge Function metrics loaded:', newMetrics);
 
           toast({
-            title: "⚡ Riktiga data laddade (Edge Function)",
+            title: "⚡ Live data laddade (Edge Function)",
             description: `${newMetrics.totalUsers} användare, ${newMetrics.totalCoaches} coaches, ${aggregatedData.systemHealth.healthScore}% hälsa`,
           });
 
@@ -414,7 +414,7 @@ export const useUnifiedDataLayer = () => {
       console.log('✅ UnifiedDataLayer: Direct query metrics loaded:', newMetrics);
 
       toast({
-        title: "Riktiga data laddade (Direct)",
+        title: "Live data laddade (Direct)",
         description: `${newMetrics.totalUsers} användare och ${newMetrics.totalCoaches} coaches`,
       });
 
@@ -423,7 +423,7 @@ export const useUnifiedDataLayer = () => {
       setError(error.message);
       toast({
         title: "Fel vid datahämtning",
-        description: "Kunde inte ladda riktiga systemmetriker",
+        description: "Kunde inte ladda live systemmetriker",
         variant: "destructive"
       });
     } finally {
