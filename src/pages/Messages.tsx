@@ -1,5 +1,6 @@
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ModernMessagingApp } from '@/components/MessagingV2/ModernMessagingApp';
+import { AutonomousMessagingInterface } from '@/components/Stefan/AutonomousMessagingInterface';
 
 export function Messages() {
   const { user } = useAuth();
@@ -23,5 +24,13 @@ export function Messages() {
 
   console.log('🚀 Messages page - loading modern messaging system for user:', user.email);
 
-  return <ModernMessagingApp />;
+  return (
+    <div className="container mx-auto p-6 max-w-7xl space-y-6">
+      {/* Autonomous Messaging Interface - Stefan's proactive messaging */}
+      <AutonomousMessagingInterface />
+      
+      {/* Main Messaging App */}
+      <ModernMessagingApp />
+    </div>
+  );
 }

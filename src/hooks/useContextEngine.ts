@@ -350,6 +350,9 @@ export const useContextEngine = () => {
   return {
     loading,
     sessionId,
+    currentSessionState: { session_id: sessionId },
+    insights: [],
+    behaviorPatterns: [],
     logContextEvent,
     trackPageVisit,
     trackAction,
