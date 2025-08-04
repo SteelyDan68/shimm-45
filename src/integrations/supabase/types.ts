@@ -1513,6 +1513,13 @@ export type Database = {
             referencedRelation: "messages_v2"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "message_read_receipts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages_v2: {

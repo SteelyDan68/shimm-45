@@ -105,16 +105,10 @@ export const useMessagingV2 = () => {
       console.log('🔍 Fetching conversations for user:', user.id);
       console.log('🔍 User email:', user.email);
       
-      // Enhanced query to properly filter conversations for current user
+      // Simplified query utan nested selects som kan orsaka problem
       const { data: conversationsData, error } = await supabase
         .from('conversations')
-        .select(`
-          *,
-          last_message:messages_v2(
-            id, content, sender_id, message_type, created_at,
-            sender_profile:profiles(first_name, last_name, email)
-          )
-        `)
+        .select('*')
         .contains('participant_ids', [user.id])
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -170,13 +164,10 @@ export const useMessagingV2 = () => {
     if (!user) return;
 
     try {
+      // Först hämta meddelanden utan nested selects
       const { data: messagesData, error } = await supabase
         .from('messages_v2')
-        .select(`
-          *,
-          sender_profile:profiles(first_name, last_name, email, avatar_url),
-          parent_message:messages_v2(id, content, sender_id)
-        `)
+        .select('*')
         .eq('conversation_id', conversationId)
         .eq('is_deleted', false)
         .order('created_at', { ascending: true });
@@ -250,10 +241,7 @@ export const useMessagingV2 = () => {
             user_agent: navigator.userAgent
           }
         })
-        .select(`
-          *,
-          sender_profile:profiles(first_name, last_name, email, avatar_url)
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
