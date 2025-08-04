@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 
 export const MessagePreferences = () => {
   const { preferences, updatePreferences } = useMessages();
-  const { canManageUsers } = useAuth();
+  const { hasRole } = useAuth();
   const [localPrefs, setLocalPrefs] = useState({
     email_notifications: true,
     internal_notifications: true,
@@ -80,7 +80,7 @@ export const MessagePreferences = () => {
           </div>
 
           {/* AI-assistans sektion - endast synlig för coaches och administrativa roller */}
-          {canManageUsers() && (
+          {(hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
             <>
               <Separator />
 
