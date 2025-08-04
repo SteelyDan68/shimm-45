@@ -171,7 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
                 content,
                 priority,
                 metadata,
-                appUrl: Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://your-app.com'
+                appUrl: `${Deno.env.get('SUPABASE_URL') || 'https://gcoorbcglxczmukzcmqs.supabase.co'}`.replace('supabase.co', 'lovableproject.com')
               })
             );
 

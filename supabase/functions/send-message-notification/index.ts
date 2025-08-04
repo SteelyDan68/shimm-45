@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       ? messageContent.substring(0, 150) + '...' 
       : messageContent;
 
-    const appUrl = Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://your-app.com';
+    const appUrl = `${Deno.env.get('SUPABASE_URL') || 'https://gcoorbcglxczmukzcmqs.supabase.co'}`.replace('supabase.co', 'lovableproject.com');
 
     // Render the email template
     const html = await renderAsync(

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Key, Eye, EyeOff } from 'lucide-react';
+import { Key, Eye, EyeOff, Shield } from 'lucide-react';
 
 interface PasswordManagementProps {
   userId: string;
@@ -53,24 +53,32 @@ export function PasswordManagement({ userId, userEmail, userName }: PasswordMana
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        password: newPassword
+      // Använd säker admin edge function istället för direkt Supabase Admin API
+      const { data, error } = await supabase.functions.invoke('admin-password-reset', {
+        body: {
+          targetUserId: userId,
+          newPassword: newPassword
+        }
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Lösenord uppdaterat",
-        description: `Lösenordet för ${userName} har uppdaterats framgångsrikt`
-      });
+      if (data?.success) {
+        toast({
+          title: "Lösenord säkert uppdaterat",
+          description: `Lösenordet för ${userName} har uppdaterats med säkerhetsvalidering`
+        });
 
-      setNewPassword('');
-      setIsOpen(false);
+        setNewPassword('');
+        setIsOpen(false);
+      } else {
+        throw new Error(data?.error || 'Password reset failed');
+      }
     } catch (error: any) {
-      console.error('Error updating password:', error);
+      console.error('Secure password reset error:', error);
       toast({
-        title: "Fel",
-        description: "Kunde inte uppdatera lösenord: " + error.message,
+        title: "Säkerhetsfel",
+        description: "Kunde inte uppdatera lösenord - behörighet nekad: " + error.message,
         variant: "destructive"
       });
     } finally {
@@ -81,23 +89,31 @@ export function PasswordManagement({ userId, userEmail, userName }: PasswordMana
   const sendPasswordResetEmail = async () => {
     setIsEmailLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-        redirectTo: `${window.location.origin}/reset-password`
+      // Använd säker admin edge function för e-post reset
+      const { data, error } = await supabase.functions.invoke('admin-password-reset', {
+        body: {
+          targetUserId: userId,
+          sendResetEmail: true
+        }
       });
 
       if (error) throw error;
 
-      toast({
-        title: "E-post skickat",
-        description: `Lösenordsåterställningslänk har skickats till ${userEmail}`
-      });
+      if (data?.success) {
+        toast({
+          title: "E-post säkert skickat",
+          description: `Säker återställningslänk har skickats till ${userEmail}`
+        });
 
-      setIsOpen(false);
+        setIsOpen(false);
+      } else {
+        throw new Error(data?.error || 'Email reset failed');
+      }
     } catch (error: any) {
-      console.error('Error sending reset email:', error);
+      console.error('Secure email reset error:', error);
       toast({
-        title: "Fel",
-        description: "Kunde inte skicka återställningslänk: " + error.message,
+        title: "Säkerhetsfel",
+        description: "Kunde inte skicka återställningslänk - behörighet nekad: " + error.message,
         variant: "destructive"
       });
     } finally {
@@ -109,15 +125,18 @@ export function PasswordManagement({ userId, userEmail, userName }: PasswordMana
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Key className="h-4 w-4 mr-2" />
-          Hantera lösenord
+          <Shield className="h-4 w-4 mr-2" />
+          Säker lösenordshantering
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Lösenordshantering för {userName}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-orange-500" />
+            Säker lösenordshantering för {userName}
+          </DialogTitle>
           <DialogDescription>
-            Återställ lösenord direkt eller skicka en återställningslänk
+            Säker återställning med admin-verifiering och auditloggning
           </DialogDescription>
         </DialogHeader>
         

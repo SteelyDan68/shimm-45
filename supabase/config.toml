@@ -49,7 +49,7 @@ enabled = true
 port = 54321
 site_url = "http://127.0.0.1:3000"
 additional_redirect_urls = ["https://127.0.0.1:3000"]
-jwt_expiry = 3600
+jwt_expiry = 1800
 enable_manual_linking = false
 enable_signup = true
 enable_confirmations = false
@@ -78,6 +78,9 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.stefan-ai-chat]
+verify_jwt = true
+
+[functions.admin-password-reset]
 verify_jwt = true
 
 [edge_runtime]
