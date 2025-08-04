@@ -293,10 +293,10 @@ export function Administration() {
               <div className="p-6 border-b">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" />
-                  Five Pillars Management
+                  Six Pillars Management
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Hantera och tilldela Five Pillars pelare till klienter
+                  Hantera och tilldela Six Pillars pelare till klienter
                 </p>
               </div>
               <div className="p-6">

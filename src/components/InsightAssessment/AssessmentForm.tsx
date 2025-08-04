@@ -114,7 +114,7 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
       // Submit via InsightAssessment hook (creates path entries)
       const result = await submitAssessment(assessmentData, clientName, clientId);
       
-      // Also submit to Five Pillars system for self_care pillar
+      // Also submit to Six Pillars system for self_care pillar
       if (result) {
         // Calculate a score for the pillar system based on assessment data
         const hinderScores = Object.values(scores);

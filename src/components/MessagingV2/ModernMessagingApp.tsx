@@ -9,7 +9,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuIte
 import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ComposeModal } from './ComposeModal';
+import { FileUpload } from './FileUpload';
+import { EmojiPicker } from './EmojiPicker';
+import { VoiceRecorder } from './VoiceRecorder';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 // 🚀 Modern Enterprise Messaging App 2025
 // Instagram/WhatsApp/Discord inspired UI with world-class UX
@@ -76,6 +80,39 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleFileUploaded = async (fileUrl: string, fileName: string, fileType: string) => {
+    if (!activeConversation) return;
+    
+    const message = fileType.startsWith('image/') 
+      ? `📷 ${fileName}` 
+      : `📎 ${fileName}`;
+    
+    const success = await sendMessage(activeConversation, message);
+    
+    if (!success) {
+      toast.error('Kunde inte skicka filen');
+    }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setMessageInput(prev => prev + emoji);
+    inputRef.current?.focus();
+  };
+
+  const handleVoiceMessage = async (audioBlob: Blob, duration: number) => {
+    if (!activeConversation) return;
+    
+    // For now, send a placeholder message
+    // In production, you'd upload the audio file and send the URL
+    const message = `🎤 Röstmeddelande (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`;
+    
+    const success = await sendMessage(activeConversation, message);
+    
+    if (!success) {
+      toast.error('Kunde inte skicka röstmeddelandet');
     }
   };
 
@@ -401,9 +438,10 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
           {/* Message Input */}
           <div className="p-4 border-t bg-background/50 backdrop-blur">
             <div className="flex items-end gap-2">
-              <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
-                <Paperclip className="h-5 w-5" />
-              </Button>
+              <FileUpload
+                onFileUploaded={handleFileUploaded}
+                disabled={!activeConversation}
+              />
               
               <div className="flex-1 min-h-[40px] relative">
                 <Input
@@ -415,12 +453,14 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
                   className="min-h-[40px] pr-20 resize-none rounded-full"
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Smile className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Mic className="h-4 w-4" />
-                  </Button>
+                  <EmojiPicker
+                    onEmojiSelect={handleEmojiSelect}
+                    disabled={!activeConversation}
+                  />
+                  <VoiceRecorder
+                    onVoiceMessage={handleVoiceMessage}
+                    disabled={!activeConversation}
+                  />
                 </div>
               </div>
               

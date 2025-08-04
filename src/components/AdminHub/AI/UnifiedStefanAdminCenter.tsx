@@ -202,18 +202,18 @@ export function UnifiedStefanAdminCenter() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">Totala dokument:</span>
-                  <span className="font-bold">{knowledgeSummary.totalAnalyzedTexts}</span>
+                  <span className="font-bold">{knowledgeSummary?.totalAnalyzedTexts || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">Vanligaste teman:</span>
                   <Badge variant="secondary">
-                    {knowledgeSummary.commonThemes.slice(0, 2).join(', ')}
+                    {knowledgeSummary?.commonThemes?.slice(0, 2).join(', ') || 'Inga teman än'}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">Senaste analys:</span>
                   <span className="text-xs text-muted-foreground">
-                    {knowledgeSummary.latestAnalysis?.analyzed_at 
+                    {knowledgeSummary?.latestAnalysis?.analyzed_at 
                       ? formatDistanceToNow(new Date(knowledgeSummary.latestAnalysis.analyzed_at), { 
                           addSuffix: true, 
                           locale: sv 

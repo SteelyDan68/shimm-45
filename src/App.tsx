@@ -133,9 +133,6 @@ const AppRoutes = () => {
                <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
                <Route path="/ai-insights" element={<AIInsights />} />
                <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-              <Route path="/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analys</h1><p className="text-muted-foreground">Analytiska insikter om dina klienter finns i varje klientprofil.</p></div>} />
-              <Route path="/data-collection" element={<div className="p-6"><h1 className="text-2xl font-bold">Datainsamling</h1><p className="text-muted-foreground">Datainsamlingsverktyg finns integrerade i klientprofilerna.</p></div>} />
-              <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Rapporter</h1><p className="text-muted-foreground">Automatiska veckobrev skickas varje måndag. Mer rapportfunktionalitet utvecklas.</p></div>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>

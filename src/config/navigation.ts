@@ -166,30 +166,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
       }
     ]
   },
-  {
-    title: "Analys & Rapporter",
-    roles: ["superadmin", "admin", "coach"],
-    items: [
-      {
-        title: "Analys",
-        url: NAVIGATION_ROUTES.ANALYTICS,
-        icon: BarChart3,
-        roles: ["superadmin", "admin", "coach"]
-      },
-      {
-        title: "Datainsamling", 
-        url: NAVIGATION_ROUTES.DATA_COLLECTION,
-        icon: Database,
-        roles: ["superadmin", "admin", "coach"]
-      },
-      {
-        title: "Rapporter",
-        url: NAVIGATION_ROUTES.REPORTS,
-        icon: ClipboardList,
-        roles: ["superadmin", "admin", "coach"]
-      }
-    ]
-  }
 ];
 
 export const QUICK_ACTIONS = {

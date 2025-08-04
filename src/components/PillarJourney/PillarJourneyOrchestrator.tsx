@@ -204,13 +204,13 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
             </CardContent>
           </Card>
 
-          {/* Informationssektion om Five Pillars */}
+          {/* Informationssektion om Six Pillars */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
                 Om Six Pillars systemet
-                <HelpTooltip content="Five Pillars är ett beprövat system för hållbar utveckling inom fem kritiska livsområden." />
+                <HelpTooltip content="Six Pillars är ett beprövat system för hållbar utveckling inom sex kritiska livsområden." />
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

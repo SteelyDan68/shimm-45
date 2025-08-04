@@ -194,7 +194,7 @@ export const AIPlanningDialog = ({
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• AI:n skapar en genomförbar {weeks}-veckorsplan</li>
                 <li>• Max 1-2 aktiviteter per dag</li>
-                <li>• Automatisk fördelning mellan Five Pillars</li>
+                <li>• Automatisk fördelning mellan Six Pillars</li>
                 <li>• Kalenderhändelser och uppgifter skapas automatiskt</li>
               </ul>
             </div>

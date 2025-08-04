@@ -49,7 +49,7 @@ export const useUnifiedAssessment = () => {
 
   const fetchTemplates = useCallback(async () => {
     try {
-      // Create mock templates based on Five Pillars
+      // Create mock templates based on Six Pillars
       const mockTemplates: AssessmentTemplate[] = [
         {
           id: 'self-care',

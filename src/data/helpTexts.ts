@@ -57,7 +57,7 @@ export const helpTexts = {
     pathTimeline: "Klientens utvecklingsresa med viktiga milstolpar och händelser."
   },
 
-  // Five Pillars
+  // Six Pillars
   sixPillars: {
     systemOverview: "Six Pillars är ett utvecklingssystem med sex grundpelare för hållbar framgång och välmående.",
     pillarsOrder: "Pillarnas prioriteringsordning: Self Care (välmående) aktiveras automatiskt först, sedan Skills → Talent → Brand → Economy enligt behov.",
