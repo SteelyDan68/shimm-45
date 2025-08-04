@@ -8,8 +8,8 @@ const googleSearchApiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY');
 const googleSearchEngineId = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID');
 const socialBladeApiKey = Deno.env.get('SOCIAL_BLADE_API_KEY');
 
-const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,9 +43,34 @@ serve(async (req) => {
   try {
     console.log('=== PARSING REQUEST BODY ===');
     const body = await req.text();
-    console.log('Raw body:', body);
+    console.log('Raw body length:', body.length);
     
-    const { client_id, test_mode, platform, url, timestamp, force_refresh } = JSON.parse(body);
+    if (!body || body.trim() === '') {
+      throw new Error('Request body is required');
+    }
+
+    let requestData;
+    try {
+      requestData = JSON.parse(body);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      throw new Error('Invalid JSON in request body');
+    }
+
+    const { client_id, test_mode, platform, url, timestamp, force_refresh } = requestData;
+
+    // Enhanced input validation
+    if (!test_mode && (!client_id || typeof client_id !== 'string')) {
+      throw new Error('client_id is required and must be a string');
+    }
+
+    if (platform && typeof platform !== 'string') {
+      throw new Error('platform must be a string');
+    }
+
+    if (url && typeof url !== 'string') {
+      throw new Error('url must be a string');
+    }
     console.log('=== PARSED PARAMETERS ===');
     console.log('client_id:', client_id);
     console.log('test_mode:', test_mode);

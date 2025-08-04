@@ -3,8 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 
 const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,7 +21,29 @@ serve(async (req) => {
   }
 
   try {
-    const { client_id, query_type = 'comprehensive', test_mode } = await req.json();
+    // Enhanced input validation
+    const body = await req.text();
+    if (!body || body.trim() === '') {
+      throw new Error('Request body is required');
+    }
+
+    let requestData;
+    try {
+      requestData = JSON.parse(body);
+    } catch (parseError) {
+      throw new Error('Invalid JSON in request body');
+    }
+
+    const { client_id, query_type = 'comprehensive', test_mode } = requestData;
+
+    // Input validation
+    if (!test_mode && (!client_id || typeof client_id !== 'string')) {
+      throw new Error('client_id is required and must be a string');
+    }
+
+    if (query_type && typeof query_type !== 'string') {
+      throw new Error('query_type must be a string');
+    }
     
     // Test mode - check Gemini API connectivity
     if (test_mode) {

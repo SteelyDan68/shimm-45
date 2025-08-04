@@ -5,8 +5,8 @@ import { aiService } from '../_shared/ai-service.ts';
 import { resolveUserClient, buildAIPromptWithUniversalTemplate } from '../_shared/user-client-resolver.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -39,7 +39,28 @@ serve(async (req) => {
   }
 
   try {
-    const { client_id, user_id, test_mode } = await req.json();
+    // Enhanced input validation
+    const body = await req.text();
+    if (!body || body.trim() === '') {
+      throw new Error('Request body is required');
+    }
+
+    let requestData;
+    try {
+      requestData = JSON.parse(body);
+    } catch (parseError) {
+      throw new Error('Invalid JSON in request body');
+    }
+
+    const { client_id, user_id, test_mode } = requestData;
+
+    // Input sanitization and validation
+    if (client_id && typeof client_id !== 'string') {
+      throw new Error('client_id must be a string');
+    }
+    if (user_id && typeof user_id !== 'string') {
+      throw new Error('user_id must be a string');
+    }
     
     // Test mode - check OpenAI API connectivity
     if (test_mode) {

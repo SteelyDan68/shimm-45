@@ -4,8 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 import { buildAIPromptWithLovableTemplate } from '../_shared/client-context.ts';
 import { aiService } from '../_shared/ai-service.ts';
 
-const supabaseUrl = "https://gcoorbcglxczmukzcmqs.supabase.co";
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
 // Create Supabase client
 const supabase = createClient(supabaseUrl, supabaseServiceKey || '');
@@ -31,7 +31,27 @@ serve(async (req) => {
   }
 
   try {
-    const assessmentData: AssessmentData = await req.json();
+    // Enhanced input validation
+    const body = await req.text();
+    if (!body || body.trim() === '') {
+      throw new Error('Request body is required');
+    }
+
+    let assessmentData: AssessmentData;
+    try {
+      assessmentData = JSON.parse(body);
+    } catch (parseError) {
+      throw new Error('Invalid JSON in request body');
+    }
+
+    // Validate required fields
+    if (!assessmentData.client_id || typeof assessmentData.client_id !== 'string') {
+      throw new Error('client_id is required and must be a string');
+    }
+
+    if (!assessmentData.assessment_scores || typeof assessmentData.assessment_scores !== 'object') {
+      throw new Error('assessment_scores is required and must be an object');
+    }
     
     console.log('Assessment analysis request received');
 
