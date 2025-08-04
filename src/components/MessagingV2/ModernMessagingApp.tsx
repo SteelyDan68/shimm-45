@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useMessagingV2 } from '@/hooks/useMessagingV2';
+import { useProactiveMessaging } from '@/hooks/useProactiveMessaging';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ComposeModal } from './ComposeModal';
 import { FileUpload } from './FileUpload';
@@ -39,7 +40,8 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
     updateTypingStatus,
     addReaction
   } = useMessagingV2();
-
+  
+  const { getOrCreateStefanConversation } = useProactiveMessaging();
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -52,6 +54,20 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Automatisk Stefan-konversation när användaren kommer till Messages
+  useEffect(() => {
+    const initializeStefanConversation = async () => {
+      if (user && conversations.length === 0) {
+        // Vänta lite för att låta conversations ladda
+        setTimeout(async () => {
+          await getOrCreateStefanConversation();
+        }, 1000);
+      }
+    };
+    
+    initializeStefanConversation();
+  }, [user, conversations.length, getOrCreateStefanConversation]);
 
   // Handle typing indicators
   useEffect(() => {

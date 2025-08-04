@@ -337,6 +337,7 @@ export const useProactiveMessaging = () => {
     pendingMessages,
     analyzeAndSendProactiveMessages,
     getRecentProactiveMessages,
+    getOrCreateStefanConversation,
     stefanConversationId
   };
 };
