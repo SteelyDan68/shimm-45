@@ -61,13 +61,17 @@ serve(async (req) => {
 
     // Insert the message using appropriate client
     const { data: message, error: insertError } = await dbClient
-      .from('messages')
+      .from('messages_v2')
       .insert({
+        conversation_id: receiverId, // Using receiverId as conversation_id for now
         sender_id: user.id,
-        receiver_id: receiverId,
         content,
-        subject,
-        is_read: false
+        message_type: requestBody.messageType || 'text',
+        metadata: {
+          sent_from: 'web',
+          user_agent: req.headers.get('User-Agent'),
+          subject: subject
+        }
       })
       .select('*')
       .single()
@@ -96,8 +100,8 @@ serve(async (req) => {
 
     // Get receiver's notification preferences using appropriate client
     const { data: receiverPrefs } = await dbClient
-      .from('message_preferences')
-      .select('email_notifications, internal_notifications')
+      .from('notification_preferences')
+      .select('email_notifications, push_notifications')
       .eq('user_id', receiverId)
       .single()
 

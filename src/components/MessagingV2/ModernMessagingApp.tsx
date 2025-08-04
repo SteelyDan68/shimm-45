@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Smile, Paperclip, Mic, Phone, Video, MoreVertical, Search, ArrowLeft } from 'lucide-react';
+import { Send, Smile, Paperclip, Mic, Phone, Video, MoreVertical, Search, ArrowLeft, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { ComposeModal } from './ComposeModal';
 import { cn } from '@/lib/utils';
 
 // 🚀 Modern Enterprise Messaging App 2025
@@ -38,6 +39,7 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showCompose, setShowCompose] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -149,6 +151,14 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={() => setShowCompose(true)}
+                className="h-8 w-8"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowSearch(!showSearch)}
                 className="h-8 w-8"
               >
@@ -176,55 +186,75 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
         {/* Conversations */}
         <ScrollArea className="flex-1">
           <div className="p-1">
-            {filteredConversations.map((conversation) => {
-              const otherParticipant = conversation.participants?.find(p => p.id !== user?.id);
-              const displayName = otherParticipant ? 
-                `${otherParticipant.first_name || ''} ${otherParticipant.last_name || ''}`.trim() || otherParticipant.email :
-                conversation.title || 'Okänd användare';
-
-              return (
-                <div
-                  key={conversation.id}
-                  onClick={() => handleConversationSelect(conversation.id)}
-                  className={cn(
-                    "flex items-center gap-3 p-3 m-1 rounded-lg cursor-pointer transition-all hover:bg-muted/50",
-                    activeConversation === conversation.id && "bg-primary/10 border border-primary/20"
-                  )}
-                >
-                  <div className="relative">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={otherParticipant?.avatar_url} />
-                      <AvatarFallback className="text-sm font-medium">
-                        {getInitials(displayName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {/* Online status indicator */}
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-medium text-sm truncate">{displayName}</h3>
-                      {conversation.last_message_at && (
-                        <span className="text-xs text-muted-foreground">
-                          {formatTime(conversation.last_message_at)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground truncate">
-                        {conversation.last_message?.content || 'Ingen meddelanden än...'}
-                      </p>
-                      {(conversation.unread_count || 0) > 0 && (
-                        <Badge variant="destructive" className="text-xs h-5 min-w-[20px] flex items-center justify-center">
-                          {conversation.unread_count}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+            {filteredConversations.length === 0 ? (
+              <div className="text-center py-8 space-y-3">
+                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto">
+                  <Send className="h-6 w-6 text-muted-foreground" />
                 </div>
-              );
-            })}
+                <div>
+                  <p className="text-sm font-medium">Inga konversationer än</p>
+                  <p className="text-xs text-muted-foreground">Starta en ny konversation</p>
+                </div>
+                <Button 
+                  onClick={() => setShowCompose(true)} 
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Ny konversation
+                </Button>
+              </div>
+            ) : (
+              filteredConversations.map((conversation) => {
+                const otherParticipant = conversation.participants?.find(p => p.id !== user?.id);
+                const displayName = otherParticipant ? 
+                  `${otherParticipant.first_name || ''} ${otherParticipant.last_name || ''}`.trim() || otherParticipant.email :
+                  conversation.title || 'Okänd användare';
+
+                return (
+                  <div
+                    key={conversation.id}
+                    onClick={() => handleConversationSelect(conversation.id)}
+                    className={cn(
+                      "flex items-center gap-3 p-3 m-1 rounded-lg cursor-pointer transition-all hover:bg-muted/50",
+                      activeConversation === conversation.id && "bg-primary/10 border border-primary/20"
+                    )}
+                  >
+                    <div className="relative">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={otherParticipant?.avatar_url} />
+                        <AvatarFallback className="text-sm font-medium">
+                          {getInitials(displayName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {/* Online status indicator */}
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium text-sm truncate">{displayName}</h3>
+                        {conversation.last_message_at && (
+                          <span className="text-xs text-muted-foreground">
+                            {formatTime(conversation.last_message_at)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground truncate">
+                          {conversation.last_message?.content || 'Ingen meddelanden än...'}
+                        </p>
+                        {(conversation.unread_count || 0) > 0 && (
+                          <Badge variant="destructive" className="text-xs h-5 min-w-[20px] flex items-center justify-center">
+                            {conversation.unread_count}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </ScrollArea>
       </div>
@@ -422,8 +452,23 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
                 Välj en konversation för att börja chatta
               </p>
             </div>
+            <Button onClick={() => setShowCompose(true)} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Starta ny konversation
+            </Button>
           </div>
         </div>
+      )}
+      
+      {/* Compose Modal */}
+      {showCompose && (
+        <ComposeModal
+          onClose={() => setShowCompose(false)}
+          onConversationCreated={(conversationId) => {
+            setShowCompose(false);
+            setActiveConversation(conversationId);
+          }}
+        />
       )}
     </div>
   );
