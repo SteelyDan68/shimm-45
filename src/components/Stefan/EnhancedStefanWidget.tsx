@@ -103,10 +103,7 @@ export const EnhancedStefanWidget: React.FC = () => {
     }
   }, [journeyState]);
 
-  // Don't show widget if user hasn't started journey
-  if (!journeyState) {
-    return null;
-  }
+  // Stefan AI är alltid tillgänglig för autentiserade användare
 
   // Minimized state
   if (isMinimized) {
