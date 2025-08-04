@@ -158,8 +158,8 @@ export const useProactiveMessaging = () => {
       // Visa toast för att uppmärksamma användaren om nytt meddelande
       toast({
         title: "💬 Stefan AI har skickat ett meddelande",
-        description: "Gå till Messages för att se chatten",
-        duration: 5000
+        description: "Du har en ny konversation med Stefan! Gå till Messages för att fortsätta chatten.",
+        duration: 8000
       });
 
     } catch (error) {

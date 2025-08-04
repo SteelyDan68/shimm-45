@@ -191,13 +191,12 @@ export const EnhancedStefanWidget: React.FC = () => {
             </div>
           )}
 
-          {/* Quick Actions (Always Visible) */}
           <div className="flex gap-1">
             <Button
               variant="outline"
               size="sm"
               className="flex-1 text-xs h-8"
-              onClick={() => sendMotivationalMessage('progress_milestone')}
+              onClick={() => window.location.href = '/messages'}
             >
               <MessageSquare className="h-3 w-3 mr-1" />
               Chatta
