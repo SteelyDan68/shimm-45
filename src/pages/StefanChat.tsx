@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { IntegratedStefanInterface } from '@/components/Stefan/IntegratedStefanInterface';
+import { PedagogicalCoachInterface } from '@/components/Stefan/PedagogicalCoachInterface';
 
 export function StefanChatPage() {
   const navigate = useNavigate();
@@ -28,15 +29,21 @@ export function StefanChatPage() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto">
-        <IntegratedStefanInterface
-          context="coaching"
-          clientId={clientId || undefined}
-          className="w-full max-w-none"
-          onCoachingAction={(action, data) => {
-            console.log('Coaching action triggered:', action, data);
-          }}
-        />
+      <div className="space-y-6">
+        {/* Enhanced Pedagogical AI Coach Interface */}
+        <PedagogicalCoachInterface />
+        
+        {/* Traditional Chat Interface */}
+        <div className="max-w-2xl mx-auto">
+          <IntegratedStefanInterface
+            context="coaching"
+            clientId={clientId || undefined}
+            className="w-full max-w-none"
+            onCoachingAction={(action, data) => {
+              console.log('Coaching action triggered:', action, data);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
