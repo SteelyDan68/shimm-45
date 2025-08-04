@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useMessagingV2 } from '@/hooks/useMessagingV2';
-import { useContextEngine } from '@/hooks/useContextEngine';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useContextEngine } from './useContextEngine';
 
 /**
  * 🤖 PROACTIVE MESSAGING ENGINE
  * Stefan kan nu autonomt skicka meddelanden baserat på användarens beteende
+ * UPPDATERAD: Använder toast notifications istället för konversationssystem
  */
 
 interface ProactiveMessage {
@@ -20,61 +21,64 @@ interface ProactiveMessage {
 
 export const useProactiveMessaging = () => {
   const { user } = useAuth();
-  const { sendMessage, getOrCreateDirectConversation } = useMessagingV2();
+  const { toast } = useToast();
   const { currentSessionState, insights } = useContextEngine();
   const [pendingMessages, setPendingMessages] = useState<ProactiveMessage[]>([]);
 
-  // Stefan AI system-användare (generera en valid UUID)
-  const STEFAN_USER_ID = '00000000-0000-0000-0000-000000000001'; // Reserved system UUID
-
-  // Skicka proaktivt meddelande från Stefan
+  // Skicka proaktivt meddelande från Stefan (utan att skapa konversation)
   const sendProactiveMessage = useCallback(async (
     triggerType: string,
-    content: string,
-    priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
+    message: string,
+    priority: 'low' | 'medium' | 'high' = 'medium'
   ) => {
-    if (!user) return false;
+    if (!user) return;
+
+    console.log('🤖 Stefan sending proactive message:', {
+      triggerType,
+      priority,
+      message: message.substring(0, 50) + '...'
+    });
 
     try {
-      console.log('🤖 Stefan sending proactive message:', { triggerType, priority });
-
-      // Skapa eller hämta konversation med Stefan
-      const conversationId = await getOrCreateDirectConversation(STEFAN_USER_ID);
-      if (!conversationId) {
-        console.error('Failed to create conversation with Stefan');
-        return false;
-      }
-
-      // Lägg till Stefan's personlighet och kontext
-      const enhancedContent = await enhanceMessageWithPersonality(content, triggerType);
-
-      // Skicka meddelandet
-      const success = await sendMessage(conversationId, enhancedContent);
-
-      if (success) {
-        // Logga proaktiv intervention
-        await supabase.from('stefan_interactions').insert({
+      // Istället för att skapa konversation, lagra meddelandet som proactive intervention
+      const { error } = await supabase
+        .from('proactive_interventions')
+        .insert({
           user_id: user.id,
-          interaction_type: 'proactive_message',
-          context: {
+          trigger_condition: triggerType,
+          intervention_type: 'chat_message',
+          content: message,
+          delivery_method: 'widget',
+          context_snapshot: {
             trigger_type: triggerType,
             priority,
-            original_content: content,
-            enhanced_content: enhancedContent
-          },
-          timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString()
+          }
         });
 
-        console.log('✅ Stefan successfully sent proactive message');
-        return true;
+      if (error) {
+        console.error('❌ Error storing proactive message:', error);
+        throw error;
       }
 
-      return false;
+      console.log('✅ Stefan proactive message stored successfully');
+      
+      // Kör toast notification istället för konversation
+      toast({
+        title: "💬 Stefan säger:",
+        description: message,
+        duration: 5000,
+      });
+
     } catch (error) {
-      console.error('Error sending proactive message:', error);
-      return false;
+      console.error('Failed to send Stefan proactive message:', error);
+      toast({
+        title: "Stefan AI",
+        description: "Stefan försöker nå dig men har svårigheter med anslutningen.",
+        variant: "destructive",
+      });
     }
-  }, [user, getOrCreateDirectConversation, sendMessage]);
+  }, [user, toast]);
 
   // Förbättra meddelande med Stefans personlighet
   const enhanceMessageWithPersonality = async (content: string, triggerType: string): Promise<string> => {
@@ -180,7 +184,9 @@ export const useProactiveMessaging = () => {
       streak_broken: "Ingen fara att du bröt din streak! Det viktiga är att du är här nu. Låt oss börja om tillsammans! 🌟",
       goal_achieved: "WOW! Du har uppnått ett viktigt mål! Ta en paus och fira detta. Du förtjänar det! 🎉",
       stuck_too_long: "Jag märker att du har fastnat på samma ställe ett tag. Ibland behöver vi bara en ny vinkel. Vill du att jag hjälper till? 🤔",
-      progress_milestone: "Du har kommit så långt på din resa! Titta tillbaka på var du startade - vilken fantastisk utveckling! 📈"
+      progress_milestone: "Du har kommit så långt på din resa! Titta tillbaka på var du startade - vilken fantastisk utveckling! 📈",
+      motivation_boost: "Du gör ett fantastiskt jobb med din utveckling! Jag ser dina framsteg och är imponerad! 🌟",
+      learning_opportunity: "Jag hittade något som kan hjälpa dig utvecklas ännu mer. Vill du ta en titt? 💡"
     };
 
     const message = motivationalMessages[context as keyof typeof motivationalMessages] || 

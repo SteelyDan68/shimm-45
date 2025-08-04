@@ -81,21 +81,20 @@ export const AutonomousMessagingInterface: React.FC = () => {
     const message = testMessages[triggerType as keyof typeof testMessages] || 'Test meddelande från Stefan AI';
     
     try {
-      const success = await sendProactiveMessage(triggerType, message, 'medium');
+      await sendProactiveMessage(triggerType, message, 'medium');
       
-      if (success) {
-        // Lägg till i recent messages
-        const newMessage: ProactiveMessageLog = {
-          id: Date.now().toString(),
-          trigger_type: triggerType,
-          content: message,
-          sent_at: new Date().toISOString(),
-          priority: 'medium',
-          user_responded: false
-        };
-        
-        setRecentMessages(prev => [newMessage, ...prev]);
-      }
+      // Success - lägg till i recent messages
+      const newMessage: ProactiveMessageLog = {
+        id: Date.now().toString(),
+        trigger_type: triggerType,
+        content: message,
+        sent_at: new Date().toISOString(),
+        priority: 'medium',
+        user_responded: false
+      };
+      
+      setRecentMessages(prev => [newMessage, ...prev]);
+      
     } catch (error) {
       console.error('Error sending test message:', error);
     } finally {
