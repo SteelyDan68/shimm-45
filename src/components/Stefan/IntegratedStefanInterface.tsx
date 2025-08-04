@@ -109,7 +109,18 @@ export function IntegratedStefanInterface({
         previousMessages: messages.slice(-3).map(m => ({ role: m.isUser ? 'user' : 'assistant', content: m.content }))
       };
 
-      const response = await enhancedStefanChat(messageToSend);
+      const response = await enhancedStefanChat({
+        message: messageToSend,
+        interactionType: context === 'coaching' ? 'coaching_session' : 
+                        context === 'assessment' ? 'assessment_completion' :
+                        context === 'planning' ? 'progress_review' : 'chat',
+        includeAssessmentContext: true,
+        generateRecommendations: true
+      });
+
+      if (!response) {
+        throw new Error('Stefan AI svarade inte');
+      }
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -118,10 +129,15 @@ export function IntegratedStefanInterface({
         timestamp: new Date(),
         memoryFragmentsUsed: 0,
         coachingContext: context,
-        actionItems: []
+        actionItems: response.recommendedActions || []
       };
 
       setMessages(prev => [...prev, aiMessage]);
+
+      // Set quick actions from AI recommendations
+      if (response.recommendedActions && response.recommendedActions.length > 0) {
+        setQuickActions(response.recommendedActions);
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);
