@@ -103,18 +103,21 @@ export const useMessagingV2 = () => {
 
     try {
       console.log('🔍 Fetching conversations for user:', user.id);
+      console.log('🔍 User email:', user.email);
       
+      // Enhanced query to properly filter conversations for current user
       const { data: conversationsData, error } = await supabase
         .from('conversations')
         .select(`
           *,
-          last_message:messages_v2!messages_v2_conversation_id_fkey(
+          last_message:messages_v2(
             id, content, sender_id, message_type, created_at,
-            sender_profile:profiles!messages_v2_sender_id_fkey(first_name, last_name, email)
+            sender_profile:profiles(first_name, last_name, email)
           )
         `)
+        .contains('participant_ids', [user.id])
         .eq('is_active', true)
-        .order('last_message_at', { ascending: false, nullsFirst: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -171,8 +174,8 @@ export const useMessagingV2 = () => {
         .from('messages_v2')
         .select(`
           *,
-          sender_profile:profiles!messages_v2_sender_id_fkey(first_name, last_name, email, avatar_url),
-          parent_message:messages_v2!messages_v2_parent_message_id_fkey(id, content, sender_id)
+          sender_profile:profiles(first_name, last_name, email, avatar_url),
+          parent_message:messages_v2(id, content, sender_id)
         `)
         .eq('conversation_id', conversationId)
         .eq('is_deleted', false)
@@ -220,6 +223,20 @@ export const useMessagingV2 = () => {
     try {
       console.log('📤 Sending message:', { conversationId, messageType, contentLength: content.length });
 
+      console.log('🔍 Checking conversation access for user:', user.id, 'in conversation:', conversationId);
+      
+      // First verify user has access to this conversation
+      const { data: conversationCheck } = await supabase
+        .from('conversations')
+        .select('id, participant_ids')
+        .eq('id', conversationId)
+        .contains('participant_ids', [user.id])
+        .single();
+        
+      if (!conversationCheck) {
+        throw new Error('Du har inte tillgång till denna konversation');
+      }
+      
       const { data: newMessage, error } = await supabase
         .from('messages_v2')
         .insert({
@@ -235,7 +252,7 @@ export const useMessagingV2 = () => {
         })
         .select(`
           *,
-          sender_profile:profiles!messages_v2_sender_id_fkey(first_name, last_name, email, avatar_url)
+          sender_profile:profiles(first_name, last_name, email, avatar_url)
         `)
         .single();
 
