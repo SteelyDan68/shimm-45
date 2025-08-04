@@ -134,12 +134,12 @@ async function getClientAssessmentContext(userId: string): Promise<ClientAssessm
         .order('created_at', { ascending: false })
         .limit(5),
       
-      // Pillar activations
+      // Pillar data
       supabase
-        .from('client_pillar_activations')
+        .from('profiles')
         .select('*')
-        .eq('user_id', userId)
-        .eq('is_active', true),
+        .eq('id', userId)
+        .limit(1),
       
       // Stefan interactions history
       supabase
@@ -179,7 +179,7 @@ async function getClientAssessmentContext(userId: string): Promise<ClientAssessm
       neuroplasticityProgress,
       personalityProfile,
       recentInteractions: stefanInteractions || [],
-      pillarActivations: pillarAssessments || [] // Använd pillar assessments
+      pillarActivations: pillarAssessments || []
     };
     
   } catch (error) {
@@ -368,7 +368,9 @@ function buildNeuroplasticityProgress(pillarAssessments: any[]): any {
   pillarAssessments.forEach(assessment => {
     if (assessment.pillar_type && assessment.scores) {
       progress[assessment.pillar_type] = {
-        latest_score: Object.values(assessment.scores).reduce((a: any, b: any) => a + b, 0) / Object.values(assessment.scores).length,
+        latest_score: assessment.scores ? 
+          (Object.values(assessment.scores) as any[]).reduce((a: number, b: any) => a + (Number(b) || 0), 0) / 
+          Math.max(Object.values(assessment.scores).length, 1) : 0,
         assessment_date: assessment.created_at,
         progress_trend: 'stable' // Skulle kunna beräknas mer sofistikerat
       };
