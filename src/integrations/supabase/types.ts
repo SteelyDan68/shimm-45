@@ -1229,6 +1229,48 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          conversation_type: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          last_message_at: string | null
+          metadata: Json | null
+          participant_ids: string[]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          conversation_type?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_message_at?: string | null
+          metadata?: Json | null
+          participant_ids: string[]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          conversation_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_message_at?: string | null
+          metadata?: Json | null
+          participant_ids?: string[]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       data_deletion_requests: {
         Row: {
           admin_notes: string | null
@@ -1436,93 +1478,97 @@ export type Database = {
         }
         Relationships: []
       }
-      message_preferences: {
+      message_read_receipts: {
         Row: {
-          auto_ai_assistance: boolean
-          created_at: string
-          email_notifications: boolean
           id: string
-          internal_notifications: boolean
-          updated_at: string
+          message_id: string
+          read_at: string
           user_id: string
         }
         Insert: {
-          auto_ai_assistance?: boolean
-          created_at?: string
-          email_notifications?: boolean
           id?: string
-          internal_notifications?: boolean
-          updated_at?: string
+          message_id: string
+          read_at?: string
           user_id: string
         }
         Update: {
-          auto_ai_assistance?: boolean
-          created_at?: string
-          email_notifications?: boolean
           id?: string
-          internal_notifications?: boolean
-          updated_at?: string
+          message_id?: string
+          read_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "message_read_receipts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_v2"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      messages: {
+      messages_v2: {
         Row: {
           content: string
+          conversation_id: string
           created_at: string
+          deleted_at: string | null
+          edited_at: string | null
           id: string
-          is_ai_assisted: boolean
-          is_read: boolean
+          is_deleted: boolean | null
+          is_edited: boolean | null
+          message_type: string
+          metadata: Json | null
           parent_message_id: string | null
-          receiver_id: string
+          reactions: Json | null
           sender_id: string
-          subject: string | null
           updated_at: string
         }
         Insert: {
           content: string
+          conversation_id: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
-          is_ai_assisted?: boolean
-          is_read?: boolean
+          is_deleted?: boolean | null
+          is_edited?: boolean | null
+          message_type?: string
+          metadata?: Json | null
           parent_message_id?: string | null
-          receiver_id: string
+          reactions?: Json | null
           sender_id: string
-          subject?: string | null
           updated_at?: string
         }
         Update: {
           content?: string
+          conversation_id?: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
-          is_ai_assisted?: boolean
-          is_read?: boolean
+          is_deleted?: boolean | null
+          is_edited?: boolean | null
+          message_type?: string
+          metadata?: Json | null
           parent_message_id?: string | null
-          receiver_id?: string
+          reactions?: Json | null
           sender_id?: string
-          subject?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "messages_parent_message_id_fkey"
+            foreignKeyName: "messages_v2_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_v2_parent_message_id_fkey"
             columns: ["parent_message_id"]
             isOneToOne: false
-            referencedRelation: "messages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "messages_v2"
             referencedColumns: ["id"]
           },
         ]
@@ -1570,6 +1616,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          desktop_notifications: boolean
+          email_notifications: boolean
+          metadata: Json | null
+          muted_conversations: string[] | null
+          push_notifications: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          sound_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          desktop_notifications?: boolean
+          email_notifications?: boolean
+          metadata?: Json | null
+          muted_conversations?: string[] | null
+          push_notifications?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sound_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          desktop_notifications?: boolean
+          email_notifications?: boolean
+          metadata?: Json | null
+          muted_conversations?: string[] | null
+          push_notifications?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sound_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notification_settings: {
         Row: {
@@ -2994,6 +3082,41 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      user_presence: {
+        Row: {
+          last_seen: string
+          metadata: Json | null
+          status: string
+          typing_in_conversation: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_seen?: string
+          metadata?: Json | null
+          status?: string
+          typing_in_conversation?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_seen?: string
+          metadata?: Json | null
+          status?: string
+          typing_in_conversation?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_presence_typing_in_conversation_fkey"
+            columns: ["typing_in_conversation"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
