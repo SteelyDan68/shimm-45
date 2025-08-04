@@ -310,6 +310,45 @@ export type Database = {
           },
         ]
       }
+      ai_usage_logs: {
+        Row: {
+          confidence_score: number | null
+          context_used: Json | null
+          created_at: string | null
+          fallback_used: boolean | null
+          id: string
+          interaction_type: string
+          model_used: string
+          response_time_ms: number | null
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          context_used?: Json | null
+          created_at?: string | null
+          fallback_used?: boolean | null
+          id?: string
+          interaction_type: string
+          model_used: string
+          response_time_ms?: number | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          context_used?: Json | null
+          created_at?: string | null
+          fallback_used?: boolean | null
+          id?: string
+          interaction_type?: string
+          model_used?: string
+          response_time_ms?: number | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       analytics_aggregations: {
         Row: {
           avg_value: number | null
@@ -503,6 +542,36 @@ export type Database = {
           is_active?: boolean
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      assessment_integration_metrics: {
+        Row: {
+          average_context_score: number | null
+          created_at: string | null
+          id: string
+          last_sync_date: string | null
+          total_users: number | null
+          updated_at: string | null
+          users_with_assessments: number | null
+        }
+        Insert: {
+          average_context_score?: number | null
+          created_at?: string | null
+          id?: string
+          last_sync_date?: string | null
+          total_users?: number | null
+          updated_at?: string | null
+          users_with_assessments?: number | null
+        }
+        Update: {
+          average_context_score?: number | null
+          created_at?: string | null
+          id?: string
+          last_sync_date?: string | null
+          total_users?: number | null
+          updated_at?: string | null
+          users_with_assessments?: number | null
         }
         Relationships: []
       }
@@ -2313,6 +2382,48 @@ export type Database = {
           velocity_score?: number | null
           weight?: string | null
           youtube_handle?: string | null
+        }
+        Relationships: []
+      }
+      stefan_ai_config: {
+        Row: {
+          confidence_threshold: number | null
+          created_at: string | null
+          enable_assessment_context: boolean | null
+          enable_recommendations: boolean | null
+          fallback_enabled: boolean | null
+          id: string
+          max_tokens: number | null
+          primary_model: string | null
+          temperature: number | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          confidence_threshold?: number | null
+          created_at?: string | null
+          enable_assessment_context?: boolean | null
+          enable_recommendations?: boolean | null
+          fallback_enabled?: boolean | null
+          id?: string
+          max_tokens?: number | null
+          primary_model?: string | null
+          temperature?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          confidence_threshold?: number | null
+          created_at?: string | null
+          enable_assessment_context?: boolean | null
+          enable_recommendations?: boolean | null
+          fallback_enabled?: boolean | null
+          id?: string
+          max_tokens?: number | null
+          primary_model?: string | null
+          temperature?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: []
       }

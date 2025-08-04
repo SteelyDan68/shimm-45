@@ -157,8 +157,11 @@ async function getClientAssessmentContext(userId: string): Promise<ClientAssessm
         .single()
     ]);
 
-    // Extrahera Wheel of Life scores från welcome assessment
-    const wheelOfLifeScores = welcomeAssessment?.[0]?.wheel_of_life_scores || {};
+    // Extrahera Wheel of Life scores från welcome assessment med type guard
+    const wheelOfLifeScores: Record<string, number> = {};
+    if (welcomeAssessment?.[0]?.wheel_of_life_scores && typeof welcomeAssessment[0].wheel_of_life_scores === 'object') {
+      Object.assign(wheelOfLifeScores, welcomeAssessment[0].wheel_of_life_scores);
+    }
     
     // Bygg neuroplasticitets-progress från pillar assessments
     const neuroplasticityProgress = buildNeuroplasticityProgress(pillarAssessments || []);
@@ -176,7 +179,7 @@ async function getClientAssessmentContext(userId: string): Promise<ClientAssessm
       neuroplasticityProgress,
       personalityProfile,
       recentInteractions: stefanInteractions || [],
-      pillarActivations: pillarActivations || []
+      pillarActivations: pillarAssessments || [] // Använd pillar assessments
     };
     
   } catch (error) {
@@ -345,11 +348,11 @@ function analyzeAssessmentTrends(assessments: any[]): string[] {
   
   if (latest.scores && previous.scores) {
     const improvement = Object.keys(latest.scores).filter(key => 
-      latest.scores[key] > previous.scores[key]
+      Number(latest.scores[key]) > Number(previous.scores[key])
     );
     
     const decline = Object.keys(latest.scores).filter(key => 
-      latest.scores[key] < previous.scores[key]
+      Number(latest.scores[key]) < Number(previous.scores[key])
     );
     
     if (improvement.length > 0) trends.push(`Förbättring inom: ${improvement.join(', ')}`);
