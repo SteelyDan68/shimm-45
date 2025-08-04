@@ -20,8 +20,8 @@ import { format, addDays, startOfWeek, endOfWeek, isSameDay, isToday } from 'dat
 import { sv } from 'date-fns/locale';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarGrid } from './CalendarGrid';
-import { CalendarEvent } from './CalendarEvent';
+import { EnhancedCalendarGrid } from './EnhancedCalendarGrid';
+import { EnhancedCalendarEvent } from './EnhancedCalendarEvent';
 import { AddEventForm } from './AddEventForm';
 import { NotificationSettings } from './NotificationSettings';
 import { CalendarExportImport } from './CalendarExportImport';
@@ -30,6 +30,7 @@ import { UnifiedTaskEventCreator } from './UnifiedTaskEventCreator';
 import { useAIPlanning } from '@/hooks/useAIPlanning';
 import { useCalendarData, CalendarEventData } from '@/hooks/useCalendarData';
 import { useUnifiedCalendarTasks } from '@/hooks/useUnifiedCalendarTasks';
+import { useUniversalDependencyTracker } from '@/hooks/useUniversalDependencyTracker';
 import { supabase } from '@/integrations/supabase/client';
 
 // Export CalendarEventData for other components
@@ -89,6 +90,9 @@ export const CalendarModule = ({
     dismissPlanningDialog, 
     handlePlanCreated 
   } = useAIPlanning(clientId);
+
+  // Universal dependency tracking
+  const { trackCalendarEventMove, notifyAffectedUsers } = useUniversalDependencyTracker();
 
   // Generate calendar dates for current view
   const calendarDates = useMemo(() => {
@@ -177,20 +181,34 @@ export const CalendarModule = ({
     }
 
     const newDate = new Date(over.id as string);
+    const oldDate = draggedEvent.date;
     
-    // Use unified move functionality
+    // Enhanced move functionality with dependency tracking
     try {
       const itemType = draggedEvent.type === 'task' ? 'task' : 'calendar_event';
       const itemId = draggedEvent.type === 'task' 
         ? draggedEvent.id.replace('task-', '')
         : draggedEvent.id;
       
+      // First, move the item
       const success = await moveItem(itemId, itemType, newDate);
       
       if (success) {
+        // Track dependency changes
+        const changeLog = await trackCalendarEventMove(
+          itemId,
+          draggedEvent.title,
+          itemType,
+          oldDate,
+          newDate
+        );
+        
+        // Notify affected users
+        const affectedUsers = await notifyAffectedUsers(changeLog);
+        
         toast({
-          title: "Händelse flyttad",
-          description: `"${draggedEvent.title}" flyttades till ${format(newDate, 'dd MMM', { locale: sv })}`
+          title: "Händelse flyttad ✅",
+          description: `"${draggedEvent.title}" flyttades till ${format(newDate, 'dd MMM', { locale: sv })}. ${affectedUsers.length} användare notifierade.`
         });
       }
     } catch (error) {
@@ -240,6 +258,10 @@ export const CalendarModule = ({
         variant: "destructive"
       });
     }
+  };
+
+  const handleQuickAdd = (date: Date) => {
+    addCustomEvent({ date, title: 'Snabb händelse' });
   };
 
   if (loading) {
@@ -387,22 +409,25 @@ export const CalendarModule = ({
         </CardHeader>
       </Card>
 
-      {/* Calendar Grid */}
+      {/* Enhanced Calendar Grid with Hover & Improved Drag/Drop */}
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <CalendarGrid
+        <EnhancedCalendarGrid
           dates={calendarDates}
           events={events}
           viewMode={viewMode}
           getEventsForDate={getEventsForDate}
           pillarColors={PILLAR_COLORS}
+          onQuickAdd={handleQuickAdd}
+          isCoachView={isCoachView}
         />
         
         <DragOverlay>
           {draggedEvent && (
-            <CalendarEvent 
+            <EnhancedCalendarEvent 
               event={draggedEvent} 
               pillarColors={PILLAR_COLORS}
               isDragging 
+              showHover={false}
             />
           )}
         </DragOverlay>

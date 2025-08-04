@@ -17,6 +17,7 @@ export interface CalendarEventData {
   duration?: number;
   isOverdue?: boolean;
   isDueSoon?: boolean;
+  created_by_role?: string;
   metadata?: Record<string, any>;
 }
 
