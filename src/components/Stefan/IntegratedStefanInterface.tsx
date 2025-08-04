@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useEnhancedStefanAI } from '@/hooks/useEnhancedStefanAI';
+import { useUnifiedAI } from '@/hooks/useUnifiedAI';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -61,7 +61,7 @@ export function IntegratedStefanInterface({
   const [selectedTab, setSelectedTab] = useState('chat');
   const [quickActions, setQuickActions] = useState<string[]>([]);
   
-  const { enhancedStefanChat, loading } = useEnhancedStefanAI();
+  const { stefanChat, loading } = useUnifiedAI();
   const { user } = useAuth();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -109,13 +109,12 @@ export function IntegratedStefanInterface({
         previousMessages: messages.slice(-3).map(m => ({ role: m.isUser ? 'user' : 'assistant', content: m.content }))
       };
 
-      const response = await enhancedStefanChat({
+      const response = await stefanChat({
         message: messageToSend,
-        interactionType: context === 'coaching' ? 'coaching_session' : 
-                        context === 'assessment' ? 'assessment_completion' :
-                        context === 'planning' ? 'progress_review' : 'chat',
-        includeAssessmentContext: true,
-        generateRecommendations: true
+        conversationHistory: messages.slice(-3).map(m => ({ 
+          role: m.isUser ? 'user' : 'assistant', 
+          content: m.content 
+        }))
       });
 
       if (!response) {
@@ -129,15 +128,12 @@ export function IntegratedStefanInterface({
         timestamp: new Date(),
         memoryFragmentsUsed: 0,
         coachingContext: context,
-        actionItems: response.recommendedActions || []
+        actionItems: []
       };
 
       setMessages(prev => [...prev, aiMessage]);
 
-      // Set quick actions from AI recommendations
-      if (response.recommendedActions && response.recommendedActions.length > 0) {
-        setQuickActions(response.recommendedActions);
-      }
+      // Note: Quick actions can be added in future versions
 
     } catch (error) {
       console.error('Error sending message:', error);

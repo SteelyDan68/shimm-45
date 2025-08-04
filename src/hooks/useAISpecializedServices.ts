@@ -16,12 +16,14 @@ export interface StefanChatResponse {
 }
 
 /**
- * 💬 STEFAN CHAT SERVICE
+ * @deprecated Use useUnifiedAI.stefanChat instead - this hook will be removed in next version
+ * 💬 STEFAN CHAT SERVICE  
  * - Specialized hook for Stefan AI interactions
  * - Conversation history management
  * - User context integration
  */
 export const useStefanChat = () => {
+  console.warn("🚨 DEPRECATED: useStefanChat is deprecated. Use useUnifiedAI.stefanChat instead.");
   const { user } = useAuth();
   const { executeAIRequest, loading, error } = useAIRequestExecutor();
 
@@ -74,12 +76,14 @@ export interface CoachingAnalysisResponse {
 }
 
 /**
+ * @deprecated Use useUnifiedAI.coachingAnalysis instead - this hook will be removed in next version
  * 🎯 COACHING ANALYSIS SERVICE
- * - Advanced coaching recommendations
+ * - Advanced coaching recommendations  
  * - Session analysis and insights
  * - Progress tracking integration
  */
 export const useCoachingAnalysis = () => {
+  console.warn("🚨 DEPRECATED: useCoachingAnalysis is deprecated. Use useUnifiedAI.coachingAnalysis instead.");
   const { user } = useAuth();
   const { executeAIRequest, loading, error } = useAIRequestExecutor();
 

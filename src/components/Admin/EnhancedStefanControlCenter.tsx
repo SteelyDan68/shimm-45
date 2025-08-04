@@ -182,7 +182,6 @@ export function EnhancedStefanControlCenter() {
         try {
           const response = await enhancedStefanChat({
             message: testMessage,
-            forceModel: config.model as any,
             includeAssessmentContext: config.context,
             generateRecommendations: true
           });

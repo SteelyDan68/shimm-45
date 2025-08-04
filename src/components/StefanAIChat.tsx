@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { MessageCircle, X, Send, Minimize2, Maximize2 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/components/ui/use-toast';
-import { useEnhancedStefanAI } from '@/hooks/useEnhancedStefanAI';
+import { useUnifiedAI } from '@/hooks/useUnifiedAI';
 
 interface Message {
   id: string;
@@ -35,7 +35,7 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { enhancedStefanChat, loading } = useEnhancedStefanAI();
+  const { stefanChat, loading } = useUnifiedAI();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,12 +62,13 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
     setInputMessage('');
 
     try {
-      // Enhanced Stefan AI with assessment context
-      const response = await enhancedStefanChat({
+      // Stefan AI chat via unified system
+      const response = await stefanChat({
         message: currentMessage,
-        interactionType: clientId ? 'coaching_session' : 'chat',
-        includeAssessmentContext: true,
-        generateRecommendations: true
+        conversationHistory: messages.slice(-3).map(m => ({ 
+          role: m.isUser ? 'user' : 'assistant', 
+          content: m.content 
+        }))
       });
 
       if (response) {
