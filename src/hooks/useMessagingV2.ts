@@ -414,13 +414,44 @@ export const useMessagingV2 = () => {
         .from('notification_preferences')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single
 
       if (error && error.code !== 'PGRST116') throw error;
-      setPreferences(data ? {
-        ...data,
-        metadata: typeof data.metadata === 'object' && data.metadata !== null ? data.metadata as Record<string, any> : {}
-      } : null);
+      
+      if (data) {
+        setPreferences({
+          ...data,
+          metadata: typeof data.metadata === 'object' && data.metadata !== null ? data.metadata as Record<string, any> : {}
+        });
+      } else {
+        // Create default preferences if none exist
+        const defaultPrefs = {
+          user_id: user.id,
+          email_notifications: true,
+          push_notifications: true,
+          desktop_notifications: true,
+          sound_enabled: true,
+          quiet_hours_start: null,
+          quiet_hours_end: null,
+          muted_conversations: [],
+          metadata: {}
+        };
+        
+        const { data: newPrefs, error: createError } = await supabase
+          .from('notification_preferences')
+          .insert(defaultPrefs)
+          .select('*')
+          .single();
+          
+        if (createError) {
+          console.error('❌ Error creating default preferences:', createError);
+        } else {
+          setPreferences({
+            ...newPrefs,
+            metadata: typeof newPrefs.metadata === 'object' && newPrefs.metadata !== null ? newPrefs.metadata as Record<string, any> : {}
+          });
+        }
+      }
     } catch (error) {
       console.error('❌ Error fetching preferences:', error);
     }
