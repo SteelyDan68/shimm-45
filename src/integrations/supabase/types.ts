@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          target_user_id: string | null
+          timestamp: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          target_user_id?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          target_user_id?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       ai_coaching_analytics: {
         Row: {
           created_at: string
@@ -3243,6 +3279,10 @@ export type Database = {
       }
       user_has_any_role: {
         Args: { _user_id: string }
+        Returns: boolean
+      }
+      validate_admin_action: {
+        Args: { action_type: string; admin_id: string }
         Returns: boolean
       }
       validate_invitation_token: {
