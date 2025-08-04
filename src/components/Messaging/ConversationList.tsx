@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Search, Plus } from 'lucide-react';
 import { useMessages, type Message } from '@/hooks/useMessages';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
+import { useUserRelationships } from '@/hooks/useUserRelationships';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -38,7 +38,7 @@ export const ConversationList = ({
   const [loading, setLoading] = useState(true);
   const { messages } = useMessages();
   const { user, hasRole } = useAuth();
-  const { isCoachClient, getCurrentUserClients, getCurrentUserCoach } = useCoachClientRelationships();
+  const { isCoachClient, getCurrentUserClients, getCurrentUserCoach } = useUserRelationships();
 
   useEffect(() => {
     if (user) {

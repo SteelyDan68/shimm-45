@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Settings, MessageSquare, Users, Brain, Plus, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { Settings, MessageSquare, Users, Plus, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSearchParams } from 'react-router-dom';
 import { ConversationList } from '@/components/Messaging/ConversationList';
@@ -16,7 +16,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 export function Messages() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, hasRole } = useAuth();
-  const { unreadCount, refetch } = useMessages();
+  const { unreadCount, refetch, loading: messagesLoading } = useMessages();
   
   const [selectedConversation, setSelectedConversation] = useState<{
     id: string;
@@ -52,24 +52,29 @@ export function Messages() {
   }, []);
 
   const handleSelectConversation = (id: string, name: string, avatar?: string) => {
+    console.log('🔍 Selecting conversation:', { id, name });
     setSelectedConversation({ id, name, avatar });
     setShowCompose(false);
   };
 
   const handleNewMessage = () => {
+    console.log('🔍 Opening compose message');
     setShowCompose(true);
     setSelectedConversation(null);
   };
 
   const handleCloseConversation = () => {
+    console.log('🔍 Closing conversation');
     setSelectedConversation(null);
   };
 
   const handleComposeClose = () => {
+    console.log('🔍 Closing compose');
     setShowCompose(false);
   };
 
   const handleComposeSent = () => {
+    console.log('🔍 Message sent, refreshing');
     setShowCompose(false);
     refetch();
   };
@@ -96,16 +101,30 @@ export function Messages() {
     return 'Skicka och ta emot meddelanden på ett säkert sätt.';
   };
 
-  if (!user) {
+  // Show loading state while authentication and messages are loading
+  if (!user || messagesLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Laddar meddelanden...</p>
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Laddar meddelanden...</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Initierar säker anslutning...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
+
+  console.log('🔍 Messages component rendering with user:', user.email);
+  console.log('🔍 User roles:', { 
+    hasClient: hasRole('client'),
+    hasCoach: hasRole('coach'), 
+    hasAdmin: hasRole('admin'),
+    hasSuperAdmin: hasRole('superadmin')
+  });
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
