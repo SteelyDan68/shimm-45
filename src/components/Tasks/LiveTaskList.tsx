@@ -17,11 +17,14 @@ import {
   CheckCircle2,
   AlertCircle,
   Plus,
-  ArrowRight
+  ArrowRight,
+  CalendarPlus,
+  Edit
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useUserTasks } from '@/hooks/useUserTasks';
+import { useTasks } from '@/hooks/useTasks';
 import { useToast } from '@/hooks/use-toast';
+import { useUnifiedCalendarTasks } from '@/hooks/useUnifiedCalendarTasks';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -40,24 +43,41 @@ export const LiveTaskList: React.FC<LiveTaskListProps> = ({ className }) => {
     loading, 
     completeTask, 
     updateTask, 
-    getTaskCounts,
-    refetch 
-  } = useUserTasks(user?.id || '', {
-    // Apply filters based on tab
-    status: filterTab === 'pending' ? ['planned', 'in_progress'] : 
-           filterTab === 'completed' ? ['completed'] : 
-           undefined,
-    ai_generated: filterTab === 'ai' ? true : undefined
+    refreshTasks
+  } = useTasks(user?.id);
+
+  const { 
+    createUnifiedTaskEvent,
+    moveItem,
+    deleteUnifiedItem
+  } = useUnifiedCalendarTasks(user?.id);
+
+  // Calculate task counts based on filtered tasks
+  const allFilteredTasks = tasks.filter(task => {
+    if (filterTab === 'pending') return ['planned', 'in_progress'].includes(task.status);
+    if (filterTab === 'completed') return task.status === 'completed';
+    if (filterTab === 'ai') return task.ai_generated;
+    return true;
   });
+
+  const taskCounts = {
+    total: tasks.length,
+    planned: tasks.filter(t => t.status === 'planned').length,
+    in_progress: tasks.filter(t => t.status === 'in_progress').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
+    overdue: tasks.filter(t => 
+      t.deadline && 
+      new Date(t.deadline) < new Date() && 
+      t.status !== 'completed'
+    ).length
+  };
 
   // Listen for task updates
   useEffect(() => {
-    const handleTasksUpdated = () => refetch();
+    const handleTasksUpdated = () => refreshTasks();
     window.addEventListener('tasks-updated', handleTasksUpdated);
     return () => window.removeEventListener('tasks-updated', handleTasksUpdated);
-  }, [refetch]);
-
-  const taskCounts = getTaskCounts();
+  }, [refreshTasks]);
   
   const filteredTasks = tasks.filter(task => 
     task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -253,6 +273,25 @@ export const LiveTaskList: React.FC<LiveTaskListProps> = ({ className }) => {
                     </div>
 
                     <div className="flex items-center gap-2 ml-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          await createUnifiedTaskEvent({
+                            title: task.title,
+                            description: task.description,
+                            date: new Date(task.deadline || Date.now()),
+                            type: 'event',
+                            priority: task.priority,
+                            ai_generated: task.ai_generated,
+                            created_by_role: 'user'
+                          });
+                        }}
+                      >
+                        <CalendarPlus className="w-4 h-4 mr-1" />
+                        Till kalender
+                      </Button>
+                      
                       {task.status !== 'completed' && (
                         <Button
                           size="sm"

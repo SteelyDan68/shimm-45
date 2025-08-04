@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ClientCard } from './ClientCard';
-import { DashboardFilters } from './DashboardFilters';
-import { useCoachDashboard } from '@/hooks/useCoachDashboard';
+import { useRealCoachDashboard } from '@/hooks/useRealCoachDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,21 +15,21 @@ import { AIRecommendationsPanel } from './AIRecommendationsPanel';
 import { ProgressMetrics } from './ProgressMetrics';
 
 export function CoachDashboard() {
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('priority');
+  
   const {
     clients,
     coachStats,
     loading,
-    activeFilter,
-    setActiveFilter,
-    sortBy,
-    setSortBy,
     refreshData,
-    totalClients,
-    filteredCount
-  } = useCoachDashboard();
+    totalClients
+  } = useRealCoachDashboard();
 
   const { navigateTo, quickActions } = useNavigation();
   const { user, profile } = useAuth();
+
+  const filteredCount = clients.length;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -59,7 +58,7 @@ export function CoachDashboard() {
               </div>
               <p className="text-sm text-muted-foreground">Aktiva klienter</p>
               <Badge variant="outline" className="mt-1">
-                {coachStats.highPriorityClients} behöver uppmärksamhet
+                {clients.length} behöver uppmärksamhet
               </Badge>
             </div>
           </div>
@@ -77,8 +76,8 @@ export function CoachDashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{coachStats.avgClientProgress}%</div>
-            <Progress value={coachStats.avgClientProgress} className="h-2 mt-2" />
+            <div className="text-2xl font-bold">{coachStats.avgProgressAcrossClients || 0}%</div>
+            <Progress value={coachStats.avgProgressAcrossClients || 0} className="h-2 mt-2" />
           </CardContent>
         </Card>
 
@@ -91,7 +90,7 @@ export function CoachDashboard() {
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{coachStats.stefanRecommendations}</div>
+            <div className="text-2xl font-bold">{coachStats.pendingAssessments || 0}</div>
             <p className="text-xs text-muted-foreground">
               Nya AI-insikter tillgängliga
             </p>
@@ -107,7 +106,7 @@ export function CoachDashboard() {
             <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{coachStats.completedTasks}</div>
+            <div className="text-2xl font-bold">{coachStats.completedTasksThisWeek || 0}</div>
             <p className="text-xs text-muted-foreground">
               denna vecka
             </p>
@@ -123,7 +122,7 @@ export function CoachDashboard() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{coachStats.upcomingDeadlines}</div>
+            <div className="text-2xl font-bold text-orange-600">{coachStats.upcomingEvents || 0}</div>
             <p className="text-xs text-muted-foreground">
               inom 3 dagar
             </p>
@@ -172,46 +171,17 @@ export function CoachDashboard() {
       
       <AIRecommendationsPanel />
 
-      {/* Client Filters and List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-green-600" />
-            Dina klienter
-            <HelpTooltip content="Filtrerade lista över klienter som behöver din uppmärksamhet" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DashboardFilters
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            totalClients={totalClients}
-            filteredCount={filteredCount}
-            loading={loading}
-            onRefresh={refreshData}
-          />
-        </CardContent>
-      </Card>
-
       {/* Client Grid */}
-      {!loading && filteredCount === 0 ? (
+      {!loading && clients.length === 0 ? (
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">
-                {totalClients === 0 
-                  ? 'Alla klienter mår bra! 🎉' 
-                  : 'Inga klienter matchar filtret'
-                }
+                Alla klienter mår bra! 🎉
               </h3>
               <p className="text-muted-foreground">
-                {totalClients === 0 
-                  ? 'Inga av dina klienter behöver uppmärksamhet just nu.'
-                  : 'Prova att ändra filter eller sortering för att se andra klienter.'
-                }
+                Inga av dina klienter behöver uppmärksamhet just nu.
               </p>
             </div>
           </CardContent>
@@ -219,7 +189,25 @@ export function CoachDashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {clients.map(client => (
-            <ClientCard key={client.id} client={client} />
+            <Card key={client.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-lg">{client.name}</CardTitle>
+                <p className="text-sm text-muted-foreground">{client.email}</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span>Framsteg:</span>
+                    <span>{client.overall_progress}%</span>
+                  </div>
+                  <Progress value={client.overall_progress} />
+                  <div className="flex justify-between text-sm">
+                    <span>Uppgifter: {client.pending_tasks.length}</span>
+                    <span>Issues: {client.real_issues.length}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -237,23 +225,23 @@ export function CoachDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-primary">{totalClients}</div>
-                <div className="text-sm text-muted-foreground">Behöver uppmärksamhet</div>
+                <div className="text-sm text-muted-foreground">Totalt antal klienter</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-red-600">
-                  {clients.filter(c => c.issues.some(i => i.severity === 'high')).length}
+                  {clients.filter(c => c.real_issues.some(i => i.severity === 'high')).length}
                 </div>
                 <div className="text-sm text-muted-foreground">Hög prioritet</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-yellow-600">
-                  {clients.filter(c => c.issues.some(i => i.type === 'new_barriers')).length}
+                  {clients.filter(c => c.real_issues.some(i => i.type === 'low_progress')).length}
                 </div>
-                <div className="text-sm text-muted-foreground">Nya hinder</div>
+                <div className="text-sm text-muted-foreground">Låg framsteg</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-blue-600">
-                  {clients.filter(c => c.issues.some(i => i.type === 'inactive')).length}
+                  {clients.filter(c => c.real_issues.some(i => i.type === 'inactive')).length}
                 </div>
                 <div className="text-sm text-muted-foreground">Inaktiva</div>
               </div>
