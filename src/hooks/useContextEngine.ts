@@ -350,7 +350,13 @@ export const useContextEngine = () => {
   return {
     loading,
     sessionId,
-    currentSessionState: { session_id: sessionId },
+    currentSessionState: {
+      session_id: sessionId,
+      last_active_at: new Date().toISOString(),
+      total_time_spent_minutes: 0,
+      daily_completions: 0,
+      session_data: {}
+    },
     insights: [],
     behaviorPatterns: [],
     logContextEvent,
