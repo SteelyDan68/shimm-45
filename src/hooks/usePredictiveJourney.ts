@@ -123,7 +123,9 @@ export const usePredictiveJourney = () => {
 
   // Föreslå nästa bästa steg för användaren
   const suggestNextBestAction = useCallback(() => {
-    if (!currentPrediction) return null;
+    if (!currentPrediction || !currentPrediction.predicted_next_actions || !Array.isArray(currentPrediction.predicted_next_actions)) {
+      return null;
+    }
 
     const nextActions = currentPrediction.predicted_next_actions
       .sort((a, b) => b.probability - a.probability);
