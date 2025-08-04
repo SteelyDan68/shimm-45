@@ -280,7 +280,7 @@ export const ClientProfileView = ({
               // Call the data-collector edge function directly
               supabase.functions.invoke('data-collector', {
                 body: { 
-                  user_id: userId,
+                  client_id: userId,
                   timestamp: new Date().toISOString(),
                   force_refresh: true
                 }
