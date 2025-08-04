@@ -12,6 +12,7 @@ serve(async (req) => {
   }
 
   try {
+    // Create Supabase client with user's auth for RLS
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -24,6 +25,22 @@ serve(async (req) => {
       console.error('Auth error:', authError)
       throw new Error('Unauthorized')
     }
+
+    // Check if user is superadmin to use service role if needed
+    const { data: userRoles } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+    
+    const isSuperAdmin = userRoles?.some(r => r.role === 'superadmin') || false
+    
+    // Use service role client for superadmin to bypass RLS if needed
+    const dbClient = isSuperAdmin 
+      ? createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        )
+      : supabaseClient
 
     const requestBody = await req.json()
     console.log('📨 Request body:', requestBody)
@@ -42,8 +59,8 @@ serve(async (req) => {
       subject
     })
 
-    // Insert the message
-    const { data: message, error: insertError } = await supabaseClient
+    // Insert the message using appropriate client
+    const { data: message, error: insertError } = await dbClient
       .from('messages')
       .insert({
         sender_id: user.id,
@@ -81,8 +98,8 @@ serve(async (req) => {
 
     console.log('✅ Real-time notification sent')
 
-    // Get receiver's notification preferences
-    const { data: receiverPrefs } = await supabaseClient
+    // Get receiver's notification preferences using appropriate client
+    const { data: receiverPrefs } = await dbClient
       .from('message_preferences')
       .select('email_notifications, internal_notifications')
       .eq('user_id', receiverId)
@@ -90,14 +107,14 @@ serve(async (req) => {
 
     // Send email notification if enabled
     if (receiverPrefs?.email_notifications !== false) {
-      const { data: receiverProfile } = await supabaseClient
+      const { data: receiverProfile } = await dbClient
         .from('profiles')
         .select('email, first_name, last_name')
         .eq('id', receiverId)
         .single()
 
       if (receiverProfile?.email) {
-        const { data: senderProfile } = await supabaseClient
+        const { data: senderProfile } = await dbClient
           .from('profiles')
           .select('first_name, last_name')
           .eq('id', user.id)
