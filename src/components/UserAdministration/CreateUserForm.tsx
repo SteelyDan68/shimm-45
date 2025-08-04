@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/UnifiedAuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,13 +53,6 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
     sendInviteEmail: false
   });
 
-  // Ladda coaches när komponenten mountas
-  useState(() => {
-    if (canAssignCoaches) {
-      loadCoaches();
-    }
-  });
-
   const loadCoaches = async () => {
     try {
       const { data, error } = await supabase
@@ -87,6 +80,13 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
       console.error('Error loading coaches:', error);
     }
   };
+
+  // Ladda coaches när komponenten mountas
+  useEffect(() => {
+    if (canAssignCoaches) {
+      loadCoaches();
+    }
+  }, [canAssignCoaches]);
 
   const generatePassword = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
