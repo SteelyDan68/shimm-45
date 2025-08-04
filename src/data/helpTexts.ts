@@ -28,7 +28,7 @@ export const helpTexts = {
     currentPhase: "Vilken fas av utvecklingsresan du befinner dig i just nu. Varje fas har olika fokusområden och mål.",
     stefanWidget: "Stefan är din AI-coach som ger personliga råd och uppmuntran baserat på din specifika situation.",
     quickOverview: "Snabböversikt över dina viktigaste mätvärden och framsteg.",
-    pillarStatus: "Status för alla dina Five Pillars-områden. Färgkodning visar styrkor (grönt), utmaningar (orange) och kritiska områden (rött)."
+    pillarStatus: "Status för alla dina Six Pillars-områden. Färgkodning visar styrkor (grönt), utmaningar (orange) och kritiska områden (rött)."
   },
 
   // Stefan AI
@@ -59,7 +59,7 @@ export const helpTexts = {
 
   // Five Pillars
   sixPillars: {
-    systemOverview: "Five Pillars är ett utvecklingssystem med fem grundpelare för hållbar framgång och välmående.",
+    systemOverview: "Six Pillars är ett utvecklingssystem med sex grundpelare för hållbar framgång och välmående.",
     pillarsOrder: "Pillarnas prioriteringsordning: Self Care (välmående) aktiveras automatiskt först, sedan Skills → Talent → Brand → Economy enligt behov.",
     selfCare: "Välmående och hälsa - grundläggande för hållbar prestanda och kreativitet. Aktiveras automatiskt för alla nya användare.",
     skills: "Färdigheter och tekniska kunskaper - kontinuerlig utveckling och kompetensutveckling.",
@@ -121,7 +121,7 @@ export const helpTexts = {
     contentPerformance: "Hur väl olika typer av innehåll presterar jämfört med varandra.",
     platformComparison: "Jämförelse av prestanda mellan olika sociala medier-plattformar.",
     aiInsightsGenerated: "Antal AI-genererade insikter och rekommendationer baserat på data.",
-    pillarAnalytics: "Analys av dina Five Pillars framsteg och utvecklingstrender över tid.",
+    pillarAnalytics: "Analys av dina Six Pillars framsteg och utvecklingstrender över tid.",
     filters: "Anpassa tidsperiod och datatyper för mer specifik analys."
   },
 

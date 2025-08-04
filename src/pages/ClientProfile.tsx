@@ -274,7 +274,7 @@ export const ClientProfile = () => {
         <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="overview">Översikt</TabsTrigger>
           <TabsTrigger value="calendar">Kalender</TabsTrigger>
-          <TabsTrigger value="pillars">Five Pillars</TabsTrigger>
+          <TabsTrigger value="pillars">Six Pillars</TabsTrigger>
           <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
           <TabsTrigger value="data">Data & Insights</TabsTrigger>
           <TabsTrigger value="tasks">Uppgifter</TabsTrigger>
@@ -427,7 +427,7 @@ export const ClientProfile = () => {
           />
         </TabsContent>
 
-        {/* Five Pillars Tab */}
+        {/* Six Pillars Tab */}
         <TabsContent value="pillars" className="space-y-6">
           <ModularPillarDashboard 
             userId={clientId!} 

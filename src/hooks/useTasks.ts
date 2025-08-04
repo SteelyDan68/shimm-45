@@ -16,16 +16,22 @@ export const useTasks = (clientId?: string) => {
   const fetchTasks = async () => {
     if (!clientId || !user) return;
     
-    // Check authorization - coaches can only see tasks for their assigned clients
-    if (hasRole('coach') && !isCoachClient(user.id, clientId)) {
-      toast({
-        title: "Ingen behörighet",
-        description: "Du har inte behörighet att se uppgifter för denna klient",
-        variant: "destructive"
-      });
-      setTasks([]);
-      setLoading(false);
-      return;
+    // 🚨 SUPERADMIN & ADMIN GOD MODE - Skip all authorization checks
+    if (hasRole('superadmin') || hasRole('admin')) {
+      // Superadmin and Admin have unlimited access to all client data
+      console.log('🔥 SUPERADMIN/ADMIN ACCESS: Bypassing all task authorization checks');
+    } else {
+      // Check authorization - coaches can only see tasks for their assigned clients
+      if (hasRole('coach') && !isCoachClient(user.id, clientId)) {
+        toast({
+          title: "Ingen behörighet",
+          description: "Du har inte behörighet att se uppgifter för denna klient",
+          variant: "destructive"
+        });
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
     }
     
     // Clients can only see their own tasks

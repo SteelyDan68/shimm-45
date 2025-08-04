@@ -302,7 +302,7 @@ export const UserProfile = () => {
             </TabsTrigger>
             <TabsTrigger value="pillars" className="flex items-center gap-2">
               <Trophy className="h-4 w-4" />
-              <span className="hidden sm:inline">Five Pillars</span>
+              <span className="hidden sm:inline">Six Pillars</span>
             </TabsTrigger>
             <TabsTrigger value="tasks" className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
@@ -446,7 +446,7 @@ export const UserProfile = () => {
             </div>
           </TabsContent>
 
-          {/* Five Pillars Tab - User-Centric */}
+          {/* Six Pillars Tab - User-Centric */}
           <TabsContent value="pillars" className="space-y-6">
             {clientId ? (
               <ModularPillarDashboard 
