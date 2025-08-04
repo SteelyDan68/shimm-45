@@ -24,8 +24,8 @@ export const useProactiveMessaging = () => {
   const { currentSessionState, insights } = useContextEngine();
   const [pendingMessages, setPendingMessages] = useState<ProactiveMessage[]>([]);
 
-  // Stefan AI användare (system användar-ID)
-  const STEFAN_USER_ID = 'stefan-ai-system-user';
+  // Stefan AI system-användare (generera en valid UUID)
+  const STEFAN_USER_ID = '00000000-0000-0000-0000-000000000001'; // Reserved system UUID
 
   // Skicka proaktivt meddelande från Stefan
   const sendProactiveMessage = useCallback(async (
