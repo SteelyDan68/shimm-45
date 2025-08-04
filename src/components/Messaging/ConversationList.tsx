@@ -55,68 +55,129 @@ export const ConversationList = ({
     }
 
     try {
-      console.log('🔍 Building conversations for user:', user.id);
-      console.log('🔍 User roles:', { hasCoach: hasRole('coach'), hasClient: hasRole('client'), hasAdmin: hasRole('admin') });
+      console.log('🔍 Building conversations for user:', user.email);
+      console.log('🔍 User roles:', { 
+        hasCoach: hasRole('coach'), 
+        hasClient: hasRole('client'), 
+        hasAdmin: hasRole('admin'),
+        hasSuperAdmin: hasRole('superadmin')
+      });
       
-      // Group messages by conversation partner, but only allow authorized conversations
-      const conversationMap = new Map<string, Message[]>();
-      
-      // For clients - automatically add their coach even if no messages yet
-      if (hasRole('client')) {
-        try {
-          // Fetch coach assignments directly from database
-          const { data: coachAssignments, error } = await supabase
-            .from('coach_client_assignments')
-            .select('coach_id')
-            .eq('client_id', user.id)
-            .eq('is_active', true);
-            
-          if (error) {
-            console.error('Error fetching coach assignments:', error);
-          } else if (coachAssignments && coachAssignments.length > 0) {
-            const coachId = coachAssignments[0].coach_id;
-            // Initialize conversation with coach even if no messages
-            if (!conversationMap.has(coachId)) {
-              conversationMap.set(coachId, []);
-            }
-          }
-        } catch (error) {
-          console.error('Failed to fetch coach assignments:', error);
-        }
+      // Get user's roles from database for more reliable checks
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      if (rolesError) {
+        console.error('Error fetching user roles:', rolesError);
+        throw rolesError;
       }
-      
-      // First, get coach assignments for client validation
-      let clientCoachAssignments: any[] = [];
-      if (hasRole('client')) {
-        const { data: assignments } = await supabase
+
+      const roles = userRoles?.map(r => r.role) || [];
+      const isClient = roles.includes('client');
+      const isCoach = roles.includes('coach');
+      const isAdmin = roles.includes('admin');
+      const isSuperAdmin = roles.includes('superadmin');
+
+      console.log('🔍 Database roles:', roles);
+
+      // Group messages by conversation partner with role-based filtering
+      const conversationMap = new Map<string, Message[]>();
+      let allowedPartnerIds = new Set<string>();
+
+      // Determine allowed conversation partners based on role
+      if (isSuperAdmin || isAdmin) {
+        // Admins and superadmins can message anyone
+        console.log('🔍 Admin/SuperAdmin: No restrictions on conversations');
+        
+      } else if (isCoach) {
+        // Coaches can message their assigned clients and other coaches/admins
+        const { data: clientAssignments, error: clientError } = await supabase
+          .from('coach_client_assignments')
+          .select('client_id')
+          .eq('coach_id', user.id)
+          .eq('is_active', true);
+
+        if (clientError) {
+          console.error('Error fetching client assignments:', clientError);
+          throw clientError;
+        }
+
+        const clientIds = clientAssignments?.map(r => r.client_id) || [];
+        
+        // Get other coaches and admins
+        const { data: coachAdminRoles, error: roleError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .in('role', ['coach', 'admin'])
+          .neq('user_id', user.id);
+
+        if (roleError) {
+          console.error('Error fetching coach/admin roles:', roleError);
+          throw roleError;
+        }
+
+        const coachAdminIds = coachAdminRoles?.map(r => r.user_id) || [];
+        allowedPartnerIds = new Set([...clientIds, ...coachAdminIds]);
+        
+        console.log('🔍 Coach: Can message', clientIds.length, 'clients and', coachAdminIds.length, 'coaches/admins');
+        
+      } else if (isClient) {
+        // Clients can only message their assigned coaches
+        const { data: coachAssignments, error: coachError } = await supabase
           .from('coach_client_assignments')
           .select('coach_id')
           .eq('client_id', user.id)
           .eq('is_active', true);
-        clientCoachAssignments = assignments || [];
+
+        if (coachError) {
+          console.error('Error fetching coach assignments:', coachError);
+          throw coachError;
+        }
+
+        const coachIds = coachAssignments?.map(r => r.coach_id) || [];
+        allowedPartnerIds = new Set(coachIds);
+        
+        console.log('🔍 Client: Can message', coachIds.length, 'assigned coaches');
+        
+        // Pre-populate coach conversations even if no messages yet
+        coachIds.forEach(coachId => {
+          conversationMap.set(coachId, []);
+        });
+        
+      } else {
+        // Default users can message coaches and admins
+        const { data: coachAdminRoles, error: roleError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .in('role', ['coach', 'admin']);
+
+        if (roleError) {
+          console.error('Error fetching coach/admin roles:', roleError);
+          throw roleError;
+        }
+
+        const coachAdminIds = coachAdminRoles?.map(r => r.user_id) || [];
+        allowedPartnerIds = new Set(coachAdminIds);
+        
+        console.log('🔍 Default user: Can message', coachAdminIds.length, 'coaches/admins');
       }
-      
-      // Filter messages based on coach-client relationships
+
+      // Filter and group messages by conversation partner
       const filteredMessages = messages.filter(message => {
         const partnerId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
         
-        // Admins can message anyone
-        if (hasRole('admin') || hasRole('superadmin')) {
+        // Admin/SuperAdmin can see all conversations
+        if (isSuperAdmin || isAdmin) {
           return true;
         }
         
-        // Coaches can only message their assigned clients
-        if (hasRole('coach')) {
-          return isCoachClient(user.id, partnerId);
-        }
-        
-        // Clients can only message their assigned coach  
-        if (hasRole('client')) {
-          return clientCoachAssignments.some(assignment => assignment.coach_id === partnerId);
-        }
-        
-        return false; // Default: no access
+        // For other roles, check if partner is allowed
+        return allowedPartnerIds.has(partnerId);
       });
+      
+      console.log('🔍 Filtered messages:', filteredMessages.length, 'out of', messages.length);
       
       filteredMessages.forEach(message => {
         const partnerId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
@@ -129,7 +190,7 @@ export const ConversationList = ({
 
       // Get participant profiles
       const participantIds = Array.from(conversationMap.keys());
-      console.log('Participant IDs to fetch:', participantIds);
+      console.log('🔍 Participant IDs to fetch:', participantIds.length);
       
       if (participantIds.length === 0) {
         console.log('🔍 No conversation participants found');
@@ -138,13 +199,17 @@ export const ConversationList = ({
         return;
       }
 
-      const { data: profiles, error } = await supabase
+      const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, email, avatar_url')
         .in('id', participantIds);
 
-      if (error) throw error;
-      console.log('Fetched profiles:', profiles);
+      if (profileError) {
+        console.error('Error fetching profiles:', profileError);
+        throw profileError;
+      }
+
+      console.log('🔍 Fetched profiles:', profiles?.length || 0);
 
       // Build conversation objects
       const convs: Conversation[] = [];
@@ -152,12 +217,19 @@ export const ConversationList = ({
       conversationMap.forEach((msgs, participantId) => {
         const profile = profiles?.find(p => p.id === participantId);
         if (!profile) {
-          console.log('Profile not found for participant:', participantId);
+          console.warn('🚨 Profile not found for participant:', participantId);
           return;
         }
 
-        const participantName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
+        const displayName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
           profile.email || 'Okänd användare';
+
+        let participantName = displayName;
+        
+        // Add role indicators for better UX
+        if (isClient) {
+          participantName = `${displayName} (Coach)`;
+        }
 
         // If there are messages, use the latest one
         if (msgs.length > 0) {
@@ -180,10 +252,10 @@ export const ConversationList = ({
             isOnline: Math.random() > 0.5 // Mock online status
           });
         } else {
-          // No messages yet - create placeholder conversation (for coach-client without messages)
+          // No messages yet - create placeholder conversation (especially for coach-client relationships)
           convs.push({
             participantId,
-            participantName: hasRole('client') ? `${participantName} (Coach)` : participantName,
+            participantName,
             participantAvatar: profile.avatar_url,
             lastMessage: {
               id: 'placeholder',
@@ -201,14 +273,22 @@ export const ConversationList = ({
         }
       });
 
-      // Sort conversations by last message time
-      convs.sort((a, b) => 
-        new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
-      );
+      // Sort conversations by last message time (with unread prioritized)
+      convs.sort((a, b) => {
+        // Prioritize unread conversations
+        if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+        if (b.unreadCount > 0 && a.unreadCount === 0) return 1;
+        
+        // Then sort by time
+        return new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime();
+      });
 
+      console.log('🔍 Built', convs.length, 'conversations');
       setConversations(convs);
+
     } catch (error) {
-      console.error('Error building conversations:', error);
+      console.error('🚨 Error building conversations:', error);
+      setConversations([]);
     } finally {
       setLoading(false);
     }

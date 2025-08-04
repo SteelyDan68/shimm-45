@@ -36,27 +36,54 @@ export const ConversationView = ({
   const [isTyping, setIsTyping] = useState(false);
   const [lastSeen, setLastSeen] = useState<Date | null>(null);
   const [sendError, setSendError] = useState<string>('');
+  const [isSending, setIsSending] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'reconnecting'>('online');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { user } = useAuth();
   const { messages, sendMessage, markAsRead } = useMessages();
 
-  // Filter messages for this conversation
+  // Filter messages for this conversation with better error handling
   useEffect(() => {
-    const filtered = messages.filter(msg => 
-      (msg.sender_id === user?.id && msg.receiver_id === recipientId) ||
-      (msg.sender_id === recipientId && msg.receiver_id === user?.id)
-    ).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    
-    setConversationMessages(filtered);
-
-    // Mark unread messages as read
-    filtered.forEach(msg => {
-      if (msg.receiver_id === user?.id && !msg.is_read) {
-        markAsRead(msg.id);
+    try {
+      console.log('🔍 Filtering messages for conversation:', { recipientId, totalMessages: messages.length });
+      
+      const filtered = messages.filter(msg => 
+        (msg.sender_id === user?.id && msg.receiver_id === recipientId) ||
+        (msg.sender_id === recipientId && msg.receiver_id === user?.id)
+      ).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      
+      console.log('🔍 Filtered messages for conversation:', filtered.length);
+      setConversationMessages(filtered);
+      
+      // Mark unread messages as read
+      const unreadMessages = filtered.filter(msg => 
+        msg.receiver_id === user?.id && !msg.is_read
+      );
+      
+      if (unreadMessages.length > 0) {
+        console.log('🔍 Marking', unreadMessages.length, 'messages as read');
+        unreadMessages.forEach(msg => markAsRead(msg.id));
       }
-    });
+    } catch (error) {
+      console.error('🚨 Error filtering conversation messages:', error);
+      setConversationMessages([]);
+    }
   }, [messages, recipientId, user?.id, markAsRead]);
+
+  // Monitor connection status
+  useEffect(() => {
+    const handleOnline = () => setConnectionStatus('online');
+    const handleOffline = () => setConnectionStatus('offline');
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Set up presence tracking
   useEffect(() => {
@@ -90,20 +117,49 @@ export const ConversationView = ({
   }, [conversationMessages]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || isSending) return;
+    
     setSendError('');
+    setIsSending(true);
 
     try {
-      const success = await sendMessage(recipientId, newMessage.trim());
+      console.log('🔍 Sending message to:', recipientId);
+      
+      // Check connection status
+      if (connectionStatus === 'offline') {
+        throw new Error('Du är offline. Kontrollera din internetanslutning.');
+      }
+
+      const messageContent = newMessage.trim();
+      const success = await sendMessage(recipientId, messageContent);
+      
       if (success) {
         setNewMessage('');
         setSendError('');
+        console.log('✅ Message sent successfully');
       } else {
-        setSendError('Meddelandet kunde inte skickas. Försök igen.');
+        throw new Error('Meddelandet kunde inte skickas. Försök igen.');
       }
-    } catch (error) {
-      setSendError('Ett fel uppstod. Kontrollera din internetanslutning.');
-      console.error('Send message error:', error);
+    } catch (error: any) {
+      console.error('🚨 Send message error:', error);
+      
+      let errorMessage = 'Ett oväntat fel uppstod. Försök igen.';
+      
+      if (error.message) {
+        if (error.message.includes('network') || error.message.includes('connection')) {
+          errorMessage = 'Nätverksfel. Kontrollera din internetanslutning och försök igen.';
+        } else if (error.message.includes('unauthorized') || error.message.includes('permission')) {
+          errorMessage = 'Du har inte behörighet att skicka meddelanden till denna person.';
+        } else if (error.message.includes('rate limit')) {
+          errorMessage = 'Du skickar meddelanden för ofta. Vänta en stund och försök igen.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setSendError(errorMessage);
+    } finally {
+      setIsSending(false);
     }
   };
 
