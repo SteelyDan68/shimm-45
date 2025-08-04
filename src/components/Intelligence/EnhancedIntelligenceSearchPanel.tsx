@@ -31,11 +31,13 @@ interface UserProfile {
 interface EnhancedIntelligenceSearchPanelProps {
   onProfileSelect: (userId: string) => void;
   selectedUserId: string | null;
+  canViewAllProfiles?: boolean;
 }
 
 export function EnhancedIntelligenceSearchPanel({ 
   onProfileSelect, 
-  selectedUserId 
+  selectedUserId,
+  canViewAllProfiles = false
 }: EnhancedIntelligenceSearchPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -51,6 +53,7 @@ export function EnhancedIntelligenceSearchPanel({
   const loadProfiles = async () => {
     setLoading(true);
     try {
+      // Role-based filtering: coaches can only see their assigned clients
       let query = supabase
         .from('profiles')
         .select(`
@@ -59,9 +62,29 @@ export function EnhancedIntelligenceSearchPanel({
           last_name,
           email,
           last_login_at,
-          user_roles!inner(role)
+          created_at,
+          status
         `)
         .neq('id', user?.id); // Exclude current user
+
+      // If user is only a coach (not admin/superadmin), limit to assigned clients
+      if (!canViewAllProfiles) {
+        const { data: assignedClients } = await supabase
+          .from('coach_client_assignments')
+          .select('client_id')
+          .eq('coach_id', user?.id)
+          .eq('is_active', true);
+
+        if (assignedClients && assignedClients.length > 0) {
+          const clientIds = assignedClients.map(a => a.client_id);
+          query = query.in('id', clientIds);
+        } else {
+          // No assigned clients, return empty result
+          setProfiles([]);
+          setLoading(false);
+          return;
+        }
+      }
 
       // Apply filters
       if (filter === 'active') {
@@ -72,22 +95,37 @@ export function EnhancedIntelligenceSearchPanel({
 
       if (error) throw error;
 
-      // Transform data with mock intelligence metrics
-      const transformedProfiles: UserProfile[] = data.map(profile => ({
-        id: profile.id,
-        display_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || null,
-        email: profile.email,
-        last_login_at: profile.last_login_at,
-        activity_level: profile.last_login_at && 
-          new Date(profile.last_login_at) > new Date(Date.now() - 24 * 60 * 60 * 1000) 
-          ? 'high' 
-          : profile.last_login_at && 
-            new Date(profile.last_login_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          ? 'medium' 
-          : 'low',
-        progress_score: Math.floor(Math.random() * 100), // Mock score
-        role: (profile as any).user_roles?.role || 'client'
+      // Fetch roles separately for each user to fix foreign key issue
+      const profilesWithRoles = await Promise.all(data.map(async (profile) => {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', profile.id)
+          .limit(1)
+          .maybeSingle();
+
+        return {
+          ...profile,
+          primaryRole: roleData?.role || 'client'
+        };
       }));
+
+      // Transform data with real intelligence metrics
+      const transformedProfiles: UserProfile[] = profilesWithRoles.map(profile => {
+        const daysSinceLastLogin = profile.last_login_at 
+          ? (Date.now() - new Date(profile.last_login_at).getTime()) / (1000 * 60 * 60 * 24)
+          : 999;
+        
+        return {
+          id: profile.id,
+          display_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || null,
+          email: profile.email,
+          last_login_at: profile.last_login_at,
+          activity_level: daysSinceLastLogin <= 1 ? 'high' : daysSinceLastLogin <= 7 ? 'medium' : 'low',
+          progress_score: Math.max(10, 100 - Math.floor(daysSinceLastLogin * 2)), // Real activity-based score
+          role: profile.primaryRole
+        };
+      });
 
       // Filter by search query
       const filteredProfiles = transformedProfiles.filter(profile =>
@@ -103,9 +141,13 @@ export function EnhancedIntelligenceSearchPanel({
       setProfiles(finalProfiles);
     } catch (error) {
       console.error('Error loading profiles:', error);
+      const errorMessage = !canViewAllProfiles 
+        ? "Kunde inte ladda tilldelade klienter. Kontrollera att du har aktiva klienttilldelningar."
+        : "Kunde inte ladda profiler. Kontrollera din internetanslutning eller kontakta support.";
+      
       toast({
         title: "Fel",
-        description: "Kunde inte ladda profiler",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

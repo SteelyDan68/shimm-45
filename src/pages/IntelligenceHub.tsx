@@ -67,17 +67,25 @@ export function IntelligenceHubPage() {
     }
   };
 
-  // Improved permissions - även för coach
-  if (!hasRole('admin') && !hasRole('superadmin') && !hasRole('coach')) {
+  // Enhanced permissions - alla roller har access med olika nivåer
+  const canViewIntelligenceHub = hasRole('admin') || hasRole('superadmin') || hasRole('coach');
+  const canViewAllProfiles = hasRole('admin') || hasRole('superadmin');
+  const canExportData = hasRole('admin') || hasRole('superadmin');
+  const canConfigureSettings = hasRole('superadmin');
+  
+  if (!canViewIntelligenceHub) {
     return (
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="text-center py-12">
             <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Ingen åtkomst</h3>
-            <p className="text-muted-foreground">
-              Du behöver admin-, coach- eller superadmin-behörighet för att komma åt Intelligence Hub.
+            <h3 className="text-lg font-semibold mb-2">Begränsad åtkomst</h3>
+            <p className="text-muted-foreground mb-4">
+              Intelligence Hub kräver minst coach-behörighet.
             </p>
+            <Badge variant="outline" className="text-xs">
+              Tillgängliga roller: Coach, Admin, Superadmin
+            </Badge>
           </CardContent>
         </Card>
       </div>
@@ -113,10 +121,17 @@ export function IntelligenceHubPage() {
                 Real-time Data
               </Badge>
 
-              {hasRole('superadmin') && (
+              {canConfigureSettings && (
                 <Button variant="outline" size="sm">
                   <Settings className="h-4 w-4 mr-2" />
                   Konfiguration
+                </Button>
+              )}
+              
+              {canExportData && selectedProfile && (
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportera
                 </Button>
               )}
             </div>
@@ -131,6 +146,7 @@ export function IntelligenceHubPage() {
           <EnhancedIntelligenceSearchPanel
             onProfileSelect={handleProfileSelect}
             selectedUserId={selectedUserId}
+            canViewAllProfiles={canViewAllProfiles}
           />
 
           {/* Main View */}
@@ -141,6 +157,8 @@ export function IntelligenceHubPage() {
                 onRefresh={handleRefresh}
                 onExport={handleExport}
                 loading={loading}
+                canExport={canExportData}
+                canViewSensitiveData={canViewAllProfiles}
               />
             ) : (
               <div className="flex items-center justify-center h-full">
@@ -207,7 +225,11 @@ export function IntelligenceHubPage() {
                     
                     <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                       <Users className="h-3 w-3" />
-                      <span>Tillgänglig för {hasRole('superadmin') ? 'Superadmins' : hasRole('admin') ? 'Admins' : 'Coaches'}</span>
+                      <span>
+                        Åtkomst: {hasRole('superadmin') ? 'Alla användare (Superadmin)' : 
+                                hasRole('admin') ? 'Alla användare (Admin)' : 
+                                'Tilldelade klienter (Coach)'}
+                      </span>
                     </div>
                   </div>
                 </div>

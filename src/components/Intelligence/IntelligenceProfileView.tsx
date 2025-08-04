@@ -37,13 +37,17 @@ interface IntelligenceProfileViewProps {
   onRefresh?: () => void;
   onExport?: () => void;
   loading?: boolean;
+  canExport?: boolean;
+  canViewSensitiveData?: boolean;
 }
 
 export function IntelligenceProfileView({ 
   profile, 
   onRefresh, 
   onExport, 
-  loading = false 
+  loading = false,
+  canExport = false,
+  canViewSensitiveData = false
 }: IntelligenceProfileViewProps) {
   
   const getInsightIcon = (category: string) => {
@@ -124,13 +128,15 @@ export function IntelligenceProfileView({
                 )}
               </Button>
               
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onExport}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
+              {canExport && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onExport}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
