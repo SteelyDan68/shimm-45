@@ -346,6 +346,48 @@ export type Database = {
           },
         ]
       }
+      ai_service_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          function_name: string
+          id: string
+          request_data: Json | null
+          response_data: Json | null
+          response_time_ms: number | null
+          service_type: string
+          success: boolean
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          function_name: string
+          id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          response_time_ms?: number | null
+          service_type: string
+          success: boolean
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          function_name?: string
+          id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          response_time_ms?: number | null
+          service_type?: string
+          success?: boolean
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_usage_logs: {
         Row: {
           confidence_score: number | null
@@ -1643,6 +1685,51 @@ export type Database = {
           },
         ]
       }
+      neuroplasticity_progress: {
+        Row: {
+          adaptability_score: number | null
+          assessment_date: string | null
+          cognitive_load_tolerance: string | null
+          created_at: string | null
+          growth_mindset_score: number | null
+          id: string
+          learning_velocity: number | null
+          neural_pathway_strength: Json | null
+          progress_notes: string | null
+          resilience_level: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          adaptability_score?: number | null
+          assessment_date?: string | null
+          cognitive_load_tolerance?: string | null
+          created_at?: string | null
+          growth_mindset_score?: number | null
+          id?: string
+          learning_velocity?: number | null
+          neural_pathway_strength?: Json | null
+          progress_notes?: string | null
+          resilience_level?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          adaptability_score?: number | null
+          assessment_date?: string | null
+          cognitive_load_tolerance?: string | null
+          created_at?: string | null
+          growth_mindset_score?: number | null
+          id?: string
+          learning_velocity?: number | null
+          neural_pathway_strength?: Json | null
+          progress_notes?: string | null
+          resilience_level?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notification_delivery_log: {
         Row: {
           attempted_at: string
@@ -2669,6 +2756,39 @@ export type Database = {
         }
         Relationships: []
       }
+      stefan_analytics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_data: Json | null
+          metric_type: string
+          metric_value: number
+          recorded_at: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_type: string
+          metric_value: number
+          recorded_at?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_type?: string
+          metric_value?: number
+          recorded_at?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       stefan_interactions: {
         Row: {
           ai_analysis: string | null
@@ -2723,35 +2843,56 @@ export type Database = {
       stefan_memory: {
         Row: {
           category: string
+          confidence_score: number | null
           content: string
+          conversation_id: string | null
           created_at: string
           embedding: string | null
+          expires_at: string | null
           id: string
+          importance_score: number | null
+          is_active: boolean | null
+          memory_type: string | null
           source: string
           tags: string[] | null
           updated_at: string
+          user_id: string | null
           version: string | null
         }
         Insert: {
           category: string
+          confidence_score?: number | null
           content: string
+          conversation_id?: string | null
           created_at?: string
           embedding?: string | null
+          expires_at?: string | null
           id?: string
+          importance_score?: number | null
+          is_active?: boolean | null
+          memory_type?: string | null
           source: string
           tags?: string[] | null
           updated_at?: string
+          user_id?: string | null
           version?: string | null
         }
         Update: {
           category?: string
+          confidence_score?: number | null
           content?: string
+          conversation_id?: string | null
           created_at?: string
           embedding?: string | null
+          expires_at?: string | null
           id?: string
+          importance_score?: number | null
+          is_active?: boolean | null
+          memory_type?: string | null
           source?: string
           tags?: string[] | null
           updated_at?: string
+          user_id?: string | null
           version?: string | null
         }
         Relationships: []
