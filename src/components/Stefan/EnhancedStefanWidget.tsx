@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useContextEngine } from '@/hooks/useContextEngine';
 import { useUserJourney } from '@/hooks/useUserJourney';
 import { useProactiveMessaging } from '@/hooks/useProactiveMessaging';
+import { useToast } from '@/hooks/use-toast';
 import { PredictiveInsightsWidget } from './PredictiveInsightsWidget';
 import {
   Brain,
@@ -49,10 +50,65 @@ export const EnhancedStefanWidget: React.FC = () => {
   const { insights, currentSessionState } = useContextEngine();
   const { journeyState } = useUserJourney();
   const { sendMotivationalMessage } = useProactiveMessaging();
+  const { toast } = useToast();
   const [isMinimized, setIsMinimized] = useState(false);
   const [showDetailed, setShowDetailed] = useState(false);
   const [activeTab, setActiveTab] = useState<'insights' | 'predictions'>('insights');
   const [currentMood, setCurrentMood] = useState('encouraging');
+
+  // Kontextuella tips baserat på användarens situation
+  const getContextualTips = () => {
+    const tips = [];
+    
+    if (!journeyState || journeyState.journey_progress < 20) {
+      tips.push(
+        "🚀 Börja med att göra din första assessment för att få personlig coaching",
+        "📊 Utforska dashboard:en för att förstå dina utvecklingsområden", 
+        "💡 Sätt upp små, uppnåeliga mål för veckan"
+      );
+    } else if (journeyState.journey_progress < 50) {
+      tips.push(
+        "⏰ Planera fasta tider för dina utvecklingsaktiviteter",
+        "📈 Följ upp dina framsteg regelbundet för att hålla motivationen uppe",
+        "🤝 Dela dina mål med någon för att skapa ansvarskänsla"
+      );
+    } else if (journeyState.journey_progress < 80) {
+      tips.push(
+        "🎯 Fördjupa dig inom områden där du ser mest framsteg",
+        "🔄 Refletekra över vad som fungerat bäst hittills",
+        "🌟 Utmana dig själv med lite svårare mål"
+      );
+    } else {
+      tips.push(
+        "🎉 Fira dina framgångar - du har kommit långt!",
+        "📚 Överväg att hjälpa andra med liknande utmaningar",
+        "🚀 Sätt upp nya, ännu större mål för framtiden"
+      );
+    }
+
+    // Lägg till tips baserat på tid på dagen
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      tips.push("🌅 Morgon är perfekt för planering - sätt dagens prioriteter");
+    } else if (hour < 17) {
+      tips.push("⚡ Eftermiddag är bra för handling - genomför dina planerade aktiviteter");
+    } else {
+      tips.push("🌙 Kväll är perfekt för reflektion - tänk över dagens lärdomar");
+    }
+
+    return tips;
+  };
+
+  const showContextualTip = () => {
+    const tips = getContextualTips();
+    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+    
+    toast({
+      title: "💡 Stefan's tips",
+      description: randomTip,
+      duration: 6000,
+    });
+  };
 
   // Simulate context insights based on journey state
   const sessionInsights = [
@@ -205,7 +261,7 @@ export const EnhancedStefanWidget: React.FC = () => {
               variant="outline"
               size="sm"
               className="flex-1 text-xs h-8"
-              onClick={() => sendMotivationalMessage('motivation_boost')}
+              onClick={showContextualTip}
             >
               <Target className="h-3 w-3 mr-1" />
               Tips
