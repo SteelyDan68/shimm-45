@@ -120,14 +120,13 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
 
     try {
       const { data, error } = await supabase
-        .from('messages')
+        .from('messages_v2')
         .select(`
-          id, subject, content, created_at, sender_id, receiver_id,
-          sender:profiles!messages_sender_id_fkey(first_name, last_name),
-          receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
+          id, content, created_at, sender_id,
+          sender_profile:profiles!messages_v2_sender_id_fkey(first_name, last_name)
         `)
-        .or(`subject.ilike.%${query}%,content.ilike.%${query}%`)
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .ilike('content', `%${query}%`)
+        .eq('sender_id', user.id)
         .order('created_at', { ascending: false })
         .limit(15);
 
@@ -136,12 +135,8 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
       return (data || []).map(message => ({
         id: message.id,
         type: 'message' as const,
-        title: message.subject || 'Meddelande utan ämne',
-        subtitle: `Till/Från: ${
-          message.sender_id === user.id 
-            ? `${(message.receiver as any)?.first_name} ${(message.receiver as any)?.last_name}`.trim()
-            : `${(message.sender as any)?.first_name} ${(message.sender as any)?.last_name}`.trim()
-        }`,
+        title: 'Meddelande',
+        subtitle: `Från: ${(message.sender_profile as any)?.first_name} ${(message.sender_profile as any)?.last_name}`.trim(),
         content: message.content?.substring(0, 200) + (message.content?.length > 200 ? '...' : ''),
         created_at: message.created_at,
         url: `/messages?messageId=${message.id}`

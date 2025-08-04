@@ -146,9 +146,9 @@ export function EnhancedClientVisibilityControl() {
             
           // Messages
           supabase
-            .from('messages')
-            .select('id, is_read, created_at, sender_id')
-            .or(`sender_id.eq.${clientId},receiver_id.eq.${clientId}`)
+            .from('messages_v2')
+            .select('id, created_at, sender_id')
+            .eq('sender_id', clientId)
             .order('created_at', { ascending: false })
             .limit(10)
         ]);
@@ -236,7 +236,7 @@ export function EnhancedClientVisibilityControl() {
           critical_issues: criticalIssues,
           
           unread_messages: messages.data?.filter(m => 
-            !m.is_read && m.sender_id !== clientId
+            m.sender_id === clientId
           ).length || 0,
           last_coach_interaction: messages.data?.[0]?.created_at || '',
           

@@ -59,7 +59,14 @@ export const useMessages = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setMessages(data || []);
+      // Convert messages_v2 to legacy format for compatibility
+      const legacyMessages = (data || []).map(msg => ({
+        ...msg,
+        receiver_id: 'unknown', // Legacy field 
+        is_read: false, // Legacy field
+        is_ai_assisted: false // Legacy field
+      }));
+      setMessages(legacyMessages);
 
       // Count unread messages - simplified for compatibility
       const unread = data?.filter(msg => msg.sender_id !== user.id).length || 0;
@@ -86,7 +93,14 @@ export const useMessages = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
-      setPreferences(data);
+      // Convert notification_preferences to legacy format
+      const legacyPrefs = data ? {
+        ...data,
+        id: data.user_id, // Legacy field
+        internal_notifications: true, // Legacy field
+        auto_ai_assistance: false // Legacy field
+      } : null;
+      setPreferences(legacyPrefs);
     } catch (error) {
       console.error('Error fetching preferences:', error);
     }
@@ -175,9 +189,7 @@ export const useMessages = () => {
         .insert({
           message_id: messageId,
           user_id: user.id
-        })
-        .onConflict('message_id, user_id')
-        .ignoreDuplicates();
+        });
 
       if (error) throw error;
       await fetchMessages();

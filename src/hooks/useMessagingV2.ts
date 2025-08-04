@@ -243,11 +243,8 @@ export const useMessagingV2 = () => {
 
       console.log('✅ Message sent successfully:', newMessage.id);
 
-      // Optimistically update local state
-      setMessages(prev => ({
-        ...prev,
-        [conversationId]: [...(prev[conversationId] || []), newMessage]
-      }));
+      // Optimistically update local state (will be properly fetched on next refresh)
+      await fetchMessages(conversationId);
 
       // Mark as read for sender
       await markMessageAsRead(newMessage.id);
@@ -282,9 +279,7 @@ export const useMessagingV2 = () => {
         .insert({
           message_id: messageId,
           user_id: user.id
-        })
-        .onConflict('message_id, user_id')
-        .ignoreDuplicates();
+        });
     } catch (error) {
       console.error('❌ Error marking message as read:', error);
     }
@@ -309,9 +304,7 @@ export const useMessagingV2 = () => {
 
       await supabase
         .from('message_read_receipts')
-        .insert(readReceipts)
-        .onConflict('message_id, user_id')
-        .ignoreDuplicates();
+        .insert(readReceipts);
 
       // Update local state
       setMessages(prev => ({
@@ -424,7 +417,10 @@ export const useMessagingV2 = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setPreferences(data);
+      setPreferences(data ? {
+        ...data,
+        metadata: typeof data.metadata === 'object' && data.metadata !== null ? data.metadata as Record<string, any> : {}
+      } : null);
     } catch (error) {
       console.error('❌ Error fetching preferences:', error);
     }

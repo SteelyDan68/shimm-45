@@ -114,9 +114,9 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
 
     // Test messages table
     try {
-      const { error } = await supabase.from('messages').select('id').limit(1);
+      const { error } = await supabase.from('messages_v2').select('id').limit(1);
       if (!error) {
-        result.database.tables.push('messages');
+        result.database.tables.push('messages_v2');
         criticalTables[1].exists = true;
       }
     } catch (err) {
