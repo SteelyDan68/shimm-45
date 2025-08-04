@@ -5,6 +5,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Brain, TrendingUp } from 'lucide-react';
 import { useClientLogic } from '@/hooks/useClientLogic';
 import { useClientData } from '@/hooks/useClientData';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { ModularPillarDashboard } from '@/components/SixPillars/ModularPillarDashboard';
 import { CalendarModule } from '@/components/Calendar/CalendarModule';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
@@ -39,6 +41,7 @@ export const ClientProfileView = ({
 }: ClientProfileViewProps) => {
   const [cacheData, setCacheData] = useState<any[]>([]);
   const [logicState, setLogicState] = useState<any>(null);
+  const { toast } = useToast();
   
   const { processClientLogic, isProcessing } = useClientLogic();
   const { getClientCacheData, getNewsMentions, getSocialMetrics } = useClientData();
@@ -271,7 +274,35 @@ export const ClientProfileView = ({
           />
           <SentimentAnalysisWidget 
             sentimentData={sentimentData} 
-            onCollectData={loadClientData}
+            onCollectData={() => {
+              console.log('🔥 Starting Data Collection for user:', userId);
+              
+              // Call the data-collector edge function directly
+              supabase.functions.invoke('data-collector', {
+                body: { 
+                  user_id: userId,
+                  timestamp: new Date().toISOString(),
+                  force_refresh: true
+                }
+              }).then(({ data, error }) => {
+                if (error) {
+                  console.error('Data collector error:', error);
+                  toast({
+                    title: "Datainsamling misslyckades",
+                    description: error.message,
+                    variant: "destructive"
+                  });
+                } else {
+                  console.log('Data collection success:', data);
+                  toast({
+                    title: "Datainsamling lyckades",
+                    description: "Intelligence-data har uppdaterats"
+                  });
+                  // Refresh the page data
+                  loadClientData();
+                }
+              });
+            }}
           />
         </div>
       </TabsContent>
