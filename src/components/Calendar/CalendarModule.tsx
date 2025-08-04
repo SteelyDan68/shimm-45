@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { format, addDays, startOfWeek, endOfWeek, isSameDay, isToday, isPast, isFuture } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, isSameDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
@@ -27,23 +27,11 @@ import { NotificationSettings } from './NotificationSettings';
 import { CalendarExportImport } from './CalendarExportImport';
 import { AIPlanningDialog } from './AIPlanningDialog';
 import { useAIPlanning } from '@/hooks/useAIPlanning';
+import { useCalendarData, CalendarEventData } from '@/hooks/useCalendarData';
+import { supabase } from '@/integrations/supabase/client';
 
-export interface CalendarEventData {
-  id: string;
-  title: string;
-  description?: string;
-  date: Date;
-  type: 'task' | 'assessment' | 'path_entry' | 'custom_event';
-  category?: string;
-  pillar_type?: string;
-  priority?: 'low' | 'medium' | 'high';
-  status?: string;
-  user_id?: string;
-  duration?: number; // minutes
-  isOverdue?: boolean;
-  isDueSoon?: boolean;
-  metadata?: Record<string, any>;
-}
+// Export CalendarEventData for other components
+export type { CalendarEventData };
 
 interface CalendarModuleProps {
   clientId?: string;
@@ -72,12 +60,15 @@ export const CalendarModule = ({
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
-  const [events, setEvents] = useState<CalendarEventData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [draggedEvent, setDraggedEvent] = useState<CalendarEventData | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showExportImport, setShowExportImport] = useState(false);
+
+  // Use unified calendar data hook
+  const { events, loading, error, refetch } = useCalendarData({ 
+    userId: clientId 
+  });
   
   // AI Planning integration
   const { 
@@ -106,23 +97,11 @@ export const CalendarModule = ({
 
   // Check for overdue and due soon events
   const overdueEvents = useMemo(() => {
-    return events.filter(event => 
-      event.type === 'task' && 
-      event.status !== 'completed' && 
-      isPast(event.date) && !isToday(event.date)
-    );
+    return events.filter(event => event.isOverdue);
   }, [events]);
 
   const dueSoonEvents = useMemo(() => {
-    const tomorrow = addDays(new Date(), 1);
-    const dayAfterTomorrow = addDays(new Date(), 2);
-    return events.filter(event => 
-      event.type === 'task' && 
-      event.status !== 'completed' && 
-      (isToday(event.date) || 
-       isSameDay(event.date, tomorrow) ||
-       isSameDay(event.date, dayAfterTomorrow))
-    );
+    return events.filter(event => event.isDueSoon);
   }, [events]);
 
   // Enhanced calendar analytics
@@ -146,70 +125,27 @@ export const CalendarModule = ({
     };
   }, [events, dueSoonEvents, overdueEvents]);
 
-  // Load calendar data
-  useEffect(() => {
-    const loadCalendarData = async () => {
-      if (!clientId) return;
+  // Data loading is now handled by useCalendarData hook
+
+  // Optimized notification system - less frequent
+  const [notificationShown, setNotificationShown] = useState(false);
+  
+  React.useEffect(() => {
+    if (!showNotifications || notificationShown || loading) return;
+
+    const totalIssues = overdueEvents.length + dueSoonEvents.length;
+    if (totalIssues > 0) {
+      toast({
+        title: totalIssues > 1 ? "Kalenderpåminnelser" : "Kalenderpåminnelse",
+        description: `${overdueEvents.length} försenade, ${dueSoonEvents.length} förfaller snart`,
+        variant: overdueEvents.length > 0 ? "destructive" : "default"
+      });
+      setNotificationShown(true);
       
-      setLoading(true);
-      try {
-        // Here you would fetch from your APIs
-        // For now, mock data
-        const mockEvents: CalendarEventData[] = [
-          {
-            id: '1',
-            title: 'Bedömning av Self Care',
-            date: new Date(),
-            type: 'assessment',
-            pillar_type: 'self_care',
-            user_id: clientId
-          },
-          {
-            id: '2', 
-            title: 'Implementera morgonrutin',
-            date: addDays(new Date(), 2),
-            type: 'task',
-            priority: 'high',
-            status: 'planned',
-            user_id: clientId
-          }
-        ];
-        
-        setEvents(mockEvents);
-      } catch (error) {
-        console.error('Error loading calendar data:', error);
-        toast({
-          title: "Fel",
-          description: "Kunde inte ladda kalenderdata",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCalendarData();
-  }, [clientId, toast]);
-
-  // Notification system
-  useEffect(() => {
-    if (!showNotifications) return;
-
-    if (overdueEvents.length > 0) {
-      toast({
-        title: "Försenade uppgifter",
-        description: `${overdueEvents.length} uppgifter är försenade`,
-        variant: "destructive"
-      });
+      // Reset notification flag after 30 seconds
+      setTimeout(() => setNotificationShown(false), 30000);
     }
-
-    if (dueSoonEvents.length > 0) {
-      toast({
-        title: "Kommande deadlines", 
-        description: `${dueSoonEvents.length} uppgifter förfaller snart`,
-      });
-    }
-  }, [overdueEvents.length, dueSoonEvents.length, showNotifications, toast]);
+  }, [overdueEvents.length, dueSoonEvents.length, showNotifications, loading, notificationShown, toast]);
 
   // Drag and drop handlers
   const handleDragStart = (event: DragStartEvent) => {
@@ -217,7 +153,7 @@ export const CalendarModule = ({
     setDraggedEvent(draggedItem || null);
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
     if (!over || !draggedEvent) {
@@ -226,17 +162,36 @@ export const CalendarModule = ({
     }
 
     const newDate = new Date(over.id as string);
-    const updatedEvent = { ...draggedEvent, date: newDate };
     
-    setEvents(prev => prev.map(e => 
-      e.id === active.id ? updatedEvent : e
-    ));
+    // Update database and then refetch
+    try {
+      if (draggedEvent.type === 'task') {
+        await supabase
+          .from('tasks')
+          .update({ deadline: newDate.toISOString() })
+          .eq('id', draggedEvent.id.replace('task-', ''));
+      } else {
+        await supabase
+          .from('calendar_events')
+          .update({ event_date: newDate.toISOString() })
+          .eq('id', draggedEvent.id);
+      }
 
-    // Here you would update the database
-    toast({
-      title: "Händelse flyttad",
-      description: `"${draggedEvent.title}" flyttades till ${format(newDate, 'dd MMM', { locale: sv })}`
-    });
+      toast({
+        title: "Händelse flyttad",
+        description: `"${draggedEvent.title}" flyttades till ${format(newDate, 'dd MMM', { locale: sv })}`
+      });
+
+      // Refetch data to ensure consistency
+      refetch();
+    } catch (error) {
+      console.error('Error updating event:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte flytta händelsen",
+        variant: "destructive"
+      });
+    }
 
     setDraggedEvent(null);
   };
@@ -250,24 +205,38 @@ export const CalendarModule = ({
     );
   };
 
-  const addCustomEvent = (eventData: Partial<CalendarEventData>) => {
-    const newEvent: CalendarEventData = {
-      id: Date.now().toString(),
-      title: eventData.title || 'Ny händelse',
-      description: eventData.description,
-      date: eventData.date || new Date(),
-      type: 'custom_event',
-      category: eventData.category,
-      priority: eventData.priority || 'medium',
-      user_id: clientId,
-      duration: eventData.duration || 60
-    };
+  const addCustomEvent = async (eventData: Partial<CalendarEventData>) => {
+    try {
+      const { error } = await supabase
+        .from('calendar_events')
+        .insert({
+          title: eventData.title || 'Ny händelse',
+          description: eventData.description,
+          event_date: (eventData.date || new Date()).toISOString(),
+          category: eventData.category || 'custom',
+          user_id: clientId,
+          created_by: clientId,
+          created_by_role: 'client',
+          visible_to_client: true
+        });
 
-    setEvents(prev => [...prev, newEvent]);
-    toast({
-      title: "Händelse tillagd",
-      description: `"${newEvent.title}" har lagts till i kalendern`
-    });
+      if (error) throw error;
+
+      toast({
+        title: "Händelse tillagd",
+        description: `"${eventData.title}" har lagts till i kalendern`
+      });
+
+      // Refetch to show new event
+      refetch();
+    } catch (error) {
+      console.error('Error adding event:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte lägga till händelsen",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {

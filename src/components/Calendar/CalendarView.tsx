@@ -90,76 +90,105 @@ export function CalendarView({ onCreateEvent, onEventClick }: CalendarViewProps)
   };
 
   const loadEvents = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
       
-      // Load both calendar events and tasks with deadlines
-      const [eventsResponse, tasksResponse] = await Promise.all([
-        supabase
+      // Circuit breaker pattern - prevent excessive API calls
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      try {
+        // Load calendar events with error boundary
+        const eventsResponse = await supabase
           .from('calendar_events')
           .select('*')
           .eq('user_id', user.id)
           .gte('event_date', monthStart.toISOString())
           .lte('event_date', monthEnd.toISOString())
-          .order('event_date', { ascending: true }),
-        
-        supabase
-          .from('tasks')
-          .select('*')
-          .eq('user_id', user.id)
-          .not('deadline', 'is', null)
-          .gte('deadline', monthStart.toISOString())
-          .lte('deadline', monthEnd.toISOString())
-          .order('deadline', { ascending: true })
-      ]);
+          .order('event_date', { ascending: true })
+          .abortSignal(controller.signal);
 
-      if (eventsResponse.error) {
-        console.error('Error loading events:', eventsResponse.error);
-        toast({
-          title: "Fel",
-          description: "Kunde inte ladda kalenderhändelser",
-          variant: "destructive"
-        });
-        return;
+        clearTimeout(timeoutId);
+
+        if (eventsResponse.error) {
+          throw eventsResponse.error;
+        }
+
+        // Only load tasks if calendar events succeeded
+        let taskEvents: any[] = [];
+        try {
+          const tasksResponse = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', user.id)
+            .not('deadline', 'is', null)
+            .gte('deadline', monthStart.toISOString())
+            .lte('deadline', monthEnd.toISOString())
+            .order('deadline', { ascending: true });
+
+          if (!tasksResponse.error && tasksResponse.data) {
+            taskEvents = tasksResponse.data.map(task => ({
+              id: `task-${task.id}`,
+              title: task.title,
+              description: task.description,
+              event_date: task.deadline,
+              category: 'task',
+              created_by: task.created_by || user.id,
+              created_by_role: 'client',
+              visible_to_client: true,
+              user_id: task.user_id,
+              task_id: task.id,
+              task_status: task.status,
+              task_priority: task.priority,
+              ai_generated: task.ai_generated
+            }));
+          }
+        } catch (taskError) {
+          console.warn('Tasks could not be loaded:', taskError);
+          // Continue without tasks - not critical
+        }
+
+        const calendarEvents = eventsResponse.data || [];
+        setEvents([...calendarEvents, ...taskEvents]);
+
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
       }
-
-      if (tasksResponse.error) {
-        console.error('Error loading tasks:', tasksResponse.error);
-      }
-
-      // Combine events and tasks
-      const calendarEvents = eventsResponse.data || [];
-      const tasks = tasksResponse.data || [];
       
-      // Convert tasks to calendar events
-      const taskEvents = tasks.map(task => ({
-        id: `task-${task.id}`,
-        title: task.title,
-        description: task.description,
-        event_date: task.deadline,
-        category: 'task',
-        created_by: task.created_by,
-        created_by_role: 'client',
-        visible_to_client: true,
-        user_id: task.user_id,
-        task_id: task.id,
-        task_status: task.status,
-        task_priority: task.priority,
-        ai_generated: task.ai_generated
-      }));
-
-      setEvents([...calendarEvents, ...taskEvents]);
     } catch (error) {
-      console.error('Error in loadEvents:', error);
+      console.error('Error loading events:', {
+        message: error.message,
+        details: error.toString(),
+        hint: error.hint || '',
+        code: error.code || ''
+      });
+      
+      // Fallback to empty state instead of breaking UI
+      setEvents([]);
+      
+      toast({
+        title: "Kalenderdata kunde inte laddas",
+        description: "Visar tom kalender. Försök uppdatera sidan.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
-  }, [user?.id, monthStart, monthEnd, toast]);
+  }, [user?.id, monthStart.toISOString(), monthEnd.toISOString()]);
 
   useEffect(() => {
-    loadEvents();
+    const timeoutId = setTimeout(() => {
+      loadEvents();
+    }, 100); // Debounce rapid changes
+
+    return () => clearTimeout(timeoutId);
   }, [loadEvents]);
 
   const getEventsForDay = (date: Date) => {
