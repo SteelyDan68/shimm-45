@@ -56,32 +56,63 @@ export function validateEmail(email: string): boolean {
 export function validatePasswordStrength(password: string): {
   isValid: boolean;
   errors: string[];
+  score: number;
 } {
   const errors: string[] = [];
+  let score = 0;
   
-  if (password.length < 8) {
-    errors.push('Password must be at least 8 characters long');
+  // Length requirements (more stringent)
+  if (password.length < 12) {
+    errors.push('Password must be at least 12 characters long');
+  } else {
+    score += 1;
   }
   
+  // Character type requirements
   if (!/[A-Z]/.test(password)) {
     errors.push('Password must contain at least one uppercase letter');
+  } else {
+    score += 1;
   }
   
   if (!/[a-z]/.test(password)) {
     errors.push('Password must contain at least one lowercase letter');
+  } else {
+    score += 1;
   }
   
   if (!/\d/.test(password)) {
     errors.push('Password must contain at least one number');
+  } else {
+    score += 1;
   }
   
   if (!/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)) {
-    errors.push('Password must contain at least one symbol');
+    errors.push('Password must contain at least one special character');
+  } else {
+    score += 1;
+  }
+  
+  // Additional security checks
+  if (password.length > 16) {
+    score += 1;
+  }
+  
+  // Check for common patterns
+  if (/(.)\1{2,}/.test(password)) {
+    errors.push('Password should not contain repeated characters');
+    score -= 1;
+  }
+  
+  if (/123|abc|qwe|password|admin/i.test(password)) {
+    errors.push('Password should not contain common patterns');
+    score -= 1;
   }
   
   return {
-    isValid: errors.length === 0,
-    errors
+    isValid: errors.length === 0 && score >= 4,
+    errors,
+    score: Math.max(0, Math.min(5, score))
   };
 }
 
@@ -126,4 +157,100 @@ export function validateUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Rate limiting utility for form submissions
+ */
+export class RateLimiter {
+  private attempts: Map<string, number[]> = new Map();
+  private readonly maxAttempts: number;
+  private readonly windowMs: number;
+
+  constructor(maxAttempts: number = 5, windowMs: number = 15 * 60 * 1000) {
+    this.maxAttempts = maxAttempts;
+    this.windowMs = windowMs;
+  }
+
+  isAllowed(identifier: string): boolean {
+    const now = Date.now();
+    const userAttempts = this.attempts.get(identifier) || [];
+    
+    // Remove attempts outside the window
+    const validAttempts = userAttempts.filter(attempt => now - attempt < this.windowMs);
+    
+    if (validAttempts.length >= this.maxAttempts) {
+      return false;
+    }
+    
+    // Record this attempt
+    validAttempts.push(now);
+    this.attempts.set(identifier, validAttempts);
+    
+    return true;
+  }
+
+  getRemainingTime(identifier: string): number {
+    const userAttempts = this.attempts.get(identifier) || [];
+    if (userAttempts.length < this.maxAttempts) return 0;
+    
+    const oldestAttempt = Math.min(...userAttempts);
+    const remainingTime = this.windowMs - (Date.now() - oldestAttempt);
+    
+    return Math.max(0, remainingTime);
+  }
+}
+
+/**
+ * Sanitize message content for safe display
+ */
+export function sanitizeMessageContent(content: string): string {
+  if (!content || typeof content !== 'string') return '';
+  
+  // First sanitize basic HTML
+  let sanitized = sanitizeText(content);
+  
+  // Limit message length
+  if (sanitized.length > 5000) {
+    sanitized = sanitized.substring(0, 5000) + '...';
+  }
+  
+  // Remove excessive whitespace but preserve line breaks
+  sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
+  sanitized = sanitized.replace(/[ \t]{2,}/g, ' ');
+  
+  return sanitized.trim();
+}
+
+/**
+ * Validate and sanitize user profile inputs
+ */
+export function validateProfileInput(field: string, value: string): { isValid: boolean; error?: string; sanitized: string } {
+  const sanitized = sanitizeDbInput(value);
+  
+  switch (field) {
+    case 'firstName':
+    case 'lastName':
+      if (sanitized.length > 50) {
+        return { isValid: false, error: 'Name must be less than 50 characters', sanitized };
+      }
+      if (!/^[a-zA-ZÀ-ÿ\s-']*$/.test(sanitized)) {
+        return { isValid: false, error: 'Name contains invalid characters', sanitized };
+      }
+      break;
+      
+    case 'email':
+      if (!validateEmail(sanitized)) {
+        return { isValid: false, error: 'Invalid email format', sanitized };
+      }
+      break;
+      
+    case 'bio':
+      if (sanitized.length > 1000) {
+        return { isValid: false, error: 'Bio must be less than 1000 characters', sanitized };
+      }
+      break;
+  }
+  
+  return { isValid: true, sanitized };
 }
