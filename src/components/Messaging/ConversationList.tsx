@@ -191,7 +191,7 @@ export const ConversationList = ({
 
       // Get participant profiles
       const participantIds = Array.from(conversationMap.keys());
-      console.log('🔍 Participant IDs to fetch:', participantIds.length);
+      console.log('🔍 Participant IDs to fetch:', participantIds.length, participantIds);
       
       if (participantIds.length === 0) {
         console.log('🔍 No conversation participants found');
@@ -200,17 +200,20 @@ export const ConversationList = ({
         return;
       }
 
+      // Fetch profiles with enhanced logging
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, email, avatar_url')
         .in('id', participantIds);
 
       if (profileError) {
-        console.error('Error fetching profiles:', profileError);
+        console.error('🚨 Error fetching profiles:', profileError);
         throw profileError;
       }
 
       console.log('🔍 Fetched profiles:', profiles?.length || 0);
+      console.log('🔍 Profile IDs received:', profiles?.map(p => p.id) || []);
+      console.log('🔍 Profile emails received:', profiles?.map(p => p.email) || []);
 
       // Build conversation objects
       const convs: Conversation[] = [];
@@ -219,6 +222,26 @@ export const ConversationList = ({
         const profile = profiles?.find(p => p.id === participantId);
         if (!profile) {
           console.warn('🚨 Profile not found for participant:', participantId);
+          
+          // Create fallback conversation for missing profile
+          const fallbackConversation: Conversation = {
+            participantId: participantId,
+            participantName: 'Coach (Unavailable)',
+            participantAvatar: undefined,
+            lastMessage: {
+              id: `fallback-${participantId}`,
+              sender_id: participantId,
+              receiver_id: user.id,
+              content: 'Coach temporarily unavailable - Please contact support',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              is_read: true,
+              is_ai_assisted: false
+            },
+            unreadCount: 0,
+            isOnline: false
+          };
+          convs.push(fallbackConversation);
           return;
         }
 
