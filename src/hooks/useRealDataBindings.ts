@@ -60,6 +60,8 @@ export const useRealDataBindings = () => {
 
   // 🔄 REAL CLIENT OUTCOMES - Aggregerar data från flera källor
   const loadRealClientOutcomes = useCallback(async () => {
+    if (!user) return; // Undvik onödiga anrop utan användare
+    
     try {
       // Hämta alla klienter med deras roller
       const { data: profiles, error: profilesError } = await supabase
@@ -203,11 +205,14 @@ export const useRealDataBindings = () => {
       
     } catch (error) {
       console.error('Error loading real client outcomes:', error);
-      toast({
-        title: "Datafel",
-        description: "Kunde inte ladda klientdata",
-        variant: "destructive"
-      });
+      // Undvik toast-loop - visa endast vid första försöket
+      if (clientOutcomes.length === 0) {
+        toast({
+          title: "Datafel",
+          description: "Kunde inte ladda klientdata - försöker igen",
+          variant: "destructive"
+        });
+      }
     }
   }, [toast]);
 
@@ -355,10 +360,16 @@ export const useRealDataBindings = () => {
     }
   }, [loadRealClientOutcomes, loadRealSystemMetrics, loadRealSystemAlerts]);
 
-  // 🚀 INITIAL LOAD
+  // 🚀 INITIAL LOAD - med debounce för att undvika loops
   useEffect(() => {
-    loadAllRealData();
-  }, [loadAllRealData]);
+    if (!user) return;
+    
+    const timeoutId = setTimeout(() => {
+      loadAllRealData();
+    }, 100); // Kort delay för att undvika race conditions
+
+    return () => clearTimeout(timeoutId);
+  }, [user?.id]); // Endast vid user change, inte hela loadAllRealData
 
   // 🔔 REALTIME SUBSCRIPTIONS
   useEffect(() => {
