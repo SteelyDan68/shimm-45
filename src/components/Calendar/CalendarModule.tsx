@@ -26,8 +26,10 @@ import { AddEventForm } from './AddEventForm';
 import { NotificationSettings } from './NotificationSettings';
 import { CalendarExportImport } from './CalendarExportImport';
 import { AIPlanningDialog } from './AIPlanningDialog';
+import { UnifiedTaskEventCreator } from './UnifiedTaskEventCreator';
 import { useAIPlanning } from '@/hooks/useAIPlanning';
 import { useCalendarData, CalendarEventData } from '@/hooks/useCalendarData';
+import { useUnifiedCalendarTasks } from '@/hooks/useUnifiedCalendarTasks';
 import { supabase } from '@/integrations/supabase/client';
 
 // Export CalendarEventData for other components
@@ -62,13 +64,23 @@ export const CalendarModule = ({
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [draggedEvent, setDraggedEvent] = useState<CalendarEventData | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showUnifiedCreator, setShowUnifiedCreator] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showExportImport, setShowExportImport] = useState(false);
 
-  // Use unified calendar data hook
-  const { events, loading, error, refetch } = useCalendarData({ 
-    userId: clientId 
-  });
+  // Use unified calendar-task integration
+  const { 
+    events, 
+    tasks, 
+    loading, 
+    error, 
+    createUnifiedTaskEvent,
+    deleteUnifiedItem,
+    moveItem,
+    refreshAll,
+    statistics,
+    isRealTimeConnected
+  } = useUnifiedCalendarTasks(clientId);
   
   // AI Planning integration
   const { 
@@ -104,7 +116,7 @@ export const CalendarModule = ({
     return events.filter(event => event.isDueSoon);
   }, [events]);
 
-  // Enhanced calendar analytics
+  // Enhanced calendar analytics using unified statistics
   const calendarStats = useMemo(() => {
     const thisWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const thisWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
@@ -114,16 +126,19 @@ export const CalendarModule = ({
     );
 
     return {
-      totalEvents: events.length,
+      totalEvents: statistics.totalEvents,
+      totalTasks: statistics.totalTasks,
       thisWeekEvents: thisWeekEvents.length,
-      completedTasks: events.filter(e => e.type === 'task' && e.status === 'completed').length,
-      upcomingDeadlines: dueSoonEvents.length,
-      overdueItems: overdueEvents.length,
-      efficiency: events.length > 0 
-        ? Math.round((events.filter(e => e.type === 'task' && e.status === 'completed').length / events.filter(e => e.type === 'task').length) * 100) 
-        : 0
+      completedTasks: statistics.completedTasks,
+      upcomingDeadlines: statistics.upcomingDeadlines,
+      overdueItems: statistics.overdueItems,
+      aiGeneratedCount: statistics.aiGeneratedCount,
+      efficiency: statistics.totalTasks > 0 
+        ? Math.round((statistics.completedTasks / statistics.totalTasks) * 100)
+        : 0,
+      realTimeConnected: isRealTimeConnected
     };
-  }, [events, dueSoonEvents, overdueEvents]);
+  }, [events, statistics, isRealTimeConnected]);
 
   // Data loading is now handled by useCalendarData hook
 
@@ -163,29 +178,23 @@ export const CalendarModule = ({
 
     const newDate = new Date(over.id as string);
     
-    // Update database and then refetch
+    // Use unified move functionality
     try {
-      if (draggedEvent.type === 'task') {
-        await supabase
-          .from('tasks')
-          .update({ deadline: newDate.toISOString() })
-          .eq('id', draggedEvent.id.replace('task-', ''));
-      } else {
-        await supabase
-          .from('calendar_events')
-          .update({ event_date: newDate.toISOString() })
-          .eq('id', draggedEvent.id);
+      const itemType = draggedEvent.type === 'task' ? 'task' : 'calendar_event';
+      const itemId = draggedEvent.type === 'task' 
+        ? draggedEvent.id.replace('task-', '')
+        : draggedEvent.id;
+      
+      const success = await moveItem(itemId, itemType, newDate);
+      
+      if (success) {
+        toast({
+          title: "Händelse flyttad",
+          description: `"${draggedEvent.title}" flyttades till ${format(newDate, 'dd MMM', { locale: sv })}`
+        });
       }
-
-      toast({
-        title: "Händelse flyttad",
-        description: `"${draggedEvent.title}" flyttades till ${format(newDate, 'dd MMM', { locale: sv })}`
-      });
-
-      // Refetch data to ensure consistency
-      refetch();
     } catch (error) {
-      console.error('Error updating event:', error);
+      console.error('Error moving item:', error);
       toast({
         title: "Fel",
         description: "Kunde inte flytta händelsen",
@@ -207,28 +216,22 @@ export const CalendarModule = ({
 
   const addCustomEvent = async (eventData: Partial<CalendarEventData>) => {
     try {
-      const { error } = await supabase
-        .from('calendar_events')
-        .insert({
-          title: eventData.title || 'Ny händelse',
-          description: eventData.description,
-          event_date: (eventData.date || new Date()).toISOString(),
-          category: eventData.category || 'custom',
-          user_id: clientId,
-          created_by: clientId,
-          created_by_role: 'client',
-          visible_to_client: true
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Händelse tillagd",
-        description: `"${eventData.title}" har lagts till i kalendern`
+      // Use unified creation for better integration
+      const success = await createUnifiedTaskEvent({
+        title: eventData.title || 'Ny händelse',
+        description: eventData.description,
+        date: eventData.date || new Date(),
+        type: 'event',
+        category: eventData.category || 'custom',
+        priority: eventData.priority || 'medium',
+        duration: eventData.duration,
+        visible_to_client: true,
+        created_by_role: isCoachView ? 'coach' : 'client'
       });
 
-      // Refetch to show new event
-      refetch();
+      if (!success) {
+        throw new Error('Unified creation failed');
+      }
     } catch (error) {
       console.error('Error adding event:', error);
       toast({
@@ -273,14 +276,14 @@ export const CalendarModule = ({
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
             <div className="p-3 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">{calendarStats.totalEvents}</div>
-              <div className="text-xs text-muted-foreground">Totala händelser</div>
+              <div className="text-xs text-muted-foreground">Kalenderhändelser</div>
+            </div>
+            <div className="p-3 bg-indigo-50 rounded-lg">
+              <div className="text-2xl font-bold text-indigo-600">{calendarStats.totalTasks}</div>
+              <div className="text-xs text-muted-foreground">Uppgifter</div>
             </div>
             <div className="p-3 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{calendarStats.thisWeekEvents}</div>
-              <div className="text-xs text-muted-foreground">Denna vecka</div>
-            </div>
-            <div className="p-3 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{calendarStats.completedTasks}</div>
+              <div className="text-2xl font-bold text-green-600">{calendarStats.completedTasks}</div>
               <div className="text-xs text-muted-foreground">Slutförda</div>
             </div>
             <div className="p-3 bg-orange-50 rounded-lg">
@@ -291,9 +294,13 @@ export const CalendarModule = ({
               <div className="text-2xl font-bold text-red-600">{calendarStats.overdueItems}</div>
               <div className="text-xs text-muted-foreground">Försenade</div>
             </div>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-gray-600">{calendarStats.efficiency}%</div>
-              <div className="text-xs text-muted-foreground">Effektivitet</div>
+            <div className="p-3 bg-purple-50 rounded-lg relative">
+              <div className="text-2xl font-bold text-purple-600">{calendarStats.aiGeneratedCount}</div>
+              <div className="text-xs text-muted-foreground">AI-skapade</div>
+              {calendarStats.realTimeConnected && (
+                <div className="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse" 
+                     title="Real-time ansluten" />
+              )}
             </div>
           </div>
         </CardContent>
@@ -326,10 +333,10 @@ export const CalendarModule = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowAddForm(true)}
+                    onClick={() => setShowUnifiedCreator(true)}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Lägg till
+                    Skapa Smart
                   </Button>
                   
                   <Button
@@ -402,6 +409,16 @@ export const CalendarModule = ({
       </DndContext>
 
       {/* Dialogs */}
+      {showUnifiedCreator && (
+        <UnifiedTaskEventCreator
+          isOpen={showUnifiedCreator}
+          onClose={() => setShowUnifiedCreator(false)}
+          onCreate={createUnifiedTaskEvent}
+          clientId={clientId}
+          isCoachView={isCoachView}
+        />
+      )}
+
       {showAddForm && (
         <AddEventForm
           isOpen={showAddForm}

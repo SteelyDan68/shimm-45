@@ -12,6 +12,10 @@ interface CalendarEventProps {
   pillarColors: Record<string, string>;
   compact?: boolean;
   isDragging?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  canManage?: boolean;
+  isCoachView?: boolean;
 }
 
 const TYPE_ICONS = {

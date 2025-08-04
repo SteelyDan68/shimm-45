@@ -54,6 +54,8 @@ export function CalendarGrid({
               event={event}
               pillarColors={pillarColors}
               compact={viewMode === 'month'}
+              canManage={true}
+              isCoachView={false}
             />
           ))}
         </div>
