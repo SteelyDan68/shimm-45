@@ -125,11 +125,20 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Admin create user error:', error);
+        throw error;
+      }
 
       // Om användaren skapades framgångsrikt och ska tilldelas en coach
       if (data.success && formData.assignCoach && formData.coachId && formData.role === 'client') {
         try {
+          console.log('Attempting to assign coach:', { 
+            coach_id: formData.coachId, 
+            client_id: data.user.id,
+            assigned_by: user?.id
+          });
+
           const { error: relationError } = await supabase
             .from('coach_client_assignments')
             .insert({
@@ -142,13 +151,15 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
 
           if (relationError) {
             console.error('Error assigning coach:', relationError);
-            toast.error('Användare skapad men kunde inte tilldela coach');
+            toast.error(`Användare skapad men kunde inte tilldela coach: ${relationError.message}`);
           } else {
-            toast.success(`Användare skapad och tilldelad coach`);
+            const selectedCoach = coaches.find(c => c.id === formData.coachId);
+            const coachName = selectedCoach ? `${selectedCoach.first_name} ${selectedCoach.last_name}` : 'vald coach';
+            toast.success(`Användare skapad och tilldelad till ${coachName}`);
           }
         } catch (coachError) {
           console.error('Coach assignment error:', coachError);
-          toast.error('Användare skapad men kunde inte tilldela coach');
+          toast.error('Användare skapad men kunde inte tilldela coach (nätverksfel)');
         }
       } else {
         toast.success(`Användare ${formData.firstName} ${formData.lastName} har skapats`);
