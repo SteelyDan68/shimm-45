@@ -69,11 +69,7 @@ serve(async (req) => {
         subject,
         is_read: false
       })
-      .select(`
-        *,
-        sender_profile:profiles!messages_sender_id_fkey(first_name, last_name, email),
-        receiver_profile:profiles!messages_receiver_id_fkey(first_name, last_name, email)
-      `)
+      .select('*')
       .single()
 
     if (insertError) {
