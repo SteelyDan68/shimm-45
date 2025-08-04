@@ -35,6 +35,7 @@ export const ConversationView = ({
   const [isOnline, setIsOnline] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [lastSeen, setLastSeen] = useState<Date | null>(null);
+  const [sendError, setSendError] = useState<string>('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { user } = useAuth();
@@ -90,10 +91,19 @@ export const ConversationView = ({
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
+    setSendError('');
 
-    const success = await sendMessage(recipientId, newMessage.trim());
-    if (success) {
-      setNewMessage('');
+    try {
+      const success = await sendMessage(recipientId, newMessage.trim());
+      if (success) {
+        setNewMessage('');
+        setSendError('');
+      } else {
+        setSendError('Meddelandet kunde inte skickas. Försök igen.');
+      }
+    } catch (error) {
+      setSendError('Ett fel uppstod. Kontrollera din internetanslutning.');
+      console.error('Send message error:', error);
     }
   };
 
@@ -265,6 +275,11 @@ export const ConversationView = ({
 
       {/* Message input */}
       <div className="p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        {sendError && (
+          <div className="mb-3 p-2 bg-destructive/10 border border-destructive/20 rounded-md">
+            <p className="text-sm text-destructive">{sendError}</p>
+          </div>
+        )}
         <div className="flex gap-2">
           <Input
             value={newMessage}
@@ -272,15 +287,21 @@ export const ConversationView = ({
             onKeyPress={handleKeyPress}
             placeholder="Skriv ett meddelande..."
             className="flex-1"
+            disabled={!user}
           />
           <Button 
             onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
+            disabled={!newMessage.trim() || !user}
             size="sm"
           >
             <Send className="h-4 w-4" />
           </Button>
         </div>
+        {isTyping && (
+          <div className="mt-2 text-xs text-muted-foreground">
+            {recipientName} skriver...
+          </div>
+        )}
       </div>
     </div>
   );

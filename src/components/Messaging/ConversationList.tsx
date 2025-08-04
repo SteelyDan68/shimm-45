@@ -63,26 +63,25 @@ export const ConversationList = ({
       
       // For clients - automatically add their coach even if no messages yet
       if (hasRole('client')) {
-        console.log('🔍 Looking for coach assignments for client:', user.id);
-        
-        // Fetch coach assignments directly from database
-        const { data: coachAssignments, error } = await supabase
-          .from('coach_client_assignments')
-          .select('coach_id')
-          .eq('client_id', user.id)
-          .eq('is_active', true);
-          
-        console.log('🔍 Coach assignments result:', { coachAssignments, error });
-        
-        if (coachAssignments && coachAssignments.length > 0) {
-          const coachId = coachAssignments[0].coach_id;
-          console.log('✅ Adding coach to conversation list:', coachId);
-          // Initialize conversation with coach even if no messages
-          if (!conversationMap.has(coachId)) {
-            conversationMap.set(coachId, []);
+        try {
+          // Fetch coach assignments directly from database
+          const { data: coachAssignments, error } = await supabase
+            .from('coach_client_assignments')
+            .select('coach_id')
+            .eq('client_id', user.id)
+            .eq('is_active', true);
+            
+          if (error) {
+            console.error('Error fetching coach assignments:', error);
+          } else if (coachAssignments && coachAssignments.length > 0) {
+            const coachId = coachAssignments[0].coach_id;
+            // Initialize conversation with coach even if no messages
+            if (!conversationMap.has(coachId)) {
+              conversationMap.set(coachId, []);
+            }
           }
-        } else {
-          console.warn('❌ No coach assignments found for client:', user.id);
+        } catch (error) {
+          console.error('Failed to fetch coach assignments:', error);
         }
       }
       
@@ -270,21 +269,14 @@ export const ConversationList = ({
       {/* Conversations */}
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {filteredConversations.length === 0 ? (
+      {filteredConversations.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               {searchQuery ? 
                 'Inga konversationer hittades' : 
                 hasRole('client') ? 
-                  'Din coach kommer att visas här. Kontakta admin om ingen coach syns.' : 
+                  'Din coach kommer att visas här. Kontakta support om du inte ser din coach.' : 
                   'Inga konversationer ännu'
               }
-              {hasRole('client') && !searchQuery && (
-                <div className="mt-4 text-xs">
-                  <p>Debug info:</p>
-                  <p>User ID: {user?.id}</p>
-                  <p>Roles: {hasRole('coach') ? 'coach' : ''} {hasRole('client') ? 'client' : ''}</p>
-                </div>
-              )}
             </div>
           ) : (
             filteredConversations.map((conversation) => (
