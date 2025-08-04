@@ -49,17 +49,20 @@ export const useMessages = () => {
     if (!user) return;
 
     try {
+      // Legacy hook - use useMessagingV2 for new implementations
+      console.warn('⚠️ useMessages is deprecated. Use useMessagingV2 instead.');
+      
       const { data, error } = await supabase
-        .from('messages')
+        .from('messages_v2')
         .select('*')
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .or(`sender_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setMessages(data || []);
 
-      // Count unread messages
-      const unread = data?.filter(msg => msg.receiver_id === user.id && !msg.is_read).length || 0;
+      // Count unread messages - simplified for compatibility
+      const unread = data?.filter(msg => msg.sender_id !== user.id).length || 0;
       setUnreadCount(unread);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -77,7 +80,7 @@ export const useMessages = () => {
 
     try {
       const { data, error } = await supabase
-        .from('message_preferences')
+        .from('notification_preferences')
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -168,9 +171,13 @@ export const useMessages = () => {
   const markAsRead = async (messageId: string) => {
     try {
       const { error } = await supabase
-        .from('messages')
-        .update({ is_read: true })
-        .eq('id', messageId);
+        .from('message_read_receipts')
+        .insert({
+          message_id: messageId,
+          user_id: user.id
+        })
+        .onConflict('message_id, user_id')
+        .ignoreDuplicates();
 
       if (error) throw error;
       await fetchMessages();
@@ -184,23 +191,12 @@ export const useMessages = () => {
     if (!user) return false;
 
     try {
-      if (preferences) {
-        const { error } = await supabase
-          .from('message_preferences')
-          .update(newPrefs)
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('message_preferences')
-          .insert({
-            user_id: user.id,
-            ...newPrefs
-          });
-
-        if (error) throw error;
-      }
+      const { error } = await supabase
+        .from('notification_preferences')
+        .upsert({
+          user_id: user.id,
+          ...newPrefs
+        });
 
       await fetchPreferences();
       toast({
@@ -247,14 +243,13 @@ export const useMessages = () => {
 
       // Set up real-time subscription for database changes
       const dbChannel = supabase
-        .channel('messages-changes')
+        .channel('messages-changes-legacy')
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
-            table: 'messages',
-            filter: `or(sender_id.eq.${user.id},receiver_id.eq.${user.id})`
+            table: 'messages_v2'
           },
           () => {
             fetchMessages();
@@ -264,9 +259,9 @@ export const useMessages = () => {
 
       // Set up real-time subscription for instant messaging
       const realtimeChannel = supabase
-        .channel('instant-messages')
+        .channel('instant-messages-legacy')
         .on('broadcast', { event: 'new_message' }, (payload) => {
-          if (payload.payload.receiver_id === user.id || payload.payload.sender_id === user.id) {
+          if (payload.payload.sender_id === user.id) {
             fetchMessages(); // Refresh messages when receiving real-time update
           }
         })
