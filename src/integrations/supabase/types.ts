@@ -1269,7 +1269,15 @@ export type Database = {
           title?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conversations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       data_deletion_requests: {
         Row: {
@@ -1569,6 +1577,13 @@ export type Database = {
             columns: ["parent_message_id"]
             isOneToOne: false
             referencedRelation: "messages_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_v2_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
