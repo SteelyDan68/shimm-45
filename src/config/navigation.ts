@@ -159,12 +159,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach", "client"]
       },
       {
-        title: "AI Coaching",
-        url: NAVIGATION_ROUTES.AI_COACHING,
-        icon: Brain,
-        roles: ["superadmin", "admin", "coach", "client"]
-      },
-      {
         title: "Mobil",
         url: NAVIGATION_ROUTES.MOBILE,
         icon: Smartphone,

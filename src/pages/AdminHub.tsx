@@ -4,7 +4,7 @@ import { RealUnifiedDashboard } from '@/components/AdminHub/RealUnifiedDashboard
 import { UserManagementTabs } from '@/components/UserAdministration/UserManagementTabs';
 
 import { UnifiedAnalytics } from '@/components/AdminHub/Analytics/UnifiedAnalytics';
-import { EnhancedStefanControlCenter } from '@/components/Admin/EnhancedStefanControlCenter';
+import { UnifiedStefanAdminCenter } from '@/components/AdminHub/AI/UnifiedStefanAdminCenter';
 import { UserManagementCenter } from '@/components/AdminHub/UserManagement/UserManagementCenter';
 import { SystemAdministrationCenter } from '@/components/AdminHub/SystemAdmin/SystemAdministrationCenter';
 
@@ -19,7 +19,7 @@ export function AdminHub() {
         <Route index element={<RealUnifiedDashboard />} />
         <Route path="users" element={<UserManagementCenter />} />
         <Route path="analytics" element={<UnifiedAnalytics />} />
-        <Route path="ai" element={<EnhancedStefanControlCenter />} />
+        <Route path="ai" element={<UnifiedStefanAdminCenter />} />
         <Route path="system" element={<AdminSystem />} />
       </Route>
     </Routes>

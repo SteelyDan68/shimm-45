@@ -17,7 +17,7 @@ import {
   Plus,
   Database
 } from 'lucide-react';
-import { IntelligenceSearchPanel } from '@/components/Intelligence/IntelligenceSearchPanel';
+import { EnhancedIntelligenceSearchPanel } from '@/components/Intelligence/EnhancedIntelligenceSearchPanel';
 import { IntelligenceProfileView } from '@/components/Intelligence/IntelligenceProfileView';
 import { useIntelligenceHub } from '@/hooks/useIntelligenceHub';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
@@ -67,7 +67,7 @@ export function IntelligenceHubPage() {
     }
   };
 
-  // Check permissions
+  // Improved permissions - även för coach
   if (!hasRole('admin') && !hasRole('superadmin') && !hasRole('coach')) {
     return (
       <div className="container mx-auto p-6">
@@ -128,7 +128,7 @@ export function IntelligenceHubPage() {
       <div className="max-w-7xl mx-auto">
         <div className="flex h-[calc(100vh-140px)]">
           {/* Search Panel */}
-          <IntelligenceSearchPanel
+          <EnhancedIntelligenceSearchPanel
             onProfileSelect={handleProfileSelect}
             selectedUserId={selectedUserId}
           />
