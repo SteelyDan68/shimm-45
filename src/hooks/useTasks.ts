@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
+import { useUserRelationships } from '@/hooks/useUserRelationships';
 import type { Task, CreateTaskData, TaskFilters, TaskStatus } from '@/types/tasks';
 
 export const useTasks = (clientId?: string) => {
@@ -11,7 +11,7 @@ export const useTasks = (clientId?: string) => {
   const [filters, setFilters] = useState<TaskFilters>({});
   const { toast } = useToast();
   const { user, hasRole } = useAuth();
-  const { isCoachClient, getCurrentUserCoach } = useCoachClientRelationships();
+  const { isCoachClient, getCurrentUserCoach } = useUserRelationships();
 
   const fetchTasks = async () => {
     if (!clientId || !user) return;

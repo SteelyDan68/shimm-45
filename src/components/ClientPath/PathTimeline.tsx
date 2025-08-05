@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PathEntry } from './PathEntry';
 import { PathFilters } from './PathFilters';
 import { AddPathEntry } from './AddPathEntry';
-import { useClientPath } from '@/hooks/useClientPath';
+import { useUserPath } from '@/hooks/useUserPath';
 import { Clock, AlertCircle } from 'lucide-react';
 
 interface PathTimelineProps {
@@ -20,7 +20,7 @@ export function PathTimeline({ clientId, clientName, readonly = false }: PathTim
     createEntry, 
     updateEntry, 
     deleteEntry 
-  } = useClientPath(clientId);
+  } = useUserPath(clientId);
 
   if (loading) {
     return (

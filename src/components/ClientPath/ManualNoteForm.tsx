@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { PlusCircle, Save, X } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useClientPath } from '@/hooks/useClientPath';
+import { useUserPath } from '@/hooks/useUserPath';
 import { useToast } from '@/hooks/use-toast';
 import { CreatePathEntryData } from '@/types/clientPath';
 
@@ -26,7 +26,7 @@ const NOTE_TYPES = [
 
 export const ManualNoteForm = ({ clientId }: ManualNoteFormProps) => {
   const { user } = useAuth();
-  const { createEntry } = useClientPath(clientId);
+  const { createEntry } = useUserPath(clientId);
   const { toast } = useToast();
   
   const [isOpen, setIsOpen] = useState(false);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useCoachClientRelationships } from '@/hooks/useCoachClientRelationships';
+import { useUserRelationships } from '@/hooks/useUserRelationships';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays, isAfter, parseISO } from 'date-fns';
@@ -60,7 +60,7 @@ export const useCoachDashboard = () => {
   const [sortBy, setSortBy] = useState<SortOption>('priority');
   const { toast } = useToast();
   const { user, hasRole } = useAuth();
-  const { getCurrentUserClients } = useCoachClientRelationships();
+  const { getCurrentUserClients } = useUserRelationships();
   const { clients: unifiedClients } = useUnifiedClients();
 
   const fetchCoachStats = async (clientPriorities: ClientPriority[]) => {
