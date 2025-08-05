@@ -7,10 +7,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   ArrowLeft, 
-  Brain, 
   TrendingUp,
   RefreshCw,
-  Settings,
   User,
   Mail,
   Phone,
@@ -228,37 +226,8 @@ export const UnifiedUserProfile = () => {
           </div>
         </div>
 
-        {/* Context-specific actions */}
-        {context === 'client' && (
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                toast({
-                  title: "AI-analys",
-                  description: "AI-analys funktionalitet kommer snart!",
-                });
-              }}
-            >
-              <Brain className="h-4 w-4 mr-2" />
-              Kör AI-analys
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                toast({
-                  title: "Inställningar",
-                  description: "Användarinställningar kommer snart!",
-                });
-              }}
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Inställningar
-            </Button>
-          </div>
-        )}
+        {/* Context-specific actions - REMOVED per team decision */}
+        {/* Placeholder buttons eliminated for cleaner UX */}
       </div>
 
       {/* CONTEXT-DRIVEN CONTENT */}
