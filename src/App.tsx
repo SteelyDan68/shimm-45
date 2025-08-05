@@ -43,6 +43,7 @@ import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
 import { IntelligenceHubPage } from "./pages/IntelligenceHub";
+import { ClientIntelligencePage } from "./pages/ClientIntelligence";
 import { TasksPage } from "./pages/Tasks";
 import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChat";
@@ -123,9 +124,10 @@ const AppRoutes = () => {
                 <Route path="/testing" element={<TestingPage />} />
                <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
                <Route path="/mobile" element={<MobileOptimization />} />
-               <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
-               <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
-               <Route path="/intelligence/:userId" element={<Intelligence />} />
+                <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
+                <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
+                <Route path="/intelligence/:userId" element={<Intelligence />} />
+                <Route path="/client-intelligence" element={<ClientIntelligencePage />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
                <Route path="/admin-hub/*" element={<AdminHub />} />
                <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />

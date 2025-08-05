@@ -153,6 +153,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach"]
       },
       {
+        title: "Min Intelligence",
+        url: "/client-intelligence",
+        icon: Brain,
+        roles: ["client"]
+      },
+      {
         title: "Stefan AI",
         url: NAVIGATION_ROUTES.STEFAN_CHAT,
         icon: Brain,
@@ -265,6 +271,13 @@ export const QUICK_ACTIONS = {
       description: "Se och hantera dina uppgifter",
       icon: CheckSquare,
       url: NAVIGATION_ROUTES.TASKS,
+      variant: "outline" as const
+    },
+    {
+      title: "Min Intelligence",
+      description: "Se din digitala analys",
+      icon: Brain,
+      url: "/client-intelligence",
       variant: "outline" as const
     }
   ]

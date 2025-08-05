@@ -68,9 +68,9 @@ export function IntelligenceHubPage() {
   };
 
   // Enhanced permissions - alla roller har access med olika nivåer
-  const canViewIntelligenceHub = hasRole('admin') || hasRole('superadmin') || hasRole('coach');
-  const canViewAllProfiles = hasRole('admin') || hasRole('superadmin');
-  const canExportData = hasRole('admin') || hasRole('superadmin');
+  const canViewIntelligenceHub = hasRole('admin') || hasRole('superadmin') || hasRole('coach') || hasRole('client');
+  const canViewAllProfiles = hasRole('admin') || hasRole('superadmin') || hasRole('coach');
+  const canExportData = hasRole('admin') || hasRole('superadmin') || hasRole('coach');
   const canConfigureSettings = hasRole('superadmin');
   
   if (!canViewIntelligenceHub) {
@@ -81,10 +81,10 @@ export function IntelligenceHubPage() {
             <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-semibold mb-2">Begränsad åtkomst</h3>
             <p className="text-muted-foreground mb-4">
-              Intelligence Hub kräver minst coach-behörighet.
+              Intelligence Hub kräver autentiserad användare.
             </p>
             <Badge variant="outline" className="text-xs">
-              Tillgängliga roller: Coach, Admin, Superadmin
+              Tillgängliga roller: Klient, Coach, Admin, Superadmin
             </Badge>
           </CardContent>
         </Card>
@@ -223,14 +223,15 @@ export function IntelligenceHubPage() {
                       Börja genom att söka efter en klient i panelen till vänster
                     </p>
                     
-                    <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      <span>
-                        Åtkomst: {hasRole('superadmin') ? 'Alla användare (Superadmin)' : 
-                                hasRole('admin') ? 'Alla användare (Admin)' : 
-                                'Tilldelade klienter (Coach)'}
-                      </span>
-                    </div>
+                     <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                       <Users className="h-3 w-3" />
+                       <span>
+                         Åtkomst: {hasRole('superadmin') ? 'Alla användare (Superadmin)' : 
+                                 hasRole('admin') ? 'Alla användare (Admin)' : 
+                                 hasRole('coach') ? 'Tilldelade klienter (Coach)' :
+                                 hasRole('client') ? 'Din egen profil (Klient)' : 'Begränsad'}
+                       </span>
+                     </div>
                   </div>
                 </div>
               </div>

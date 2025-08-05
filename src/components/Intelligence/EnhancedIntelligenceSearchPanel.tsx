@@ -43,8 +43,15 @@ export function EnhancedIntelligenceSearchPanel({
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'high_progress'>('all');
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const { toast } = useToast();
+
+  // Auto-select current user if client role
+  useEffect(() => {
+    if (hasRole('client') && user?.id && !selectedUserId) {
+      onProfileSelect(user.id);
+    }
+  }, [hasRole, user?.id, selectedUserId, onProfileSelect]);
 
   useEffect(() => {
     loadProfiles();
@@ -53,6 +60,46 @@ export function EnhancedIntelligenceSearchPanel({
   const loadProfiles = async () => {
     setLoading(true);
     try {
+      // Special handling for client users - they only see themselves
+      if (hasRole('client')) {
+        const { data: clientProfile, error } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            email,
+            last_login_at,
+            created_at,
+            status
+          `)
+          .eq('id', user?.id)
+          .single();
+
+        if (error) throw error;
+
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', clientProfile.id)
+          .limit(1)
+          .maybeSingle();
+
+        const transformedProfile: UserProfile = {
+          id: clientProfile.id,
+          display_name: `${clientProfile.first_name || ''} ${clientProfile.last_name || ''}`.trim() || null,
+          email: clientProfile.email,
+          last_login_at: clientProfile.last_login_at,
+          activity_level: 'high', // Client is always active when viewing
+          progress_score: 85, // Default good score for client view
+          role: roleData?.role || 'client'
+        };
+
+        setProfiles([transformedProfile]);
+        setLoading(false);
+        return;
+      }
+
       // Role-based filtering: coaches can only see their assigned clients
       let query = supabase
         .from('profiles')
@@ -178,38 +225,41 @@ export function EnhancedIntelligenceSearchPanel({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Sök klienter..."
+              placeholder={hasRole('client') ? "Din profil" : "Sök klienter..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              disabled={hasRole('client')}
             />
           </div>
           
-          <div className="flex gap-2">
-            <Button
-              variant={filter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('all')}
-            >
-              Alla
-            </Button>
-            <Button
-              variant={filter === 'active' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('active')}
-            >
-              <Clock className="h-3 w-3 mr-1" />
-              Aktiva
-            </Button>
-            <Button
-              variant={filter === 'high_progress' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('high_progress')}
-            >
-              <Star className="h-3 w-3 mr-1" />
-              Topp
-            </Button>
-          </div>
+          {!hasRole('client') && (
+            <div className="flex gap-2">
+              <Button
+                variant={filter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('all')}
+              >
+                Alla
+              </Button>
+              <Button
+                variant={filter === 'active' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('active')}
+              >
+                <Clock className="h-3 w-3 mr-1" />
+                Aktiva
+              </Button>
+              <Button
+                variant={filter === 'high_progress' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('high_progress')}
+              >
+                <Star className="h-3 w-3 mr-1" />
+                Topp
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
