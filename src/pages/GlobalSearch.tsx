@@ -112,7 +112,7 @@ export const GlobalSearchPage: React.FC = () => {
     <MobileContainer className="py-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-mobile-3xl font-bold mb-2">Sök i SHIMM</h1>
+          <h1 className="text-mobile-3xl font-bold mb-2">Sök i SHIMMS</h1>
           <p className="text-mobile-base text-muted-foreground">
             Hitta användare, meddelanden, uppgifter, bedömningar och mer
           </p>

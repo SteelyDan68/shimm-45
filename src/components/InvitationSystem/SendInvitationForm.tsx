@@ -31,7 +31,7 @@ export const SendInvitationForm = ({ onSuccess }: SendInvitationFormProps) => {
         body: {
           email,
           role,
-          inviterName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'SHIMM-teamet'
+          inviterName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'SHIMMS-teamet'
         }
       });
 

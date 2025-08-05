@@ -477,7 +477,7 @@ export function MobileOptimizationCenter() {
                       className="w-full"
                       onClick={() => {
                         navigator.share({
-                          title: 'Shimm-45 App',
+                          title: 'SHIMMS App',
                           text: 'Kolla in denna fantastiska app!',
                           url: window.location.href
                         });
