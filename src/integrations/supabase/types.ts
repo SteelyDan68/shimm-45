@@ -3238,6 +3238,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_attributes: {
+        Row: {
+          attribute_key: string
+          attribute_type: string
+          attribute_value: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attribute_key: string
+          attribute_type?: string
+          attribute_value?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attribute_key?: string
+          attribute_type?: string
+          attribute_value?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_behavior_patterns: {
         Row: {
           first_detected: string
@@ -3842,9 +3878,9 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_client_id_from_user_id: {
-        Args: { user_uuid: string }
-        Returns: string
+      get_user_attribute: {
+        Args: { _user_id: string; _attribute_key: string }
+        Returns: Json
       }
       get_user_context: {
         Args: { target_user_id: string }
@@ -3857,10 +3893,6 @@ export type Database = {
           permission_level: number
           can_access: boolean
         }[]
-      }
-      get_user_id_from_client_id: {
-        Args: { client_uuid: string }
-        Returns: string
       }
       get_user_organization_ids: {
         Args: { _user_id: string }
@@ -3878,6 +3910,10 @@ export type Database = {
           coach_relationships: string[]
           client_relationships: string[]
         }[]
+      }
+      get_users_with_attribute: {
+        Args: { _attribute_key: string; _attribute_value?: Json }
+        Returns: string[]
       }
       halfvec_avg: {
         Args: { "": number[] }
@@ -3899,6 +3935,14 @@ export type Database = {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      has_user_attribute: {
+        Args: {
+          _user_id: string
+          _attribute_key: string
+          _attribute_value?: Json
         }
         Returns: boolean
       }
@@ -3958,6 +4002,15 @@ export type Database = {
         Args: { _user_id: string }
         Returns: string
       }
+      set_user_attribute: {
+        Args: {
+          _user_id: string
+          _attribute_key: string
+          _attribute_value: Json
+          _attribute_type?: string
+        }
+        Returns: undefined
+      }
       sparsevec_out: {
         Args: { "": unknown }
         Returns: unknown
@@ -3975,6 +4028,10 @@ export type Database = {
         Returns: boolean
       }
       user_has_any_role: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      user_has_client_context: {
         Args: { _user_id: string }
         Returns: boolean
       }

@@ -236,7 +236,11 @@ export const useUnifiedUsers = () => {
   }, [users]);
 
   const getClients = useCallback(() => {
-    return users.filter(user => user.roles.includes('client') || user.client_category);
+    // Use the new attribute-based system
+    return users.filter(user => 
+      user.roles.includes('client') || 
+      user.client_category // Legacy support
+    );
   }, [users]);
 
   const getCoaches = useCallback(() => {
