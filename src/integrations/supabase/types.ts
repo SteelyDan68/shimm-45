@@ -918,6 +918,66 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_coach_client_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          client_id: string | null
+          coach_id: string | null
+          created_at: string | null
+          id: string | null
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      backup_user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          expires_at: string | null
+          id: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          expires_at?: string | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          expires_at?: string | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           category: string
@@ -957,39 +1017,6 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           visible_to_client?: boolean
-        }
-        Relationships: []
-      }
-      coach_client_assignments: {
-        Row: {
-          assigned_at: string
-          assigned_by: string
-          client_id: string
-          coach_id: string
-          created_at: string
-          id: string
-          is_active: boolean
-          updated_at: string
-        }
-        Insert: {
-          assigned_at?: string
-          assigned_by: string
-          client_id: string
-          coach_id: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          updated_at?: string
-        }
-        Update: {
-          assigned_at?: string
-          assigned_by?: string
-          client_id?: string
-          coach_id?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          updated_at?: string
         }
         Relationships: []
       }
@@ -3727,33 +3754,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      user_roles: {
-        Row: {
-          assigned_at: string | null
-          assigned_by: string | null
-          expires_at: string | null
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          expires_at?: string | null
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          expires_at?: string | null
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
       }
       weekly_email_logs: {
         Row: {
