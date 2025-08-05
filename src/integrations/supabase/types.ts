@@ -3961,6 +3961,10 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      cleanup_old_audit_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cleanup_old_error_logs: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -4031,10 +4035,9 @@ export type Database = {
         Returns: number
       }
       has_role: {
-        Args: {
-          _user_id: string
-          _role: Database["public"]["Enums"]["app_role"]
-        }
+        Args:
+          | { _user_id: string; _role: Database["public"]["Enums"]["app_role"] }
+          | { _user_id: string; _role: string }
         Returns: boolean
       }
       has_user_attribute: {
@@ -4164,6 +4167,10 @@ export type Database = {
           expires_at: string
           is_valid: boolean
         }[]
+      }
+      validate_password_strength: {
+        Args: { password_text: string }
+        Returns: Json
       }
       validate_role_context_switch: {
         Args: {
