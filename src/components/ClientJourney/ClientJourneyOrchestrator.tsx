@@ -131,9 +131,27 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
     
     setIsProcessing(true);
     try {
-      const mockAssessmentData = {
-        scores: { self_care: 6, stress_management: 4, work_life_balance: 5 },
-        responses: { main_challenge: "Stresshantering", goal: "Bättre balans" },
+      // Get real assessment data from the latest assessment
+      const { data: assessments, error: assessmentError } = await supabase
+        .from('assessment_rounds')
+        .select('scores, answers, pillar_type')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (assessmentError) {
+        console.error('Error fetching assessment data:', assessmentError);
+        return;
+      }
+
+      const latestAssessment = assessments?.[0];
+      const assessmentData = latestAssessment ? {
+        scores: latestAssessment.scores || { self_care: 5, stress_management: 5, work_life_balance: 5 },
+        responses: latestAssessment.answers || { main_challenge: "Utveckling", goal: "Förbättring" },
+        pillarKey: latestAssessment.pillar_type || 'self_care'
+      } : {
+        scores: { self_care: 5, stress_management: 5, work_life_balance: 5 },
+        responses: { main_challenge: "Utveckling", goal: "Förbättring" },
         pillarKey: 'self_care'
       };
 
@@ -141,9 +159,9 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
         action: 'assessment_analysis',
         data: {
           assessmentType: 'welcome_assessment',
-          scores: mockAssessmentData.scores,
-          responses: mockAssessmentData.responses,
-          pillarKey: mockAssessmentData.pillarKey
+          scores: assessmentData.scores,
+          responses: assessmentData.responses,
+          pillarKey: assessmentData.pillarKey
         },
         priority: 'high'
       });

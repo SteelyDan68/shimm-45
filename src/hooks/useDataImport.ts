@@ -20,7 +20,7 @@ export interface ImportHistoryItem {
   id: string;
   fileName: string;
   type: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
   totalRows: number;
   processedRows: number;
   errors: number;
@@ -52,26 +52,33 @@ export const useDataImport = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Load import history (mock implementation)
+  // Load import history from database
   const loadImportHistory = useCallback(async () => {
     if (!user) return;
 
     try {
-      // Mock data for demonstration
-      const mockHistory: ImportHistoryItem[] = [
-        {
-          id: '1',
-          fileName: 'users_import_2024-01-15.csv',
-          type: 'users',
-          status: 'completed',
-          totalRows: 150,
-          processedRows: 150,
-          errors: 0,
-          created_at: new Date().toISOString()
-        }
-      ];
+      const { data, error } = await supabase
+        .from('import_requests')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-      setImportHistory(mockHistory);
+      if (error) throw error;
+      
+      // Map database data to interface format
+      const mappedHistory: ImportHistoryItem[] = (data || []).map(h => ({
+        id: h.id,
+        fileName: h.file_name,
+        type: h.type,
+        status: h.status as 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled',
+        totalRows: h.total_rows || 0,
+        processedRows: h.processed_rows || 0,
+        errors: h.errors || 0,
+        created_at: h.created_at
+      }));
+      
+      setImportHistory(mappedHistory);
     } catch (error) {
       console.error('Error loading import history:', error);
     }
@@ -278,16 +285,24 @@ export const useDataImport = () => {
     }
   }, [toast]);
 
-  // Get import status (mock implementation)
+  // Get import status from database
   const getImportStatus = useCallback(async (importId: string) => {
     try {
-      const item = importHistory.find(h => h.id === importId);
-      return item || null;
+      const { data, error } = await supabase
+        .from('import_requests')
+        .select('*')
+        .eq('id', importId)
+        .single();
+
+      if (error) throw error;
+      
+      loadImportHistory(); // Refresh the list
+      return data;
     } catch (error) {
       console.error('Error getting import status:', error);
       return null;
     }
-  }, [importHistory]);
+  }, [loadImportHistory]);
 
   // Validate file format
   const validateFile = useCallback((file: File): boolean => {

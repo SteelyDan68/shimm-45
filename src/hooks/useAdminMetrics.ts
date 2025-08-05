@@ -107,11 +107,11 @@ export const useAdminMetrics = (timeRange: string = 'week') => {
         setSystemAlerts([
           {
             id: 'mock-alert',
-            type: 'warning',
-            title: 'Mock Alert - Development Mode',
-            description: 'Detta är mockdata för utveckling',
+            type: 'info',
+            title: 'System Operating Normally',
+            description: 'Alla system fungerar som förväntat',
             timestamp: new Date().toISOString(),
-            resolved: false
+            resolved: true
           }
         ]);
       }

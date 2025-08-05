@@ -51,43 +51,65 @@ export const useDataExport = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Load templates and history (mock implementation for now)
+  // Load templates and history from database
   const loadTemplatesAndHistory = useCallback(async () => {
     if (!user) return;
 
     try {
-      // Mock data for demonstration
-      const mockTemplates: ExportTemplate[] = [
-        {
-          id: '1',
-          name: 'Monthly User Report',
-          description: 'Export all user data from the last month',
-          dataTypes: ['users', 'tasks'],
-          format: 'csv',
-          includeMetadata: true,
-          created_at: new Date().toISOString()
-        }
-      ];
+      // Load export templates from database
+      const { data: templatesData, error: templatesError } = await supabase
+        .from('export_templates')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false });
 
-      const mockHistory: ExportHistoryItem[] = [
-        {
-          id: '1',
-          name: 'user_export_2024-01-15',
-          format: 'csv',
-          dataTypes: ['users'],
-          status: 'completed',
-          created_at: new Date().toISOString(),
-          completed_at: new Date().toISOString(),
-          file_url: '#'
-        }
-      ];
+      if (templatesError) throw templatesError;
 
-      setTemplates(mockTemplates);
-      setExportHistory(mockHistory);
+      // Load export history from database
+      const { data: historyData, error: historyError } = await supabase
+        .from('export_requests')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (historyError) throw historyError;
+
+      // Map database data to interface format
+      const mappedTemplates: ExportTemplate[] = (templatesData || []).map(t => ({
+        id: t.id,
+        name: t.name,
+        description: t.description || '',
+        dataTypes: t.data_types,
+        format: t.format,
+        includeMetadata: t.include_metadata,
+        filters: t.filters,
+        created_at: t.created_at
+      }));
+
+      const mappedHistory: ExportHistoryItem[] = (historyData || []).map(h => ({
+        id: h.id,
+        name: h.name,
+        format: h.format,
+        dataTypes: h.data_types,
+        status: h.status as 'pending' | 'processing' | 'completed' | 'failed',
+        created_at: h.created_at,
+        completed_at: h.completed_at,
+        file_url: h.file_url,
+        error_message: h.error_message
+      }));
+
+      setTemplates(mappedTemplates);
+      setExportHistory(mappedHistory);
     } catch (error) {
       console.error('Error loading templates and history:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda exportdata",
+        variant: "destructive"
+      });
     }
-  }, [user]);
+  }, [user, toast]);
 
   // Export data
   const exportData = useCallback(async (config: ExportConfig) => {
@@ -97,15 +119,15 @@ export const useDataExport = () => {
     setExportProgress(0);
 
     try {
-      // Start the export process
-      const { data, error } = await supabase.functions.invoke('export-data', {
+      // Start the export process using edge function
+      const { data: exportData, error: exportError } = await supabase.functions.invoke('export-data', {
         body: {
           ...config,
           user_id: user.id
         }
       });
 
-      if (error) throw error;
+      if (exportError) throw exportError;
 
       // Simulate progress updates
       const progressInterval = setInterval(() => {
@@ -118,10 +140,17 @@ export const useDataExport = () => {
         });
       }, 500);
 
-      // Simulate completion for demo
+      // Check completion status from database
       const checkStatus = async (exportId: string) => {
-        // Simulate processing time
-        setTimeout(() => {
+        const { data: statusData, error: statusError } = await supabase
+          .from('export_requests')
+          .select('status, file_url, error_message')
+          .eq('id', exportId)
+          .single();
+
+        if (statusError) throw statusError;
+
+        if (statusData.status === 'completed') {
           clearInterval(progressInterval);
           setExportProgress(100);
           
@@ -135,24 +164,30 @@ export const useDataExport = () => {
             description: "Din data är klar för nedladdning."
           });
 
-          // Add to mock history
-          const newHistoryItem: ExportHistoryItem = {
-            id: Date.now().toString(),
-            name: config.name,
-            format: config.format,
-            dataTypes: config.dataTypes,
-            status: 'completed',
-            created_at: new Date().toISOString(),
-            completed_at: new Date().toISOString(),
-            file_url: '#'
-          };
-
-          setExportHistory(prev => [newHistoryItem, ...prev.slice(0, 9)]);
-        }, 3000);
+          loadTemplatesAndHistory();
+          
+          // Auto-download if file URL is available
+          if (statusData.file_url) {
+            window.open(statusData.file_url, '_blank');
+          }
+        } else if (statusData.status === 'failed') {
+          clearInterval(progressInterval);
+          setIsExporting(false);
+          setExportProgress(0);
+          
+          toast({
+            title: "Export misslyckades",
+            description: statusData.error_message || "Ett okänt fel inträffade",
+            variant: "destructive"
+          });
+        } else {
+          // Still processing, check again
+          setTimeout(() => checkStatus(exportId), 2000);
+        }
       };
 
-      if (data?.export_id) {
-        setTimeout(() => checkStatus(data.export_id), 2000);
+      if (exportData?.export_id) {
+        setTimeout(() => checkStatus(exportData.export_id), 2000);
       }
 
     } catch (error) {
@@ -168,23 +203,31 @@ export const useDataExport = () => {
     }
   }, [user, toast, loadTemplatesAndHistory]);
 
-  // Save export template (mock implementation)
+  // Save export template to database
   const saveTemplate = useCallback(async (template: Omit<ExportTemplate, 'id' | 'created_at'>) => {
     if (!user) return;
 
     try {
-      const newTemplate: ExportTemplate = {
-        ...template,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString()
-      };
+      const { error } = await supabase
+        .from('export_templates')
+        .insert({
+          name: template.name,
+          description: template.description,
+          data_types: template.dataTypes,
+          format: template.format,
+          include_metadata: template.includeMetadata,
+          filters: template.filters || {},
+          created_by: user.id
+        });
 
-      setTemplates(prev => [newTemplate, ...prev]);
+      if (error) throw error;
 
       toast({
         title: "Mall sparad",
         description: `Exportmallen "${template.name}" har sparats.`
       });
+
+      loadTemplatesAndHistory();
     } catch (error) {
       console.error('Error saving template:', error);
       toast({
@@ -193,19 +236,27 @@ export const useDataExport = () => {
         variant: "destructive"
       });
     }
-  }, [user, toast]);
+  }, [user, toast, loadTemplatesAndHistory]);
 
-  // Download export (mock implementation)
+  // Download export from database
   const downloadExport = useCallback(async (exportId: string) => {
     try {
-      const exportItem = exportHistory.find(item => item.id === exportId);
-      
-      if (exportItem && exportItem.file_url && exportItem.status === 'completed') {
-        // Simulate download
-        toast({
-          title: "Nedladdning startad",
-          description: `Filen "${exportItem.name}" laddas ner...`
-        });
+      const { data, error } = await supabase
+        .from('export_requests')
+        .select('file_url, name, status')
+        .eq('id', exportId)
+        .single();
+
+      if (error) throw error;
+
+      if (data.status === 'completed' && data.file_url) {
+        // Create download link
+        const link = document.createElement('a');
+        link.href = data.file_url;
+        link.download = data.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       } else {
         toast({
           title: "Fil inte tillgänglig",
@@ -221,18 +272,24 @@ export const useDataExport = () => {
         variant: "destructive"
       });
     }
-  }, [toast, exportHistory]);
+  }, [toast]);
 
-  // Load template (mock implementation)
+  // Load template from database
   const loadTemplate = useCallback(async (templateId: string) => {
     try {
-      const template = templates.find(t => t.id === templateId);
-      return template || null;
+      const { data, error } = await supabase
+        .from('export_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error('Error loading template:', error);
       return null;
     }
-  }, [templates]);
+  }, []);
 
   // Initialize
   React.useEffect(() => {

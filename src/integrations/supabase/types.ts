@@ -499,6 +499,36 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+          recorded_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value: number
+          recorded_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+          recorded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       assessment_events: {
         Row: {
           assessment_state_id: string | null
@@ -810,6 +840,42 @@ export type Database = {
           started_at?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      assessment_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          name: string
+          pillar_key: string
+          questions: Json
+          scoring_config: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          name: string
+          pillar_key: string
+          questions?: Json
+          scoring_config?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          pillar_key?: string
+          questions?: Json
+          scoring_config?: Json | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1504,6 +1570,90 @@ export type Database = {
         }
         Relationships: []
       }
+      export_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          data_types: string[]
+          error_message: string | null
+          expires_at: string | null
+          file_size_bytes: number | null
+          file_url: string | null
+          format: string
+          id: string
+          name: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          data_types?: string[]
+          error_message?: string | null
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          format: string
+          id?: string
+          name: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          data_types?: string[]
+          error_message?: string | null
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          format?: string
+          id?: string
+          name?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      export_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_types: string[]
+          description: string | null
+          filters: Json | null
+          format: string
+          id: string
+          include_metadata: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_types?: string[]
+          description?: string | null
+          filters?: Json | null
+          format: string
+          id?: string
+          include_metadata?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_types?: string[]
+          description?: string | null
+          filters?: Json | null
+          format?: string
+          id?: string
+          include_metadata?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gdpr_audit_log: {
         Row: {
           action: string
@@ -1534,6 +1684,51 @@ export type Database = {
           timestamp?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      import_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          error_details: Json | null
+          error_message: string | null
+          errors: number | null
+          file_name: string
+          id: string
+          processed_rows: number | null
+          status: string
+          total_rows: number | null
+          type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          error_details?: Json | null
+          error_message?: string | null
+          errors?: number | null
+          file_name: string
+          id?: string
+          processed_rows?: number | null
+          status?: string
+          total_rows?: number | null
+          type: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          error_details?: Json | null
+          error_message?: string | null
+          errors?: number | null
+          file_name?: string
+          id?: string
+          processed_rows?: number | null
+          status?: string
+          total_rows?: number | null
+          type?: string
         }
         Relationships: []
       }
@@ -2894,6 +3089,36 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           version?: string | null
+        }
+        Relationships: []
+      }
+      system_performance_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_type: string
+          recorded_at: string
+          unit: string | null
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          recorded_at?: string
+          unit?: string | null
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          recorded_at?: string
+          unit?: string | null
+          value?: number
         }
         Relationships: []
       }
