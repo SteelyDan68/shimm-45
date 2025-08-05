@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUserAttributes } from '@/hooks/useUserAttributes';
 import { PillarKey } from '@/types/sixPillarsModular';
 
 export interface UserPillarActivation {
@@ -31,21 +31,36 @@ export const useUserPillars = (userId: string) => {
   const [assessments, setAssessments] = useState<UserPillarAssessment[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  
+  const { 
+    getAttribute, 
+    setAttribute, 
+    hasAttribute,
+    loading: attributesLoading 
+  } = useUserAttributes(userId);
 
   const fetchActivations = async () => {
     if (!userId) return;
     
     try {
-      const { data, error } = await supabase
-        .from('user_pillar_activations')
-        .select('*')
-        .eq('user_id', userId)
-        .order('activated_at', { ascending: false });
-
-      if (error) throw error;
-      setActivations(data as UserPillarActivation[] || []);
+      // Get pillar activations from user attributes
+      const activationsData = await getAttribute(userId, 'pillar_activations');
+      const activationsArray = Array.isArray(activationsData) ? activationsData : [];
+      
+      // Convert attribute data to expected format
+      const formattedActivations: UserPillarActivation[] = activationsArray.map((activation: any) => ({
+        id: activation.id || `activation_${activation.pillar_key}_${Date.now()}`,
+        user_id: userId,
+        pillar_key: activation.pillar_key,
+        is_active: activation.is_active !== false, // Default to true
+        activated_by: activation.activated_by || userId,
+        activated_at: activation.activated_at || new Date().toISOString(),
+        updated_at: activation.updated_at || new Date().toISOString()
+      }));
+      
+      setActivations(formattedActivations);
     } catch (error) {
-      console.error('Error fetching pillar activations:', error);
+      console.error('Error fetching pillar activations from attributes:', error);
       toast({
         title: "Error",
         description: "Failed to fetch pillar activations",
@@ -58,16 +73,27 @@ export const useUserPillars = (userId: string) => {
     if (!userId) return;
     
     try {
-      const { data, error } = await supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setAssessments(data as UserPillarAssessment[] || []);
+      // Get pillar assessments from user attributes
+      const assessmentsData = await getAttribute(userId, 'pillar_assessments');
+      const assessmentsArray = Array.isArray(assessmentsData) ? assessmentsData : [];
+      
+      // Convert attribute data to expected format
+      const formattedAssessments: UserPillarAssessment[] = assessmentsArray.map((assessment: any) => ({
+        id: assessment.id || `assessment_${assessment.pillar_key}_${Date.now()}`,
+        user_id: userId,
+        pillar_key: assessment.pillar_key,
+        assessment_data: assessment.assessment_data || {},
+        calculated_score: assessment.calculated_score || null,
+        ai_analysis: assessment.ai_analysis || null,
+        insights: assessment.insights || {},
+        created_by: assessment.created_by || userId,
+        created_at: assessment.created_at || new Date().toISOString(),
+        updated_at: assessment.updated_at || new Date().toISOString()
+      }));
+      
+      setAssessments(formattedAssessments);
     } catch (error) {
-      console.error('Error fetching pillar assessments:', error);
+      console.error('Error fetching pillar assessments from attributes:', error);
       toast({
         title: "Error",
         description: "Failed to fetch pillar assessments",
@@ -83,29 +109,54 @@ export const useUserPillars = (userId: string) => {
   };
 
   useEffect(() => {
-    // Only fetch when userId is available
-    if (userId) {
-      
+    if (userId && !attributesLoading) {
       fetchData();
-    } else {
-      
+    } else if (!userId) {
+      setActivations([]);
+      setAssessments([]);
+      setLoading(false);
     }
-  }, [userId]);
+  }, [userId, attributesLoading]);
 
   const activatePillar = async (pillarKey: PillarKey) => {
     if (!userId) return;
 
     try {
-      const { error } = await supabase
-        .from('user_pillar_activations')
-        .insert({
-          user_id: userId,
-          pillar_key: pillarKey,
-          is_active: true,
-          activated_by: userId
-        });
+      // Get current activations
+      const currentActivationsData = await getAttribute(userId, 'pillar_activations');
+      const currentActivations = Array.isArray(currentActivationsData) ? currentActivationsData : [];
+      
+      // Find existing activation or create new one
+      const existingIndex = currentActivations.findIndex((a: any) => a.pillar_key === pillarKey);
+      const newActivation = {
+        id: `activation_${pillarKey}_${Date.now()}`,
+        pillar_key: pillarKey,
+        is_active: true,
+        activated_by: userId,
+        activated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      let updatedActivations;
+      if (existingIndex >= 0) {
+        // Update existing activation
+        updatedActivations = [...currentActivations];
+        updatedActivations[existingIndex] = {
+          ...updatedActivations[existingIndex],
+          is_active: true,
+          updated_at: new Date().toISOString()
+        };
+      } else {
+        // Add new activation
+        updatedActivations = [...currentActivations, newActivation];
+      }
+
+      // Save to attributes
+      await setAttribute(userId, {
+        attribute_key: 'pillar_activations',
+        attribute_value: updatedActivations,
+        attribute_type: 'metadata'
+      });
       
       await fetchActivations();
       toast({
@@ -126,16 +177,28 @@ export const useUserPillars = (userId: string) => {
     if (!userId) return;
 
     try {
-      const { error } = await supabase
-        .from('user_pillar_activations')
-        .update({ 
-          is_active: false,
-          deactivated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('pillar_key', pillarKey);
+      // Get current activations
+      const currentActivationsData = await getAttribute(userId, 'pillar_activations');
+      const currentActivations = Array.isArray(currentActivationsData) ? currentActivationsData : [];
+      
+      // Update activation status
+      const updatedActivations = currentActivations.map((activation: any) =>
+        activation.pillar_key === pillarKey 
+          ? { 
+              ...activation, 
+              is_active: false, 
+              deactivated_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+          : activation
+      );
 
-      if (error) throw error;
+      // Save to attributes
+      await setAttribute(userId, {
+        attribute_key: 'pillar_activations',
+        attribute_value: updatedActivations,
+        attribute_type: 'metadata'
+      });
       
       await fetchActivations();
       toast({
@@ -175,10 +238,57 @@ export const useUserPillars = (userId: string) => {
     );
   };
 
+  const savePillarAssessment = async (pillarKey: PillarKey, assessmentData: any, calculatedScore?: number, aiAnalysis?: string) => {
+    if (!userId) return;
+
+    try {
+      // Get current assessments
+      const currentAssessmentsData = await getAttribute(userId, 'pillar_assessments');
+      const currentAssessments = Array.isArray(currentAssessmentsData) ? currentAssessmentsData : [];
+      
+      // Create new assessment
+      const newAssessment = {
+        id: `assessment_${pillarKey}_${Date.now()}`,
+        pillar_key: pillarKey,
+        assessment_data: assessmentData,
+        calculated_score: calculatedScore || null,
+        ai_analysis: aiAnalysis || null,
+        insights: {},
+        created_by: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Remove any existing assessment for this pillar and add the new one
+      const filteredAssessments = currentAssessments.filter((a: any) => a.pillar_key !== pillarKey);
+      const updatedAssessments = [...filteredAssessments, newAssessment];
+
+      // Save to attributes
+      await setAttribute(userId, {
+        attribute_key: 'pillar_assessments',
+        attribute_value: updatedAssessments,
+        attribute_type: 'metadata'
+      });
+      
+      await fetchAssessments();
+      toast({
+        title: "Success",
+        description: "Pillar assessment saved successfully",
+      });
+    } catch (error) {
+      console.error('Error saving pillar assessment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save pillar assessment",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     activations,
     assessments,
-    loading,
+    loading: loading || attributesLoading,
     activatePillar,
     deactivatePillar,
     getActivatedPillars,
@@ -186,5 +296,6 @@ export const useUserPillars = (userId: string) => {
     isPillarActive,
     refetch: fetchData,
     getCompletedPillars,
+    savePillarAssessment, // New method for saving assessments
   };
 };

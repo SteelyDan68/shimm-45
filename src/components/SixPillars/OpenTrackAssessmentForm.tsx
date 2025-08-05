@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useUserPillars } from '@/hooks/useUserPillars';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { Compass } from 'lucide-react';
 
@@ -18,6 +18,7 @@ interface OpenTrackAssessmentFormProps {
 export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { savePillarAssessment } = useUserPillars(user?.id || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -47,31 +48,17 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
       const score = (formData.exploration_areas.length * 15) + 
         (formData.motivation_level === 'high' ? 30 : 20);
 
-      const { data, error } = await supabase.from('pillar_assessments').insert({
-        user_id: user.id,
-        created_by: user.id,
-        pillar_key: 'open_track',
-        assessment_data: formData,
-        calculated_score: Math.min(score, 100),
-        insights: {}
-      });
-
-      if (error) {
-        console.error('Error inserting assessment:', error);
-        throw error;
-      }
-
-      
+      // Use new attribute-based pillar system
+      await savePillarAssessment(
+        'open_track',
+        formData,
+        Math.min(score, 100)
+      );
 
       toast({
         title: "Öppna spåret-bedömning genomförd!",
         description: "Din utforskningsresa har dokumenterats.",
       });
-
-      // Force refresh of pillar data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
 
       onComplete?.();
     } catch (error) {

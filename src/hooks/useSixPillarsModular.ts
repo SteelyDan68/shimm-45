@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import { useUserPillars } from '@/hooks/useUserPillars';
+import { useUserAttributes } from '@/hooks/useUserAttributes';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   PillarDefinition, 
   ClientPillarActivation, 
@@ -32,18 +34,28 @@ function calculateTrend(pillarKey: string, assessments: any[]): 'stable' | 'up' 
 export const useSixPillarsModular = (clientId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
   const [pillarDefinitions, setPillarDefinitions] = useState<PillarDefinition[]>([]);
-  const [activations, setActivations] = useState<ClientPillarActivation[]>([]);
-  const [assessments, setAssessments] = useState<PillarAssessment[]>([]);
+  
+  // Use the new unified pillar system
+  const {
+    activations,
+    assessments,
+    loading: pillarsLoading,
+    activatePillar: activatePillarBase,
+    deactivatePillar: deactivatePillarBase,
+    getActivatedPillars: getActivatedPillarsBase,
+    getLatestAssessment: getLatestAssessmentBase,
+    isPillarActive,
+    refetch: refetchPillars,
+    getCompletedPillars,
+    savePillarAssessment
+  } = useUserPillars(clientId || '');
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadPillarDefinitions();
-    if (clientId && user) {
-      loadActivations();
-      loadAssessments();
-    }
-  }, [clientId, user]);
+  }, []);
 
   const loadPillarDefinitions = async () => {
     try {
@@ -60,57 +72,13 @@ export const useSixPillarsModular = (clientId?: string) => {
     }
   };
 
-  const loadActivations = async () => {
-    if (!clientId) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('user_pillar_activations')
-        .select('*')
-        .eq('user_id', clientId)
-        .eq('is_active', true);
-
-      if (error) throw error;
-      setActivations((data || []) as ClientPillarActivation[]);
-    } catch (error) {
-      console.error('Error loading activations:', error);
-    }
-  };
-
-  const loadAssessments = async () => {
-    if (!clientId) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', clientId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setAssessments((data || []) as PillarAssessment[]);
-    } catch (error) {
-      console.error('Error loading assessments:', error);
-    }
-  };
-
   const activatePillar = async (pillarKey: PillarKey) => {
     if (!clientId || !user) return;
 
     try {
       setLoading(true);
-      const { error } = await supabase
-        .from('user_pillar_activations')
-        .upsert({
-          user_id: clientId,
-          pillar_key: pillarKey,
-          is_active: true,
-          activated_by: user.id
-        });
-
-      if (error) throw error;
+      await activatePillarBase(pillarKey);
       
-      await loadActivations();
       toast({
         title: "Pelare aktiverad",
         description: `${pillarKey} har aktiverats för klienten.`,
@@ -132,18 +100,8 @@ export const useSixPillarsModular = (clientId?: string) => {
 
     try {
       setLoading(true);
-      const { error } = await supabase
-        .from('user_pillar_activations')
-        .update({ 
-          is_active: false,
-          deactivated_at: new Date().toISOString()
-        })
-        .eq('user_id', clientId)
-        .eq('pillar_key', pillarKey);
-
-      if (error) throw error;
+      await deactivatePillarBase(pillarKey);
       
-      await loadActivations();
       toast({
         title: "Pelare inaktiverad",
         description: `${pillarKey} har inaktiverats för klienten.`,
@@ -170,75 +128,52 @@ export const useSixPillarsModular = (clientId?: string) => {
     try {
       setLoading(true);
       
-      // Save assessment
-      const { data: assessmentResult, error: assessmentError } = await supabase
-        .from('pillar_assessments')
-        .insert({
-          user_id: clientId,
-          pillar_key: pillarKey,
-          assessment_data: assessmentData,
-          calculated_score: calculatedScore,
-          created_by: user.id
-        })
-        .select()
-        .single();
+      // Save assessment using new attribute system
+      await savePillarAssessment(pillarKey, assessmentData, calculatedScore);
 
-      if (assessmentError) throw assessmentError;
-
-      // Call AI analysis function
-      const { data: aiResponse, error: aiError } = await supabase.functions.invoke(
-        'analyze-pillar-module',
-        {
-          body: {
-            assessment_id: assessmentResult.id,
-            pillar_key: pillarKey,
-            assessment_data: assessmentData,
-            calculated_score: calculatedScore,
-            user_id: clientId
-          }
-        }
-      );
-
-      if (aiError) {
-        console.error('AI analysis error:', aiError);
-      } else if (aiResponse?.analysis) {
-        // Update assessment with AI analysis
-        await supabase
-          .from('pillar_assessments')
-          .update({ 
-            ai_analysis: aiResponse.analysis,
-            insights: aiResponse.insights || {}
-          })
-          .eq('id', assessmentResult.id);
-
-        // Save as path entry with pillar metadata
-        await supabase
-          .from('path_entries')
-          .insert({
-            user_id: clientId,
-            created_by: user.id,
-            type: 'recommendation',
-            title: `${pillarKey} Assessment AI-Analys`,
-            details: aiResponse.analysis,
-            ai_generated: true,
-            timestamp: new Date().toISOString(),
-            metadata: {
-              pillar_type: pillarKey,
-              pillar_name: pillarKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              assessment_score: calculatedScore,
-              assessment_id: assessmentResult.id
+      // Call AI analysis function - this can still use edge functions
+      try {
+        const { data: aiResponse, error: aiError } = await supabase.functions.invoke(
+          'analyze-pillar-module',
+          {
+            body: {
+              pillar_key: pillarKey,
+              assessment_data: assessmentData,
+              calculated_score: calculatedScore,
+              user_id: clientId
             }
-          });
+          }
+        );
+
+        if (!aiError && aiResponse?.analysis) {
+          // Save AI analysis to path entries
+          await supabase
+            .from('path_entries')
+            .insert({
+              user_id: clientId,
+              created_by: user.id,
+              type: 'recommendation',
+              title: `${pillarKey} Assessment AI-Analys`,
+              details: aiResponse.analysis,
+              ai_generated: true,
+              timestamp: new Date().toISOString(),
+              metadata: {
+                pillar_type: pillarKey,
+                pillar_name: pillarKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                assessment_score: calculatedScore
+              }
+            });
+        }
+      } catch (aiError) {
+        console.warn('AI analysis failed but assessment was saved:', aiError);
       }
-      
-      await loadAssessments();
       
       toast({
         title: "Assessment genomförd",
-        description: `Din ${pillarKey} bedömning har sparats och AI-analys har skapats.`,
+        description: `Din ${pillarKey} bedömning har sparats.`,
       });
 
-      return assessmentResult;
+      return { id: `assessment_${pillarKey}_${Date.now()}` }; // Mock return for compatibility
     } catch (error) {
       console.error('Error submitting assessment:', error);
       toast({
@@ -253,16 +188,18 @@ export const useSixPillarsModular = (clientId?: string) => {
   };
 
   const getActivatedPillars = (): PillarKey[] => {
-    return activations.map(a => a.pillar_key);
+    return getActivatedPillarsBase();
   };
 
   const getLatestAssessment = (pillarKey: PillarKey): PillarAssessment | undefined => {
-    return assessments.find(assessment => assessment.pillar_key === pillarKey);
+    const assessment = getLatestAssessmentBase(pillarKey);
+    // Convert to expected format if needed
+    return assessment as PillarAssessment | undefined;
   };
 
   const generateHeatmapData = (): PillarHeatmapData[] => {
     return pillarDefinitions.map(pillar => {
-      const isActive = activations.some(a => a.pillar_key === pillar.pillar_key);
+      const isActive = isPillarActive(pillar.pillar_key);
       const latestAssessment = getLatestAssessment(pillar.pillar_key);
       
       return {
@@ -304,7 +241,7 @@ export const useSixPillarsModular = (clientId?: string) => {
   };
 
   return {
-    loading,
+    loading: loading || pillarsLoading,
     pillarDefinitions,
     activations,
     assessments,
@@ -318,8 +255,7 @@ export const useSixPillarsModular = (clientId?: string) => {
     generateOverallAssessment,
     refreshData: () => {
       loadPillarDefinitions();
-      loadActivations();
-      loadAssessments();
+      refetchPillars();
     }
   };
 };
