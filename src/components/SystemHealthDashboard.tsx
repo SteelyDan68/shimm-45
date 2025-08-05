@@ -24,7 +24,7 @@ export function SystemHealthDashboard() {
   const runDiagnosis = async () => {
     setLoading(true);
     try {
-      console.log('🔍 Running system diagnosis...');
+      
       const result = await runSystemDiagnosis();
       setDiagnosis(result);
       setLastCheck(new Date());

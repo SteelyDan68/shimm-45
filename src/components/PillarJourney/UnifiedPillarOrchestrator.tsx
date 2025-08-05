@@ -65,13 +65,13 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
   const isFirstTime = completedPillars.length === 0;
 
   const handlePillarSelect = (pillarKey: PillarKey, isSequential: boolean) => {
-    console.log('Pillar selected:', pillarKey, 'Sequential:', isSequential);
+    
     setSelectedPillar(pillarKey);
     setFlowState('assessment');
   };
 
   const handleAssessmentComplete = async (pillarKey: PillarKey, data: Record<string, any>) => {
-    console.log('Assessment completed for:', pillarKey, data);
+    
     setAssessmentData(data);
     
     // Uppdatera pillar data efter genomförd assessment
@@ -86,7 +86,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
   };
 
   const handleCalibrationComplete = (selectedIntensity: IntensityLevel, selectedDuration: DurationLevel) => {
-    console.log('Calibration completed:', selectedIntensity, selectedDuration);
+    
     setIntensity(selectedIntensity);
     setDuration(selectedDuration);
     setFlowState('plan_generation');
@@ -98,7 +98,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
   };
 
   const handlePlanGenerated = (activities: any[]) => {
-    console.log('Plan generated with activities:', activities.length);
+    
     setGeneratedActivities(activities);
     setFlowState('plan_complete');
   };
@@ -123,15 +123,15 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
           completedPillars={completedPillars}
           onContinueToNextPhase={() => {
             // Navigate to advanced coaching phase
-            console.log('Continuing to advanced coaching phase');
+            // Navigate to advanced coaching phase
           }}
           onExploreAdvancedFeatures={() => {
             // Navigate to premium features
-            console.log('Exploring advanced features');
+            // Navigate to premium features
           }}
           onScheduleCheckIn={() => {
             // Navigate to calendar scheduling
-            console.log('Scheduling check-in');
+            // Navigate to calendar scheduling
           }}
         />
       </div>

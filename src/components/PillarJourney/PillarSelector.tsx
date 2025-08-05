@@ -126,7 +126,7 @@ export const PillarSelector = ({
     for (const pillarKey of selectedPillars) {
       const result = await onPillarSelect(pillarKey);
       if (result && 'shouldNavigate' in result && result.shouldNavigate) {
-        console.log(`🔄 Navigating to: ${result.url}`);
+        
         window.location.href = result.url!;
         break; // Endast navigera till första pillar assessment
       }

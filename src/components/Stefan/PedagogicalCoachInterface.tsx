@@ -89,15 +89,15 @@ export const PedagogicalCoachInterface: React.FC = () => {
         }
         break;
       case 'learning_adaptation':
-        console.log('Adapting learning approach...');
+        
         break;
       case 'emotional_support':
         if (emotionalState) {
-          console.log('Providing emotional support...');
+          
         }
         break;
       case 'neuroplasticity_explanation':
-        console.log('Explaining neuroplasticity concepts...');
+        
         break;
     }
   };

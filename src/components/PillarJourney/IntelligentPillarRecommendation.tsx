@@ -50,17 +50,17 @@ export const IntelligentPillarRecommendation: React.FC<IntelligentPillarRecommen
   };
 
   const handleStartJourney = async (pillarKey: string) => {
-    console.log(`🚀 Starting journey for pillar: ${pillarKey}`);
+    
     const result = await onPillarSelect(pillarKey);
     
     // Om onPillarSelect returnerar navigation-info, använd den
     if (result && 'shouldNavigate' in result && result.shouldNavigate) {
-      console.log(`🔄 Navigating to: ${result.url}`);
+      
       window.location.href = result.url!;
     } else {
       // Fallback - navigera direkt till assessment
       const assessmentUrl = `/six-pillars?pillar=${pillarKey}&startAssessment=true`;
-      console.log(`🔄 Fallback navigation to: ${assessmentUrl}`);
+      
       window.location.href = assessmentUrl;
     }
   };

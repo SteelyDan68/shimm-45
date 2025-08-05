@@ -275,7 +275,7 @@ export const ClientProfileView = ({
           <SentimentAnalysisWidget 
             sentimentData={sentimentData} 
             onCollectData={() => {
-              console.log('🔥 Starting Data Collection for user:', userId);
+              
               
               // Call the data-collector edge function directly
               supabase.functions.invoke('data-collector', {
@@ -293,7 +293,7 @@ export const ClientProfileView = ({
                     variant: "destructive"
                   });
                 } else {
-                  console.log('Data collection success:', data);
+                  
                   toast({
                     title: "Datainsamling lyckades",
                     description: "Intelligence-data har uppdaterats"

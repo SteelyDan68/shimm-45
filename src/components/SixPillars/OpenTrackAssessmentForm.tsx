@@ -47,15 +47,6 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
       const score = (formData.exploration_areas.length * 15) + 
         (formData.motivation_level === 'high' ? 30 : 20);
 
-      console.log('Submitting open_track assessment:', {
-        user_id: user.id,
-        created_by: user.id,
-        pillar_key: 'open_track',
-        assessment_data: formData,
-        calculated_score: Math.min(score, 100),
-        insights: {}
-      });
-
       const { data, error } = await supabase.from('pillar_assessments').insert({
         user_id: user.id,
         created_by: user.id,
@@ -70,7 +61,7 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
         throw error;
       }
 
-      console.log('Assessment saved successfully:', data);
+      
 
       toast({
         title: "Öppna spåret-bedömning genomförd!",

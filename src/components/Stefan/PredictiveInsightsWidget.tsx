@@ -54,21 +54,21 @@ export const PredictiveInsightsWidget: React.FC = () => {
     switch (action.action_type) {
       case 'assessment':
         // Navigate to assessment
-        console.log('Navigate to assessment:', action);
+        
         break;
       case 'task':
         // Navigate to tasks
-        console.log('Navigate to tasks:', action);
+        
         break;
       case 'reflection':
         // Open reflection interface
-        console.log('Open reflection:', action);
+        
         break;
       case 'support':
         await sendMotivationalMessage('stuck_too_long');
         break;
       default:
-        console.log('Unknown action type:', action.action_type);
+        
     }
   };
 

@@ -105,13 +105,13 @@ export const AutonomousMessagingInterface: React.FC = () => {
     
     setIsAnalyzing(true);
     try {
-      console.log('🤖 Stefan running full behavior analysis...');
+      
       await analyzeAndSendProactiveMessages();
       
       // Simulera djupare analys
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      console.log('✅ Full behavior analysis completed');
+      
     } catch (error) {
       console.error('Error in full behavior analysis:', error);
     } finally {

@@ -244,10 +244,10 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
             maxSelection={journeyModes[selectedMode].maxConcurrent}
             currentActive={activeJourneys.length}
             onPillarSelect={async (pillarKey) => {
-              console.log(`🎯 Pillar selected: ${pillarKey}`);
+              
               const result = await initializeJourney(pillarKey, selectedMode);
               if (result?.shouldNavigate) {
-                console.log(`🔄 Navigating to: ${result.url}`);
+                
                 window.location.href = result.url;
               }
             }}
@@ -285,7 +285,7 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
                 activeJourneys={activeJourneys}
                 onTaskComplete={(taskId) => {
                   // Huvudpolicy från Frontend Dev: Optimistisk UI
-                  console.log('Task completed:', taskId);
+                  
                 }}
               />
             </>
