@@ -40,7 +40,7 @@ export function StefanChatPage() {
             clientId={clientId || undefined}
             className="w-full max-w-none"
             onCoachingAction={(action, data) => {
-              console.log('Coaching action triggered:', action, data);
+              
             }}
           />
         </div>

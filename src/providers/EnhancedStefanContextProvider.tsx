@@ -120,7 +120,7 @@ export const EnhancedStefanContextProvider = ({ children }: EnhancedStefanContex
 
     const enhancedActivityCheck = async () => {
       try {
-        console.log('🔍 Enhanced Activity Check - Starting comprehensive analysis');
+        
         
         // Get current context from Context Engine
         const currentContext = await getCurrentContext();
@@ -184,7 +184,7 @@ export const EnhancedStefanContextProvider = ({ children }: EnhancedStefanContex
 
         // Generate AI insights periodically
         if (Math.random() < 0.3) { // 30% chance för att inte överbelasta
-          console.log('🧠 Generating AI insights from activity patterns');
+          
           await generateContextInsights();
         }
 
@@ -346,7 +346,7 @@ export const EnhancedStefanContextProvider = ({ children }: EnhancedStefanContex
         if (pattern.pattern_type === 'daily_rhythm' && pattern.pattern_strength > 0.7) {
           const optimalTime = pattern.pattern_data?.peak_activity_hour;
           if (optimalTime) {
-            console.log(`🕒 User is most active at ${optimalTime}:00 - adapting Stefan's schedule`);
+            
             // Schedule more interventions during peak hours
           }
         }
@@ -354,7 +354,7 @@ export const EnhancedStefanContextProvider = ({ children }: EnhancedStefanContex
         if (pattern.pattern_type === 'motivation_trend' && pattern.pattern_strength > 0.6) {
           const preferredMotivation = pattern.pattern_data?.preferred_style;
           if (preferredMotivation) {
-            console.log(`💪 User responds best to ${preferredMotivation} motivation - adapting tone`);
+            
             setContextualMood(preferredMotivation.includes('celebrat') ? 'celebratory' : 'encouraging');
           }
         }

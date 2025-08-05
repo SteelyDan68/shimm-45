@@ -28,7 +28,7 @@ export const useWelcomeAssessment = () => {
       // Om det är ett utkast, spara bara utan AI-analys
       if (isDraft) {
         // För utkast - spara bara utan AI-analys
-        console.log('Saving draft...');
+        
         return null; // Vi behöver inte spara utkast för nu
       }
       // First, call the AI analysis function

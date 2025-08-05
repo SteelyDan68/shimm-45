@@ -22,7 +22,7 @@ export function Messages() {
     );
   }
 
-  console.log('🚀 Messages page - loading modern messaging system for user:', user.email);
+  
 
   return (
     <div className="container mx-auto p-6 max-w-7xl space-y-6">

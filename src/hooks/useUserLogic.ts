@@ -23,7 +23,7 @@ export const useUserLogic = () => {
     setIsProcessing(true);
     
     try {
-      console.log('Processing user logic for:', userId);
+      
       
       const { data, error } = await supabase.functions.invoke('client-logic', {
         body: { user_id: userId }
