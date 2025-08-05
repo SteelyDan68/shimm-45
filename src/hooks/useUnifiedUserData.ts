@@ -85,11 +85,11 @@ export const useUnifiedUserData = () => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch user roles from attributes system
+      // Fetch user roles from attributes system (nya strukturen)
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_attributes')
         .select('user_id, attribute_value')
-        .eq('attribute_key', 'role')
+        .like('attribute_key', 'role_%')
         .eq('is_active', true);
 
       if (rolesError) throw rolesError;

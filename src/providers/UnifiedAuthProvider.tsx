@@ -197,7 +197,7 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
         .from('user_attributes')
         .select('attribute_value')
         .eq('user_id', userId)
-        .eq('attribute_key', 'role')
+        .like('attribute_key', 'role_%')
         .eq('is_active', true);
 
       if (error) {

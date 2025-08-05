@@ -78,14 +78,14 @@ export const useCoachClientRelationships = () => {
       const { data: coachCount } = await supabase
         .from('user_attributes')
         .select('user_id')
-        .eq('attribute_key', 'role')
+        .like('attribute_key', 'role_%')
         .eq('attribute_value', '"coach"')
         .eq('is_active', true);
 
       const { data: clientCount } = await supabase
         .from('user_attributes')
         .select('user_id')
-        .eq('attribute_key', 'role')
+        .like('attribute_key', 'role_%')
         .eq('attribute_value', '"client"')
         .eq('is_active', true);
 
