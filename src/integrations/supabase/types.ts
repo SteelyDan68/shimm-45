@@ -1579,6 +1579,45 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          function_name: string
+          id: string
+          message_ids: string[] | null
+          payload_data: Json | null
+          recipients: string[]
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          function_name: string
+          id?: string
+          message_ids?: string[] | null
+          payload_data?: Json | null
+          recipients: string[]
+          sent_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          function_name?: string
+          id?: string
+          message_ids?: string[] | null
+          payload_data?: Json | null
+          recipients?: string[]
+          sent_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       error_logs: {
         Row: {
           context: string | null
