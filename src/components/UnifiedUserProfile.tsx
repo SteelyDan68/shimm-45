@@ -37,9 +37,7 @@ interface UnifiedUserProfileProps {
  * Role-based access: Respects user permissions and roles
  */
 export const UnifiedUserProfile = () => {
-  console.log('🔥🔥🔥 UnifiedUserProfile: COMPONENT MOUNTED');
   const { userId } = useParams<{ userId: string }>();
-  console.log('🔥🔥🔥 UnifiedUserProfile: PARAMS:', { userId });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -50,29 +48,6 @@ export const UnifiedUserProfile = () => {
   const { getExtendedProfile } = useExtendedProfile();
   const { isSuperAdmin, isAdmin, canManageUsers } = useAuth();
   
-  // FORCE DEBUG EVERY RENDER
-  console.log('🔥🔥🔥 UnifiedUserProfile: EVERY RENDER DEBUG:', {
-    userId,
-    currentUserId: user?.id,
-    currentUserEmail: user?.email, 
-    isSuperAdmin,
-    isAdmin,
-    canManageUsers,
-    profileLoading,
-    profile: !!profile
-  });
-  
-  // DEBUG: Log all permission data 
-  console.log('🔍 UnifiedUserProfile DEBUG - Complete state:', {
-    userId,
-    currentUserId: user?.id,
-    userEmail: user?.email,
-    profileEmail: profile?.email,
-    profileLoading,
-    'TARGET_USER_roles (from useUserData)': roles,
-    'CURRENT_USER_permissions (from useUnifiedPermissions)': { isSuperAdmin, isAdmin, canManageUsers },
-    'roles type and content': { type: typeof roles, content: roles, length: roles?.length }
-  });
   
   // Context determines UI behavior
   const context = searchParams.get('context') || 'profile'; // client, assessment, profile
@@ -82,74 +57,44 @@ export const UnifiedUserProfile = () => {
   // 🚨 SUPERADMIN GOD MODE: ABSOLUTE ACCESS TO EVERYTHING
   // CRITICAL FIX: Wait for user data to load before checking permissions
   const canViewProfile = useMemo(() => {
-    // WAIT FOR USER DATA TO LOAD
+    // Wait for user data to load
     if (!user || !user.id) {
-      console.log('🔍 WAITING FOR USER DATA TO LOAD...');
-      return false; // Don't block access, just wait
+      return false;
     }
-    
-    console.log('🔍 SUPERADMIN ACCESS CHECK START for target user:', userId);
-    console.log('🔍 Current user (checking permissions):', user?.id, user?.email);
-    console.log('🔍 Current user permissions from useUnifiedPermissions:', { isSuperAdmin, isAdmin, canManageUsers });
 
-    // SUPERADMIN GOD MODE - Multiple layers for absolute access
-    // CRITICAL: Check CURRENT USER permissions, not target user roles!
-    
-    // 1. PRIMARY: Check current user's superadmin status
-    if (isSuperAdmin) {
-      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - Current user isSuperAdmin = true');
+    // Superadmin access
+    if (isSuperAdmin()) {
       return true;
     }
     
-    // 2. EMERGENCY: Hardcoded superadmin access for Stefan
+    // Emergency hardcoded access
     if (user?.email === 'stefan.hallgren@gmail.com') {
-      console.log('🔥🔥🔥 SUPERADMIN GOD MODE ACTIVATED - Emergency hardcoded access for Stefan');
       return true;
     }
 
-    // 3. BACKUP: Admin access
-    if (isAdmin) {
-      console.log('🔥🔥🔥 ADMIN ACCESS GRANTED');
+    // Admin access
+    if (isAdmin()) {
       return true;
     }
     
-    // 4. Self-access
+    // Self-access
     if (userId === user?.id) {
-      console.log('✅ Self-access granted');
       return true;
     }
     
-    // 5. User management permissions
+    // User management permissions
     if (canManageUsers) {
-      console.log('✅ User management permission granted');
       return true;
     }
     
-    console.log('❌❌❌ ACCESS DENIED - This should NEVER happen for superadmin!');
-    console.log('❌ Full DEBUG INFO:', {
-      'Current user (who is checking)': { userId: user?.id, email: user?.email },
-      'Target user (being viewed)': userId,
-      'Current user permissions': { isSuperAdmin, isAdmin, canManageUsers },
-      'Target user roles': roles,
-      'Should be accessible': 'YES, because current user is superadmin'
-    });
+    
     return false;
   }, [user?.id, user?.email, userId, isSuperAdmin, isAdmin, canManageUsers]);
   
   const [extendedProfile, setExtendedProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  console.log('🔄 UnifiedUserProfile DEBUG:', {
-    userId,
-    currentUserId: user?.id,
-    context,
-    userRoles: roles,
-    isSuperAdmin,
-    isAdmin,
-    canManageUsers,
-    canViewProfile,
-    'roles.includes(superadmin)': roles.includes('superadmin' as any)
-  });
+  
 
   useEffect(() => {
     if (!canViewProfile) {

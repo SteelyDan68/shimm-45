@@ -265,7 +265,7 @@ export const PRDDashboard = () => {
         hasData: true
       });
 
-      console.log('✅ PRD Dashboard: Data load complete');
+      
 
     } catch (error: any) {
       console.error('💥 PRD Dashboard: Critical error during load:', error);
@@ -308,7 +308,7 @@ export const PRDDashboard = () => {
         throw error;
       }
 
-      console.log('✅ PRD Generated successfully:', data);
+      
 
       toast({
         title: "PRD Genererat!",
@@ -382,7 +382,7 @@ export const PRDDashboard = () => {
         description: "PRD har exporterats som JSON fil"
       });
 
-      console.log('✅ Export completed successfully');
+      
 
     } catch (error: any) {
       console.error('💥 Export error:', error);

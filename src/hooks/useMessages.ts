@@ -50,7 +50,7 @@ export const useMessages = () => {
 
     try {
       // Legacy hook - use useMessagingV2 for new implementations
-      console.warn('⚠️ useMessages is deprecated. Use useMessagingV2 instead.');
+      
       
       const { data, error } = await supabase
         .from('messages_v2')

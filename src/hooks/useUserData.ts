@@ -118,7 +118,7 @@ export const useUserData = (userId?: string) => {
       console.log('🔥 useUserData: Current user context:', { userId: user?.id, email: user?.email });
       fetchData();
     } else {
-      console.log('❌ useUserData: Waiting for targetUserId - current state:', { targetUserId, userId, userIdFromParams: user?.id });
+      
     }
   }, [targetUserId]);
 
