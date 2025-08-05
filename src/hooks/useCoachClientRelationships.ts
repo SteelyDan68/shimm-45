@@ -1,7 +1,7 @@
 // Backwards compatibility file
-// Redirects to useUserRelationships
+// Redirects to useUserRelationships (NEW ATTRIBUT SYSTEM)
 export { 
-  useCoachClientRelationships
+  useUserRelationships as useCoachClientRelationships
 } from './useUserRelationships';
 
 export type { 

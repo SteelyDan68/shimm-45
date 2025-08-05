@@ -1,3 +1,3 @@
 // Backwards compatibility file
-// Redirects to useUnifiedUserData
-export { useClientData } from './useUnifiedUserData';
+// Redirects to useUnifiedUserData (NEW ATTRIBUT SYSTEM)
+export { useUnifiedUserData as useClientData } from './useUnifiedUserData';
