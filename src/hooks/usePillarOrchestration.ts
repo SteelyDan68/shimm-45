@@ -36,17 +36,26 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return;
 
     try {
-      // Fetch latest assessments from attribute system
-      const { data: assessmentData, error: assessmentsError } = await supabase.functions.invoke('get-user-attribute', {
-        body: {
-          user_id: user.id,
-          attribute_key: 'pillar_assessments'
-        }
-      });
-
-      const assessments = Array.isArray(assessmentData?.data) ? assessmentData.data : [];
+      // CRITICAL FIX: Use path_entries instead of broken user_attributes
+      const { data: assessmentData, error: assessmentsError } = await supabase
+        .from('path_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('type', 'assessment')
+        .order('created_at', { ascending: false });
 
       if (assessmentsError) throw assessmentsError;
+
+      // Convert path_entries to expected assessment format
+      const assessments = (assessmentData || []).map(entry => ({
+        id: entry.id,
+        user_id: entry.user_id,
+        pillar_key: (entry.metadata as any)?.pillar_key,
+        assessment_data: (entry.metadata as any)?.assessment_data || {},
+        calculated_score: (entry.metadata as any)?.assessment_score,
+        created_at: entry.created_at,
+        updated_at: entry.updated_at
+      })).filter(assessment => assessment.pillar_key);
 
       // Fetch task progress for development plans  
       const { data: tasks, error: tasksError } = await supabase
@@ -67,16 +76,20 @@ export const usePillarOrchestration = () => {
         const completedTasks = pillarTasks.filter(t => t.status === 'completed').length;
         const totalTasks = pillarTasks.length;
         
+        // CRITICAL FIX: Proper completion detection
+        const hasValidScore = latestAssessment?.calculated_score !== null && latestAssessment?.calculated_score !== undefined;
+        const isCompleted = !!latestAssessment && hasValidScore;
+        
         return {
           pillarKey,
-          isCompleted: !!latestAssessment && latestAssessment.calculated_score !== null,
+          isCompleted,
           isActive: !!latestAssessment,
           lastAssessmentDate: latestAssessment?.created_at,
-          completionPercentage: totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0,
+          completionPercentage: isCompleted ? 100 : (totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0),
           nextRecommendedAction: getNextRecommendedAction(
             pillarKey, 
             !!latestAssessment, 
-            !!latestAssessment && latestAssessment.calculated_score !== null, 
+            isCompleted, 
             pillarTasks
           )
         };
@@ -191,34 +204,27 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return false;
 
     try {
-      // Use attribute system for activation
-      const currentAssessments = await supabase.functions.invoke('get-user-attribute', {
-        body: {
+      // CRITICAL FIX: Use path_entries for consistency
+      const { error } = await supabase
+        .from('path_entries')
+        .insert({
           user_id: user.id,
-          attribute_key: 'pillar_assessments'
-        }
-      });
+          created_by: user.id,
+          timestamp: new Date().toISOString(),
+          type: 'action',
+          title: `Aktiverad pelare: ${pillarKey}`,
+          details: `Pelare ${pillarKey} aktiverad för utvecklingsresa`,
+          status: 'completed',
+          ai_generated: false,
+          visible_to_client: true,
+          metadata: {
+            pillar_key: pillarKey,
+            action: 'activate',
+            activated_at: new Date().toISOString()
+          }
+        });
 
-      const assessments = currentAssessments.data?.attribute_value || [];
-      assessments.push({
-        id: crypto.randomUUID(),
-        user_id: user.id,
-        pillar_key: pillarKey,
-        assessment_data: { activated: true, activation_date: new Date().toISOString() },
-        insights: {},
-        created_by: user.id,
-        created_at: new Date().toISOString()
-      });
-
-      const { error: assessmentError } = await supabase.functions.invoke('update-user-attribute', {
-        body: {
-          user_id: user.id,
-          attribute_key: 'pillar_assessments',
-          attribute_value: assessments
-        }
-      });
-
-      if (assessmentError) throw assessmentError;
+      if (error) throw error;
 
       await loadPillarProgress();
       
@@ -243,34 +249,32 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return false;
 
     try {
-      // Use attribute system for assessment completion
-      const currentAssessments = await supabase.functions.invoke('get-user-attribute', {
-        body: {
+      // Calculate score from assessment data
+      const calculatedScore = calculatePillarScore(assessmentData);
+      
+      // CRITICAL FIX: Store in path_entries for consistency
+      const { error } = await supabase
+        .from('path_entries')
+        .insert({
           user_id: user.id,
-          attribute_key: 'pillar_assessments'
-        }
-      });
+          created_by: user.id,
+          timestamp: new Date().toISOString(),
+          type: 'assessment',
+          title: `Bedömning: ${pillarKey}`,
+          details: `Slutförd bedömning för pelare ${pillarKey}`,
+          status: 'completed',
+          ai_generated: false,
+          visible_to_client: true,
+          metadata: {
+            pillar_key: pillarKey,
+            assessment_score: calculatedScore,
+            assessment_data: assessmentData,
+            insights: {},
+            completed: true
+          }
+        });
 
-      const assessments = currentAssessments.data?.attribute_value || [];
-      assessments.push({
-        id: crypto.randomUUID(),
-        user_id: user.id,
-        pillar_key: pillarKey,
-        assessment_data: assessmentData,
-        insights: {},
-        created_by: user.id,
-        created_at: new Date().toISOString()
-      });
-
-      const { error: assessmentError } = await supabase.functions.invoke('update-user-attribute', {
-        body: {
-          user_id: user.id,
-          attribute_key: 'pillar_assessments',
-          attribute_value: assessments
-        }
-      });
-
-      if (assessmentError) throw assessmentError;
+      if (error) throw error;
 
       // Trigger AI analysis
       const { error: analysisError } = await supabase.functions.invoke('analyze-pillar-assessment', {
@@ -363,6 +367,17 @@ export const usePillarOrchestration = () => {
     }
     
     return null; // All pillars completed
+  };
+
+  // CRITICAL FIX: Add score calculation function
+  const calculatePillarScore = (assessmentData: Record<string, any>): number => {
+    const values = Object.values(assessmentData);
+    const numericValues = values.filter(v => typeof v === 'number' && !isNaN(v)) as number[];
+    
+    if (numericValues.length === 0) return 5; // Default score
+    
+    const average = numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length;
+    return Math.min(10, Math.max(0, average)); // Ensure 0-10 range
   };
 
   const getCompletedPillars = (): PillarKey[] => {

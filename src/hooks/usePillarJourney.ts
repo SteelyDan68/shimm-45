@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { PillarKey } from '@/types/sixPillarsModular';
 
 // Huvudpolicy från Systemarkitekt: Stark typning och datamodellering
 export interface PillarJourney {
@@ -74,6 +76,110 @@ export const usePillarJourney = (userId: string) => {
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // CRITICAL FIX: Load real data from path_entries
+  const loadJourneysFromDatabase = useCallback(async () => {
+    if (!userId) return;
+    
+    setLoading(true);
+    try {
+      // Get all pillar assessments and activations
+      const { data: assessments, error: assessmentError } = await supabase
+        .from('path_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('type', 'assessment')
+        .order('created_at', { ascending: false });
+
+      if (assessmentError) throw assessmentError;
+
+      const { data: activations, error: activationError } = await supabase
+        .from('path_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('type', 'action')
+        .ilike('title', '%pelare:%')
+        .order('created_at', { ascending: false });
+
+      if (activationError) throw activationError;
+
+      // Process data into journey format
+      const pillars: PillarKey[] = ['self_care', 'skills', 'talent', 'brand', 'economy', 'open_track'];
+      const completed: PillarJourney[] = [];
+      const active: PillarJourney[] = [];
+
+      pillars.forEach(pillarKey => {
+        const pillarAssessments = (assessments || []).filter(a => 
+          (a.metadata as any)?.pillar_key === pillarKey
+        );
+        const pillarActivations = (activations || []).filter(a => 
+          (a.metadata as any)?.pillar_key === pillarKey && (a.metadata as any)?.action === 'activate'
+        );
+
+        const latestAssessment = pillarAssessments[0];
+        const hasValidScore = latestAssessment && (latestAssessment.metadata as any)?.assessment_score != null;
+
+        if (hasValidScore) {
+          // Completed journey
+          completed.push({
+            id: `journey-${pillarKey}`,
+            userId,
+            pillarKey,
+            pillarName: getPillarName(pillarKey),
+            mode: 'guided',
+            status: 'completed',
+            progress: 100,
+            startedAt: pillarActivations[0]?.created_at || latestAssessment.created_at,
+            completedAt: latestAssessment.created_at,
+            estimatedCompletion: latestAssessment.created_at,
+            milestones: [],
+            tasks: [],
+            reflections: [],
+            metadata: latestAssessment.metadata,
+            createdAt: latestAssessment.created_at,
+            updatedAt: latestAssessment.updated_at
+          });
+        } else if (pillarActivations.length > 0) {
+          // Active journey
+          active.push({
+            id: `journey-${pillarKey}`,
+            userId,
+            pillarKey,
+            pillarName: getPillarName(pillarKey),
+            mode: 'guided',
+            status: 'active',
+            progress: 25, // Started but not completed
+            startedAt: pillarActivations[0].created_at,
+            estimatedCompletion: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            milestones: generateMilestones(pillarKey, 'guided'),
+            tasks: [],
+            reflections: [],
+            metadata: {},
+            createdAt: pillarActivations[0].created_at,
+            updatedAt: pillarActivations[0].updated_at
+          });
+        }
+      });
+
+      setCompletedJourneys(completed);
+      setActiveJourneys(active);
+
+    } catch (error) {
+      console.error('Error loading journeys:', error);
+      toast({
+        title: "Fel vid laddning",
+        description: "Kunde inte ladda utvecklingsresor",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, toast]);
+
+  // Load data on mount
+  useEffect(() => {
+    loadJourneysFromDatabase();
+  }, [loadJourneysFromDatabase]);
 
   // Huvudpolicy från AI/Coaching Psykolog: Adaptiv vägledning
   const initializeJourney = useCallback(async (pillarKey: string, mode: 'guided' | 'flexible' | 'intensive') => {
@@ -355,6 +461,7 @@ export const usePillarJourney = (userId: string) => {
     abandonJourney,
     completeJourney,
     getJourneyTimeline,
-    addTimelineEvent
+    addTimelineEvent,
+    refreshJourneys: loadJourneysFromDatabase // For external refresh
   };
 };
