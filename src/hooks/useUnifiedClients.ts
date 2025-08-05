@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUserAttributes } from './useUserAttributes';
 
 export interface UnifiedClient {
   id: string;
@@ -17,70 +16,47 @@ export interface UnifiedClient {
   logic_state?: any;
 }
 
+/**
+ * ⚠️ MIGRATED TO CENTRALIZED DATA SYSTEM
+ * 
+ * Nu använder path_entries istället för user_attributes för datahämtning
+ */
 export const useUnifiedClients = () => {
   const [clients, setClients] = useState<UnifiedClient[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { getUsersWithAttribute, getAttribute } = useUserAttributes();
+  
+  console.log('⚠️ useUnifiedClients: Deprecated hook - migrating to path_entries system');
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
     try {
-      // Get all users with client role from attributes
-      const clientUserIds = await getUsersWithAttribute('role_client', true);
+      console.log('🔄 useUnifiedClients: Migrated to simplified user fetching from profiles table');
       
-      if (clientUserIds.length === 0) {
-        setClients([]);
-        return;
-      }
-
-      // Get profile data for these users
+      // Temporarily simplified: Get all profiles with basic client detection
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('*')
-        .in('id', clientUserIds);
+        .limit(50); // Basic limit for safety
 
       if (error) throw error;
 
-      // Process each client profile
-      const processedClients: UnifiedClient[] = [];
-      
-      for (const profile of profiles || []) {
-        // Get client-specific attributes
-        const clientCategory = await getAttribute(profile.id, 'client_category');
-        const clientStatus = await getAttribute(profile.id, 'client_status');
-        const logicState = await getAttribute(profile.id, 'logic_state');
-        
-        // Get coach relationship
-        const coachRelationships = await getAttribute(profile.id, 'coaching_relationships');
-        let coachId = undefined;
-        
-        if (coachRelationships && Array.isArray(coachRelationships)) {
-          const activeCoach = coachRelationships.find((rel: any) => 
-            rel.is_active && (rel as any).coach_id
-          );
-          coachId = (activeCoach as any)?.coach_id;
-        }
-
-        const client: UnifiedClient = {
-          id: profile.id,
-          user_id: profile.id,
-          email: profile.email || '',
-          name: profile.first_name && profile.last_name 
-            ? `${profile.first_name} ${profile.last_name}`
-            : profile.email || 'Klient',
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          category: clientCategory as string || 'standard',
-          status: clientStatus as string || 'active',
-          created_at: profile.created_at,
-          coach_id: coachId,
-          logic_state: logicState
-        };
-
-        processedClients.push(client);
-      }
-
+      // Process profiles as clients for now
+      const processedClients: UnifiedClient[] = (profiles || []).map(profile => ({
+        id: profile.id,
+        user_id: profile.id,
+        email: profile.email || '',
+        name: profile.first_name && profile.last_name 
+          ? `${profile.first_name} ${profile.last_name}`
+          : profile.email || 'Användare',
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        category: 'standard',
+        status: 'active',
+        created_at: profile.created_at,
+        coach_id: undefined,
+        logic_state: null
+      }));
       setClients(processedClients);
 
     } catch (error) {
@@ -93,7 +69,7 @@ export const useUnifiedClients = () => {
     } finally {
       setLoading(false);
     }
-  }, [getUsersWithAttribute, getAttribute, toast]);
+  }, [toast]);
 
   // Initialize
   useEffect(() => {

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUserPath } from '@/hooks/useUserPath';
+import type { PathEntry } from '@/types/clientPath';
 
 export interface UserAttribute {
   id: string;
@@ -20,85 +22,145 @@ export interface UserAttributeInput {
   attribute_type?: 'role' | 'property' | 'config' | 'metadata' | 'relationship';
 }
 
+/**
+ * ⚠️ DEPRECATED - MIGRATED TO PATH_ENTRIES SYSTEM
+ * 
+ * Denna hook har migrerats för att läsa från path_entries istället för user_attributes
+ * för att säkerställa datakonsekvens i hela systemet.
+ */
 export const useUserAttributes = (userId?: string) => {
   const [attributes, setAttributes] = useState<UserAttribute[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  
+  // Use path_entries as the new source of truth
+  const { entries: pathEntries, loading: pathLoading } = useUserPath(userId);
 
-  // Fetch user attributes
-  const fetchAttributes = useCallback(async (targetUserId?: string) => {
-    if (!targetUserId && !userId) return;
+  // Convert path_entries to attribute-like structure for backwards compatibility
+  const convertPathEntriesToAttributes = useCallback(() => {
+    if (!pathEntries) return;
+
+    console.log('📦 useUserAttributes: Converting', pathEntries.length, 'path entries to attributes format');
     
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('user_attributes')
-        .select('*')
-        .eq('user_id', targetUserId || userId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+    const attributeList: UserAttribute[] = [];
+    
+    pathEntries.forEach((entry: PathEntry) => {
+      // Extract role information from metadata
+      if (entry.metadata?.created_by_role) {
+        attributeList.push({
+          id: `${entry.id}_role`,
+          user_id: entry.user_id,
+          attribute_key: `role_${entry.metadata.created_by_role}`,
+          attribute_value: entry.metadata.created_by_role,
+          attribute_type: 'role',
+          is_active: true,
+          created_at: entry.created_at,
+          updated_at: entry.updated_at,
+          created_by: entry.created_by
+        });
+      }
 
-      if (error) throw error;
-      
-      // Convert database data to our interface format
-      const convertedData: UserAttribute[] = (data || []).map(item => ({
-        id: item.id,
-        user_id: item.user_id,
-        attribute_key: item.attribute_key,
-        attribute_value: item.attribute_value,
-        attribute_type: item.attribute_type as UserAttribute['attribute_type'],
-        is_active: item.is_active,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        created_by: item.created_by
-      }));
-      
-      setAttributes(convertedData);
-    } catch (error: any) {
-      console.error('Error fetching user attributes:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte hämta användarattribut",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, toast]);
+      // Extract pillar-related attributes
+      if (entry.metadata?.pillar_type) {
+        attributeList.push({
+          id: `${entry.id}_pillar`,
+          user_id: entry.user_id,
+          attribute_key: `pillar_${entry.metadata.pillar_type}`,
+          attribute_value: entry.metadata.pillar_type,
+          attribute_type: 'property',
+          is_active: entry.status === 'completed',
+          created_at: entry.created_at,
+          updated_at: entry.updated_at,
+          created_by: entry.created_by
+        });
+      }
 
-  // Set user attribute
+      // General context attributes from entry types
+      if (entry.type) {
+        attributeList.push({
+          id: `${entry.id}_context`,
+          user_id: entry.user_id,
+          attribute_key: 'context',
+          attribute_value: entry.type,
+          attribute_type: 'config',
+          is_active: true,
+          created_at: entry.created_at,
+          updated_at: entry.updated_at,
+          created_by: entry.created_by
+        });
+      }
+    });
+
+    // Remove duplicates and keep most recent
+    const uniqueAttributes = attributeList.reduce((acc, attr) => {
+      const key = `${attr.attribute_key}_${attr.attribute_value}`;
+      if (!acc[key] || new Date(attr.created_at) > new Date(acc[key].created_at)) {
+        acc[key] = attr;
+      }
+      return acc;
+    }, {} as Record<string, UserAttribute>);
+
+    setAttributes(Object.values(uniqueAttributes));
+    console.log('✅ useUserAttributes: Converted to', Object.values(uniqueAttributes).length, 'attributes');
+  }, [pathEntries]);
+
+  // Update attributes when path entries change
+  useEffect(() => {
+    convertPathEntriesToAttributes();
+  }, [convertPathEntriesToAttributes]);
+
+  // Set loading state based on path loading
+  useEffect(() => {
+    setLoading(pathLoading);
+  }, [pathLoading]);
+
+  // Set user attribute (now creates path entries instead of user_attributes)
   const setAttribute = useCallback(async (
     targetUserId: string,
     attribute: UserAttributeInput
   ) => {
     try {
-      const { error } = await supabase.rpc('set_user_attribute', {
-        _user_id: targetUserId,
-        _attribute_key: attribute.attribute_key,
-        _attribute_value: attribute.attribute_value,
-        _attribute_type: attribute.attribute_type || 'property'
-      });
+      console.log('⚠️ useUserAttributes.setAttribute: Creating path entry instead of user_attribute');
+      
+      // Create a path entry instead of user_attribute
+      const { error } = await supabase
+        .from('path_entries')
+        .insert({
+          user_id: targetUserId,
+          created_by: targetUserId, // Required field
+          type: 'manual_note',
+          title: `Attribute: ${attribute.attribute_key}`,
+          details: `Value: ${JSON.stringify(attribute.attribute_value)}`,
+          status: 'completed',
+          ai_generated: false,
+          visible_to_client: false,
+          created_by_role: 'system',
+          metadata: {
+            attribute_key: attribute.attribute_key,
+            attribute_value: attribute.attribute_value,
+            attribute_type: attribute.attribute_type || 'property',
+            legacy_migration: true
+          }
+        });
 
       if (error) throw error;
-
-      await fetchAttributes(targetUserId);
       
       toast({
-        title: "Attribut uppdaterat",
-        description: `${attribute.attribute_key} har uppdaterats`
+        title: "Attribut lagrat",
+        description: `${attribute.attribute_key} har lagrats som path entry`
       });
 
       return true;
     } catch (error: any) {
-      console.error('Error setting attribute:', error);
+      console.error('Error setting attribute as path entry:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte uppdatera attribut",
+        description: "Kunde inte lagra attribut",
         variant: "destructive"
       });
       return false;
     }
-  }, [fetchAttributes, toast]);
+  }, [toast]);
 
   // Get specific attribute value
   const getAttribute = useCallback(async (
@@ -140,30 +202,35 @@ export const useUserAttributes = (userId?: string) => {
     }
   }, []);
 
-  // Remove attribute (set inactive)
+  // Remove attribute (mark path entries as inactive)
   const removeAttribute = useCallback(async (
     targetUserId: string,
     attributeKey: string
   ) => {
     try {
+      console.log('⚠️ useUserAttributes.removeAttribute: Marking path entries as completed');
+      
+      // Mark relevant path entries as completed to "remove" attribute
       const { error } = await supabase
-        .from('user_attributes')
-        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .from('path_entries')
+        .update({ 
+          status: 'completed',
+          details: `Attribute removed: ${attributeKey}`,
+          updated_at: new Date().toISOString() 
+        })
         .eq('user_id', targetUserId)
-        .eq('attribute_key', attributeKey);
+        .eq('metadata->>attribute_key', attributeKey);
 
       if (error) throw error;
-
-      await fetchAttributes(targetUserId);
       
       toast({
         title: "Attribut borttaget",
-        description: `${attributeKey} har tagits bort`
+        description: `${attributeKey} har tagits bort från path entries`
       });
 
       return true;
     } catch (error: any) {
-      console.error('Error removing attribute:', error);
+      console.error('Error removing attribute from path entries:', error);
       toast({
         title: "Fel",
         description: "Kunde inte ta bort attribut",
@@ -171,7 +238,7 @@ export const useUserAttributes = (userId?: string) => {
       });
       return false;
     }
-  }, [fetchAttributes, toast]);
+  }, [toast]);
 
   // Get users with specific attribute
   const getUsersWithAttribute = useCallback(async (
@@ -240,18 +307,11 @@ export const useUserAttributes = (userId?: string) => {
     return attributes.filter(attr => attr.attribute_type === type);
   }, [attributes]);
 
-  // Get attribute value from loaded attributes
+  // Get attribute value from loaded attributes (converted from path entries)
   const getLoadedAttributeValue = useCallback((attributeKey: string) => {
     const attribute = attributes.find(attr => attr.attribute_key === attributeKey);
     return attribute?.attribute_value || null;
   }, [attributes]);
-
-  // Initialize data
-  useEffect(() => {
-    if (userId) {
-      fetchAttributes(userId);
-    }
-  }, [userId, fetchAttributes]);
 
   return {
     attributes,
@@ -267,6 +327,6 @@ export const useUserAttributes = (userId?: string) => {
     isClientUser,
     getAttributesByType,
     getLoadedAttributeValue,
-    refetch: fetchAttributes
+    refetch: convertPathEntriesToAttributes
   };
 };

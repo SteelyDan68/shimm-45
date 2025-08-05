@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPillars } from '@/hooks/useUserPillars';
-import { useUserAttributes } from '@/hooks/useUserAttributes';
+import { useCentralizedData } from '@/hooks/useCentralizedData';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   PillarDefinition, 

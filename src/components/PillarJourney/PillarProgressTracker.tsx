@@ -3,6 +3,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, CheckCircle, Clock, Target } from 'lucide-react';
 import { HelpTooltip } from '@/components/HelpTooltip';
+import { useCentralizedData } from '@/hooks/useCentralizedData';
 
 interface PillarJourney {
   id: string;
@@ -19,16 +20,33 @@ interface PillarProgressTrackerProps {
   activeJourneys: PillarJourney[];
 }
 
-// Huvudpolicy från UX Expert: Visuell progressindikation med kognitiv enkelhet
+/**
+ * 🎯 MODERNIZED PILLAR PROGRESS TRACKER
+ * 
+ * Använder nu CentralizedData för REAL DATA från path_entries
+ * Inga mer mockdata eller disconnected räknevärken!
+ */
 export const PillarProgressTracker = ({ 
   userId, 
   completedJourneys, 
   activeJourneys 
 }: PillarProgressTrackerProps) => {
-  const totalJourneys = completedJourneys.length + activeJourneys.length;
-  const overallProgress = totalJourneys > 0 
+  
+  // 🔄 REAL DATA från centralized system
+  const { 
+    metrics,
+    loading,
+    isHealthy,
+    refreshAllData 
+  } = useCentralizedData(userId);
+
+  console.log('📊 PillarProgressTracker: Using REAL metrics:', metrics);
+
+  // Use REAL data från centralized metrics
+  const totalJourneys = metrics.total_pillars || (completedJourneys.length + activeJourneys.length);
+  const overallProgress = metrics.overall_completion || (totalJourneys > 0 
     ? ((completedJourneys.length * 100) + activeJourneys.reduce((sum, j) => sum + j.progress, 0)) / totalJourneys
-    : 0;
+    : 0);
 
   return (
     <Card>
@@ -40,35 +58,44 @@ export const PillarProgressTracker = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Huvudpolicy från Product Manager: Nyckeltal först */}
+        {/* 🎯 REAL METRICS från path_entries */}
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
-              {completedJourneys.length}
+              {metrics.completed_pillars || completedJourneys.length}
             </div>
             <div className="text-sm text-muted-foreground">Slutförda</div>
+            <div className="text-xs text-green-600">LIVE DATA</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">
-              {activeJourneys.length}
+              {metrics.active_pillars || activeJourneys.length}
             </div>
             <div className="text-sm text-muted-foreground">Aktiva</div>
+            <div className="text-xs text-blue-600">Real-time</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {overallProgress.toFixed(0)}%
+              {metrics.overall_completion.toFixed(0)}%
             </div>
             <div className="text-sm text-muted-foreground">Total framsteg</div>
+            <div className="text-xs text-purple-600">Path entries</div>
           </div>
         </div>
 
-        {/* Huvudpolicy från UX Expert: Progressvisualisering */}
+        {/* 🔄 REAL PROGRESS från databas */}
         <div>
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium">Övergripande framsteg</span>
-            <span className="text-sm text-muted-foreground">{overallProgress.toFixed(0)}%</span>
+            <span className="text-sm text-muted-foreground">{metrics.overall_completion.toFixed(0)}%</span>
+            <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+              {metrics.total_path_entries} entries
+            </Badge>
           </div>
-          <Progress value={overallProgress} className="h-3" />
+          <Progress value={metrics.overall_completion} className="h-3" />
+          <div className="text-xs text-center text-muted-foreground mt-1">
+            Baserat på {metrics.total_path_entries} path entries från databasen
+          </div>
         </div>
 
         {/* Aktiva resor */}
