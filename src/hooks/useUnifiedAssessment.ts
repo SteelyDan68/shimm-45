@@ -65,7 +65,7 @@ export const useUnifiedAssessment = () => {
         type: 'pillar' as const,
         pillar_key: template.pillar_key,
         questions: Array.isArray(template.questions) ? 
-          (template.questions as AssessmentQuestion[]) : [],
+          (template.questions as unknown as AssessmentQuestion[]) : [],
         scoring_rules: template.scoring_config || {},
         active: template.is_active
       }));
