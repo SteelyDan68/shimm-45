@@ -19,7 +19,7 @@ export const useCapacityAssessment = (clientId: string) => {
 
     try {
       setLoading(true);
-      console.log('🔍 useCapacityAssessment: Fetching data for clientId:', clientId);
+      
 
       // Hämta senaste pillar assessment för self_care (den som innehåller alla frågor nu)
       const { data: pillarAssessments, error } = await supabase
@@ -30,18 +30,18 @@ export const useCapacityAssessment = (clientId: string) => {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      console.log('📊 Pillar assessments result:', { data: pillarAssessments, error });
+      
 
       if (error) throw error;
 
       if (!pillarAssessments || pillarAssessments.length === 0) {
-        console.log('⚠️ No pillar assessments found');
+        
         setCapacityData(null);
         return;
       }
 
       const latestAssessment = pillarAssessments[0];
-      console.log('📋 Latest assessment:', latestAssessment);
+      
       
       // Parse assessment responses
       let functionalAccessCount = 0;
@@ -50,17 +50,17 @@ export const useCapacityAssessment = (clientId: string) => {
 
       if (latestAssessment.assessment_data) {
         const responses = latestAssessment.assessment_data as Record<string, any>;
-        console.log('📝 Assessment responses:', responses);
+        
         
         // Count functional access "ja" responses (questions 14-17)
         const functionalQuestions = ['mat_access', 'hygien_access', 'kommunikation_access', 'sovplats_access'];
         functionalAccessCount = functionalQuestions.filter(q => responses[q] === 'ja').length;
-        console.log('🏠 Functional access count:', functionalAccessCount, 'from questions:', functionalQuestions.map(q => `${q}: ${responses[q]}`));
+        
 
         // Calculate subjective opportunities average - these seem to be missing from current data
         // Let me check what opportunity-related fields exist in the actual data
         const allKeys = Object.keys(responses);
-        console.log('🔑 All available response keys:', allKeys);
+        
         
         // For now, let's use some barrier scores as proxies for subjective opportunities
         // Higher barriers = lower opportunities, so we'll invert these scores
@@ -71,11 +71,11 @@ export const useCapacityAssessment = (clientId: string) => {
           const invertedScores = barrierScores.map(score => 6 - (score / 2)); // Convert 1-10 scale to inverted 1-5 scale
           subjectiveOpportunitiesAvg = invertedScores.reduce((a, b) => a + b, 0) / invertedScores.length;
         }
-        console.log('🎯 Subjective opportunities (from barriers):', barrierScores, 'inverted average:', subjectiveOpportunitiesAvg);
+        
 
         // Check relationship support (question 22)
         hasRegularSupport = responses['prata_regelbundet'] === 'ja';
-        console.log('👥 Regular support:', hasRegularSupport, 'from:', responses['prata_regelbundet']);
+        
       }
 
       const capacityData = {
@@ -85,7 +85,7 @@ export const useCapacityAssessment = (clientId: string) => {
         assessmentDate: latestAssessment.created_at
       };
       
-      console.log('📈 Final capacity data:', capacityData);
+      
       setCapacityData(capacityData);
 
     } catch (error: any) {

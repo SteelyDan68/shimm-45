@@ -100,7 +100,7 @@ export const useAIPlanning = (clientId?: string) => {
         },
         (payload) => {
           if (payload.new.type === 'recommendation') {
-            console.log('New recommendation received:', payload.new);
+            
             setLastRecommendation(payload.new);
             
             setTimeout(() => {

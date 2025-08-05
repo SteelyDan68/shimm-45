@@ -50,7 +50,7 @@ export const useAdaptiveLearning = () => {
 
     setLoading(true);
     try {
-      console.log('🎓 Detecting learning style for user:', user.id);
+      
 
       // Samla beteendedata för analys
       const behaviorData = {
@@ -92,7 +92,7 @@ export const useAdaptiveLearning = () => {
       }
 
       setLearningProfile(analysisResult);
-      console.log('✅ Learning style detected successfully');
+      
       return analysisResult;
 
     } catch (error) {

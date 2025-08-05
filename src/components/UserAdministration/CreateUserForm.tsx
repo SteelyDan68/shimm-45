@@ -133,12 +133,6 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
       // Om användaren skapades framgångsrikt och ska tilldelas en coach
       if (data.success && formData.assignCoach && formData.coachId && formData.role === 'client') {
         try {
-          console.log('Attempting to assign coach:', { 
-            coach_id: formData.coachId, 
-            client_id: data.user.id,
-            assigned_by: user?.id
-          });
-
           const { error: relationError } = await supabase
             .from('coach_client_assignments')
             .insert({

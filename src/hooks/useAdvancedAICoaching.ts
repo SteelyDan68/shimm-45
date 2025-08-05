@@ -342,7 +342,7 @@ export const useAdvancedAICoaching = () => {
 
     // Schedule notification (simplified)
     if (reminders) {
-      console.log('Follow-up scheduled for:', date);
+      
       // Here you would integrate with a notification system
     }
   }, [currentSession]);

@@ -47,7 +47,7 @@ export const useAIRequestExecutor = () => {
     setError(null);
 
     try {
-      console.log(`🤖 AI Executor: Processing ${request.action}`);
+      
       
       const result = await circuitBreaker.unifiedAI.executeWithCircuitBreaker(async () => {
         const { createClient } = await import('@supabase/supabase-js');
@@ -79,7 +79,7 @@ export const useAIRequestExecutor = () => {
       });
 
       const processingTime = Date.now() - startTime;
-      console.log(`✅ AI Executor: ${request.action} completed in ${result.processingTime}ms using ${result.aiModel}`);
+      
       
       analytics.trackAIInteraction({
         function_name: request.action,
@@ -136,7 +136,7 @@ export const useAIRequestExecutor = () => {
   }, [toast, circuitBreaker.unifiedAI, analytics]);
 
   const batchProcess = useCallback(async (requests: AIRequest[]): Promise<AIResponse[]> => {
-    console.log(`🚀 AI Executor: Processing ${requests.length} batch requests`);
+    
     
     const promises = requests.map(request => executeAIRequest(request));
     const results = await Promise.allSettled(promises);
