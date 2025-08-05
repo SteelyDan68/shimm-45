@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Brain, TrendingUp, MessageSquare, Loader2 } from 'lucide-react';
-import { useClientLogic } from '@/hooks/useClientLogic';
+import { useUserLogic } from '@/hooks/useUserLogic';
 import { AnalysisActions } from '@/components/ui/analysis-actions';
 
 interface LogicState {
@@ -26,19 +26,19 @@ interface ClientLogicCardProps {
 
 export const ClientLogicCard = ({ clientId, clientName }: ClientLogicCardProps) => {
   const [logicState, setLogicState] = useState<LogicState | null>(null);
-  const { processClientLogic, getClientLogicState, isProcessing } = useClientLogic();
+  const { processUserLogic, getUserLogicState, isProcessing } = useUserLogic();
 
   useEffect(() => {
     loadLogicState();
   }, [clientId]);
 
   const loadLogicState = async () => {
-    const state = await getClientLogicState(clientId);
+    const state = await getUserLogicState(clientId);
     setLogicState(state);
   };
 
   const handleProcessLogic = async () => {
-    const result = await processClientLogic(clientId);
+    const result = await processUserLogic(clientId);
     if (result) {
       setLogicState(result);
     }

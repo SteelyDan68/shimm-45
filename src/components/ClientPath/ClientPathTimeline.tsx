@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Calendar, Clock, Filter, User, Brain, Target, Award, Building, DollarSign, Shield, Eye } from 'lucide-react';
-import { useClientPath } from '@/hooks/useClientPath';
+import { useUserPath } from '@/hooks/useUserPath';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { PathEntry, TimelineEntry, PillarType, PathEntryType } from '@/types/clientPath';
 import { TimelineFilters } from './TimelineFilters';
@@ -41,7 +41,7 @@ export const ClientPathTimeline = ({
   clientName, 
   isCoachView = false 
 }: ClientPathTimelineProps) => {
-  const { entries, loading, filters, setFilters } = useClientPath(clientId);
+  const { entries, loading, filters, setFilters } = useUserPath(clientId);
   const { canManageUsers } = useAuth();
   const [selectedEntry, setSelectedEntry] = useState<TimelineEntry | null>(null);
   const [showFilters, setShowFilters] = useState(false);

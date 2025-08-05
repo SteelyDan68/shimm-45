@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { useClientData } from '@/hooks/useClientData';
+import { useUnifiedUserData } from '@/hooks/useUnifiedUserData';
 import { supabase } from '@/integrations/supabase/client';
 import { IntelligenceDataCollector } from '@/components/Intelligence/IntelligenceDataCollector';
 import { SocialWidget } from '@/components/SocialWidget';
@@ -32,7 +32,7 @@ export function ClientIntelligencePage() {
   const [cacheData, setCacheData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const { getClientCacheData, getNewsMentions, getSocialMetrics } = useClientData();
+  const { getUserCacheData, getNewsMentions, getSocialMetrics } = useUnifiedUserData();
 
   // Restrict access to clients only
   if (!hasRole('client')) {
@@ -102,7 +102,7 @@ export function ClientIntelligencePage() {
       setUserProfile(profileData);
 
       // Load intelligence cache data
-      const cache = await getClientCacheData(user.id);
+      const cache = await getUserCacheData(user.id);
       setCacheData(cache);
 
     } catch (error) {

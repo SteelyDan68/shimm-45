@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { useClientLogic } from '@/hooks/useClientLogic';
-import { useClientData } from '@/hooks/useClientData';
+import { useUserLogic } from '@/hooks/useUserLogic';
+import { useUnifiedUserData } from '@/hooks/useUnifiedUserData';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
@@ -52,8 +52,8 @@ export const ClientProfile = () => {
   const [cacheData, setCacheData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const { processClientLogic, isProcessing } = useClientLogic();
-  const { getClientCacheData, getNewsMentions, getSocialMetrics } = useClientData();
+  const { processUserLogic, isProcessing } = useUserLogic();
+  const { getUserCacheData, getNewsMentions, getSocialMetrics } = useUnifiedUserData();
   
   // Filter cache data by type
   const newsItems = getNewsMentions(cacheData);
@@ -149,7 +149,7 @@ export const ClientProfile = () => {
       });
 
       // Load cache data
-      const cache = await getClientCacheData(clientId);
+      const cache = await getUserCacheData(clientId);
       setCacheData(cache);
 
     } catch (error) {
@@ -167,7 +167,7 @@ export const ClientProfile = () => {
   const handleRunAnalysis = async () => {
     if (!clientId) return;
     
-    const result = await processClientLogic(clientId);
+    const result = await processUserLogic(clientId);
     if (result) {
       loadClientData();
     }

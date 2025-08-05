@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { useClientData } from '@/hooks/useClientData';
+import { useUnifiedUserData } from '@/hooks/useUnifiedUserData';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialWidget } from '@/components/SocialWidget';
 import { SwedishNewsWidget } from '@/components/SwedishNewsWidget';
@@ -51,7 +51,7 @@ export const Intelligence = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedDataType, setSelectedDataType] = useState<string>('all');
   
-  const { getClientCacheData, getNewsMentions, getSocialMetrics } = useClientData();
+  const { getUserCacheData, getNewsMentions, getSocialMetrics } = useUnifiedUserData();
   
   const isCoachView = hasRole('coach') || hasRole('admin');
   const displayName = userProfile ? 
@@ -124,7 +124,7 @@ export const Intelligence = () => {
       setUserProfile(profileData);
 
       // Load intelligence cache data
-      const cache = await getClientCacheData(userId);
+      const cache = await getUserCacheData(userId);
       setCacheData(cache);
 
     } catch (error) {

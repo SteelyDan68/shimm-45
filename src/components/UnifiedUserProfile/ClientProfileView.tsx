@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Brain, TrendingUp } from 'lucide-react';
-import { useClientLogic } from '@/hooks/useClientLogic';
-import { useClientData } from '@/hooks/useClientData';
+import { useUserLogic } from '@/hooks/useUserLogic';
+import { useUnifiedUserData } from '@/hooks/useUnifiedUserData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ModularPillarDashboard } from '@/components/SixPillars/ModularPillarDashboard';
@@ -43,8 +43,8 @@ export const ClientProfileView = ({
   const [logicState, setLogicState] = useState<any>(null);
   const { toast } = useToast();
   
-  const { processClientLogic, isProcessing } = useClientLogic();
-  const { getClientCacheData, getNewsMentions, getSocialMetrics } = useClientData();
+  const { processUserLogic, isProcessing } = useUserLogic();
+  const { getUserCacheData, getNewsMentions, getSocialMetrics } = useUnifiedUserData();
   
   // Filter cache data by type
   const newsItems = getNewsMentions(cacheData);
@@ -60,7 +60,7 @@ export const ClientProfileView = ({
   const loadClientData = async () => {
     try {
       // Load cache data using user_id (Single Source of Truth)
-      const cache = await getClientCacheData(userId);
+      const cache = await getUserCacheData(userId);
       setCacheData(cache);
       
       // Extract logic state from profile metadata
@@ -73,7 +73,7 @@ export const ClientProfileView = ({
   };
 
   const handleRunAnalysis = async () => {
-    const result = await processClientLogic(userId);
+    const result = await processUserLogic(userId);
     if (result) {
       loadClientData();
     }

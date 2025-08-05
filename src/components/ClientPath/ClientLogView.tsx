@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { useClientPath } from '@/hooks/useClientPath';
+import { useUserPath } from '@/hooks/useUserPath';
 import { PathEntry, PathEntryType } from '@/types/clientPath';
 import { cn } from '@/lib/utils';
 
@@ -55,7 +55,7 @@ const ROLE_LABELS = {
 };
 
 export const ClientLogView = ({ clientId, clientName, isOpen, onClose }: ClientLogViewProps) => {
-  const { entries } = useClientPath(clientId);
+  const { entries } = useUserPath(clientId);
   const [selectedEntry, setSelectedEntry] = useState<PathEntry | null>(null);
   
   // Filter states
