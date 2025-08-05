@@ -6,7 +6,8 @@ import { UserPlus, Mail, Users, Settings } from "lucide-react";
 import { useAuth } from "@/providers/UnifiedAuthProvider";
 import { SendInvitationForm } from "@/components/InvitationSystem/SendInvitationForm";
 import { CreateUserForm } from "./CreateUserForm";
-import { CentralUserManager } from "./CentralUserManager";
+import { SafeCentralUserManager } from "@/components/Universal/SafeCentralUserManager";
+import { UserManagementErrorBoundary } from "@/components/Universal/UserManagementErrorBoundary";
 
 interface UserManagementTabsProps {
   onUserCreated?: () => void;
@@ -81,7 +82,9 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <CentralUserManager />
+              <UserManagementErrorBoundary>
+                <SafeCentralUserManager />
+              </UserManagementErrorBoundary>
             </CardContent>
           </Card>
         </TabsContent>
