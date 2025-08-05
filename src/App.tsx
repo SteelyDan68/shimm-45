@@ -15,7 +15,7 @@ import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation 
 import { errorTracker } from "@/utils/productionErrorTracking";
 import { AutoNotificationSystem } from "@/components/Notifications/AutoNotificationSystem";
 
-import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/ErrorBoundary";
+import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/error/ErrorBoundary";
 import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
@@ -95,9 +95,10 @@ const AppRoutes = () => {
                 <Suspense fallback={
                   <div className="flex items-center justify-center p-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <span className="ml-2 text-sm text-muted-foreground">Loading...</span>
                   </div>
                 }>
-              <Routes>
+                <Routes>
                <Route path="/" element={<Dashboard />} />
                <Route path={NAVIGATION_ROUTES.DASHBOARD} element={<Dashboard />} />
               <Route path={NAVIGATION_ROUTES.CLIENT_DASHBOARD} element={<ClientDashboard />} />
