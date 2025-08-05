@@ -3951,6 +3951,15 @@ export type Database = {
         }
         Relationships: []
       }
+      security_summary: {
+        Row: {
+          admin_count: number | null
+          category: string | null
+          superadmin_count: number | null
+          total_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       aggregate_analytics_data: {
@@ -3960,6 +3969,10 @@ export type Database = {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      check_security_violations: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       cleanup_old_audit_logs: {
         Args: Record<PropertyKey, never>
@@ -4116,6 +4129,10 @@ export type Database = {
       reset_user_welcome_assessment: {
         Args: { _user_id: string }
         Returns: string
+      }
+      secure_validate_invitation: {
+        Args: { token_param: string }
+        Returns: Json
       }
       set_user_attribute: {
         Args: {
