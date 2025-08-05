@@ -60,12 +60,6 @@ export const ProgressFeedbackCard = ({ className }: ProgressFeedbackCardProps) =
         setAssessmentCompleted(progress >= 15);
         setProgressPercentage(progress);
         
-        console.log('ProgressFeedbackCard debug:', {
-          progress,
-          shouldShow,
-          metadata: journeyState?.metadata,
-          insights_available: journeyState?.metadata?.assessment_insights_available
-        });
         
         if (shouldShow) {
           // Definiera nästa steg baserat på var användaren befinner sig

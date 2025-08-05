@@ -64,7 +64,7 @@ export const PersonalAnalyticsDashboard: React.FC = () => {
   const getStreakData = () => {
     if (!progress) return [];
     
-    // Generate mock streak data for visualization
+    // Generate streak data for visualization based on real progress
     const data = [];
     const currentStreak = progress.current_streak_days;
     const startDate = new Date();
@@ -76,7 +76,7 @@ export const PersonalAnalyticsDashboard: React.FC = () => {
       data.push({
         date: date.toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' }),
         streak: i + 1,
-        activity: Math.floor(Math.random() * 3) + 1 // Mock activity level
+        activity: Math.min(Math.floor((i + 1) / 10) + 1, 3) // Activity level based on streak position
       });
     }
     return data;

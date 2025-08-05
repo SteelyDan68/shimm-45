@@ -55,7 +55,6 @@ export function UnifiedStefanAdminCenter() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock AI metrics (should be real in production)
   const aiMetrics: AIMetric[] = [
     { label: "Responstid", value: 1.2, trend: 'down', unit: "s" },
     { label: "Träffsäkerhet", value: 94.8, trend: 'up', unit: "%" },

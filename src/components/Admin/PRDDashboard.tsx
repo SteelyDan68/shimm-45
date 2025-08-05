@@ -170,7 +170,6 @@ export const PRDDashboard = () => {
       
 
       // Step 2: Load Components
-      console.log('🧩 Loading components...');
       const { data: componentsData, error: compError } = await supabase
         .from('prd_components')
         .select('*')

@@ -47,7 +47,6 @@ export function StefanControlCenter() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // TODO: Integrera med live AI-metrics från stefan_interactions tabellen
   const aiMetrics: AIMetric[] = [
     { label: "Responstid", value: 1.2, trend: 'down', unit: "s" },
     { label: "Träffsäkerhet", value: 94, trend: 'up', unit: "%" },

@@ -78,7 +78,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
     // In production, send to error tracking service
     if (process.env.NODE_ENV === 'production') {
-      // TODO: Integrate with error tracking service (Sentry, LogRocket, etc.)
       this.sendErrorToTracking(errorData);
     }
   };
