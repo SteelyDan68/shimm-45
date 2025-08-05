@@ -4101,6 +4101,15 @@ export type Database = {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: unknown
       }
+      log_sensitive_access: {
+        Args: {
+          table_name: string
+          action_type: string
+          target_user_id?: string
+          additional_context?: Json
+        }
+        Returns: undefined
+      }
       reset_user_welcome_assessment: {
         Args: { _user_id: string }
         Returns: string
@@ -4140,6 +4149,10 @@ export type Database = {
       }
       validate_admin_action: {
         Args: { action_type: string; admin_id: string }
+        Returns: boolean
+      }
+      validate_invitation_security: {
+        Args: { email_param: string; token_param: string }
         Returns: boolean
       }
       validate_invitation_token: {
