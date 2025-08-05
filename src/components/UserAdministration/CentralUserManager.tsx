@@ -275,7 +275,6 @@ export function CentralUserManager() {
       data?.forEach(({ user_id, attribute_value }) => {
         if (!rolesByUser[user_id]) rolesByUser[user_id] = [];
         rolesByUser[user_id].push(attribute_value as AppRole);
-        rolesByUser[user_id].push(role as AppRole);
       });
 
       setUserRoles(rolesByUser);

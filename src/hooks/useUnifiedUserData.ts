@@ -85,26 +85,59 @@ export const useUnifiedUserData = () => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch user roles from attributes system (nya strukturen)
-      const { data: rolesData, error: rolesError } = await supabase
+      // HYBRID-STÖD: Hämta roller från båda källor under migration
+      // 1. Från gamla user_roles tabellen
+      const { data: legacyRoles, error: legacyRolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (legacyRolesError) {
+        console.warn('Error fetching legacy roles:', legacyRolesError);
+      }
+
+      // 2. Från nya attributsystemet
+      const { data: attributeRoles, error: attributeRolesError } = await supabase
         .from('user_attributes')
         .select('user_id, attribute_value')
         .like('attribute_key', 'role_%')
         .eq('is_active', true);
 
-      if (rolesError) throw rolesError;
+      if (attributeRolesError) {
+        console.warn('Error fetching attribute roles:', attributeRolesError);
+      }
 
-      // Combine profiles with roles from attributes
-      const usersWithRoles: UnifiedUser[] = (profilesData || []).map(profile => ({
-        id: profile.id,
-        email: profile.email,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        avatar_url: profile.avatar_url,
-        created_at: profile.created_at,
-        updated_at: profile.updated_at,
-        roles: rolesData?.filter(r => r.user_id === profile.id).map(r => r.attribute_value as string) || []
-      }));
+      // Kombinera profiler med roller från båda källor
+      const usersWithRoles: UnifiedUser[] = (profilesData || []).map(profile => {
+        // Samla roller från legacy systemet
+        const legacyUserRoles = legacyRoles?.filter(r => r.user_id === profile.id).map(r => r.role) || [];
+        
+        // Samla roller från attributsystemet
+        const attributeUserRoles = attributeRoles?.filter(r => r.user_id === profile.id)
+          .map(r => {
+            // Parse JSON value from attributes
+            try {
+              const value = typeof r.attribute_value === 'string' ? 
+                JSON.parse(r.attribute_value) : r.attribute_value;
+              return String(value);
+            } catch {
+              return String(r.attribute_value);
+            }
+          }) || [];
+
+        // Kombinera och ta bort dubletter
+        const allRoles = [...new Set([...legacyUserRoles, ...attributeUserRoles])];
+
+        return {
+          id: profile.id,
+          email: profile.email,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          avatar_url: profile.avatar_url,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at,
+          roles: allRoles
+        };
+      });
 
       setUsers(usersWithRoles);
       

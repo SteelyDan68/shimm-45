@@ -74,28 +74,51 @@ export const useCoachClientRelationships = () => {
 
       setRelationships(enrichedRelationships);
 
-      // Calculate stats from attributes system
-      const { data: coachCount } = await supabase
+      // HYBRID-STÖD: Beräkna statistik från båda källor
+      // Från gamla user_roles tabellen
+      const { data: legacyCoaches } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'coach');
+
+      const { data: legacyClients } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'client');
+
+      // Från nya attributsystemet
+      const { data: attributeCoaches } = await supabase
         .from('user_attributes')
         .select('user_id')
         .like('attribute_key', 'role_%')
         .eq('attribute_value', '"coach"')
         .eq('is_active', true);
 
-      const { data: clientCount } = await supabase
+      const { data: attributeClients } = await supabase
         .from('user_attributes')
         .select('user_id')
         .like('attribute_key', 'role_%')
         .eq('attribute_value', '"client"')
         .eq('is_active', true);
 
+      // Kombinera och ta bort dubletter
+      const allCoaches = new Set([
+        ...(legacyCoaches?.map(c => c.user_id) || []),
+        ...(attributeCoaches?.map(c => c.user_id) || [])
+      ]);
+
+      const allClients = new Set([
+        ...(legacyClients?.map(c => c.user_id) || []),
+        ...(attributeClients?.map(c => c.user_id) || [])
+      ]);
+
       const assignedClientIds = new Set(relationshipsData?.map(rel => rel.client_id) || []);
 
       setStats({
-        total_coaches: coachCount?.length || 0,
-        total_clients: clientCount?.length || 0,
+        total_coaches: allCoaches.size,
+        total_clients: allClients.size,
         assigned_clients: assignedClientIds.size,
-        unassigned_clients: (clientCount?.length || 0) - assignedClientIds.size,
+        unassigned_clients: allClients.size - assignedClientIds.size,
         active_relationships: relationshipsData?.length || 0
       });
 
