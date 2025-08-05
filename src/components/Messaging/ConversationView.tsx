@@ -46,14 +46,14 @@ export const ConversationView = ({
   // Filter messages for this conversation with better error handling
   useEffect(() => {
     try {
-      console.log('🔍 Filtering messages for conversation:', { recipientId, totalMessages: messages.length });
+      
       
       const filtered = messages.filter(msg => 
         (msg.sender_id === user?.id && msg.receiver_id === recipientId) ||
         (msg.sender_id === recipientId && msg.receiver_id === user?.id)
       ).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
       
-      console.log('🔍 Filtered messages for conversation:', filtered.length);
+      
       setConversationMessages(filtered);
       
       // Mark unread messages as read
@@ -62,7 +62,7 @@ export const ConversationView = ({
       );
       
       if (unreadMessages.length > 0) {
-        console.log('🔍 Marking', unreadMessages.length, 'messages as read');
+        
         unreadMessages.forEach(msg => markAsRead(msg.id));
       }
     } catch (error) {
@@ -123,7 +123,7 @@ export const ConversationView = ({
     setIsSending(true);
 
     try {
-      console.log('🔍 Sending message to:', recipientId);
+      
       
       // Check connection status
       if (connectionStatus === 'offline') {

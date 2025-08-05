@@ -79,7 +79,7 @@ export const NotificationSystem: React.FC = () => {
         read: false,
         action: {
           label: 'Gör bedömning',
-          onClick: () => console.log('Navigate to assessment')
+          onClick: () => { /* Navigate to assessment */ }
         }
       },
       {

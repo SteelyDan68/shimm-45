@@ -39,7 +39,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ onClose, onConversat
 
       setLoading(true);
       try {
-        console.log('🔍 ComposeModal: Fetching users, current user:', user.id, user.email);
+        
         
         const { data: profiles, error } = await supabase
           .from('profiles')
@@ -49,7 +49,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ onClose, onConversat
 
         if (error) throw error;
         
-        console.log('✅ ComposeModal: Found', profiles?.length, 'users:', profiles?.map(p => p.email));
+        
         setAvailableUsers(profiles || []);
       } catch (error) {
         console.error('❌ Error fetching users:', error);

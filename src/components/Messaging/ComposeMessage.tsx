@@ -194,7 +194,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
         } else {
           allowedRecipients = [];
         }
-        console.log('🔍 Client: Found', allowedRecipients.length, 'assigned coaches');
+        
 
         if (allowedRecipients.length === 0) {
           console.warn('🚨 Client has no assigned coaches!');
@@ -217,7 +217,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
 
           allowedRecipients = adminCoachProfiles || [];
         }
-        console.log('🔍 Default user: Found', allowedRecipients.length, 'admins/coaches');
+        
       }
 
       // Remove duplicates and sort
@@ -229,7 +229,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
         return nameA.localeCompare(nameB);
       });
 
-      console.log('🔍 Final recipients:', uniqueRecipients.length);
+      
       setRecipients(uniqueRecipients);
 
     } catch (error) {

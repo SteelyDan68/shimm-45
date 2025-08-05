@@ -80,7 +80,7 @@ export const ConversationList = ({
       const isAdmin = roles.includes('admin');
       const isSuperAdmin = roles.includes('superadmin');
 
-      console.log('🔍 Database roles:', roles);
+      
 
       // Group messages by conversation partner with role-based filtering
       const conversationMap = new Map<string, Message[]>();
@@ -89,7 +89,7 @@ export const ConversationList = ({
       // Determine allowed conversation partners based on role
       if (isSuperAdmin || isAdmin) {
         // Admins and superadmins can message anyone
-        console.log('🔍 Admin/SuperAdmin: No restrictions on conversations');
+        
         
       } else if (isCoach) {
         // Coaches can message their assigned clients and other coaches/admins
@@ -121,7 +121,7 @@ export const ConversationList = ({
         const coachAdminIds = coachAdminRoles?.map(r => r.user_id) || [];
         allowedPartnerIds = new Set([...clientIds, ...coachAdminIds]);
         
-        console.log('🔍 Coach: Can message', clientIds.length, 'clients and', coachAdminIds.length, 'coaches/admins');
+        
         
       } else if (isClient) {
         // Clients can only message their assigned coaches
@@ -139,12 +139,12 @@ export const ConversationList = ({
         const coachIds = coachAssignments?.map(r => r.coach_id) || [];
         allowedPartnerIds = new Set(coachIds);
         
-        console.log('🔍 Client: Can message', coachIds.length, 'assigned coaches:', coachIds);
+        
         
         // Pre-populate coach conversations even if no messages yet
         coachIds.forEach(coachId => {
           conversationMap.set(coachId, []);
-          console.log('🔍 Pre-populating conversation for coach:', coachId);
+          
         });
         
       } else {
@@ -162,7 +162,7 @@ export const ConversationList = ({
         const coachAdminIds = coachAdminRoles?.map(r => r.user_id) || [];
         allowedPartnerIds = new Set(coachAdminIds);
         
-        console.log('🔍 Default user: Can message', coachAdminIds.length, 'coaches/admins');
+        
       }
 
       // Filter and group messages by conversation partner
@@ -178,7 +178,7 @@ export const ConversationList = ({
         return allowedPartnerIds.has(partnerId);
       });
       
-      console.log('🔍 Filtered messages:', filteredMessages.length, 'out of', messages.length);
+      
       
       filteredMessages.forEach(message => {
         const partnerId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
@@ -191,10 +191,10 @@ export const ConversationList = ({
 
       // Get participant profiles
       const participantIds = Array.from(conversationMap.keys());
-      console.log('🔍 Participant IDs to fetch:', participantIds.length, participantIds);
+      
       
       if (participantIds.length === 0) {
-        console.log('🔍 No conversation participants found');
+        
         setConversations([]);
         setLoading(false);
         return;
@@ -211,9 +211,6 @@ export const ConversationList = ({
         throw profileError;
       }
 
-      console.log('🔍 Fetched profiles:', profiles?.length || 0);
-      console.log('🔍 Profile IDs received:', profiles?.map(p => p.id) || []);
-      console.log('🔍 Profile emails received:', profiles?.map(p => p.email) || []);
 
       // Build conversation objects
       const convs: Conversation[] = [];
@@ -307,7 +304,7 @@ export const ConversationList = ({
         return new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime();
       });
 
-      console.log('🔍 Built', convs.length, 'conversations');
+      
       setConversations(convs);
 
     } catch (error) {

@@ -48,7 +48,7 @@ export const AllPillarsCompletedCelebration: React.FC<AllPillarsCompletedCelebra
   // Automatically trigger AI planning when component mounts
   useEffect(() => {
     if (user?.id && completedPillars.length === 6 && !planGenerated) {
-      console.log('🎯 AllPillarsCompletedCelebration: Auto-generating comprehensive plan...');
+      
       generateComprehensivePlan();
     }
   }, [user?.id, completedPillars.length]);
@@ -59,7 +59,7 @@ export const AllPillarsCompletedCelebration: React.FC<AllPillarsCompletedCelebra
     setIsGeneratingPlan(true);
     
     try {
-      console.log('🚀 Generating comprehensive AI plan for user:', user.id);
+      
       
       const { data, error } = await supabase.functions.invoke('generate-ai-planning', {
         body: {
@@ -100,7 +100,7 @@ Fokusera på hållbarhet, momentum och exponentiell utveckling!`,
         return;
       }
 
-      console.log('✅ AI plan generated successfully:', data);
+      
       setPlanResults(data);
       setPlanGenerated(true);
 

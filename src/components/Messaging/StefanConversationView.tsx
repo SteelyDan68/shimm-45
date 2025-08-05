@@ -76,7 +76,7 @@ export function StefanConversationView({ onClose }: StefanConversationViewProps)
 
       // Logga konversationen för coaching insights
       if (data.insights && data.insights.length > 0) {
-        console.log('Stefan generated insights:', data.insights);
+        
       }
     } catch (error) {
       console.error('Error sending message to Stefan:', error);
