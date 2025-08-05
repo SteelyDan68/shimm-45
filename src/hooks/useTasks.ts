@@ -36,8 +36,8 @@ export const useTasks = (clientId?: string) => {
     
     // Clients can only see their own tasks
     if (hasRole('client') && user.id !== clientId) {
-      const userCoach = getCurrentUserCoach();
-      if (!userCoach || userCoach.coach_id !== user.id) {
+      const userCoach = await getCurrentUserCoach(user.id);
+      if (!userCoach || userCoach !== user.id) {
         toast({
           title: "Ingen behörighet", 
           description: "Du kan bara se dina egna uppgifter",

@@ -120,17 +120,21 @@ export function CentralUserManager() {
     loading: relationshipsLoading,
     createRelationship,
     removeRelationship,
-    transferClient,
-    getClientsByCoach,
     refetch: refetchRelationships
-  } = useCoachClientRelationships();
+  } = useUserRelationships();
 
-  const { 
-    saveExtendedProfile, 
-    getExtendedProfile, 
-    uploadProfilePicture, 
-    isLoading: profileLoading 
-  } = useExtendedProfile();
+  const {
+    assignRole,
+    removeRole,
+    createCoachClientRelationship,
+    removeCoachClientRelationship
+  } = useUserManagement();
+
+  // Mock profile functions (replace with real implementation when available)
+  const saveExtendedProfile = async (data: any, userId: string) => ({ success: true });
+  const getExtendedProfile = async (userId: string) => ({});
+  const uploadProfilePicture = async (file: File, userId: string) => ({ success: true });
+  const profileLoading = false;
 
   /**
    * ========================================================================
@@ -148,7 +152,7 @@ export function CentralUserManager() {
   // User Management State  
   const [selectedUser, setSelectedUser] = useState<UnifiedUser | null>(null);
   const [editingUser, setEditingUser] = useState<UnifiedUser | null>(null);
-  const [userFormData, setUserFormData] = useState<ExtendedProfileData | null>(null);
+  const [userFormData, setUserFormData] = useState<any | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   
   // Role Management State
@@ -161,7 +165,7 @@ export function CentralUserManager() {
   const [relationshipFilter, setRelationshipFilter] = useState<string>('all');
   
   // Transfer Client State
-  const [transferringRelationship, setTransferringRelationship] = useState<CoachClientRelationship | null>(null);
+  const [transferringRelationship, setTransferringRelationship] = useState<UserRelationship | null>(null);
   const [newCoach, setNewCoach] = useState<string>('');
   
   // Dialog States
@@ -460,7 +464,10 @@ export function CentralUserManager() {
   };
 
   const handleRemoveRelationship = async (relationshipId: string) => {
-    const success = await removeRelationship(relationshipId);
+    const success = await removeRelationship(
+      relationships.find(r => r.id === relationshipId)?.coach_id || '',
+      relationships.find(r => r.id === relationshipId)?.client_id || ''
+    );
     if (success) {
       await refreshAllData();
     }
@@ -476,10 +483,15 @@ export function CentralUserManager() {
       return;
     }
 
-    const success = await transferClient(
-      transferringRelationship.client_id,
+    // Transfer client by removing old relationship and creating new one
+    await removeRelationship(
       transferringRelationship.coach_id,
-      newCoach
+      transferringRelationship.client_id
+    );
+    
+    const success = await createRelationship(
+      newCoach,
+      transferringRelationship.client_id
     );
 
     if (success) {

@@ -1,125 +1,99 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useUserAttributes } from './useUserAttributes';
 
 export interface UserRelationship {
   id: string;
-  coach_user_id: string;
-  client_user_id: string;
-  assigned_at: string;
-  assigned_by: string | null;
-  is_active: boolean;
-  
-  // Enriched data
-  coach_name?: string;
-  coach_email?: string;
-  client_name?: string;
-  client_email?: string;
-  
-  // Backwards compatibility
   coach_id: string;
   client_id: string;
+  assigned_at: string;
+  assigned_by: string;
+  is_active: boolean;
+  deactivated_at?: string;
+  metadata?: any;
 }
 
 export interface RelationshipStats {
-  total_coaches: number;
-  total_clients: number;
-  assigned_clients: number;
-  unassigned_clients: number;
+  total_relationships: number;
   active_relationships: number;
+  inactive_relationships: number;
+  unique_coaches: number;
+  unique_clients: number;
+  avg_clients_per_coach: number;
+  // Legacy compatibility
+  total_coaches?: number;
+  total_clients?: number;
 }
 
 export const useCoachClientRelationships = () => {
   const [relationships, setRelationships] = useState<UserRelationship[]>([]);
   const [stats, setStats] = useState<RelationshipStats>({
-    total_coaches: 0,
-    total_clients: 0,
-    assigned_clients: 0,
-    unassigned_clients: 0,
-    active_relationships: 0
+    total_relationships: 0,
+    active_relationships: 0,
+    inactive_relationships: 0,
+    unique_coaches: 0,
+    unique_clients: 0,
+    avg_clients_per_coach: 0
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { getUsersWithAttribute, setAttribute, getAttribute } = useUserAttributes();
 
+  // Fetch all relationships from attributes
   const fetchRelationships = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      // Get all users to check for coaching relationships
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name');
 
-      // Fetch all active relationships with basic data first
-      const { data: relationshipsData, error: relationshipsError } = await supabase
-        .from('coach_client_assignments')
-        .select('*')
-        .eq('is_active', true);
+      if (error) throw error;
 
-      if (relationshipsError) throw relationshipsError;
+      const allRelationships: UserRelationship[] = [];
 
-      // Enrich the relationships data with proper typing
-      const enrichedRelationships: UserRelationship[] = (relationshipsData || []).map(rel => ({
-        id: rel.id,
-        coach_user_id: rel.coach_id,
-        client_user_id: rel.client_id,
-        assigned_at: rel.assigned_at,
-        assigned_by: rel.assigned_by,
-        is_active: rel.is_active,
-        coach_name: 'Okänd coach', // Will be set below
-        coach_email: '',
-        client_name: 'Okänd klient', // Will be set below
-        client_email: '',
-        // Backwards compatibility
-        coach_id: rel.coach_id,
-        client_id: rel.client_id
-      }));
+      for (const profile of profiles || []) {
+        // Check if this user has coaching relationships
+        const coachingData = await getAttribute(profile.id, 'coaching_relationships');
+        
+        if (coachingData && Array.isArray(coachingData)) {
+          const relationships = coachingData as any[];
+          
+          for (const rel of relationships) {
+            if (rel.relationship_type === 'coaching' && rel.is_active) {
+              allRelationships.push({
+                id: rel.id || crypto.randomUUID(),
+                coach_id: rel.coach_id || profile.id,
+                client_id: rel.client_id || profile.id,
+                assigned_at: rel.assigned_at || new Date().toISOString(),
+                assigned_by: rel.assigned_by || '',
+                is_active: rel.is_active,
+                deactivated_at: rel.deactivated_at,
+                metadata: rel.metadata || {}
+              });
+            }
+          }
+        }
+      }
 
-      setRelationships(enrichedRelationships);
+      setRelationships(allRelationships);
 
-      // HYBRID-STÖD: Beräkna statistik från båda källor
-      // Från gamla user_roles tabellen
-      const { data: legacyCoaches } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'coach');
-
-      const { data: legacyClients } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'client');
-
-      // Från nya attributsystemet
-      const { data: attributeCoaches } = await supabase
-        .from('user_attributes')
-        .select('user_id')
-        .like('attribute_key', 'role_%')
-        .eq('attribute_value', '"coach"')
-        .eq('is_active', true);
-
-      const { data: attributeClients } = await supabase
-        .from('user_attributes')
-        .select('user_id')
-        .like('attribute_key', 'role_%')
-        .eq('attribute_value', '"client"')
-        .eq('is_active', true);
-
-      // Kombinera och ta bort dubletter
-      const allCoaches = new Set([
-        ...(legacyCoaches?.map(c => c.user_id) || []),
-        ...(attributeCoaches?.map(c => c.user_id) || [])
-      ]);
-
-      const allClients = new Set([
-        ...(legacyClients?.map(c => c.user_id) || []),
-        ...(attributeClients?.map(c => c.user_id) || [])
-      ]);
-
-      const assignedClientIds = new Set(relationshipsData?.map(rel => rel.client_id) || []);
+      // Calculate stats
+      const activeRelationships = allRelationships.filter(r => r.is_active);
+      const uniqueCoaches = new Set(activeRelationships.map(r => r.coach_id)).size;
+      const uniqueClients = new Set(activeRelationships.map(r => r.client_id)).size;
 
       setStats({
-        total_coaches: allCoaches.size,
-        total_clients: allClients.size,
-        assigned_clients: assignedClientIds.size,
-        unassigned_clients: allClients.size - assignedClientIds.size,
-        active_relationships: relationshipsData?.length || 0
+        total_relationships: allRelationships.length,
+        active_relationships: activeRelationships.length,
+        inactive_relationships: allRelationships.length - activeRelationships.length,
+        unique_coaches: uniqueCoaches,
+        unique_clients: uniqueClients,
+        avg_clients_per_coach: uniqueCoaches > 0 ? uniqueClients / uniqueCoaches : 0,
+        // Legacy compatibility
+        total_coaches: uniqueCoaches,
+        total_clients: uniqueClients
       });
 
     } catch (error) {
@@ -127,53 +101,61 @@ export const useCoachClientRelationships = () => {
       toast({
         title: "Fel",
         description: "Kunde inte hämta coach-klient relationer",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [getAttribute, toast]);
 
-  useEffect(() => {
-    fetchRelationships();
-  }, [fetchRelationships]);
-
-  const createRelationship = useCallback(async (coachId: string, clientId: string) => {
+  // Create new coach-client relationship
+  const createRelationship = useCallback(async (
+    coachId: string,
+    clientId: string,
+    assignedBy?: string
+  ) => {
     try {
-      // Check if relationship already exists
-      const { data: existing } = await supabase
-        .from('coach_client_assignments')
-        .select('id')
-        .eq('coach_id', coachId)
-        .eq('client_id', clientId)
-        .eq('is_active', true)
-        .single();
+      const relationshipId = crypto.randomUUID();
+      const relationshipData = {
+        id: relationshipId,
+        coach_id: coachId,
+        client_id: clientId,
+        relationship_type: 'coaching',
+        assigned_at: new Date().toISOString(),
+        assigned_by: assignedBy || coachId,
+        is_active: true,
+        metadata: {}
+      };
 
-      if (existing) {
-        toast({
-          title: "Relation existerar redan",
-          description: "Denna klient är redan tilldelad till denna coach",
-          variant: "destructive",
-        });
-        return false;
-      }
+      // Set relationship for coach
+      const coachRelationships = await getAttribute(coachId, 'coaching_relationships') || [];
+      const updatedCoachRelationships = Array.isArray(coachRelationships) 
+        ? [...coachRelationships, { ...relationshipData, client_id: clientId }]
+        : [{ ...relationshipData, client_id: clientId }];
 
-      const { error } = await supabase
-        .from('coach_client_assignments')
-        .insert({
-          coach_id: coachId,
-          client_id: clientId,
-          assigned_by: user?.id || coachId,
-          is_active: true
-        });
+      await setAttribute(coachId, {
+        attribute_key: 'coaching_relationships',
+        attribute_value: updatedCoachRelationships,
+        attribute_type: 'relationship'
+      });
 
-      if (error) throw error;
+      // Set relationship for client
+      const clientRelationships = await getAttribute(clientId, 'coaching_relationships') || [];
+      const updatedClientRelationships = Array.isArray(clientRelationships)
+        ? [...clientRelationships, { ...relationshipData, coach_id: coachId }]
+        : [{ ...relationshipData, coach_id: coachId }];
+
+      await setAttribute(clientId, {
+        attribute_key: 'coaching_relationships', 
+        attribute_value: updatedClientRelationships,
+        attribute_type: 'relationship'
+      });
 
       await fetchRelationships();
-      
+
       toast({
         title: "Relation skapad",
-        description: "Klienten har tilldelats till coachen",
+        description: "Coach-klient relation har etablerats"
       });
 
       return true;
@@ -181,27 +163,56 @@ export const useCoachClientRelationships = () => {
       console.error('Error creating relationship:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte skapa relation",
-        variant: "destructive",
+        description: "Kunde inte skapa coach-klient relation",
+        variant: "destructive"
       });
       return false;
     }
-  }, [fetchRelationships, toast, user]);
+  }, [getAttribute, setAttribute, fetchRelationships, toast]);
 
-  const removeRelationship = useCallback(async (relationshipId: string) => {
+  // Remove/deactivate relationship
+  const removeRelationship = useCallback(async (
+    coachId: string,
+    clientId: string
+  ) => {
     try {
-      const { error } = await supabase
-        .from('coach_client_assignments')
-        .update({ is_active: false })
-        .eq('id', relationshipId);
+      // Update coach relationships
+      const coachRelationships = await getAttribute(coachId, 'coaching_relationships') || [];
+      if (Array.isArray(coachRelationships)) {
+        const updatedCoachRelationships = coachRelationships.map((rel: any) => 
+          rel.client_id === clientId 
+            ? { ...rel, is_active: false, deactivated_at: new Date().toISOString() }
+            : rel
+        );
 
-      if (error) throw error;
+        await setAttribute(coachId, {
+          attribute_key: 'coaching_relationships',
+          attribute_value: updatedCoachRelationships,
+          attribute_type: 'relationship'
+        });
+      }
+
+      // Update client relationships
+      const clientRelationships = await getAttribute(clientId, 'coaching_relationships') || [];
+      if (Array.isArray(clientRelationships)) {
+        const updatedClientRelationships = clientRelationships.map((rel: any) =>
+          rel.coach_id === coachId
+            ? { ...rel, is_active: false, deactivated_at: new Date().toISOString() }
+            : rel
+        );
+
+        await setAttribute(clientId, {
+          attribute_key: 'coaching_relationships',
+          attribute_value: updatedClientRelationships,
+          attribute_type: 'relationship'
+        });
+      }
 
       await fetchRelationships();
-      
+
       toast({
-        title: "Relation borttagen",
-        description: "Klient-coach relationen har inaktiverats",
+        title: "Relation avslutad",
+        description: "Coach-klient relation har avslutats"
       });
 
       return true;
@@ -209,89 +220,66 @@ export const useCoachClientRelationships = () => {
       console.error('Error removing relationship:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte ta bort relation",
-        variant: "destructive",
+        description: "Kunde inte avsluta coach-klient relation",
+        variant: "destructive"
       });
       return false;
     }
-  }, [fetchRelationships, toast]);
+  }, [getAttribute, setAttribute, fetchRelationships, toast]);
 
-  const transferClient = useCallback(async (clientId: string, fromCoachId: string, toCoachId: string) => {
+  // Check if coach-client relationship exists
+  const isCoachClient = useCallback(async (coachId: string, clientId: string) => {
     try {
-      // First, deactivate the current relationship
-      const { data: currentRel } = await supabase
-        .from('coach_client_assignments')
-        .select('id')
-        .eq('coach_id', fromCoachId)
-        .eq('client_id', clientId)
-        .eq('is_active', true)
-        .single();
-
-      if (currentRel) {
-        await supabase
-          .from('coach_client_assignments')
-          .update({ is_active: false })
-          .eq('id', currentRel.id);
+      const coachRelationships = await getAttribute(coachId, 'coaching_relationships') || [];
+      if (Array.isArray(coachRelationships)) {
+        return coachRelationships.some((rel: any) => 
+          rel.client_id === clientId && rel.is_active
+        );
       }
-
-      // Create new relationship
-      const { error } = await supabase
-        .from('coach_client_assignments')
-        .insert({
-          coach_id: toCoachId,
-          client_id: clientId,
-          assigned_by: user?.id || toCoachId,
-          is_active: true
-        });
-
-      if (error) throw error;
-
-      await fetchRelationships();
-      
-      toast({
-        title: "Klient överförd",
-        description: "Klienten har överförts till ny coach",
-      });
-
-      return true;
+      return false;
     } catch (error) {
-      console.error('Error transferring client:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte överföra klient",
-        variant: "destructive",
-      });
+      console.error('Error checking coach-client relationship:', error);
       return false;
     }
-  }, [fetchRelationships, toast, user]);
+  }, [getAttribute]);
 
-  // Utility functions
-  const getClientsByCoach = useCallback((coachId: string) => {
-    return relationships.filter(rel => rel.coach_user_id === coachId);
-  }, [relationships]);
+  // Get coach's clients
+  const getCurrentUserClients = useCallback(async (coachId: string) => {
+    try {
+      const relationships = await getAttribute(coachId, 'coaching_relationships') || [];
+      if (Array.isArray(relationships)) {
+        return relationships
+          .filter((rel: any) => rel.is_active && rel.client_id)
+          .map((rel: any) => rel.client_id);
+      }
+      return [];
+    } catch (error) {
+      console.error('Error getting coach clients:', error);
+      return [];
+    }
+  }, [getAttribute]);
 
-  const getCoachForClient = useCallback((clientId: string) => {
-    return relationships.find(rel => rel.client_user_id === clientId);
-  }, [relationships]);
+  // Get client's coach
+  const getCurrentUserCoach = useCallback(async (clientId: string) => {
+    try {
+      const relationships = await getAttribute(clientId, 'coaching_relationships') || [];
+      if (Array.isArray(relationships)) {
+        const activeCoaching = relationships.find((rel: any) => 
+          rel.is_active && (rel as any).coach_id
+        );
+        return (activeCoaching as any)?.coach_id || null;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting client coach:', error);
+      return null;
+    }
+  }, [getAttribute]);
 
-  const isCoachClient = useCallback((coachId: string, clientId: string) => {
-    return relationships.some(rel => 
-      rel.coach_user_id === coachId && 
-      rel.client_user_id === clientId && 
-      rel.is_active
-    );
-  }, [relationships]);
-
-  // For current user context
-  const getCurrentUserClients = useCallback(() => {
-    if (!user?.id) return [];
-    return getClientsByCoach(user.id);
-  }, [user?.id, getClientsByCoach]);
-
-  const getCurrentUserCoach = useCallback(() => {
-    if (!user?.id) return null;
-    return getCoachForClient(user.id);
-  }, [user?.id, getCoachForClient]);
+  // Initialize
+  useEffect(() => {
+    fetchRelationships();
+  }, [fetchRelationships]);
 
   return {
     relationships,
@@ -299,9 +287,6 @@ export const useCoachClientRelationships = () => {
     loading,
     createRelationship,
     removeRelationship,
-    transferClient,
-    getClientsByCoach,
-    getCoachForClient,
     isCoachClient,
     getCurrentUserClients,
     getCurrentUserCoach,
