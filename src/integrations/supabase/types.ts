@@ -3970,6 +3970,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      is_coach_of_client: {
+        Args: { _coach_id: string; _client_id: string }
+        Returns: boolean
+      }
       is_organization_member: {
         Args: { _user_id: string; _organization_id: string }
         Returns: boolean
@@ -4048,6 +4052,14 @@ export type Database = {
           expires_at: string
           is_valid: boolean
         }[]
+      }
+      validate_role_context_switch: {
+        Args: {
+          _user_id: string
+          _from_role: Database["public"]["Enums"]["app_role"]
+          _to_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: Json
       }
       vector_avg: {
         Args: { "": number[] }

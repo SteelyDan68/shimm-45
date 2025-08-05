@@ -54,10 +54,10 @@ export function MultiRoleManager({ userId, currentRoles, onRolesUpdated, disable
   };
 
   const removeRole = async (role: AppRole) => {
-    // Tillåt att ta bort alla roller - användare kan nu existera utan roller
+    // Varning om användaren bara har en roll kvar
     if (currentRoles.length <= 1) {
       toast({
-        title: "Varning",
+        title: "Varning", 
         description: "Användaren kommer att sakna roller efter detta. De kommer endast ha grundläggande åtkomst.",
         variant: "default"
       });
@@ -108,7 +108,7 @@ export function MultiRoleManager({ userId, currentRoles, onRolesUpdated, disable
           {currentRoles.map((role) => (
             <Badge key={role} variant="default" className="flex items-center gap-1">
               {roleLabels[role as AppRole]}
-              {currentRoles.length > 1 && !disabled && (
+              {!disabled && (
                 <Button
                   variant="ghost"
                   size="sm"
