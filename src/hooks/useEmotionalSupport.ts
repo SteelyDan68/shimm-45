@@ -45,7 +45,7 @@ export const useEmotionalSupport = () => {
     if (!user) return null;
 
     try {
-      console.log('💗 Detecting emotional state for user:', user.id);
+      
 
       // Analysera beteendeindikatorer
       const behaviorIndicators = {
@@ -102,7 +102,7 @@ export const useEmotionalSupport = () => {
         } as any
       });
 
-      console.log('✅ Emotional state detected:', detectedMood);
+      
       return newEmotionalState;
 
     } catch (error) {
@@ -256,7 +256,7 @@ export const useEmotionalSupport = () => {
       } as any
     });
 
-    console.log('💗 Emotional check-in scheduled:', checkInType);
+    
   }, [user, emotionalState]);
 
   // Auto-detection vid aktivitet

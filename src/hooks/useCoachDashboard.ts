@@ -336,7 +336,7 @@ export const useCoachDashboard = () => {
   useEffect(() => {
     // Wait for user, roles, and clients before processing
     if (user && hasRole && unifiedClients && unifiedClients.length >= 0) {
-      console.log('useCoachDashboard: Triggering fetchClientsWithPriority');
+      
       fetchClientsWithPriority();
     } else {
       console.log('useCoachDashboard: Waiting for dependencies', { 

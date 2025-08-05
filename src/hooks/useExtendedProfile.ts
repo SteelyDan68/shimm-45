@@ -10,7 +10,7 @@ export const useExtendedProfile = () => {
   const saveExtendedProfile = async (profileData: ExtendedProfileData, targetUserId?: string) => {
     setIsLoading(true);
     try {
-      console.log('Saving extended profile data:', profileData);
+      
       
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error('User not authenticated');
@@ -65,7 +65,7 @@ export const useExtendedProfile = () => {
         throw error;
       }
 
-      console.log('Extended profile saved successfully');
+      
 
       toast({
         title: "Profil sparad!",

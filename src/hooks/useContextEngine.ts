@@ -57,7 +57,7 @@ export const useContextEngine = () => {
         .from('user_context_events')
         .insert(contextEvent);
 
-      console.log('🎯 Context Event Logged:', event.event_type, event.context_data);
+      
     } catch (error) {
       console.error('Failed to log context event:', error);
     }
@@ -262,7 +262,7 @@ export const useContextEngine = () => {
           scheduled_for: intervention.scheduled_for || new Date().toISOString(),
         });
 
-      console.log('🤖 Intervention Scheduled:', intervention.intervention_type);
+      
     } catch (error) {
       console.error('Error scheduling intervention:', error);
     }

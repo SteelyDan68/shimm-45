@@ -412,7 +412,7 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
       URL.revokeObjectURL(url);
     } else {
       // CSV export would require more complex formatting
-      console.log('CSV export not yet implemented');
+      // CSV export functionality placeholder
     }
   }, [profiles, selectedProfile]);
 
