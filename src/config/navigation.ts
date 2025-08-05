@@ -108,7 +108,27 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Admin Hub",
         url: NAVIGATION_ROUTES.ADMIN_HUB,
         icon: Settings,
-        roles: ["superadmin", "admin", "coach"]
+        roles: ["superadmin", "admin", "coach"],
+        children: [
+          {
+            title: "Dashboard",
+            url: NAVIGATION_ROUTES.ADMIN_HUB,
+            icon: Home,
+            roles: ["superadmin", "admin", "coach"]
+          },
+          {
+            title: "Migration",
+            url: `${NAVIGATION_ROUTES.ADMIN_HUB}/migration`,
+            icon: Database,
+            roles: ["superadmin"]
+          },
+          {
+            title: "Testing",
+            url: `${NAVIGATION_ROUTES.ADMIN_HUB}/testing`,
+            icon: Database,
+            roles: ["superadmin"]
+          }
+        ]
       },
       {
         title: "Användare", 
