@@ -157,26 +157,25 @@ export const useAnalytics = () => {
     if (!user) return;
 
     try {
-      // Store activity in local storage for immediate UI updates
-      const storageKey = `analytics_${user.id}`;
-      const stored = localStorage.getItem(storageKey);
-      const activities: ActivityPoint[] = stored ? JSON.parse(stored) : [];
+      // Store activity in analytics_events table
+      await supabase.from('analytics_events').insert({
+        user_id: user.id,
+        session_id: 'session-' + Date.now(),
+        event: type,
+        properties: metadata || {},
+        page_url: window.location.href,
+        user_agent: navigator.userAgent
+      });
       
-      const newActivity: ActivityPoint = {
-        date: new Date().toISOString(),
-        value: 1,
-        type,
-        metadata
-      };
-      
-      activities.push(newActivity);
-      
-      // Keep only last 100 activities in localStorage
-      const trimmed = activities.slice(-100);
-      localStorage.setItem(storageKey, JSON.stringify(trimmed));
-      
-      // In a real app, this would also sync to Supabase
-      // For now, we'll simulate with local data
+      // Also track in analytics_metrics if it's a measurable metric
+      if (['login', 'task', 'assessment'].includes(type)) {
+        await supabase.from('analytics_metrics').insert({
+          user_id: user.id,
+          metric_type: `${type}_count`,
+          metric_value: 1,
+          metadata: metadata || {}
+        });
+      }
       
     } catch (error) {
       console.error('Error tracking activity:', error);
@@ -189,123 +188,122 @@ export const useAnalytics = () => {
     
     setIsLoading(true);
     try {
-      // In a real implementation, this would fetch from Supabase
-      // For now, we'll create realistic mock data
-      
-      const mockData: AnalyticsData = {
-        onboardingProgress: 100,
-        assessmentProgress: 75,
-        taskCompletionRate: 68,
-        overallProgress: 81,
+      // Fetch real analytics data from database
+      const [metricsResult, assessmentsResult, tasksResult, eventsResult] = await Promise.all([
+        supabase.from('analytics_metrics').select('*').eq('user_id', user.id),
+        supabase.from('pillar_assessments').select('*').eq('user_id', user.id),
+        supabase.from('tasks').select('*').eq('user_id', user.id),
+        supabase.from('analytics_events').select('*').eq('user_id', user.id)
+      ]);
+
+      const metrics = metricsResult.data || [];
+      const assessments = assessmentsResult.data || [];
+      const tasks = tasksResult.data || [];
+      const events = eventsResult.data || [];
+
+      // Calculate real analytics from database data
+      const completedTasks = tasks.filter(t => t.status === 'completed').length;
+      const totalTasks = tasks.length;
+      const taskCompletionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+      // Calculate assessment progress
+      const completedAssessments = assessments.filter(a => a.calculated_score > 0).length;
+      const assessmentProgress = completedAssessments > 0 ? 100 : 0;
+
+      // Calculate pillar progress from real assessments
+      const pillarGroups = assessments.reduce((acc, assessment) => {
+        if (!acc[assessment.pillar_key]) {
+          acc[assessment.pillar_key] = [];
+        }
+        acc[assessment.pillar_key].push(assessment);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+      const pillarsProgress: PillarProgress[] = Object.entries(pillarGroups).map(([pillarKey, pillarAssessments]) => {
+        const sorted = pillarAssessments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const current = sorted[0]?.calculated_score || 0;
+        const previous = sorted[1]?.calculated_score || 0;
         
-        dailyActivity: generateMockActivity('day', 7),
-        weeklyActivity: generateMockActivity('week', 4),
-        monthlyActivity: generateMockActivity('month', 6),
+        return {
+          pillarKey,
+          currentScore: current,
+          previousScore: previous,
+          trend: current > previous ? 'up' : current < previous ? 'down' : 'stable',
+          change: current - previous,
+          lastUpdated: new Date(sorted[0]?.created_at || new Date())
+        };
+      });
+
+      // Calculate activity from events
+      const dailyActivity = generateActivityFromEvents(events, 'day', 7);
+      const weeklyActivity = generateActivityFromEvents(events, 'week', 4);
+      const monthlyActivity = generateActivityFromEvents(events, 'month', 6);
+
+      // Calculate login streak and session metrics
+      const loginEvents = events.filter(e => e.event === 'login' || e.event === 'page_view');
+      const loginStreak = calculateLoginStreak(loginEvents);
+      const totalSessions = loginEvents.length;
+      const averageSessionDuration = metrics
+        .filter(m => m.metric_type === 'session_duration')
+        .reduce((sum, m) => sum + Number(m.metric_value), 0) / totalSessions || 0;
+
+      // Calculate overall progress
+      const progressFactors = [assessmentProgress, taskCompletionRate];
+      const overallProgress = progressFactors.reduce((sum, p) => sum + p, 0) / progressFactors.length;
+
+      const analyticsData: AnalyticsData = {
+        onboardingProgress: assessmentProgress,
+        assessmentProgress,
+        taskCompletionRate,
+        overallProgress,
         
-        pillarsProgress: [
-          {
-            pillarKey: 'self_care',
-            currentScore: 7.2,
-            previousScore: 6.8,
-            trend: 'up',
-            change: 0.4,
-            lastUpdated: new Date()
-          },
-          {
-            pillarKey: 'skills',
-            currentScore: 6.5,
-            previousScore: 6.1,
-            trend: 'up',
-            change: 0.4,
-            lastUpdated: new Date()
-          },
-          {
-            pillarKey: 'talent',
-            currentScore: 8.1,
-            previousScore: 8.3,
-            trend: 'down',
-            change: -0.2,
-            lastUpdated: new Date()
-          },
-          {
-            pillarKey: 'brand',
-            currentScore: 5.8,
-            previousScore: 5.8,
-            trend: 'stable',
-            change: 0,
-            lastUpdated: new Date()
-          },
-          {
-            pillarKey: 'economy',
-            currentScore: 6.9,
-            previousScore: 6.2,
-            trend: 'up',
-            change: 0.7,
-            lastUpdated: new Date()
-          }
-        ],
+        dailyActivity,
+        weeklyActivity,
+        monthlyActivity,
         
-        velocityScore: 72,
-        consistencyScore: 85,
+        pillarsProgress,
         
-        loginStreak: 7,
-        totalSessions: 23,
-        averageSessionDuration: 18.5, // minutes
+        velocityScore: Math.min(100, taskCompletionRate + loginStreak * 2),
+        consistencyScore: loginStreak * 10,
+        
+        loginStreak,
+        totalSessions,
+        averageSessionDuration,
         lastActive: new Date(),
         
-        goalsCompleted: 3,
-        goalProgress: [
-          {
-            goalId: '1',
-            title: 'Förbättra morgonrutin',
-            progress: 80,
-            target: 100,
-            deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            category: 'self_care'
-          },
-          {
-            goalId: '2', 
-            title: 'Lär dig ny teknik',
-            progress: 45,
-            target: 100,
-            category: 'skills'
-          }
-        ],
+        goalsCompleted: completedTasks,
+        goalProgress: [], // Would need goals table to populate
         
-        stefanInteractions: 12,
-        aiRecommendationsFollowed: 8,
+        stefanInteractions: events.filter(e => e.event === 'stefan_interaction').length,
+        aiRecommendationsFollowed: events.filter(e => e.event === 'recommendation_followed').length,
         
         summary: {
           totalUsers: 1,
           activeUsers: 1,
-          completionRate: 68,
-          completedTasks: 23,
-          totalTasks: 34,
-          currentVelocity: 72,
+          completionRate: taskCompletionRate,
+          completedTasks,
+          totalTasks,
+          currentVelocity: Math.min(100, taskCompletionRate + loginStreak * 2),
           averageVelocity: 65,
           mostCommonBarrier: 'Tidsbrist'
         }
       };
-      
-      const mockPerformance: PerformanceMetrics = {
+
+      const performanceMetrics: PerformanceMetrics = {
         timeToComplete: {
-          'assessment': 12.5,
-          'task': 8.2,
-          'onboarding': 5.3
+          'assessment': averageSessionDuration,
+          'task': averageSessionDuration * 0.6,
+          'onboarding': averageSessionDuration * 0.4
         },
-        engagementLevel: mockData.consistencyScore > 80 ? 'high' : 
-                        mockData.consistencyScore > 60 ? 'medium' : 'low',
-        productivityScore: Math.round((mockData.taskCompletionRate + mockData.consistencyScore) / 2),
-        focusAreas: ['self_care', 'skills'],
-        recommendations: [
-          'Fortsätt din fantastiska morgonrutin - du är på rätt spår!',
-          'Överväg att lägga till fler tekniska färdigheter till din utvecklingsplan',
-          'Din konsistens är imponerande - behåll tempot!'
-        ]
+        engagementLevel: analyticsData.consistencyScore > 80 ? 'high' : 
+                        analyticsData.consistencyScore > 60 ? 'medium' : 'low',
+        productivityScore: Math.round((analyticsData.taskCompletionRate + analyticsData.consistencyScore) / 2),
+        focusAreas: pillarsProgress.filter(p => p.trend === 'up').map(p => p.pillarKey),
+        recommendations: generateRecommendations(analyticsData, pillarsProgress)
       };
       
-      setAnalyticsData(mockData);
-      setPerformanceMetrics(mockPerformance);
+      setAnalyticsData(analyticsData);
+      setPerformanceMetrics(performanceMetrics);
       
     } catch (error) {
       console.error('Error loading analytics:', error);
@@ -314,8 +312,8 @@ export const useAnalytics = () => {
     }
   }, [user, timeRange]);
 
-  // Activity data generation for charts
-  const generateMockActivity = (period: string, count: number): ActivityPoint[] => {
+  // Generate activity data from real events
+  const generateActivityFromEvents = (events: any[], period: string, count: number): ActivityPoint[] => {
     const activities: ActivityPoint[] = [];
     const now = new Date();
     
@@ -329,14 +327,70 @@ export const useAnalytics = () => {
         date.setMonth(date.getMonth() - i);
       }
       
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(date);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      const dayEvents = events.filter(e => {
+        const eventDate = new Date(e.timestamp);
+        return eventDate >= dayStart && eventDate <= dayEnd;
+      });
+      
       activities.push({
         date: date.toISOString(),
-        value: Math.floor(Math.random() * 10) + 1,
-        type: 'login'
+        value: dayEvents.length,
+        type: dayEvents[0]?.event || 'login',
+        metadata: { events: dayEvents.length }
       });
     }
     
     return activities;
+  };
+
+  // Calculate login streak from events
+  const calculateLoginStreak = (loginEvents: any[]): number => {
+    if (loginEvents.length === 0) return 0;
+    
+    const sortedEvents = loginEvents.sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    let streak = 0;
+    const today = new Date();
+    
+    for (let i = 0; i < sortedEvents.length; i++) {
+      const eventDate = new Date(sortedEvents[i].timestamp);
+      const daysDiff = Math.floor((today.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff === streak) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
+  // Generate contextual recommendations
+  const generateRecommendations = (data: AnalyticsData, pillars: PillarProgress[]): string[] => {
+    const recommendations = [];
+    
+    if (data.loginStreak >= 7) {
+      recommendations.push('Fantastisk konsistens! Fortsätt med din dagliga rutin.');
+    }
+    
+    if (data.taskCompletionRate < 50) {
+      recommendations.push('Fokusera på att slutföra fler uppgifter för bättre framsteg.');
+    }
+    
+    const improvingPillars = pillars.filter(p => p.trend === 'up');
+    if (improvingPillars.length > 0) {
+      recommendations.push(`Bra utveckling inom ${improvingPillars.map(p => p.pillarKey).join(', ')}.`);
+    }
+    
+    return recommendations;
   };
 
   // Calculate insights

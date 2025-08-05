@@ -49,56 +49,28 @@ export const useUnifiedAssessment = () => {
 
   const fetchTemplates = useCallback(async () => {
     try {
-      // Create mock templates based on Six Pillars
-      const mockTemplates: AssessmentTemplate[] = [
-        {
-          id: 'self-care',
-          name: 'Self Care Assessment',
-          type: 'pillar',
-          pillar_key: 'self_care',
-          questions: [],
-          scoring_rules: {},
-          active: true
-        },
-        {
-          id: 'relationships',
-          name: 'Relationships Assessment', 
-          type: 'pillar',
-          pillar_key: 'relationships',
-          questions: [],
-          scoring_rules: {},
-          active: true
-        },
-        {
-          id: 'professional-life',
-          name: 'Professional Life Assessment',
-          type: 'pillar',
-          pillar_key: 'professional_life', 
-          questions: [],
-          scoring_rules: {},
-          active: true
-        },
-        {
-          id: 'finances',
-          name: 'Finances Assessment',
-          type: 'pillar',
-          pillar_key: 'finances',
-          questions: [],
-          scoring_rules: {},
-          active: true
-        },
-        {
-          id: 'spirituality',
-          name: 'Spirituality Assessment',
-          type: 'pillar',
-          pillar_key: 'spirituality',
-          questions: [],
-          scoring_rules: {},
-          active: true
-        }
-      ];
+      // Fetch real templates from database
+      const { data, error } = await supabase
+        .from('assessment_templates')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Convert database format to hook format with proper typing
+      const convertedTemplates: AssessmentTemplate[] = (data || []).map(template => ({
+        id: template.id,
+        name: template.name,
+        type: 'pillar' as const,
+        pillar_key: template.pillar_key,
+        questions: Array.isArray(template.questions) ? 
+          (template.questions as AssessmentQuestion[]) : [],
+        scoring_rules: template.scoring_config || {},
+        active: template.is_active
+      }));
       
-      setTemplates(mockTemplates);
+      setTemplates(convertedTemplates);
     } catch (error: any) {
       console.error('Error fetching templates:', error);
       toast({
@@ -266,14 +238,30 @@ export const useUnifiedAssessment = () => {
 
   const createCustomTemplate = useCallback(async (template: Omit<AssessmentTemplate, 'id'>) => {
     try {
-      // For now, just return success without saving to DB
-      // In future, create assessment_templates table
+      // Save to assessment_templates table
+      const { data, error } = await supabase
+        .from('assessment_templates')
+        .insert({
+          name: template.name,
+          pillar_key: template.pillar_key || '',
+          questions: template.questions as any, // Cast to Json for database
+          scoring_config: template.scoring_rules as any,
+          is_active: template.active,
+          created_by: 'current-user' // Would be auth.uid() in real implementation
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      await fetchTemplates(); // Refresh templates
+      
       toast({
         title: "Mall skapad",
-        description: "Assessment mallen har skapats (mockad för nu)"
+        description: "Assessment mallen har skapats framgångsrikt"
       });
 
-      return { id: 'mock-' + Date.now(), ...template };
+      return { id: data.id, ...template };
     } catch (error: any) {
       console.error('Error creating template:', error);
       toast({
