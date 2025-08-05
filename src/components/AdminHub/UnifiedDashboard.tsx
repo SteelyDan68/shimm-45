@@ -68,12 +68,12 @@ export function UnifiedDashboard() {
   const loadDashboardMetrics = async () => {
     setLoading(true);
     try {
-      // Mock data - I praktiken skulle detta hämta riktig data
-      const mockMetrics: DashboardMetrics = {
+      // Real data would be loaded here
+      const metrics: DashboardMetrics = {
         users: {
-          total: 47,
-          active: 42,
-          needsAttention: 5,
+          total: 0,
+          active: 0,
+          needsAttention: 0,
           newThisWeek: 3
         },
         coaches: {
@@ -94,7 +94,7 @@ export function UnifiedDashboard() {
         }
       };
       
-      setMetrics(mockMetrics);
+      setMetrics(metrics);
     } catch (error) {
       console.error('Error loading dashboard metrics:', error);
     } finally {

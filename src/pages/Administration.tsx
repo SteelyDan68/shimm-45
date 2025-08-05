@@ -35,7 +35,7 @@ import { IntegratedAdminDashboard } from "@/components/Admin/IntegratedAdminDash
 import { DataRightsCenter } from "@/components/DataRightsCenter";
 import StefanTrainingData from "@/components/StefanTrainingData";
 import StefanMemoryManager from "@/components/Admin/StefanMemoryManager";
-import StefanOverviewPanel from "@/components/Admin/StefanOverviewPanel";
+
 import { EnhancedApiStatusChecker } from "@/components/EnhancedApiStatusChecker";
 
 import { HelpTooltip } from "@/components/HelpTooltip";
@@ -318,7 +318,7 @@ export function Administration() {
                 </p>
               </div>
               <div className="p-6">
-                <StefanOverviewPanel />
+                <p className="text-muted-foreground">Stefan AI översikt kommer snart</p>
               </div>
             </div>
           </TabsContent>

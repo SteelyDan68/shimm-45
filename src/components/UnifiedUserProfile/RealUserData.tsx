@@ -210,11 +210,8 @@ export const RealUserData = ({ userId, profile }: RealUserDataProps) => {
       {/* Header med refresh */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
+          <h3 className="text-lg font-semibold">
             Användaraktivitet
-            <Badge variant="outline" className="bg-green-50 text-green-700">
-              🔥 100% Riktig Data
-            </Badge>
           </h3>
           <p className="text-sm text-muted-foreground">
             Senast uppdaterad: {lastUpdated.toLocaleTimeString('sv-SE')}
@@ -317,9 +314,6 @@ export const RealUserData = ({ userId, profile }: RealUserDataProps) => {
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
             Senaste Aktivitet
-            <Badge variant="outline" className="text-xs">
-              Live från databas
-            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>

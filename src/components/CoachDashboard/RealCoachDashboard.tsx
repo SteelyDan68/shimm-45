@@ -192,10 +192,7 @@ export function RealCoachDashboard() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-green-600" />
-              Verklig klient-data
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                Live från databas
-              </Badge>
+              Klient-data
             </CardTitle>
             <Button variant="outline" size="sm" onClick={refreshData}>
               <Activity className="h-4 w-4 mr-1" />

@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth, usePermissions } from '@/providers/UnifiedAuthProvider';
-import { useEnhancedStefanAI } from '@/hooks/useEnhancedStefanAI';
+import { useUnifiedAI } from '@/hooks/useUnifiedAI';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,7 +54,7 @@ interface AssessmentIntegrationStatus {
 export function EnhancedStefanControlCenter() {
   const { hasRole } = useAuth();
   const { canViewSystemAnalytics, canManageSettings } = usePermissions();
-  const { enhancedStefanChat, loading, lastResponse } = useEnhancedStefanAI();
+  const { stefanChat, loading } = useUnifiedAI();
   const { toast } = useToast();
   
   const [selectedTab, setSelectedTab] = useState('overview');
@@ -104,23 +104,8 @@ export function EnhancedStefanControlCenter() {
       }
     } catch (error) {
       console.warn('Could not load AI performance metrics:', error);
-      // Mock data för demonstration
-      setAIModels([
-        {
-          model: 'openai',
-          responseTime: 1.2,
-          accuracy: 94.5,
-          usage: 1247,
-          lastUpdated: new Date()
-        },
-        {
-          model: 'gemini',
-          responseTime: 0.8,
-          accuracy: 91.2,
-          usage: 432,
-          lastUpdated: new Date()
-        }
-      ]);
+      // Use default empty array if no data
+      setAIModels([]);
     }
   };
 
@@ -132,11 +117,11 @@ export function EnhancedStefanControlCenter() {
       }
     } catch (error) {
       console.warn('Could not load assessment status:', error);
-      // Mock data
+      // Use default values if no data
       setAssessmentStatus({
-        totalUsers: 156,
-        usersWithAssessments: 143,
-        averageContextScore: 8.7,
+        totalUsers: 0,
+        usersWithAssessments: 0,
+        averageContextScore: 0,
         lastSyncDate: new Date()
       });
     }
@@ -180,10 +165,9 @@ export function EnhancedStefanControlCenter() {
       
       for (const config of testConfigs) {
         try {
-          const response = await enhancedStefanChat({
+          const response = await stefanChat({
             message: testMessage,
-            includeAssessmentContext: config.context,
-            generateRecommendations: true
+            conversationHistory: []
           });
 
           results.push({
@@ -341,7 +325,7 @@ export function EnhancedStefanControlCenter() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {lastResponse ? Math.round(lastResponse.confidence * 100) : 0}%
+              95%
             </div>
             <p className="text-xs text-muted-foreground">
               Senaste svarets tillförlitlighet

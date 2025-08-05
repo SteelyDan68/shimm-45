@@ -87,7 +87,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
         habits_active: (client.profile_extended as any)?.habits_active || 0
       })) || [];
 
-      console.log('Client profiles loaded (OnboardingWorkflow):', clientProfiles.length, clientProfiles.map(c => `${c.first_name} ${c.last_name}`));
+      
       setClients(clientProfiles);
     } catch (error: any) {
       console.error('Error loading clients:', error);
@@ -125,26 +125,22 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
   };
 
   const startOnboarding = (client: ClientProfile) => {
-    console.log('🔥 startOnboarding called for client:', client);
-    console.log('🔥 Client onboarding status:', client.onboarding_completed);
     setSelectedClient(client);
     
     if (!client.onboarding_completed) {
-      console.log('🔥 Setting step to onboard');
+      
       setCurrentStep('onboard');
     } else if (!client.assessment_completed) {
-      console.log('🔥 Setting step to assess');
+      
       setCurrentStep('assess');
     } else if ((client.habits_active || 0) === 0) {
-      console.log('🔥 Setting step to habits');
+      
       setCurrentStep('habits');
     } else {
-      console.log('🔥 Setting step to complete');
+      
       setCurrentStep('complete');
     }
     
-    console.log('🔥 Selected client after update:', selectedClient);
-    console.log('🔥 Current step after update:', currentStep);
   };
 
   const handleStepComplete = async (step: string) => {
@@ -255,7 +251,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <CardContent>
               <OnboardingForm 
                 onComplete={(data) => {
-                  console.log('Onboarding completed with data:', data);
+                  
                   handleStepComplete('onboard');
                 }}
               />
@@ -440,9 +436,6 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              console.log('🚨 BUTTON CLICKED! Event:', e);
-                              console.log('🚨 Button client:', client);
-                              console.log('🚨 Button status:', { status, nextStep });
                               startOnboarding(client);
                             }}
                             variant={status === 'Komplett' ? 'outline' : 'default'}

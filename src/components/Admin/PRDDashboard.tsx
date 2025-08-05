@@ -132,7 +132,7 @@ export const PRDDashboard = () => {
 
   // 💻 BACKEND: Robust data loading with comprehensive error handling
   const loadCurrentPRD = useCallback(async () => {
-    console.log('🔄 PRD Dashboard: Starting data load...');
+    
     
     setDashboardState(prev => ({
       ...prev,
@@ -142,7 +142,7 @@ export const PRDDashboard = () => {
 
     try {
       // Step 1: Load PRD Document
-      console.log('📄 Loading PRD document...');
+      
       const { data: prdDoc, error: prdError } = await supabase
         .from('prd_documents')
         .select('*')
@@ -152,12 +152,12 @@ export const PRDDashboard = () => {
         .maybeSingle();
 
       if (prdError) {
-        console.error('❌ PRD Document Error:', prdError);
+        
         throw new Error(`Database error: ${prdError.message}`);
       }
 
       if (!prdDoc) {
-        console.log('📝 No PRD document found');
+        
         setDashboardState(prev => ({
           ...prev,
           loadingState: LoadingState.SUCCESS,
@@ -167,7 +167,7 @@ export const PRDDashboard = () => {
         return;
       }
 
-      console.log('✅ PRD Document loaded:', prdDoc.version);
+      
 
       // Step 2: Load Components
       console.log('🧩 Loading components...');

@@ -146,10 +146,7 @@ export const IntegratedAdminDashboard = ({ onNavigateToTab }: IntegratedAdminDas
               <div>
                 <CardTitle className="text-xl flex items-center gap-2">
                   Integrerad Administration
-                  <Badge variant="outline" className="bg-green-50 text-green-700">
-                    🔥 100% Riktig Data
-                  </Badge>
-                  <HelpTooltip content="Alla siffror kommer från riktig databas - ingen mockdata!" />
+                  <HelpTooltip content="Alla siffror kommer från riktig databas" />
                 </CardTitle>
                 <p className="text-muted-foreground">
                   Realtidsöversikt baserad på faktisk klientdata från systemet

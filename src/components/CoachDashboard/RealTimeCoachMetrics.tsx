@@ -101,11 +101,8 @@ export const RealTimeCoachMetrics = ({ coachId }: RealTimeCoachMetricsProps) => 
       {/* Header med refresh */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+          <h2 className="text-xl font-semibold">
             Coach Dashboard
-            <Badge variant="outline" className="bg-green-50 text-green-700">
-              🔥 100% Riktig Data
-            </Badge>
           </h2>
           <p className="text-muted-foreground">
             Realtidsöversikt över dina klienter - senast uppdaterad {lastUpdated.toLocaleTimeString('sv-SE')}
@@ -229,10 +226,7 @@ export const RealTimeCoachMetrics = ({ coachId }: RealTimeCoachMetricsProps) => 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-blue-600" />
-            Klientstatus - Realtid
-            <Badge variant="outline" className="text-xs">
-              Live Data från databas
-            </Badge>
+            Klientstatus
           </CardTitle>
         </CardHeader>
         <CardContent>
