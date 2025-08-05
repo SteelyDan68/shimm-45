@@ -1,21 +1,12 @@
 /**
  * 🚀 LAZY LOADED COMPONENTS
- * SCRUM-TEAM ADVANCED COMPONENT LOADING SYSTEM
+ * SCRUM-TEAM SIMPLIFIED COMPONENT LOADING SYSTEM
  */
-import React, { Suspense, lazy, ComponentType } from 'react';
-import { ComponentErrorBoundary } from '@/components/error/ErrorBoundary';
+import React, { Suspense, lazy } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { logger } from '@/utils/productionLogger';
-
-interface LazyComponentOptions {
-  fallback?: React.ComponentType;
-  errorFallback?: React.ComponentType<{ error: Error; retry: () => void }>;
-  retryDelay?: number;
-  maxRetries?: number;
-}
 
 interface LazyLoadingSkeletonProps {
   variant?: 'card' | 'list' | 'dashboard' | 'form';
@@ -111,83 +102,42 @@ export const LazyLoadingSkeleton: React.FC<LazyLoadingSkeletonProps> = ({
 };
 
 /**
- * Default Error Fallback Component
+ * Simple Loading Fallback
  */
-const DefaultErrorFallback: React.FC<{ error: Error; retry: () => void }> = ({ 
-  error, 
-  retry 
-}) => (
+const SimpleLoadingFallback: React.FC = () => (
+  <div className="flex items-center justify-center p-8">
+    <Loader2 className="h-6 w-6 animate-spin mr-2" />
+    <span>Loading component...</span>
+  </div>
+);
+
+/**
+ * Error Fallback Component
+ */
+const SimpleErrorFallback: React.FC<{ error?: string }> = ({ error }) => (
   <Alert variant="destructive" className="my-4">
-    <AlertDescription className="flex items-center justify-between">
-      <span>Failed to load component: {error.message}</span>
-      <Button size="sm" variant="outline" onClick={retry}>
-        <RefreshCw className="h-3 w-3 mr-1" />
-        Retry
-      </Button>
+    <AlertDescription>
+      Failed to load component. {error && `Error: ${error}`}
     </AlertDescription>
   </Alert>
 );
 
 /**
- * Enhanced Lazy Component Wrapper with Retry Logic
+ * Simple Lazy Component Wrapper
  */
-export const createLazyComponent = <P extends object>(
-  componentImport: () => Promise<{ default: ComponentType<P> }>,
-  options: LazyComponentOptions = {}
-): React.FC<P> => {
-  const {
-    fallback: CustomFallback,
-    errorFallback: CustomErrorFallback = DefaultErrorFallback,
-    retryDelay = 1000,
-    maxRetries = 3
-  } = options;
+export const createSimpleLazyComponent = (
+  importFunction: () => Promise<{ default: React.ComponentType<any> }>
+) => {
+  const LazyComponent = lazy(importFunction);
 
-  // Create the lazy component
-  const LazyComponent = lazy(componentImport);
+  const WrappedComponent: React.FC<any> = (props) => (
+    <Suspense fallback={<SimpleLoadingFallback />}>
+      <LazyComponent {...props} />
+    </Suspense>
+  );
 
-  // Wrapper component with retry logic
-  const LazyWrapper: React.FC<P> = (props) => {
-    const [retryCount, setRetryCount] = React.useState(0);
-    const [retryKey, setRetryKey] = React.useState(0);
-
-    const handleRetry = React.useCallback(() => {
-      if (retryCount < maxRetries) {
-        logger.info(`Retrying lazy component load (attempt ${retryCount + 1}/${maxRetries})`);
-        
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-          setRetryKey(prev => prev + 1);
-        }, retryDelay);
-      } else {
-        logger.error('Max retries exceeded for lazy component');
-      }
-    }, [retryCount]);
-
-    const DefaultFallback = CustomFallback || (() => (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 animate-spin mr-2" />
-        <span>Loading component...</span>
-      </div>
-    ));
-
-    return (
-      <ComponentErrorBoundary
-        fallback={<CustomErrorFallback error={new Error('Component failed to load')} retry={handleRetry} />}
-      >
-        <Suspense fallback={<DefaultFallback />}>
-          <LazyComponent {...props} />
-        </Suspense>
-  
-  return LazyWrapper;
+  return WrappedComponent;
 };
-
-/**
- * Pre-configured Lazy Components for Common Use Cases
- */
-
-// Simple lazy loading without complex retry logic for now
-export const LazyDashboard = React.lazy(() => import('@/pages/Dashboard').then(module => ({ default: module.Dashboard })));
-export const LazyPhaseExecutionManager = React.lazy(() => import('@/components/PhaseExecutionManager').then(module => ({ default: module.PhaseExecutionManager })));
 
 /**
  * Preload Utility for Important Components
@@ -199,6 +149,12 @@ export const preloadComponent = (componentImport: () => Promise<any>) => {
         logger.warn('Component preload failed', { error: error.message });
       });
     });
+  } else {
+    setTimeout(() => {
+      componentImport().catch(error => {
+        logger.warn('Component preload failed', { error: error.message });
+      });
+    }, 100);
   }
 };
 
@@ -207,7 +163,7 @@ export const preloadComponent = (componentImport: () => Promise<any>) => {
  */
 export const useRouteBasedPreloading = () => {
   React.useEffect(() => {
-    // Simple preloading for now
+    // Preload commonly accessed components
     preloadComponent(() => import('@/pages/Dashboard'));
   }, []);
 };
