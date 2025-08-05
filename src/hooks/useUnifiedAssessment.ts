@@ -103,7 +103,7 @@ export const useUnifiedAssessment = () => {
 
   const fetchResults = useCallback(async (userId?: string) => {
     try {
-      // Use attribute system for pillar assessments
+      // HYBRID: Keep using attribute system for pillar assessments (configuration data)
       const { data: attributeData, error } = await supabase.functions.invoke('get-user-attribute', {
         body: {
           user_id: userId || 'all',
