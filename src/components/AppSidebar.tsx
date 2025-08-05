@@ -98,16 +98,49 @@ export function AppSidebar() {
                   <SidebarMenu>
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild tooltip={!open ? item.title : undefined}>
-                          <NavLink 
-                            to={item.url} 
-                            className={`${getNavCls(item.url)} transition-colors rounded-md`}
-                            title={!open ? item.title : undefined}
-                          >
-                            <item.icon className="h-4 w-4 flex-shrink-0" />
-                            {open && <span className="truncate">{item.title}</span>}
-                          </NavLink>
-                        </SidebarMenuButton>
+                        {item.children ? (
+                          // Item with submenu
+                          <Collapsible key={`${item.title}-submenu`}>
+                            <SidebarMenuButton asChild>
+                              <CollapsibleTrigger className="flex w-full items-center justify-between">
+                                <div className="flex items-center">
+                                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                                  {open && <span className="truncate ml-2">{item.title}</span>}
+                                </div>
+                                {open && <ChevronDown className="h-3 w-3" />}
+                              </CollapsibleTrigger>
+                            </SidebarMenuButton>
+                            <CollapsibleContent>
+                              <SidebarMenuSub>
+                                {item.children.map((child) => (
+                                  <SidebarMenuSubItem key={child.title}>
+                                    <SidebarMenuSubButton asChild>
+                                      <NavLink 
+                                        to={child.url} 
+                                        className={`${getNavCls(child.url)} transition-colors rounded-md pl-6`}
+                                      >
+                                        <child.icon className="h-4 w-4 flex-shrink-0" />
+                                        {open && <span className="truncate ml-2">{child.title}</span>}
+                                      </NavLink>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ) : (
+                          // Regular item without submenu
+                          <SidebarMenuButton asChild tooltip={!open ? item.title : undefined}>
+                            <NavLink 
+                              to={item.url} 
+                              className={`${getNavCls(item.url)} transition-colors rounded-md`}
+                              title={!open ? item.title : undefined}
+                            >
+                              <item.icon className="h-4 w-4 flex-shrink-0" />
+                              {open && <span className="truncate">{item.title}</span>}
+                            </NavLink>
+                          </SidebarMenuButton>
+                        )}
                       </SidebarMenuItem>
                     ))}
                   </SidebarMenu>
