@@ -87,7 +87,7 @@ export const useUserData = (userId?: string) => {
     if (!targetUserId) return;
 
     try {
-      console.log('🔥 useUserData.fetchRoles: Starting for userId:', targetUserId);
+      
       const { data, error } = await supabase
         .from('user_roles')
         .select('*')
@@ -98,7 +98,7 @@ export const useUserData = (userId?: string) => {
         throw error;
       }
       
-      console.log('🔥 useUserData.fetchRoles: Success! Raw data:', data);
+      
       setRoles(data || []);
     } catch (error) {
       console.error('Error fetching roles:', error);
@@ -114,8 +114,6 @@ export const useUserData = (userId?: string) => {
   useEffect(() => {
     // Only fetch when targetUserId is available
     if (targetUserId) {
-      console.log('🔥 useUserData: Triggering fetchData for targetUserId:', targetUserId);
-      console.log('🔥 useUserData: Current user context:', { userId: user?.id, email: user?.email });
       fetchData();
     } else {
       

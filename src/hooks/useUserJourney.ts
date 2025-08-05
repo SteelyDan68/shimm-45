@@ -167,7 +167,7 @@ export const useUserJourney = () => {
         }
       });
 
-      console.log('Autonomous action plan generated for', assessmentType);
+      
     } catch (error) {
       console.error('Error generating autonomous action plan:', error);
     }

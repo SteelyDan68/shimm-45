@@ -88,10 +88,10 @@ export const useUserAssessments = (userId: string) => {
   useEffect(() => {
     // Only fetch when userId is available
     if (userId) {
-      console.log('useUserAssessments: Triggering fetchData for userId:', userId);
+      
       fetchData();
     } else {
-      console.log('useUserAssessments: Waiting for userId');
+      
     }
   }, [userId]);
 

@@ -99,7 +99,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
     setRealtimeSubscription(channel);
 
     return () => {
-      console.log('🔄 Cleaning up real-time subscription');
+      
       if (channel) {
         supabase.removeChannel(channel);
       }
@@ -329,7 +329,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
 
   // 🔄 REFRESH ALL DATA
   const refreshAll = useCallback(() => {
-    console.log('🔄 Refreshing all calendar and task data');
+    
     refetchCalendar();
     refreshTasks();
   }, [refetchCalendar, refreshTasks]);

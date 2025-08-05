@@ -308,7 +308,7 @@ export const useUnifiedDataLayer = () => {
     setError(null);
 
     try {
-      console.log('🔥 UnifiedDataLayer: Loading ALL real metrics via Edge Function...');
+      
 
       // Försök använda Edge Function för aggregerad data (snabbare)
       try {
@@ -352,7 +352,7 @@ export const useUnifiedDataLayer = () => {
 
           setMetrics(newMetrics);
           
-          console.log('✅ UnifiedDataLayer: Edge Function metrics loaded:', newMetrics);
+          
 
           toast({
             title: "⚡ Live data laddade (Edge Function)",
@@ -362,7 +362,7 @@ export const useUnifiedDataLayer = () => {
           return;
         }
       } catch (edgeError) {
-        console.log('⚠️ Edge function unavailable, falling back to direct queries...');
+        
       }
 
       // Fallback: Direct database queries
@@ -411,7 +411,7 @@ export const useUnifiedDataLayer = () => {
 
       setMetrics(newMetrics);
 
-      console.log('✅ UnifiedDataLayer: Direct query metrics loaded:', newMetrics);
+      
 
       toast({
         title: "Live data laddade (Direct)",
@@ -446,7 +446,7 @@ export const useUnifiedDataLayer = () => {
 
   // Setup real-time subscriptions för live-uppdateringar
   const setupRealtimeSubscriptions = useCallback(() => {
-    console.log('🔄 Setting up real-time subscriptions...');
+    
 
     const channels = [
       // Assessment updates

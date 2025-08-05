@@ -29,7 +29,7 @@ export const useUnifiedClients = () => {
     try {
       setLoading(true);
       
-      console.log('fetchClients: Starting with user:', user?.id, 'roles:', { hasRole });
+      
       
       // If user is admin/superadmin, show all clients
       // If user is coach, only show their assigned clients
@@ -38,7 +38,7 @@ export const useUnifiedClients = () => {
       let clientUserIds: string[] = [];
       
       if (hasRole('superadmin') || hasRole('admin')) {
-        console.log('fetchClients: User is admin/superadmin');
+        
         // Admin sees all clients
         const { data: userRoles, error: rolesError } = await supabase
           .from('user_roles')
@@ -47,10 +47,10 @@ export const useUnifiedClients = () => {
 
         if (rolesError) throw rolesError;
         clientUserIds = userRoles?.map(r => r.user_id) || [];
-        console.log('fetchClients: Admin found client user IDs:', clientUserIds);
+        
         
       } else if (hasRole('coach')) {
-        console.log('fetchClients: User is coach, looking for assigned clients');
+        
         // Coach sees only their assigned clients
         // NOTE: In unified system, client_id = user_id
         const { data: relationships, error: relError } = await supabase
@@ -66,27 +66,27 @@ export const useUnifiedClients = () => {
         
         // client_id IS user_id in the unified system
         clientUserIds = relationships?.map(r => r.client_id) || [];
-        console.log('fetchClients: Coach found assigned client user_ids:', clientUserIds, 'from relationships:', relationships);
+        
         
       } else if (hasRole('client')) {
-        console.log('fetchClients: User is client');
+        
         // Client sees only themselves
         clientUserIds = user?.id ? [user.id] : [];
         
       } else {
-        console.log('fetchClients: User has no recognized role');
+        
         // No specific role - no access to clients
         setClients([]);
         return;
       }
 
       if (clientUserIds.length === 0) {
-        console.log('fetchClients: No client user IDs found');
+        
         setClients([]);
         return;
       }
 
-      console.log('fetchClients: Getting profiles for client IDs:', clientUserIds);
+      
       // Get profiles for authorized client users
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -108,7 +108,7 @@ export const useUnifiedClients = () => {
         throw profilesError;
       }
 
-      console.log('fetchClients: Found profiles:', profiles);
+      
 
       // Get coach relationships for these clients
       const { data: relationships, error: relError } = await supabase
@@ -142,7 +142,7 @@ export const useUnifiedClients = () => {
         coach_id: userCoachMap.get(profile.id) || null, // Use user_id (profile.id)
       }));
 
-      console.log('fetchClients: Final unified clients:', unifiedClients);
+      
       setClients(unifiedClients);
     } catch (error: any) {
       console.error('Error fetching unified clients:', error);
@@ -159,10 +159,10 @@ export const useUnifiedClients = () => {
   useEffect(() => {
     // Only fetch when user is available AND roles have been loaded
     if (user && roles && roles.length > 0) {
-      console.log('useUnifiedClients: Triggering fetchClients because user and roles are available');
+      
       fetchClients();
     } else {
-      console.log('useUnifiedClients: Waiting for user and roles', { user: !!user, roles });
+      
     }
   }, [user, roles]); // Also depend on roles, not just user
 
