@@ -219,7 +219,9 @@ export const UnifiedUserProfile = () => {
                 <p className="text-muted-foreground">{getContextDescription()}</p>
                 <Badge variant="outline">{getContextTitle()}</Badge>
                 {roles.map((role, index) => (
-                  <Badge key={index} variant="secondary">{String(role)}</Badge>
+                  <Badge key={index} variant="secondary">
+                    {typeof role === 'string' ? role : role?.role || 'Unknown'}
+                  </Badge>
                 ))}
               </div>
             </div>
@@ -229,11 +231,29 @@ export const UnifiedUserProfile = () => {
         {/* Context-specific actions */}
         {context === 'client' && (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                toast({
+                  title: "AI-analys",
+                  description: "AI-analys funktionalitet kommer snart!",
+                });
+              }}
+            >
               <Brain className="h-4 w-4 mr-2" />
               Kör AI-analys
             </Button>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                toast({
+                  title: "Inställningar",
+                  description: "Användarinställningar kommer snart!",
+                });
+              }}
+            >
               <Settings className="h-4 w-4 mr-2" />
               Inställningar
             </Button>
