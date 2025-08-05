@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useRoleCache } from '@/hooks/useRoleCache';
-import { usePillarOrchestration } from '@/hooks/usePillarOrchestration';
+import { useUserPillars } from '@/hooks/useUserPillars'; // FIXED to use path_entries
 import { useTasks } from '@/hooks/useTasks';
 import { useNavigate } from 'react-router-dom';
 import UnifiedPillarOrchestrator from '@/components/PillarJourney/UnifiedPillarOrchestrator';
@@ -30,14 +30,19 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const { tasks, loading: tasksLoading } = useTasks(isClient ? user?.id : undefined);
   
-  const {
-    loading,
-    pillarProgress,
-    activeDevelopmentPlans,
-    overallProgress,
-    getNextUnlockedPillar,
-    refreshProgress
-  } = usePillarOrchestration();
+  // CRITICAL FIX: Use real pillar data from path_entries
+  const { 
+    activations, 
+    assessments, 
+    loading: pillarLoading,
+    getCompletedPillars,
+    getActivatedPillars 
+  } = useUserPillars(user?.id || '');
+  
+  // Calculate actual pillar progress from real data
+  const completedPillars = getCompletedPillars().length;
+  const activePillars = getActivatedPillars().length;
+  const overallProgress = completedPillars > 0 ? (completedPillars / 6) * 100 : 0;
 
   // Load calendar events with memoization
   useEffect(() => {
@@ -75,11 +80,10 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
 
   // Refresh data när komponenten visas igen
   const handleShowPillarJourney = () => {
-    refreshProgress(); // Uppdatera all data innan visning
     setShowPillarJourney(true);
   };
 
-  if (loading) {
+  if (pillarLoading || tasksLoading) {
     return (
       <div className={`max-w-6xl mx-auto p-6 space-y-6 ${className}`}>
         <Card>
@@ -92,9 +96,11 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
     );
   }
 
-  const nextPillar = getNextUnlockedPillar();
-  const completedPillars = pillarProgress.filter(p => p.isCompleted).length;
-  const hasActiveWork = activeDevelopmentPlans.length > 0;
+  // CRITICAL FIX: Calculate next pillar from REAL completion data
+  const pillarOrder: string[] = ['self_care', 'skills', 'talent', 'brand', 'economy', 'open_track'];
+  const completedPillarKeys = getCompletedPillars();
+  const nextPillar = pillarOrder.find(pillar => !completedPillarKeys.includes(pillar as any));
+  const hasActiveWork = activePillars > 0;
   
   // Calculate real activity statistics
   const activeTasks = tasks?.filter(task => task.status !== 'completed') || [];

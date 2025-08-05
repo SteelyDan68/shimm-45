@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUserAttributes } from './useUserAttributes';
+import { supabase } from '@/integrations/supabase/client';
 
 export type PillarKey = 'self_care' | 'economy' | 'career' | 'relationships' | 'fun_recreation' | 'physical_environment';
 
@@ -153,14 +152,13 @@ export const useUnifiedPillars = (userId?: string) => {
   const [progress, setProgress] = useState<PillarProgress[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { setAttribute, getAttribute, hasAttribute, removeAttribute } = useUserAttributes();
 
   // Get pillar definitions
   const getPillarDefinitions = useCallback(() => {
     return PILLAR_DEFINITIONS;
   }, []);
 
-  // Fetch user's pillar data
+  // Fetch user's pillar data - CRITICAL FIX: Use path_entries instead of user_attributes
   const fetchPillarData = useCallback(async (targetUserId?: string) => {
     if (!targetUserId && !userId) return;
     
@@ -168,20 +166,53 @@ export const useUnifiedPillars = (userId?: string) => {
     setLoading(true);
 
     try {
-      // Get pillar activations from attributes
-      const activationsAttr = await getAttribute(fetchUserId!, 'pillar_activations');
-      if (activationsAttr && Array.isArray(activationsAttr)) {
-        setActivations(activationsAttr as unknown as PillarActivation[]);
-      }
+      // Get pillar assessments from path_entries (REAL DATA)
+      const { data: assessmentData, error: assessmentError } = await supabase
+        .from('path_entries')
+        .select('*')
+        .eq('user_id', fetchUserId!)
+        .eq('type', 'assessment')
+        .order('created_at', { ascending: false });
 
-      // Get pillar assessments from attributes
-      const assessmentsAttr = await getAttribute(fetchUserId!, 'pillar_assessments');
-      if (assessmentsAttr && Array.isArray(assessmentsAttr)) {
-        setAssessments(assessmentsAttr as unknown as PillarAssessment[]);
-      }
+      if (assessmentError) throw assessmentError;
 
-      // Calculate progress from assessments
-      const progressData = calculateProgress((assessmentsAttr as unknown as PillarAssessment[]) || []);
+      // Get pillar activations from path_entries
+      const { data: activationData, error: activationError } = await supabase
+        .from('path_entries')
+        .select('*')
+        .eq('user_id', fetchUserId!)
+        .eq('type', 'action')
+        .ilike('title', '%pelare:%')
+        .order('created_at', { ascending: false });
+
+      if (activationError) throw activationError;
+
+      // Convert to expected format
+      const processedActivations: PillarActivation[] = (activationData || []).map(entry => ({
+        pillar_key: (entry.metadata as any)?.pillar_key,
+        user_id: entry.user_id,
+        is_active: (entry.metadata as any)?.action === 'activate',
+        activated_at: entry.created_at,
+        activated_by: entry.created_by,
+        settings: {}
+      })).filter(a => a.pillar_key);
+
+      const processedAssessments: PillarAssessment[] = (assessmentData || []).map(entry => ({
+        id: entry.id,
+        user_id: entry.user_id,
+        pillar_key: (entry.metadata as any)?.pillar_key,
+        answers: (entry.metadata as any)?.assessment_data || {},
+        scores: {},
+        total_score: (entry.metadata as any)?.assessment_score || 0,
+        completed_at: entry.created_at,
+        ai_analysis: entry.content || undefined
+      })).filter(a => a.pillar_key);
+
+      setActivations(processedActivations);
+      setAssessments(processedAssessments);
+
+      // Calculate progress from real assessments
+      const progressData = calculateProgress(processedAssessments);
       setProgress(progressData);
 
     } catch (error) {
@@ -194,7 +225,7 @@ export const useUnifiedPillars = (userId?: string) => {
     } finally {
       setLoading(false);
     }
-  }, [userId, getAttribute, toast]);
+  }, [userId, toast]);
 
   // Calculate progress from assessments
   const calculateProgress = useCallback((assessmentData: PillarAssessment[]): PillarProgress[] => {
@@ -227,38 +258,37 @@ export const useUnifiedPillars = (userId?: string) => {
     return Object.values(progressMap);
   }, []);
 
-  // Activate pillar for user
+  // Activate pillar for user - FIXED to use path_entries
   const activatePillar = useCallback(async (targetUserId: string, pillarKey: PillarKey) => {
     try {
-      const newActivation: PillarActivation = {
-        pillar_key: pillarKey,
-        user_id: targetUserId,
-        is_active: true,
-        activated_at: new Date().toISOString(),
-        activated_by: targetUserId, // Could be coach or admin
-        settings: {}
-      };
+      const { error } = await supabase
+        .from('path_entries')
+        .insert({
+          user_id: targetUserId,
+          created_by: targetUserId,
+          timestamp: new Date().toISOString(),
+          type: 'action',
+          title: `Aktiverad pelare: ${pillarKey}`,
+          details: `Pelare ${pillarKey} aktiverad för utvecklingsresa`,
+          status: 'completed',
+          ai_generated: false,
+          visible_to_client: true,
+          metadata: {
+            pillar_key: pillarKey,
+            action: 'activate',
+            activated_at: new Date().toISOString()
+          }
+        });
 
-      // Get current activations
-      const currentActivations = await getAttribute(targetUserId, 'pillar_activations') || [];
-      const currentActivationsTyped = Array.isArray(currentActivations) ? currentActivations as unknown as PillarActivation[] : [];
-      const updatedActivations = [...currentActivationsTyped.filter(a => a.pillar_key !== pillarKey), newActivation];
-
-      const success = await setAttribute(targetUserId, {
-        attribute_key: 'pillar_activations',
-        attribute_value: updatedActivations,
-        attribute_type: 'config'
+      if (error) throw error;
+      
+      await fetchPillarData(targetUserId);
+      toast({
+        title: "Pillar aktiverad",
+        description: `${PILLAR_DEFINITIONS[pillarKey].name} har aktiverats`
       });
 
-      if (success) {
-        setActivations(updatedActivations);
-        toast({
-          title: "Pillar aktiverad",
-          description: `${PILLAR_DEFINITIONS[pillarKey].name} har aktiverats`
-        });
-      }
-
-      return success;
+      return true;
     } catch (error) {
       console.error('Error activating pillar:', error);
       toast({
@@ -268,41 +298,46 @@ export const useUnifiedPillars = (userId?: string) => {
       });
       return false;
     }
-  }, [getAttribute, setAttribute, toast]);
+  }, [fetchPillarData, toast]);
 
-  // Deactivate pillar
+  // Deactivate pillar - FIXED to use path_entries
   const deactivatePillar = useCallback(async (targetUserId: string, pillarKey: PillarKey) => {
     try {
-      const currentActivations = await getAttribute(targetUserId, 'pillar_activations') || [];
-      const currentActivationsTyped = Array.isArray(currentActivations) ? currentActivations as unknown as PillarActivation[] : [];
-      const updatedActivations = currentActivationsTyped.map(a => 
-        a.pillar_key === pillarKey 
-          ? { ...a, is_active: false, deactivated_at: new Date().toISOString() }
-          : a
-      );
+      const { error } = await supabase
+        .from('path_entries')
+        .insert({
+          user_id: targetUserId,
+          created_by: targetUserId,
+          timestamp: new Date().toISOString(),
+          type: 'action',
+          title: `Deaktiverad pelare: ${pillarKey}`,
+          details: `Pelare ${pillarKey} deaktiverad`,
+          status: 'completed',
+          ai_generated: false,
+          visible_to_client: true,
+          metadata: {
+            pillar_key: pillarKey,
+            action: 'deactivate',
+            deactivated_at: new Date().toISOString()
+          }
+        });
 
-      const success = await setAttribute(targetUserId, {
-        attribute_key: 'pillar_activations',
-        attribute_value: updatedActivations,
-        attribute_type: 'config'
+      if (error) throw error;
+      
+      await fetchPillarData(targetUserId);
+      toast({
+        title: "Pillar inaktiverad",
+        description: `${PILLAR_DEFINITIONS[pillarKey].name} har inaktiverats`
       });
 
-      if (success) {
-        setActivations(updatedActivations);
-        toast({
-          title: "Pillar inaktiverad",
-          description: `${PILLAR_DEFINITIONS[pillarKey].name} har inaktiverats`
-        });
-      }
-
-      return success;
+      return true;
     } catch (error) {
       console.error('Error deactivating pillar:', error);
       return false;
     }
-  }, [getAttribute, setAttribute, toast]);
+  }, [fetchPillarData, toast]);
 
-  // Submit assessment
+  // Submit assessment - FIXED to use path_entries
   const submitAssessment = useCallback(async (
     targetUserId: string,
     pillarKey: PillarKey,
@@ -334,41 +369,36 @@ export const useUnifiedPillars = (userId?: string) => {
       );
       totalScore = (totalScore / maxPossibleScore) * 10;
 
-      const newAssessment: PillarAssessment = {
-        id: crypto.randomUUID(),
-        user_id: targetUserId,
-        pillar_key: pillarKey,
-        answers,
-        scores,
-        total_score: totalScore,
-        completed_at: new Date().toISOString()
-      };
+      const { error } = await supabase
+        .from('path_entries')
+        .insert({
+          user_id: targetUserId,
+          created_by: targetUserId,
+          timestamp: new Date().toISOString(),
+          type: 'assessment',
+          title: `Bedömning: ${pillarKey}`,
+          details: `Slutförd bedömning för pelare ${pillarKey}`,
+          status: 'completed',
+          ai_generated: false,
+          visible_to_client: true,
+          metadata: {
+            pillar_key: pillarKey,
+            assessment_score: totalScore,
+            assessment_data: answers,
+            insights: {},
+            completed: true
+          }
+        });
 
-      // Store assessment
-      const currentAssessments = await getAttribute(targetUserId, 'pillar_assessments') || [];
-      const currentAssessmentsTyped = Array.isArray(currentAssessments) ? currentAssessments as unknown as PillarAssessment[] : [];
-      const updatedAssessments = [...currentAssessmentsTyped, newAssessment];
-
-      const success = await setAttribute(targetUserId, {
-        attribute_key: 'pillar_assessments',
-        attribute_value: updatedAssessments,
-        attribute_type: 'metadata'
+      if (error) throw error;
+      
+      await fetchPillarData(targetUserId);
+      toast({
+        title: "Bedömning slutförd",
+        description: `Din bedömning för ${pillarDef.name} har sparats`
       });
 
-      if (success) {
-        setAssessments(updatedAssessments);
-        
-        // Recalculate progress
-        const newProgress = calculateProgress(updatedAssessments);
-        setProgress(newProgress);
-
-        toast({
-          title: "Bedömning slutförd",
-          description: `Din bedömning för ${pillarDef.name} har sparats`
-        });
-      }
-
-      return success;
+      return true;
     } catch (error) {
       console.error('Error submitting assessment:', error);
       toast({
@@ -378,7 +408,7 @@ export const useUnifiedPillars = (userId?: string) => {
       });
       return false;
     }
-  }, [getAttribute, setAttribute, calculateProgress, toast]);
+  }, [fetchPillarData, toast]);
 
   // Check if pillar is active
   const isPillarActive = useCallback((pillarKey: PillarKey) => {
