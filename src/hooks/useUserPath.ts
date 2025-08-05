@@ -14,33 +14,40 @@ export const useUserPath = (userId?: string) => {
     
     try {
       setLoading(true);
-      let query = supabase
-        .from('path_entries')
-        .select('*')
-        .eq('user_id', userId)
-        .order('timestamp', { ascending: false });
+      
+      // Use attribute system for path entries
+      const { data, error } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'path_entries'
+        }
+      });
+
+      if (error) throw error;
+      
+      let entries = data?.attribute_value || [];
 
       // Apply filters
       if (filters.type && filters.type.length > 0) {
-        query = query.in('type', filters.type);
+        entries = entries.filter((entry: any) => filters.type!.includes(entry.type));
       }
       if (filters.status && filters.status.length > 0) {
-        query = query.in('status', filters.status);
+        entries = entries.filter((entry: any) => filters.status!.includes(entry.status));
       }
       if (filters.startDate) {
-        query = query.gte('timestamp', filters.startDate.toISOString());
+        entries = entries.filter((entry: any) => new Date(entry.timestamp) >= filters.startDate!);
       }
       if (filters.endDate) {
-        query = query.lte('timestamp', filters.endDate.toISOString());
+        entries = entries.filter((entry: any) => new Date(entry.timestamp) <= filters.endDate!);
       }
       if (filters.aiGenerated !== undefined) {
-        query = query.eq('ai_generated', filters.aiGenerated);
+        entries = entries.filter((entry: any) => entry.ai_generated === filters.aiGenerated);
       }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setEntries((data || []) as PathEntry[]);
+      // Sort by timestamp descending
+      entries.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      setEntries(entries as PathEntry[]);
     } catch (error: any) {
       console.error('Error fetching path entries:', error);
       toast({
@@ -59,19 +66,38 @@ export const useUserPath = (userId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
-        .from('path_entries')
-        .insert([{
-          ...entryData,
-          created_by: user.id,
-          timestamp: entryData.timestamp || new Date().toISOString(),
-          status: entryData.status || 'planned',
-          ai_generated: entryData.ai_generated || false,
-          visible_to_client: entryData.visible_to_client || false,
-          created_by_role: entryData.created_by_role || 'user'
-        }])
-        .select()
-        .single();
+      // Get current path entries from attribute system
+      const currentEntries = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: entryData.user_id,
+          attribute_key: 'path_entries'
+        }
+      });
+
+      const entries = currentEntries.data?.attribute_value || [];
+      
+      const newEntry = {
+        id: crypto.randomUUID(),
+        ...entryData,
+        created_by: user.id,
+        timestamp: entryData.timestamp || new Date().toISOString(),
+        status: entryData.status || 'planned',
+        ai_generated: entryData.ai_generated || false,
+        visible_to_client: entryData.visible_to_client || false,
+        created_by_role: entryData.created_by_role || 'user',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      entries.push(newEntry);
+
+      const { error } = await supabase.functions.invoke('update-user-attribute', {
+        body: {
+          user_id: entryData.user_id,
+          attribute_key: 'path_entries',
+          attribute_value: entries
+        }
+      });
 
       if (error) throw error;
 
@@ -81,7 +107,7 @@ export const useUserPath = (userId?: string) => {
       });
 
       fetchEntries(); // Refresh the list
-      return data as PathEntry;
+      return newEntry as PathEntry;
     } catch (error: any) {
       console.error('Error creating path entry:', error);
       toast({
@@ -95,10 +121,32 @@ export const useUserPath = (userId?: string) => {
 
   const updateEntry = async (id: string, updates: Partial<PathEntry>): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('path_entries')
-        .update(updates)
-        .eq('id', id);
+      // Get current path entries from attribute system
+      const currentEntries = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'path_entries'
+        }
+      });
+
+      const entries = currentEntries.data?.attribute_value || [];
+      const entryIndex = entries.findIndex((entry: any) => entry.id === id);
+      
+      if (entryIndex === -1) throw new Error('Entry not found');
+
+      entries[entryIndex] = {
+        ...entries[entryIndex],
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase.functions.invoke('update-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'path_entries',
+          attribute_value: entries
+        }
+      });
 
       if (error) throw error;
 
@@ -122,10 +170,24 @@ export const useUserPath = (userId?: string) => {
 
   const deleteEntry = async (id: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('path_entries')
-        .delete()
-        .eq('id', id);
+      // Get current path entries from attribute system
+      const currentEntries = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'path_entries'
+        }
+      });
+
+      const entries = currentEntries.data?.attribute_value || [];
+      const updatedEntries = entries.filter((entry: any) => entry.id !== id);
+
+      const { error } = await supabase.functions.invoke('update-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'path_entries',
+          attribute_value: updatedEntries
+        }
+      });
 
       if (error) throw error;
 
