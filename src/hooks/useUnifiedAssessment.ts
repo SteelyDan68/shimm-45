@@ -103,17 +103,15 @@ export const useUnifiedAssessment = () => {
 
   const fetchResults = useCallback(async (userId?: string) => {
     try {
-      // Use existing pillar assessments as results
-      let query = supabase
-        .from('pillar_assessments')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Use attribute system for pillar assessments
+      const { data: attributeData, error } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: userId || 'all',
+          attribute_key: 'pillar_assessments'
+        }
+      });
 
-      if (userId) {
-        query = query.eq('user_id', userId);
-      }
-
-      const { data, error } = await query;
+      const data = Array.isArray(attributeData?.data) ? attributeData.data : [];
       if (error) throw error;
       
       // Convert to unified format

@@ -47,8 +47,10 @@ export const useAdminRealtime = () => {
     const adminChannel = supabase
       .channel('admin-realtime-metrics')
       .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'pillar_assessments' },
+        { event: '*', schema: 'public', table: 'user_attributes' },
         (payload) => {
+          // Only process pillar-related attributes
+          if (!payload.new || !(payload.new as any).attribute_key?.includes('pillar')) return;
           const event = {
             type: 'new_assessment',
             data: payload.new,
@@ -63,7 +65,7 @@ export const useAdminRealtime = () => {
             lastUpdate: new Date().toISOString(),
             pillarCompletions: {
               ...prev.pillarCompletions,
-              [payload.new.pillar_key]: (prev.pillarCompletions[payload.new.pillar_key] || 0) + 1
+              [(payload.new as any).pillar_key]: (prev.pillarCompletions[(payload.new as any).pillar_key] || 0) + 1
             }
           }));
         }

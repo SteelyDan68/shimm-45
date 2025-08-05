@@ -131,14 +131,16 @@ export const useAdminMetrics = (timeRange: string = 'week') => {
       return;
     }
 
-    // Lyssna på förändringar i pillar_assessments
-    const assessmentChannel = supabase
-      .channel('admin-assessments')
+    // Lyssna på förändringar i user_attributes för pillar data
+    const attributeChannel = supabase
+      .channel('admin-attributes')
       .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'pillar_assessments' },
-        () => {
-          // Uppdatera data när nya assessments skapas
-          fetchAdminData();
+        { event: '*', schema: 'public', table: 'user_attributes' },
+        (payload) => {
+          // Uppdatera när pillar-relaterade attribut ändras
+          if (payload.new && (payload.new as any).attribute_key?.includes('pillar')) {
+            fetchAdminData();
+          }
         }
       )
       .subscribe();
@@ -156,7 +158,7 @@ export const useAdminMetrics = (timeRange: string = 'week') => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(assessmentChannel);
+      supabase.removeChannel(attributeChannel);
       supabase.removeChannel(pathChannel);
     };
   }, [user, hasRole]);

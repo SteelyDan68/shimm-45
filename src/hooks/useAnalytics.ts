@@ -191,13 +191,15 @@ export const useAnalytics = () => {
       // Fetch real analytics data from database
       const [metricsResult, assessmentsResult, tasksResult, eventsResult] = await Promise.all([
         supabase.from('analytics_metrics').select('*').eq('user_id', user.id),
-        supabase.from('pillar_assessments').select('*').eq('user_id', user.id),
+        supabase.functions.invoke('get-user-attribute', {
+          body: { user_id: user.id, attribute_key: 'pillar_assessments' }
+        }),
         supabase.from('tasks').select('*').eq('user_id', user.id),
         supabase.from('analytics_events').select('*').eq('user_id', user.id)
       ]);
 
       const metrics = metricsResult.data || [];
-      const assessments = assessmentsResult.data || [];
+      const assessments = Array.isArray(assessmentsResult.data?.data) ? assessmentsResult.data.data : [];
       const tasks = tasksResult.data || [];
       const events = eventsResult.data || [];
 
@@ -220,7 +222,8 @@ export const useAnalytics = () => {
       }, {} as Record<string, any[]>);
 
       const pillarsProgress: PillarProgress[] = Object.entries(pillarGroups).map(([pillarKey, pillarAssessments]) => {
-        const sorted = pillarAssessments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const assessmentArray = Array.isArray(pillarAssessments) ? pillarAssessments : [];
+        const sorted = assessmentArray.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         const current = sorted[0]?.calculated_score || 0;
         const previous = sorted[1]?.calculated_score || 0;
         

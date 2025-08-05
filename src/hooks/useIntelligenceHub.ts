@@ -63,12 +63,15 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
         console.error('Error fetching cache data:', cacheError);
       }
 
-      // Fetch pillar assessments for progress tracking
-      const { data: pillarData, error: pillarError } = await supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+      // Fetch pillar assessments from attribute system
+      const { data: pillarAttributeData, error: pillarError } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const pillarData = Array.isArray(pillarAttributeData?.data) ? pillarAttributeData.data : [];
 
       if (pillarError) {
         console.error('Error fetching pillar data:', pillarError);

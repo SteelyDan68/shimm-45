@@ -36,12 +36,15 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return;
 
     try {
-      // Fetch latest assessments for each pillar
-      const { data: assessments, error: assessmentsError } = await supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      // Fetch latest assessments from attribute system
+      const { data: assessmentData, error: assessmentsError } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: user.id,
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const assessments = Array.isArray(assessmentData?.data) ? assessmentData.data : [];
 
       if (assessmentsError) throw assessmentsError;
 

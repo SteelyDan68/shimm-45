@@ -81,19 +81,22 @@ export const RealUserData = ({ userId, profile }: RealUserDataProps) => {
           .eq('user_id', userId)
           .maybeSingle(),
         
-        // Active pillars
-        supabase
-          .from('user_pillar_activations')
-          .select('pillar_key')
-          .eq('user_id', userId)
-          .eq('is_active', true)
+        // Active pillars from attribute system
+        supabase.functions.invoke('get-user-attribute', {
+          body: {
+            user_id: userId,
+            attribute_key: 'pillar_activations'
+          }
+        })
       ]);
 
       // Beräkna metrics från real data
       const totalAssessments = assessmentResult.data?.length || 0;
       const completedTasks = taskResult.data?.filter(t => t.status === 'completed').length || 0;
       const stefanInteractions = stefanResult.data?.length || 0;
-      const activePillars = pillarResult.data?.length || 0;
+      const activePillarsData = pillarResult.data?.data || [];
+      const activePillars = Array.isArray(activePillarsData) ? 
+        activePillarsData.filter((p: any) => p.is_active !== false).length : 0;
       const journeyProgress = journeyResult.data?.journey_progress || 0;
       const lastActivity = journeyResult.data?.last_activity_at || profile.updated_at;
 

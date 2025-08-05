@@ -94,13 +94,14 @@ export class XmlDataAggregator {
 
   static async aggregatePillarData(clientId: string): Promise<Record<string, any> | null> {
     try {
-      // Fetch pillar assessments and visualization data
-      const [pillarAssessments, visualizationData] = await Promise.all([
-        supabase
-          .from('pillar_assessments')
-          .select('*')
-          .eq('user_id', clientId)
-          .order('created_at', { ascending: false }),
+      // Fetch pillar assessments from attribute system and visualization data
+      const [pillarAssessmentData, visualizationData] = await Promise.all([
+        supabase.functions.invoke('get-user-attribute', {
+          body: {
+            user_id: clientId,
+            attribute_key: 'pillar_assessments'
+          }
+        }),
         supabase
           .from('pillar_visualization_data')
           .select('*')
@@ -108,10 +109,12 @@ export class XmlDataAggregator {
           .order('created_at', { ascending: false })
       ]);
 
-      if (pillarAssessments.error || visualizationData.error) {
-        console.error('Error fetching pillar data:', pillarAssessments.error || visualizationData.error);
+      if (pillarAssessmentData.error || visualizationData.error) {
+        console.error('Error fetching pillar data:', pillarAssessmentData.error || visualizationData.error);
         return null;
       }
+
+      const pillarAssessments = { data: Array.isArray(pillarAssessmentData.data?.data) ? pillarAssessmentData.data.data : [] };
 
       const aggregatedData = {
         user_id: clientId,

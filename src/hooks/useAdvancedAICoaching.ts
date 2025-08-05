@@ -108,12 +108,15 @@ export const useAdvancedAICoaching = () => {
         .eq('id', user.id)
         .single();
 
-      const { data: recentPillarAssessments } = await supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
+      const { data: pillarAssessments } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: user.id,
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const recentPillarAssessments = Array.isArray(pillarAssessments?.data) ? 
+        pillarAssessments.data.slice(0, 3) : [];
 
       const fullContext: CoachingContext = {
         userId: user.id,

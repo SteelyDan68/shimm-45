@@ -110,13 +110,13 @@ export const useRealAnalytics = () => {
           .eq('user_id', user.id)
           .gte('created_at', startDate.toISOString()),
         
-        // Pillar assessments
-        supabase
-          .from('pillar_assessments')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(50),
+        // Pillar assessments from attribute system
+        supabase.functions.invoke('get-user-attribute', {
+          body: {
+            user_id: user.id,
+            attribute_key: 'pillar_assessments'
+          }
+        }),
         
         // Coaching sessions
         supabase

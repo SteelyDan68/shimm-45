@@ -126,12 +126,13 @@ export const useRealDataBindings = () => {
             .eq('user_id', client.id)
             .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
           
-          // Active pillars
-          supabase
-            .from('user_pillar_activations')
-            .select('pillar_key')
-            .eq('user_id', client.id)
-            .eq('is_active', true)
+          // Active pillars from attribute system
+          supabase.functions.invoke('get-user-attribute', {
+            body: {
+              user_id: client.id,
+              attribute_key: 'pillar_activations'
+            }
+          })
         ]);
 
         // Beräkna metrics från real data

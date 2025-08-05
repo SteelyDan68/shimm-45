@@ -21,14 +21,19 @@ export const useCapacityAssessment = (clientId: string) => {
       setLoading(true);
       
 
-      // Hämta senaste pillar assessment för self_care (den som innehåller alla frågor nu)
-      const { data: pillarAssessments, error } = await supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', clientId)
-        .eq('pillar_key', 'self_care')
-        .order('created_at', { ascending: false })
-        .limit(1);
+      // Hämta senaste pillar assessment från attribute system
+      const { data: attributeData, error } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: clientId,
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const pillarAssessments = Array.isArray(attributeData?.data) 
+        ? attributeData.data.filter((a: any) => a.pillar_key === 'self_care')
+            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 1)
+        : [];
 
       
 

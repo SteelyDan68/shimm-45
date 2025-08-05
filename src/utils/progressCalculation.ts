@@ -41,12 +41,17 @@ export const calculateUserDevelopmentProgress = async (userId: string): Promise<
     const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
     const totalTasks = tasks?.length || 1;
 
-    // 3. Hämta pillar aktivering och framsteg (25% vikt)
-    const { data: pillarActivations } = await supabase
-      .from('user_pillar_activations')
-      .select('pillar_key, is_active')
-      .eq('user_id', userId)
-      .eq('is_active', true);
+    // 3. Hämta pillar aktivering från attribute system (25% vikt)
+    const { data: activationData } = await supabase.functions.invoke('get-user-attribute', {
+      body: {
+        user_id: userId,
+        attribute_key: 'pillar_activations'
+      }
+    });
+
+    const pillarActivations = Array.isArray(activationData?.data) 
+      ? activationData.data.filter((p: any) => p.is_active !== false) 
+      : [];
 
     const activePillars = pillarActivations?.length || 0;
     const totalPillars = 6;

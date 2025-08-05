@@ -174,19 +174,21 @@ export const useRealCoachDashboard = () => {
             .order('created_at', { ascending: false })
             .limit(10),
             
-          // Pillar activations
-          supabase
-            .from('user_pillar_activations')
-            .select('*')
-            .eq('user_id', clientId),
+          // Pillar activations from attribute system
+          supabase.functions.invoke('get-user-attribute', {
+            body: {
+              user_id: clientId,
+              attribute_key: 'pillar_activations'
+            }
+          }),
             
-          // Pillar assessments
-          supabase
-            .from('pillar_assessments')
-            .select('*')
-            .eq('user_id', clientId)
-            .order('created_at', { ascending: false })
-            .limit(10),
+          // Pillar assessments from attribute system
+          supabase.functions.invoke('get-user-attribute', {
+            body: {
+              user_id: clientId,
+              attribute_key: 'pillar_assessments'
+            }
+          }),
             
           // Tasks
           supabase

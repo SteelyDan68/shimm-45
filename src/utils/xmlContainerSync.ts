@@ -79,7 +79,7 @@ export class XmlContainerSync {
       'pillar_analysis',
       aggregatedData,
       {
-        source_table: 'pillar_assessments,pillar_visualization_data',
+        source_table: 'user_attributes(pillar_assessments,pillar_visualization_data)',
         aggregation_date: new Date().toISOString(),
         data_version: '1.0'
       }

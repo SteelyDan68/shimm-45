@@ -85,11 +85,14 @@ export function IntelligenceOverview() {
             .select('*', { count: 'exact', head: true })
             .eq('user_id', profile.id);
 
-          // Räkna pillar assessments
-          const { count: pillarAssessments } = await supabase
-            .from('pillar_assessments')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', profile.id);
+          // Räkna pillar assessments från attribute system
+          const { data: assessmentData } = await supabase.functions.invoke('get-user-attribute', {
+            body: {
+              user_id: profile.id,
+              attribute_key: 'pillar_assessments'
+            }
+          });
+          const pillarAssessments = Array.isArray(assessmentData?.data) ? assessmentData.data.length : 0;
 
           // Räkna intelligence cache data (disabled due to recursive type issue)
           const intelligenceData = 0;

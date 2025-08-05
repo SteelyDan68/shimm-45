@@ -93,15 +93,25 @@ export const AdminPillarManagement = () => {
     if (!selectedClient) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_pillar_activations')
-        .select('pillar_key, is_active, activated_at')
-        .eq('user_id', selectedClient.id);
+      // Use unified attribute system
+      const { data: userAttributes } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: selectedClient.id,
+          attribute_key: 'pillar_activations'
+        }
+      });
 
-      if (error) throw error;
-      setActivations(data || []);
+      const activationsData = userAttributes?.data || [];
+      const formattedActivations = Array.isArray(activationsData) ? activationsData.map((activation: any) => ({
+        pillar_key: activation.pillar_key,
+        is_active: activation.is_active !== false,
+        activated_at: activation.activated_at || new Date().toISOString()
+      })) : [];
+
+      setActivations(formattedActivations);
     } catch (error: any) {
-      console.error('Error loading activations:', error);
+      console.error('Error loading activations from attributes:', error);
+      setActivations([]);
     }
   };
 

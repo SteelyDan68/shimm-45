@@ -135,15 +135,15 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
       result.database.errors.push('Invitations table not accessible');
     }
 
-    // Test pillar_assessments table
+    // Test user_attributes for pillar data
     try {
-      const { error } = await supabase.from('pillar_assessments').select('id').limit(1);
+      const { error } = await supabase.from('user_attributes').select('id').limit(1);
       if (!error) {
-        result.database.tables.push('pillar_assessments');
+        result.database.tables.push('user_attributes');
         criticalTables[3].exists = true;
       }
     } catch (err) {
-      result.database.errors.push('Pillar assessments table not accessible');
+      result.database.errors.push('User attributes table not accessible');
     }
 
   } catch (error: any) {

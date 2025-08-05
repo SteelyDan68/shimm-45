@@ -126,13 +126,13 @@ async function getClientAssessmentContext(userId: string): Promise<ClientAssessm
         .order('created_at', { ascending: false })
         .limit(1),
       
-      // Pillar assessments
-      supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(5),
+      // Pillar assessments from attribute system
+      supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'pillar_assessments'
+        }
+      }),
       
       // Pillar data
       supabase
