@@ -19,7 +19,7 @@ export const useTasks = (clientId?: string) => {
     // 🚨 SUPERADMIN & ADMIN GOD MODE - Skip all authorization checks
     if (hasRole('superadmin') || hasRole('admin')) {
       // Superadmin and Admin have unlimited access to all client data
-      console.log('🔥 SUPERADMIN/ADMIN ACCESS: Bypassing all task authorization checks');
+      
     } else {
       // Check authorization - coaches can only see tasks for their assigned clients
       if (hasRole('coach') && !isCoachClient(user.id, clientId)) {

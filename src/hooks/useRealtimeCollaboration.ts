@@ -84,10 +84,10 @@ export const useRealtimeCollaboration = (roomId?: string) => {
         setActiveCollaborators(Object.values(presenceMap));
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('User joined:', key, newPresences);
+        
       })
       .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        console.log('User left:', key, leftPresences);
+        
       })
       .on('broadcast', { event: 'collaboration_event' }, (payload) => {
         const event = payload.payload as CollaborationEvent;

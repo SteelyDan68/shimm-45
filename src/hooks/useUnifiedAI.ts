@@ -153,7 +153,7 @@ export const useUnifiedAI = () => {
     setError(null);
 
     try {
-      console.log(`🤖 Unified AI: Processing ${request.action}`);
+      
       
       // Use circuit breaker for resilience
       const result = await circuitBreaker.unifiedAI.executeWithCircuitBreaker(async () => {
@@ -181,7 +181,7 @@ export const useUnifiedAI = () => {
       });
 
       const processingTime = Date.now() - startTime;
-      console.log(`✅ Unified AI: ${request.action} completed in ${result.processingTime}ms using ${result.aiModel}`);
+      
       
       // Track AI performance analytics
       analytics.trackAIInteraction({
@@ -308,7 +308,7 @@ export const useUnifiedAI = () => {
 
   // ============= BATCH PROCESSING =============
   const batchProcess = useCallback(async (requests: AIRequest[]): Promise<AIResponse[]> => {
-    console.log(`🚀 Unified AI: Processing ${requests.length} batch requests`);
+    
     
     // Process requests in parallel for efficiency
     const promises = requests.map(request => executeAIRequest(request));

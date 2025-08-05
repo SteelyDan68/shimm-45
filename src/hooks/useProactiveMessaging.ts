@@ -227,7 +227,7 @@ export const useProactiveMessaging = () => {
     if (!user || !currentSessionState) return;
 
     try {
-      console.log('🤖 Stefan analyzing user behavior for proactive messaging...');
+      
 
       const now = new Date();
       const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
@@ -293,7 +293,7 @@ export const useProactiveMessaging = () => {
         );
       }
 
-      console.log('✅ Stefan completed proactive message analysis');
+      
 
     } catch (error) {
       console.error('Error in proactive messaging analysis:', error);

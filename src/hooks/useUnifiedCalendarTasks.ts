@@ -58,7 +58,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
   useEffect(() => {
     if (!userId) return;
 
-    console.log('🔄 Setting up real-time calendar-task sync for user:', userId);
+    
 
     const channel = supabase
       .channel(`unified-calendar-tasks-${userId}`)
@@ -71,7 +71,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('📅 Calendar event change:', payload);
+          
           refetchCalendar();
           
           // Track analytics
@@ -87,7 +87,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('✅ Task change:', payload);
+          
           refreshTasks();
           
           // Track analytics
