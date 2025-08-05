@@ -36,8 +36,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, type AppRole } from '@/providers/UnifiedAuthProvider';
 import { useUnifiedUserData, type UnifiedUser } from '@/hooks/useUnifiedUserData';
-import { useCoachClientRelationships, type CoachClientRelationship } from '@/hooks/useCoachClientRelationships';
-import { useExtendedProfile } from '@/hooks/useExtendedProfile';
+import { useUserRelationships, type UserRelationship } from '@/hooks/useUserRelationships';
+import { useUserManagement } from '@/hooks/useUserManagement';
 import type { ExtendedProfileData } from '@/types/extendedProfile';
 import { PRIMARY_ROLES, PLATFORMS, COUNTRIES } from '@/types/extendedProfile';
 

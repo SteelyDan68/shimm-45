@@ -14,12 +14,21 @@ interface CacheData {
 export interface UnifiedUser {
   id: string;
   email: string;
+  name: string;
   first_name?: string;
   last_name?: string;
   avatar_url?: string;
-  roles?: string[];
-  created_at?: string;
+  created_at: string;
   updated_at?: string;
+  // Attribute-based fields
+  roles: string[];
+  primary_role: string;
+  logic_state?: any;
+  client_category?: string;
+  client_status?: string;
+  coach_id?: string;
+  has_coaching_context?: boolean;
+  // Legacy compatibility fields
   phone?: string;
   organization?: string;
   department?: string;
@@ -31,10 +40,15 @@ export interface UnifiedUser {
 
 export interface UserStats {
   total_users: number;
-  total_admins: number;
-  total_coaches: number;
-  total_clients: number;
   active_users: number;
+  users_with_roles: number;
+  coaches: number;
+  clients: number;
+  admins: number;
+  // Legacy compatibility
+  total_admins?: number;
+  total_coaches?: number;
+  total_clients?: number;
   total?: number;
   active?: number;
   byRole?: {
@@ -56,10 +70,15 @@ export const useUnifiedUserData = () => {
   const [users, setUsers] = useState<UnifiedUser[]>([]);
   const [stats, setStats] = useState<UserStats>({
     total_users: 0,
+    active_users: 0,
+    users_with_roles: 0,
+    coaches: 0,
+    clients: 0,
+    admins: 0,
+    // Legacy compatibility
     total_admins: 0,
     total_coaches: 0,
     total_clients: 0,
-    active_users: 0,
     total: 0,
     active: 0,
     byRole: {
@@ -130,12 +149,19 @@ export const useUnifiedUserData = () => {
         return {
           id: profile.id,
           email: profile.email,
+          name: profile.first_name && profile.last_name 
+            ? `${profile.first_name} ${profile.last_name}`
+            : profile.email || 'Användare',
           first_name: profile.first_name,
           last_name: profile.last_name,
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           updated_at: profile.updated_at,
-          roles: allRoles
+          roles: allRoles,
+          primary_role: allRoles.includes('superadmin') ? 'superadmin' :
+                       allRoles.includes('admin') ? 'admin' :
+                       allRoles.includes('coach') ? 'coach' :
+                       allRoles.includes('client') ? 'client' : 'user'
         };
       });
 
@@ -149,10 +175,15 @@ export const useUnifiedUserData = () => {
 
       setStats({
         total_users: totalUsers,
+        active_users: totalUsers,
+        users_with_roles: usersWithRoles.filter(u => u.roles?.length > 0).length,
+        coaches: coaches,
+        clients: clients,
+        admins: admins,
+        // Legacy compatibility
         total_admins: admins,
         total_coaches: coaches,
         total_clients: clients,
-        active_users: totalUsers,
         total: totalUsers,
         active: totalUsers,
         byRole: {
