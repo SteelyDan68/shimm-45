@@ -59,14 +59,18 @@ export const useSixPillarsModular = (clientId?: string) => {
 
   const loadPillarDefinitions = async () => {
     try {
-      const { data, error } = await supabase
-        .from('pillar_definitions')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order');
+      // Use attribute system for pillar definitions
+      const { data, error } = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: 'system',
+          attribute_key: 'pillar_definitions'
+        }
+      });
 
       if (error) throw error;
-      setPillarDefinitions((data || []) as PillarDefinition[]);
+      
+      const definitions = data?.attribute_value || [];
+      setPillarDefinitions(definitions.filter((def: any) => def.is_active) as PillarDefinition[]);
     } catch (error) {
       console.error('Error loading pillar definitions:', error);
     }

@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { useStefanContext } from '@/providers/StefanContextProvider';
+import { useEnhancedStefanContext } from '@/providers/EnhancedStefanContextProvider';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useTasks } from '@/hooks/useTasks';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const useStefanWorkTriggers = () => {
   const { user } = useAuth();
-  const { triggerContextualHelp, celebrateProgress } = useStefanContext();
+  const { triggerContextualHelp, celebrateProgress } = useEnhancedStefanContext();
   const { tasks } = useTasks();
 
   // Monitor task completion patterns

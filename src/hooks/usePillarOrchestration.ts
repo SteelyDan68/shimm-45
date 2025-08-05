@@ -191,16 +191,32 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return false;
 
     try {
-      // For now, just create a simple pillar assessment to "activate" it
-      const { error: assessmentError } = await supabase
-        .from('pillar_assessments')
-        .insert({
+      // Use attribute system for activation
+      const currentAssessments = await supabase.functions.invoke('get-user-attribute', {
+        body: {
           user_id: user.id,
-          pillar_key: pillarKey,
-          assessment_data: { activated: true, activation_date: new Date().toISOString() },
-          insights: {},
-          created_by: user.id
-        });
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const assessments = currentAssessments.data?.attribute_value || [];
+      assessments.push({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        pillar_key: pillarKey,
+        assessment_data: { activated: true, activation_date: new Date().toISOString() },
+        insights: {},
+        created_by: user.id,
+        created_at: new Date().toISOString()
+      });
+
+      const { error: assessmentError } = await supabase.functions.invoke('update-user-attribute', {
+        body: {
+          user_id: user.id,
+          attribute_key: 'pillar_assessments',
+          attribute_value: assessments
+        }
+      });
 
       if (assessmentError) throw assessmentError;
 
@@ -227,16 +243,32 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return false;
 
     try {
-      // Save assessment
-      const { error: assessmentError } = await supabase
-        .from('pillar_assessments')
-        .insert({
+      // Use attribute system for assessment completion
+      const currentAssessments = await supabase.functions.invoke('get-user-attribute', {
+        body: {
           user_id: user.id,
-          pillar_key: pillarKey,
-          assessment_data: assessmentData,
-          insights: {},
-          created_by: user.id
-        });
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const assessments = currentAssessments.data?.attribute_value || [];
+      assessments.push({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        pillar_key: pillarKey,
+        assessment_data: assessmentData,
+        insights: {},
+        created_by: user.id,
+        created_at: new Date().toISOString()
+      });
+
+      const { error: assessmentError } = await supabase.functions.invoke('update-user-attribute', {
+        body: {
+          user_id: user.id,
+          attribute_key: 'pillar_assessments',
+          attribute_value: assessments
+        }
+      });
 
       if (assessmentError) throw assessmentError;
 

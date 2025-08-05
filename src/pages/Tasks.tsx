@@ -15,7 +15,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useStefanContext } from '@/providers/StefanContextProvider';
+import { useEnhancedStefanContext } from '@/providers/EnhancedStefanContextProvider';
 import { LiveTaskList } from '@/components/Tasks/LiveTaskList';
 
 export function TasksPage() {
@@ -24,7 +24,7 @@ export function TasksPage() {
   const { toast } = useToast();
   const { createTask, loading } = useTasks();
   const { user } = useAuth();
-  const { triggerContextualHelp } = useStefanContext();
+  const { triggerContextualHelp } = useEnhancedStefanContext();
   
   const action = searchParams.get('action');
   const isCreating = action === 'create';

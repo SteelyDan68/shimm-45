@@ -176,18 +176,36 @@ export const useUnifiedAssessment = () => {
 
       const insights = aiResult?.insights || [];
 
-      // Save to pillar_assessments table
-      const { data: result, error } = await supabase
-        .from('pillar_assessments')
-        .insert([{
+      // Save to attribute system
+      const currentAssessments = await supabase.functions.invoke('get-user-attribute', {
+        body: {
           user_id: userId,
-          pillar_key: template.pillar_key || 'universal',
-          calculated_score: totalScore,
-          insights,
-          created_by: userId
-        }])
-        .select()
-        .single();
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const assessments = currentAssessments.data?.attribute_value || [];
+      const newAssessment = {
+        id: crypto.randomUUID(),
+        user_id: userId,
+        pillar_key: template.pillar_key || 'universal',
+        calculated_score: totalScore,
+        insights,
+        created_by: userId,
+        created_at: new Date().toISOString()
+      };
+      
+      assessments.push(newAssessment);
+
+      const { error } = await supabase.functions.invoke('update-user-attribute', {
+        body: {
+          user_id: userId,
+          attribute_key: 'pillar_assessments',
+          attribute_value: assessments
+        }
+      });
+
+      const result = newAssessment;
 
       if (error) throw error;
 
@@ -293,10 +311,28 @@ export const useUnifiedAssessment = () => {
 
   const deleteResult = useCallback(async (resultId: string) => {
     try {
-      const { error } = await supabase
-        .from('pillar_assessments')
-        .delete()
-        .eq('id', resultId);
+      // Find the result to get the user_id
+      const resultToDelete = results.find(r => r.id === resultId);
+      if (!resultToDelete) throw new Error('Result not found');
+
+      // Delete from attribute system
+      const currentAssessments = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: resultToDelete.user_id,
+          attribute_key: 'pillar_assessments'
+        }
+      });
+
+      const assessments = currentAssessments.data?.attribute_value || [];
+      const updatedAssessments = assessments.filter((a: any) => a.id !== resultId);
+
+      const { error } = await supabase.functions.invoke('update-user-attribute', {
+        body: {
+          user_id: resultToDelete.user_id,
+          attribute_key: 'pillar_assessments',
+          attribute_value: updatedAssessments
+        }
+      });
 
       if (error) throw error;
       

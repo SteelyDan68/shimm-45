@@ -102,11 +102,12 @@ export class XmlDataAggregator {
             attribute_key: 'pillar_assessments'
           }
         }),
-        supabase
-          .from('pillar_visualization_data')
-          .select('*')
-          .eq('user_id', clientId)
-          .order('created_at', { ascending: false })
+        supabase.functions.invoke('get-user-attribute', {
+          body: {
+            user_id: clientId,
+            attribute_key: 'pillar_visualization_data'
+          }
+        })
       ]);
 
       if (pillarAssessmentData.error || visualizationData.error) {

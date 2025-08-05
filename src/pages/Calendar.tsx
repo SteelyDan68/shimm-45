@@ -15,7 +15,7 @@ import { sv } from 'date-fns/locale';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useStefanContext } from '@/providers/StefanContextProvider';
+import { useEnhancedStefanContext } from '@/providers/EnhancedStefanContextProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarView } from '@/components/Calendar/CalendarView';
 
@@ -36,7 +36,7 @@ export function CalendarPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { triggerContextualHelp } = useStefanContext();
+  const { triggerContextualHelp } = useEnhancedStefanContext();
   
   const action = searchParams.get('action');
   const isScheduling = action === 'schedule';

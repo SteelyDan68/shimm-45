@@ -43,18 +43,33 @@ export const usePillarAssessmentState = (pillarKey: PillarKey) => {
     setLoading(true);
     try {
       // Check för COMPLETED pillar assessment (MUST have ai_analysis)
-      const { data: completedAssessment, error: completedError } = await supabase
-        .from('pillar_assessments')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('pillar_key', pillarKey)
-        .not('ai_analysis', 'is', null) // KEY: Must have AI analysis
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const assessmentsData = await supabase.functions.invoke('get-user-attribute', {
+        body: {
+          user_id: user.id,
+          attribute_key: 'pillar_assessments'
+        }
+      });
 
-      if (completedError) {
-        console.error('Error checking completed pillar assessment:', completedError);
+      if (assessmentsData.error) {
+        console.error('Error fetching pillar assessments:', assessmentsData.error);
+        return {
+          hasCompleted: false,
+          hasInProgress: false,
+          latestAssessment: null,
+          canStart: false,
+          canResume: false,
+          shouldRestart: false,
+          statusMessage: "Kunde inte ladda bedömningsdata"
+        };
+      }
+
+      const assessments = assessmentsData.data?.attribute_value || [];
+      const completedAssessment = assessments
+        .filter((a: any) => a.pillar_key === pillarKey && a.ai_analysis)
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+
+      if (assessmentsData.error) {
+        console.error('Error checking completed pillar assessment:', assessmentsData.error);
       }
 
       // Check för IN PROGRESS från assessment_states table  
