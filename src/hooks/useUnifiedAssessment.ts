@@ -74,13 +74,13 @@ export const useUnifiedAssessment = () => {
         return;
       }
 
-      // Convert database format to hook format with proper typing
+      // Convert database format to hook format - keep it simple
       const convertedTemplates: AssessmentTemplate[] = (data || []).map(template => ({
         id: template.id,
         name: template.name,
         type: 'pillar' as const,
         pillar_key: template.pillar_key,
-        questions: [], // Simplified - templates exist but questions will be loaded separately
+        questions: [], // Keep empty for now - questions can be loaded separately if needed
         scoring_rules: template.scoring_config || {},
         active: template.is_active
       }));
