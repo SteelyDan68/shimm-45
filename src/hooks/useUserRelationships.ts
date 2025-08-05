@@ -74,16 +74,20 @@ export const useCoachClientRelationships = () => {
 
       setRelationships(enrichedRelationships);
 
-      // Calculate stats
+      // Calculate stats from attributes system
       const { data: coachCount } = await supabase
-        .from('user_roles')
+        .from('user_attributes')
         .select('user_id')
-        .eq('role', 'coach');
+        .eq('attribute_key', 'role')
+        .eq('attribute_value', '"coach"')
+        .eq('is_active', true);
 
       const { data: clientCount } = await supabase
-        .from('user_roles')
+        .from('user_attributes')
         .select('user_id')
-        .eq('role', 'client');
+        .eq('attribute_key', 'role')
+        .eq('attribute_value', '"client"')
+        .eq('is_active', true);
 
       const assignedClientIds = new Set(relationshipsData?.map(rel => rel.client_id) || []);
 

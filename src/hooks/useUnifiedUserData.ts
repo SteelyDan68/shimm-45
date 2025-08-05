@@ -77,7 +77,7 @@ export const useUnifiedUserData = () => {
     try {
       setLoading(true);
       
-      // Fetch profiles with roles
+      // Fetch profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -85,14 +85,16 @@ export const useUnifiedUserData = () => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch user roles
+      // Fetch user roles from attributes system
       const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
+        .from('user_attributes')
+        .select('user_id, attribute_value')
+        .eq('attribute_key', 'role')
+        .eq('is_active', true);
 
       if (rolesError) throw rolesError;
 
-      // Combine profiles with roles
+      // Combine profiles with roles from attributes
       const usersWithRoles: UnifiedUser[] = (profilesData || []).map(profile => ({
         id: profile.id,
         email: profile.email,
@@ -101,7 +103,7 @@ export const useUnifiedUserData = () => {
         avatar_url: profile.avatar_url,
         created_at: profile.created_at,
         updated_at: profile.updated_at,
-        roles: rolesData?.filter(r => r.user_id === profile.id).map(r => r.role) || []
+        roles: rolesData?.filter(r => r.user_id === profile.id).map(r => r.attribute_value as string) || []
       }));
 
       setUsers(usersWithRoles);
