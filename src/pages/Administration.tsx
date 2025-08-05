@@ -20,7 +20,8 @@ import {
   FileText,
   Users,
   Key,
-  Activity
+  Activity,
+  Brain
 } from "lucide-react";
 import { PRDDashboard } from '@/components/Admin/PRDDashboard';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -31,6 +32,7 @@ import { AdminPillarManagement } from "@/components/AdminPillarManagement";
 import { SystemHealthDashboard } from "@/components/SystemHealthDashboard";
 
 import { IntegratedAdminDashboard } from "@/components/Admin/IntegratedAdminDashboard";
+import { StefanAIManagementCenter } from "@/components/Admin/StefanAIManagementCenter";
 
 import { DataRightsCenter } from "@/components/DataRightsCenter";
 import StefanTrainingData from "@/components/StefanTrainingData";
@@ -311,14 +313,44 @@ export function Administration() {
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <Bot className="h-5 w-5 text-primary" />
-                  Stefan AI Översikt
+                  Stefan AI Management Center
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Hantera och övervaka Stefan AI-funktionalitet
+                  Centraliserad kontroll för Stefan AI, minnesfragment och träningsdata
                 </p>
               </div>
               <div className="p-6">
-                <p className="text-muted-foreground">Stefan AI översikt kommer snart</p>
+                <StefanAIManagementCenter />
+              </div>
+            </div>
+
+            <div className="bg-card rounded-lg border">
+              <div className="p-6 border-b">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Database className="h-5 w-5 text-primary" />
+                  Stefan Träningsdata
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Hantera och optimera Stefan AI träningsdata
+                </p>
+              </div>
+              <div className="p-6">
+                <StefanTrainingData />
+              </div>
+            </div>
+
+            <div className="bg-card rounded-lg border">
+              <div className="p-6 border-b">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  Stefan Minnesfragment
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Hantera Stefan AI minnesfragment och memory bank
+                </p>
+              </div>
+              <div className="p-6">
+                <StefanMemoryManager />
               </div>
             </div>
           </TabsContent>

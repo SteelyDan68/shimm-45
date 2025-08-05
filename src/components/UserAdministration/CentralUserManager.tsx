@@ -268,22 +268,39 @@ export function CentralUserManager() {
   const loadUserRoles = async () => {
     try {
       const { data, error } = await supabase
-        .from('user_attributes')
-        .select('user_id, attribute_value')
-        .like('attribute_key', 'role_%')
-        .eq('is_active', true);
+        .from('user_roles')
+        .select('user_id, role');
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Failed to load user roles from user_roles table:', error);
+        // Fallback to user_attributes if user_roles table fails
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('user_attributes')
+          .select('user_id, attribute_value')
+          .like('attribute_key', 'role_%')
+          .eq('is_active', true);
+        
+        if (fallbackError) throw fallbackError;
+        
+        const rolesByUser: Record<string, AppRole[]> = {};
+        fallbackData?.forEach(({ user_id, attribute_value }) => {
+          if (!rolesByUser[user_id]) rolesByUser[user_id] = [];
+          rolesByUser[user_id].push(attribute_value as AppRole);
+        });
+        setUserRoles(rolesByUser);
+        return;
+      }
 
       const rolesByUser: Record<string, AppRole[]> = {};
-      data?.forEach(({ user_id, attribute_value }) => {
+      data?.forEach(({ user_id, role }) => {
         if (!rolesByUser[user_id]) rolesByUser[user_id] = [];
-        rolesByUser[user_id].push(attribute_value as AppRole);
+        rolesByUser[user_id].push(role as AppRole);
       });
 
       setUserRoles(rolesByUser);
     } catch (error) {
       console.error('Error loading user roles:', error);
+      setUserRoles({}); // Set empty state instead of failing
     }
   };
 

@@ -104,34 +104,52 @@ export const Dashboard = () => {
     
     setLoading(true);
     try {
-      // Calculate stats from unified clients
-      const totalClients = unifiedClients.length;
-      const activeClients = unifiedClients.filter(c => c.status === 'active').length;
-      const recentAnalyses = unifiedClients.filter(c => 
-        c.logic_state && 
+      // Calculate stats from unified clients with safe fallbacks
+      const totalClients = unifiedClients?.length || 0;
+      const activeClients = unifiedClients?.filter(c => c?.status === 'active').length || 0;
+      const recentAnalyses = unifiedClients?.filter(c => 
+        c?.logic_state && 
         typeof c.logic_state === 'object' && 
         !Array.isArray(c.logic_state) &&
         'last_updated' in c.logic_state
-      ).length;
+      ).length || 0;
 
-      // Get total data points from path_entries table
-      const userIds = unifiedClients.map(c => c.id);
-      const { count: dataPoints } = await supabase
-        .from('path_entries')
-        .select('*', { count: 'exact', head: true })
-        .in('user_id', userIds.length > 0 ? userIds : ['00000000-0000-0000-0000-000000000000']); // Avoid empty array
+      // Get total data points from path_entries table with safety checks
+      let dataPoints = 0;
+      try {
+        const userIds = unifiedClients?.map(c => c?.id).filter(Boolean) || [];
+        if (userIds.length > 0) {
+          const { count } = await supabase
+            .from('path_entries')
+            .select('*', { count: 'exact', head: true })
+            .in('user_id', userIds);
+          dataPoints = count || 0;
+        }
+      } catch (dataError) {
+        console.warn('Failed to get data points count:', dataError);
+        dataPoints = 0;
+      }
 
       setStats({
         totalClients,
         activeClients,
         recentAnalyses,
-        dataPoints: dataPoints || 0
+        dataPoints
       });
 
     } catch (error: any) {
+      console.error('Dashboard data loading error:', error);
+      // Set default stats instead of throwing error
+      setStats({
+        totalClients: 0,
+        activeClients: 0,
+        recentAnalyses: 0,
+        dataPoints: 0
+      });
+      
       toast({
         title: "Fel",
-        description: "Kunde inte ladda dashboard-data: " + error.message,
+        description: "Kunde inte hämta uppgifter. Standardvärden visas.",
         variant: "destructive",
       });
     } finally {
