@@ -7,7 +7,7 @@ export interface UserAttribute {
   user_id: string;
   attribute_key: string;
   attribute_value: any;
-  attribute_type: 'role' | 'property' | 'config' | 'metadata';
+  attribute_type: 'role' | 'property' | 'config' | 'metadata' | 'relationship';
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -17,7 +17,7 @@ export interface UserAttribute {
 export interface UserAttributeInput {
   attribute_key: string;
   attribute_value: any;
-  attribute_type?: 'role' | 'property' | 'config' | 'metadata';
+  attribute_type?: 'role' | 'property' | 'config' | 'metadata' | 'relationship';
 }
 
 export const useUserAttributes = (userId?: string) => {
