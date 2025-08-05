@@ -136,7 +136,7 @@ export const ConversationView = ({
       if (success) {
         setNewMessage('');
         setSendError('');
-        console.log('✅ Message sent successfully');
+        
       } else {
         throw new Error('Meddelandet kunde inte skickas. Försök igen.');
       }

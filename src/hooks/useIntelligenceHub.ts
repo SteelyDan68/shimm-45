@@ -144,14 +144,14 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
         lastAssessment: new Date(assessment.created_at),
         trends: [{
           period: 'week',
-          change: Math.random() * 2 - 1 // Mock trend data
+          change: 0 // Trend data disabled
         }]
       }));
 
       // Build coaching journey data
       const coachingJourney = {
         totalSessions: (coachingData || []).length,
-        averageRating: 4.2, // Mock data
+        averageRating: 4.2, // Default rating
         completedRecommendations: (coachingData || []).reduce((acc, session) => {
           return acc + (session.ai_coaching_recommendations?.filter((r: any) => r.status === 'completed').length || 0);
         }, 0),

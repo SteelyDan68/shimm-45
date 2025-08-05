@@ -246,7 +246,7 @@ export const useMessagingV2 = () => {
 
       if (error) throw error;
 
-      console.log('✅ Message sent successfully:', newMessage.id);
+      
 
       // Optimistically update local state (will be properly fetched on next refresh)
       await fetchMessages(conversationId);
@@ -514,7 +514,7 @@ export const useMessagingV2 = () => {
           table: 'conversations',
           filter: `participant_ids.cs.{${user.id}}`
         }, () => {
-          console.log('🔄 Conversation update detected');
+          
           fetchConversations();
         })
         .subscribe((status) => {

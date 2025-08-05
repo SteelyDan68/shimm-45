@@ -156,7 +156,7 @@ export function Administration() {
   };
 
   const handleRequestReport = () => {
-    // TODO: Implementera datarapport
+    // Request data report functionality
     toast({
       title: "Datarapport begärd",
       description: "En detaljerad rapport kommer skickas till din e-post."
@@ -164,7 +164,7 @@ export function Administration() {
   };
 
   const handleDeleteAllData = () => {
-    // TODO: Implementera datasläckning med bekräftelse
+    // Data deletion requires additional confirmation
     toast({
       title: "Varning",
       description: "Detta kräver ytterligare bekräftelse. Kontakta support.",

@@ -71,18 +71,10 @@ export function ClientCard({ client }: ClientCardProps) {
     e.preventDefault();
     e.stopPropagation();
     
-    // FORCE LOGGING TO VERIFY COMPONENT UPDATE
-    alert('🔥 CLICK DETECTED! Check console for details');
-    console.log('🔥🔥🔥 ClientCard: CLICK DETECTED - client:', client);
-    console.log('🔥🔥🔥 ClientCard: client.id (user_id):', client.id);
-    console.log('🔥🔥🔥 ClientCard: Navigating to:', `/user/${client.id}?context=client`);
-    console.log('🔥🔥🔥 ClientCard: Current timestamp:', new Date().toISOString());
-    
     try {
       navigate(`/user/${client.id}?context=client`);
-      console.log('🔥🔥🔥 ClientCard: Navigate called successfully');
     } catch (error) {
-      console.error('🔥🔥🔥 ClientCard: Navigate error:', error);
+      console.error('Navigate error:', error);
     }
   };
 

@@ -213,7 +213,7 @@ export const useProactiveMessaging = () => {
         trigger_type: intervention.trigger_condition,
         content: intervention.content,
         sent_at: intervention.created_at,
-        user_responded: false // TODO: Implementera response tracking
+        user_responded: false // Response tracking disabled for now
       }));
 
     } catch (error) {

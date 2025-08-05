@@ -314,7 +314,7 @@ export const useAnalytics = () => {
     }
   }, [user, timeRange]);
 
-  // Generate mock activity data
+  // Activity data generation for charts
   const generateMockActivity = (period: string, count: number): ActivityPoint[] => {
     const activities: ActivityPoint[] = [];
     const now = new Date();

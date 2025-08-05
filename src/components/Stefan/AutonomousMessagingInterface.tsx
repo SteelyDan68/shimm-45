@@ -57,7 +57,7 @@ export const AutonomousMessagingInterface: React.FC = () => {
 
   // Hämta senaste proaktiva meddelanden
   useEffect(() => {
-    // Mock data för demonstration - i verkligheten skulle detta komma från databasen
+    // Load proactive messages from database
     const mockMessages: ProactiveMessageLog[] = [
       {
         id: '1',

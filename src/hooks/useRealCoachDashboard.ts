@@ -131,7 +131,7 @@ export const useRealCoachDashboard = () => {
       }
 
       const clientIds = assignments.map(a => a.client_id);
-      console.log('🔥 useRealCoachDashboard: Loading data for clients:', clientIds);
+      
 
       // 2. Hämta grundläggande profil-data
       const { data: profiles, error: profileError } = await supabase
@@ -401,7 +401,7 @@ export const useRealCoachDashboard = () => {
 
       setClients(realClientData);
       
-      console.log('🔥 useRealCoachDashboard: Loaded real data for clients:', realClientData);
+      
 
     } catch (error: any) {
       console.error('Error fetching real client data:', error);

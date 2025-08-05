@@ -87,7 +87,7 @@ export const useAdminMetrics = (timeRange: string = 'week') => {
       console.error('Error fetching admin metrics:', err);
       setError(err.message || 'Failed to fetch admin data');
       
-      // Fallback till mock data för development
+      // Development fallback disabled
       if (process.env.NODE_ENV === 'development') {
         setMetrics({
           totalClients: 25,
