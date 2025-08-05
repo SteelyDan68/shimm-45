@@ -62,7 +62,7 @@ const StefanMemoryManager: React.FC = () => {
 
   const fetchMemories = async () => {
     try {
-      console.log('Fetching Stefan memories...');
+      
       const { data, error } = await supabase.functions.invoke('get-stefan-memories');
       
       if (error) {
@@ -71,10 +71,10 @@ const StefanMemoryManager: React.FC = () => {
       }
       
       if (data && data.memories) {
-        console.log(`Loaded ${data.memories.length} memory fragments`);
+        
         setMemories(data.memories);
       } else {
-        console.log('No memories returned from edge function');
+        
         setMemories([]);
       }
     } catch (error: any) {

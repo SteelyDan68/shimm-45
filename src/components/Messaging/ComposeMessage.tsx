@@ -59,7 +59,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
   const fetchRecipients = async () => {
     if (!user) return;
     
-    console.log('🔍 Fetching recipients for user:', user.email);
+    
 
     try {
       // Get user's roles first
@@ -74,7 +74,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
       }
 
       const roles = userRoles?.map(r => r.role) || [];
-      console.log('🔍 User roles:', roles);
+      
       
       const isClient = roles.includes('client');
       const isCoach = roles.includes('coach');
@@ -92,7 +92,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
 
         if (error) throw error;
         allowedRecipients = data || [];
-        console.log('🔍 Superadmin: Found', allowedRecipients.length, 'potential recipients');
+        
 
       } else if (isAdmin) {
         // Admins can message anyone except superadmins
@@ -116,7 +116,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
 
         const superAdminUserIds = superAdminIds?.map(r => r.user_id) || [];
         allowedRecipients = (data || []).filter(profile => !superAdminUserIds.includes(profile.id));
-        console.log('🔍 Admin: Found', allowedRecipients.length, 'potential recipients');
+        
 
       } else if (isCoach) {
         // Coaches can message their assigned clients + other coaches + admins
@@ -144,7 +144,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
           
           clients = clientProfiles || [];
         }
-        console.log('🔍 Coach: Found', clients.length, 'assigned clients');
+        
 
         // Get other coaches and admins
         const { data: coachAdminRoles } = await supabase
@@ -162,7 +162,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
             .in('id', coachAdminIds);
 
           const coachesAndAdmins = coachAdminProfiles || [];
-          console.log('🔍 Coach: Found', coachesAndAdmins.length, 'other coaches/admins');
+          
           
           allowedRecipients = [...clients, ...coachesAndAdmins];
         } else {

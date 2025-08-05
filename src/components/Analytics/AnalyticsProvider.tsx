@@ -48,7 +48,7 @@ export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
     // Track Web Vitals if available
     if ('web-vitals' in window) {
       // This would be implemented with web-vitals library in a real app
-      console.log('Web Vitals tracking could be implemented here');
+      
     }
   }, [analytics]);
 

@@ -122,7 +122,7 @@ export function IntelligenceDataCollector({
       // Stage 2: Call Data Collector Function
       updateProgress('collection', 30, 'Anropar data-collector edge function...');
       
-      console.log('Calling data-collector with userId:', profile.userId);
+      
       
       const { data, error } = await supabase.functions.invoke('data-collector', {
         body: { 

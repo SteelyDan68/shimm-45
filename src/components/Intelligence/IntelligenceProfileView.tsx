@@ -288,7 +288,7 @@ export function IntelligenceProfileView({
               title="Social Media Profiler"
               showGrowthMetrics={true}
               onRefreshPlatform={(platform, handle) => {
-                console.log(`Refreshing ${platform} for handle: ${handle}`);
+                
                 // Trigger refresh for specific platform
                 onRefresh?.();
               }}

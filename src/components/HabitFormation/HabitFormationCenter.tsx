@@ -356,7 +356,7 @@ export const HabitFormationCenter: React.FC<HabitFormationCenterProps> = ({ clie
                         variant="secondary" 
                         size="sm" 
                         className="text-xs"
-                        onClick={() => console.log('Level up habit:', habit.id)}
+                        onClick={() => { /* Level up habit feature */ }}
                       >
                         📈 Nivå upp
                       </Button>

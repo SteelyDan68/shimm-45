@@ -181,7 +181,7 @@ export const PRDDashboard = () => {
       }
 
       // Step 3: Load Features
-      console.log('🎯 Loading features...');
+      
       const { data: featuresData, error: featError } = await supabase
         .from('prd_features')
         .select('*')
@@ -193,7 +193,7 @@ export const PRDDashboard = () => {
       }
 
       // Step 4: Load Architecture
-      console.log('🏗️ Loading architecture...');
+      
       const [
         { data: nodesData, error: nodesError },
         { data: edgesData, error: edgesError }
@@ -251,7 +251,7 @@ export const PRDDashboard = () => {
 
         setNodes(flowNodes);
         setEdges(flowEdges);
-        console.log(`🎯 Architecture loaded: ${flowNodes.length} nodes, ${flowEdges.length} edges`);
+        
       }
 
       // 🎨 UX: Success state update
@@ -285,7 +285,7 @@ export const PRDDashboard = () => {
 
   // 💻 BACKEND: PRD Generation with full monitoring
   const generateNewPRD = useCallback(async () => {
-    console.log('🚀 Starting PRD generation...');
+    
     
     setDashboardState(prev => ({
       ...prev,
@@ -347,7 +347,7 @@ export const PRDDashboard = () => {
     }
 
     try {
-      console.log('📤 Exporting PRD...');
+      
       
       const exportData = {
         metadata: {
@@ -417,7 +417,7 @@ export const PRDDashboard = () => {
   // 🚀 DEVOPS: Initialize data load
   useEffect(() => {
     if (hasAccess === true) {
-      console.log('🔑 Access granted, loading PRD data...');
+      
       loadCurrentPRD();
     }
   }, [hasAccess, loadCurrentPRD]);

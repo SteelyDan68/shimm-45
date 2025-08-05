@@ -35,7 +35,7 @@ export const AssessmentManager = ({ clientId, clientName }: AssessmentManagerPro
 
   const handleAssignForm = async (formDefinitionId: string) => {
     // Assign form with due date
-    console.log('Assigning form:', formDefinitionId, 'with due date:', selectedDueDate);
+    
     setSelectedDueDate(undefined);
     setShowDueDateFor(null);
   };
@@ -43,7 +43,7 @@ export const AssessmentManager = ({ clientId, clientName }: AssessmentManagerPro
   const handleToggleAssignment = async (formDefinitionId: string, isAssigned: boolean) => {
     if (isAssigned) {
       // Remove form assignment  
-      console.log('Removing assignment for form:', formDefinitionId);
+      
     } else {
       setShowDueDateFor(formDefinitionId);
     }
