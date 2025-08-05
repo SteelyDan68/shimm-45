@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/productionLogger';
 
 export interface SystemDiagnosisResult {
   database: {
@@ -60,11 +61,11 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
     recommendations: []
   };
 
-  console.log('🔍 Initiating comprehensive system diagnosis...');
+  logger.info('🔍 Initiating comprehensive system diagnosis...');
 
   // 1. Database Connection Test
   try {
-    console.log('📊 Testing database connection...');
+    logger.info('📊 Testing database connection...');
     
     // Test profiles table
     const { data: profiles, error: profilesError, count: profilesCount } = await supabase
@@ -77,7 +78,7 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
       result.database.connected = true;
       result.database.profiles_count = profilesCount || 0;
       result.database.tables.push('profiles');
-      console.log(`✅ Profiles table: ${profilesCount} records`);
+      logger.success(`✅ Profiles table: ${profilesCount} records`);
     }
 
     // Test user_roles table
@@ -90,7 +91,7 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
     } else {
       result.database.roles_count = rolesCount || 0;
       result.database.tables.push('user_roles');
-      console.log(`✅ User roles table: ${rolesCount} records`);
+      logger.success(`✅ User roles table: ${rolesCount} records`);
     }
 
     // Test other critical tables
@@ -147,12 +148,12 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
 
   } catch (error: any) {
     result.database.errors.push(`Database connection failed: ${error.message}`);
-    console.error('❌ Database connection failed:', error);
+    logger.error('❌ Database connection failed:', error);
   }
 
   // 2. Authentication Test
   try {
-    console.log('🔐 Testing authentication system...');
+    logger.info('🔐 Testing authentication system...');
     
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
@@ -166,20 +167,20 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
         email: session.user.email,
         created_at: session.user.created_at
       };
-      console.log(`✅ Authentication working for: ${session.user.email}`);
+      logger.success(`✅ Authentication working for: ${session.user.email}`);
     } else {
       result.authentication.errors.push('No active session found');
-      console.log('⚠️ No active session');
+      logger.warn('⚠️ No active session');
     }
 
   } catch (error: any) {
     result.authentication.errors.push(`Authentication test failed: ${error.message}`);
-    console.error('❌ Authentication test failed:', error);
+    logger.error('❌ Authentication test failed:', error);
   }
 
   // 3. Permissions & Role System Test
   try {
-    console.log('👑 Testing permission system...');
+    logger.info('👑 Testing permission system...');
     
     if (result.authentication.current_user) {
       // Check if current user has roles
@@ -192,7 +193,7 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
         result.permissions.errors.push(`Role check error: ${roleError.message}`);
       } else {
         result.permissions.user_has_roles = (userRoles?.length || 0) > 0;
-        console.log(`✅ User has ${userRoles?.length || 0} roles`);
+        logger.success(`✅ User has ${userRoles?.length || 0} roles`);
       }
 
       // Check if superadmin exists in system
@@ -206,18 +207,18 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
       } else {
         result.permissions.superadmin_exists = (superadmins?.length || 0) > 0;
         result.permissions.role_system_working = true;
-        console.log(`✅ Found ${superadmins?.length || 0} superadmin(s)`);
+        logger.success(`✅ Found ${superadmins?.length || 0} superadmin(s)`);
       }
     }
 
   } catch (error: any) {
     result.permissions.errors.push(`Permission test failed: ${error.message}`);
-    console.error('❌ Permission test failed:', error);
+    logger.error('❌ Permission test failed:', error);
   }
 
   // 4. Component Health Check
   try {
-    console.log('🧩 Testing component health...');
+    logger.info('🧩 Testing component health...');
     
     // This is a basic check - in a real scenario we'd test component rendering
     result.components.user_manager_loading = result.database.connected && result.authentication.working;
@@ -252,7 +253,7 @@ export async function runSystemDiagnosis(): Promise<SystemDiagnosisResult> {
     result.recommendations.push('✅ System appears healthy - all core functions operational');
   }
 
-  console.log('📋 System diagnosis complete!');
+  logger.success('📋 System diagnosis complete!');
   return result;
 }
 

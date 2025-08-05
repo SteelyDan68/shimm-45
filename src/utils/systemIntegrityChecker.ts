@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/productionLogger';
 
 export interface IntegrityIssue {
   type: 'critical' | 'warning' | 'info';
@@ -19,7 +20,7 @@ export interface SystemIntegrityReport {
  */
 export async function checkSystemIntegrity(): Promise<SystemIntegrityReport> {
   const issues: IntegrityIssue[] = [];
-  console.log('🔍 Starting comprehensive system integrity check...');
+  logger.info('🔍 Starting comprehensive system integrity check...');
 
   // Check 1: User profiles without roles
   try {
@@ -171,7 +172,7 @@ export async function checkSystemIntegrity(): Promise<SystemIntegrityReport> {
       .from('user_roles')
       .select('*', { count: 'exact' });
 
-    console.log(`📊 Found ${profileCount} profiles and ${roleCount} role assignments`);
+    logger.info(`📊 Found ${profileCount} profiles and ${roleCount} role assignments`);
 
     if (profileCount === 0) {
       issues.push({
@@ -230,7 +231,7 @@ export async function checkSystemIntegrity(): Promise<SystemIntegrityReport> {
     recommendations.push('💡 Kör regelbundna integritetskontroller');
   }
 
-  console.log(`📋 Integrity check complete: ${status} with ${issues.length} issues`);
+  logger.info(`📋 Integrity check complete: ${status} with ${issues.length} issues`);
 
   return {
     status,
@@ -252,7 +253,7 @@ export async function autoFixIntegrityIssues(): Promise<{
 
   try {
     // Fix 1: Remove orphaned roles manually
-    console.log('🔧 Removing orphaned roles...');
+    logger.info('🔧 Removing orphaned roles...');
     const { data: orphanedRoles } = await supabase
       .from('user_roles')
       .select('id, user_id')
