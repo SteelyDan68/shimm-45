@@ -28,6 +28,14 @@ export interface SearchFilters {
   tags?: string[];
 }
 
+export interface SavedSearch {
+  query: string;
+  filters: SearchFilters;
+  name: string;
+  id: string;
+  created_at: string;
+}
+
 export interface UseGlobalSearchReturn {
   results: SearchResult[];
   isLoading: boolean;
@@ -38,6 +46,13 @@ export interface UseGlobalSearchReturn {
   recentSearches: string[];
   addToRecent: (query: string) => void;
   clearRecent: () => void;
+  savedSearches: SavedSearch[];
+  saveSearch: (query: string, filters: SearchFilters, name: string) => void;
+  deleteSavedSearch: (id: string) => void;
+  loadSavedSearch: (savedSearch: SavedSearch) => Promise<void>;
+  searchSuggestions: string[];
+  generateSuggestions: (partialQuery: string) => Promise<void>;
+  clearSuggestions: () => void;
 }
 
 export const useGlobalSearch = (): UseGlobalSearchReturn => {
@@ -49,6 +64,13 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
     const saved = localStorage.getItem('shimm_recent_searches');
     return saved ? JSON.parse(saved) : [];
   });
+
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>(() => {
+    const saved = localStorage.getItem('shimm_saved_searches');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 
   const { user, roles } = useAuth();
   const { toast } = useToast();
@@ -83,6 +105,77 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
     setResults([]);
     setError(null);
     setTotalResults(0);
+  }, []);
+
+  const saveSearch = useCallback((query: string, filters: SearchFilters, name: string) => {
+    const newSearch: SavedSearch = {
+      id: `search_${Date.now()}`,
+      query,
+      filters,
+      name,
+      created_at: new Date().toISOString()
+    };
+    const updated = [newSearch, ...savedSearches.slice(0, 19)];
+    setSavedSearches(updated);
+    localStorage.setItem('shimm_saved_searches', JSON.stringify(updated));
+  }, [savedSearches]);
+
+  const deleteSavedSearch = useCallback((id: string) => {
+    const updated = savedSearches.filter(search => search.id !== id);
+    setSavedSearches(updated);
+    localStorage.setItem('shimm_saved_searches', JSON.stringify(updated));
+  }, [savedSearches]);
+
+  const loadSavedSearch = useCallback(async (savedSearch: SavedSearch) => {
+    await search(savedSearch.query, savedSearch.filters);
+  }, []);
+
+  const generateSuggestions = useCallback(async (partialQuery: string) => {
+    if (partialQuery.length < 2) {
+      setSearchSuggestions([]);
+      return;
+    }
+
+    const suggestions = new Set<string>();
+
+    // Add matching recent searches
+    recentSearches.forEach(search => {
+      if (search.toLowerCase().includes(partialQuery.toLowerCase())) {
+        suggestions.add(search);
+      }
+    });
+
+    // Add contextual suggestions
+    const queryLower = partialQuery.toLowerCase();
+    if (queryLower.includes('användare') || queryLower.includes('user')) {
+      suggestions.add('användare aktiva');
+      suggestions.add('användare nya');
+      suggestions.add('användare klienter');
+    }
+    
+    if (queryLower.includes('meddelande') || queryLower.includes('message')) {
+      suggestions.add('meddelanden idag');
+      suggestions.add('meddelanden viktiga');
+      suggestions.add('meddelanden lästa');
+    }
+    
+    if (queryLower.includes('uppgift') || queryLower.includes('task')) {
+      suggestions.add('uppgifter färdiga');
+      suggestions.add('uppgifter väntande');
+      suggestions.add('uppgifter pågående');
+    }
+
+    if (queryLower.includes('bedömning') || queryLower.includes('assessment')) {
+      suggestions.add('bedömningar hälsa');
+      suggestions.add('bedömningar relation');
+      suggestions.add('bedömningar ekonomi');
+    }
+
+    setSearchSuggestions(Array.from(suggestions).slice(0, 6));
+  }, [recentSearches]);
+
+  const clearSuggestions = useCallback(() => {
+    setSearchSuggestions([]);
   }, []);
 
   const searchProfiles = useCallback(async (query: string): Promise<SearchResult[]> => {
@@ -418,6 +511,13 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
     clearResults,
     recentSearches,
     addToRecent,
-    clearRecent
+    clearRecent,
+    savedSearches,
+    saveSearch,
+    deleteSavedSearch,
+    loadSavedSearch,
+    searchSuggestions,
+    generateSuggestions,
+    clearSuggestions
   };
 };

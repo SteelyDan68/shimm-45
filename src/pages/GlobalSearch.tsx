@@ -1,15 +1,19 @@
 import React from 'react';
 import { GlobalSearchBar } from '@/components/GlobalSearch/GlobalSearchBar';
-import { useGlobalSearch } from '@/hooks/useGlobalSearch';
+import { useGlobalSearch, SearchFilters } from '@/hooks/useGlobalSearch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MobileContainer, MobileGrid } from '@/components/ui/mobile-responsive';
-import { Search, TrendingUp, Clock, Filter, X } from 'lucide-react';
+import { AdvancedSearchFilters } from '@/components/search/AdvancedSearchFilters';
+import { SavedSearches } from '@/components/search/SavedSearches';
+import { SearchSuggestions } from '@/components/search/SearchSuggestions';
+import { Search, TrendingUp, Clock, Filter, X, Bookmark, Sparkles } from 'lucide-react';
 import { useNavigation } from '@/hooks/useNavigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const SEARCH_TYPE_LABELS = {
   user: 'Användare',
@@ -35,7 +39,10 @@ const SEARCH_TYPE_ICONS = {
 
 export const GlobalSearchPage: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [filters, setFilters] = useState<SearchFilters>({});
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showSavedSearches, setShowSavedSearches] = useState(false);
+  
   const { 
     results, 
     isLoading, 
@@ -43,34 +50,63 @@ export const GlobalSearchPage: React.FC = () => {
     clearResults, 
     recentSearches, 
     clearRecent,
-    totalResults 
+    totalResults,
+    savedSearches,
+    saveSearch,
+    deleteSavedSearch,
+    loadSavedSearch,
+    searchSuggestions,
+    generateSuggestions,
+    clearSuggestions
   } = useGlobalSearch();
+  
   const { navigateTo } = useNavigation();
+  const { toast } = useToast();
+
+  // Generate suggestions as user types
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (query.length >= 2) {
+        generateSuggestions(query);
+      } else {
+        clearSuggestions();
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [query, generateSuggestions, clearSuggestions]);
 
   const handleSearch = async () => {
     if (query.trim().length >= 2) {
-      await search(query, { 
-        types: selectedTypes.length > 0 ? selectedTypes as any : undefined 
-      });
+      await search(query, filters);
+      clearSuggestions();
     }
   };
 
-  const handleRecentSearch = (recentQuery: string) => {
-    setQuery(recentQuery);
-    search(recentQuery, { 
-      types: selectedTypes.length > 0 ? selectedTypes as any : undefined 
+  const handleSaveSearch = (name: string) => {
+    saveSearch(query, filters, name);
+    toast({
+      title: "Sökning sparad",
+      description: `"${name}" har sparats i dina sparade sökningar.`
     });
   };
 
-  const toggleType = (type: string) => {
-    setSelectedTypes(prev => 
-      prev.includes(type) 
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    );
+  const handleLoadSavedSearch = async (savedSearch: any) => {
+    setQuery(savedSearch.query);
+    setFilters(savedSearch.filters);
+    await loadSavedSearch(savedSearch);
+    setShowSavedSearches(false);
   };
 
-  const availableTypes = Object.keys(SEARCH_TYPE_LABELS);
+  const handleQueryChange = (newQuery: string) => {
+    setQuery(newQuery);
+  };
+
+  const handleSuggestionSelect = (suggestion: string) => {
+    setQuery(suggestion);
+    clearSuggestions();
+    search(suggestion, filters);
+  };
 
   return (
     <MobileContainer className="py-6">
@@ -82,7 +118,7 @@ export const GlobalSearchPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Advanced Search Interface */}
+        {/* Main Search Interface */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-mobile-lg">Avancerad sökning</CardTitle>
@@ -99,55 +135,77 @@ export const GlobalSearchPage: React.FC = () => {
                   id="search-input"
                   placeholder="Skriv din sökning här..."
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => handleQueryChange(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="pl-10 touch-target-md"
                 />
               </div>
             </div>
 
-            {/* Type Filters */}
-            <div>
-              <Label className="text-mobile-sm font-medium mb-3 block">
-                Söktyper
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {availableTypes.map(type => (
-                  <Badge
-                    key={type}
-                    variant={selectedTypes.includes(type) ? "default" : "outline"}
-                    className="cursor-pointer touch-target-sm"
-                    onClick={() => toggleType(type)}
-                  >
-                    <span className="mr-1">{SEARCH_TYPE_ICONS[type as keyof typeof SEARCH_TYPE_ICONS]}</span>
-                    {SEARCH_TYPE_LABELS[type as keyof typeof SEARCH_TYPE_LABELS]}
-                  </Badge>
-                ))}
-              </div>
-              {selectedTypes.length > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setSelectedTypes([])}
-                  className="mt-2 text-mobile-xs"
+            {/* Action Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                onClick={handleSearch}
+                disabled={!query.trim() || query.length < 2}
+                className="touch-target-md"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Sök
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="touch-target-md"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
+
+              {savedSearches.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSavedSearches(!showSavedSearches)}
+                  className="touch-target-md"
                 >
-                  <X className="h-3 w-3 mr-1" />
-                  Rensa filter
+                  <Bookmark className="h-4 w-4 mr-2" />
+                  Sparade ({savedSearches.length})
                 </Button>
               )}
             </div>
-
-            {/* Search Button */}
-            <Button 
-              onClick={handleSearch}
-              disabled={!query.trim() || query.length < 2}
-              className="w-full touch-target-md"
-            >
-              <Search className="h-4 w-4 mr-2" />
-              Sök
-            </Button>
           </CardContent>
         </Card>
+
+        {/* Search Suggestions */}
+        {(searchSuggestions.length > 0 || (!query && recentSearches.length > 0)) && (
+          <SearchSuggestions
+            suggestions={searchSuggestions}
+            recentSearches={!query ? recentSearches : []}
+            onSelectSuggestion={handleSuggestionSelect}
+            onSelectRecent={handleSuggestionSelect}
+            className="mb-6"
+          />
+        )}
+
+        {/* Advanced Filters */}
+        {showAdvancedFilters && (
+          <AdvancedSearchFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            onSaveSearch={query ? handleSaveSearch : undefined}
+            className="mb-6"
+          />
+        )}
+
+        {/* Saved Searches */}
+        {showSavedSearches && (
+          <SavedSearches
+            savedSearches={savedSearches}
+            onLoadSearch={handleLoadSavedSearch}
+            onDeleteSearch={deleteSavedSearch}
+            className="mb-6"
+          />
+        )}
 
         {/* Recent Searches */}
         {!query && recentSearches.length > 0 && (
@@ -168,7 +226,7 @@ export const GlobalSearchPage: React.FC = () => {
                     key={index}
                     variant="outline"
                     className="cursor-pointer touch-target-sm"
-                    onClick={() => handleRecentSearch(recentQuery)}
+                    onClick={() => handleSuggestionSelect(recentQuery)}
                   >
                     <TrendingUp className="h-3 w-3 mr-1" />
                     {recentQuery}
