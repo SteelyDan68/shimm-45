@@ -87,7 +87,7 @@ export const DataExport: React.FC<DataExportProps> = ({ className = "" }) => {
 
     const exportConfig = {
       dataTypes: selectedDataTypes,
-      format: exportFormat,
+      format: exportFormat as 'csv' | 'excel' | 'json',
       name: exportName || `export_${format(new Date(), 'yyyy-MM-dd_HH-mm')}`,
       includeMetadata,
       filters
@@ -283,7 +283,7 @@ export const DataExport: React.FC<DataExportProps> = ({ className = "" }) => {
               <div className="flex items-center gap-3">
                 <Checkbox
                   checked={includeMetadata}
-                  onCheckedChange={setIncludeMetadata}
+                  onCheckedChange={(checked) => setIncludeMetadata(checked === true)}
                 />
                 <div>
                   <Label className="text-mobile-sm font-medium">Inkludera metadata</Label>
