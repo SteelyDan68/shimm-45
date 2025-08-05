@@ -10,7 +10,7 @@ export const useOnboarding = () => {
   const saveOnboardingData = async (clientId: string, data: OnboardingData) => {
     setIsLoading(true);
     try {
-      console.log('Saving onboarding data:', { clientId, data });
+      
       
       // Skapa en strukturerad profile_metadata med nested properties för backup
       const profileMetadata = {
@@ -71,7 +71,7 @@ export const useOnboarding = () => {
         throw error;
       }
 
-      console.log('Onboarding data saved successfully');
+      
 
       toast({
         title: "Profil sparad!",

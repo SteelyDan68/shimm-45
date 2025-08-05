@@ -81,7 +81,7 @@ export const useProactiveMessaging = () => {
       const conversationId = newConversation.id;
       setStefanConversationId(conversationId);
       
-      console.log('🤖 Created new Stefan conversation:', conversationId);
+      
       return conversationId;
 
     } catch (error) {
@@ -153,7 +153,7 @@ export const useProactiveMessaging = () => {
         console.warn('Could not log intervention:', interventionError);
       }
 
-      console.log('✅ Stefan proactive message sent successfully');
+      
       
       // Visa toast för att uppmärksamma användaren om nytt meddelande
       toast({

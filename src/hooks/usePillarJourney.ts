@@ -90,7 +90,7 @@ export const usePillarJourney = (userId: string) => {
       }
 
       // KRITISK FIX: Navigera till assessment-formuläret istället för bara skapa lokal resa
-      console.log(`🚀 Starting pillar assessment for: ${pillarKey}`);
+      
       
       // Skapa URL för att starta assessment
       const assessmentUrl = `/six-pillars?pillar=${pillarKey}&startAssessment=true`;

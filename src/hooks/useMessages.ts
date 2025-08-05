@@ -127,7 +127,7 @@ export const useMessages = () => {
         }
       });
 
-      console.log('🔍 Edge function response:', { data, error });
+      
 
       if (error) {
         console.error('🚨 Edge function error:', error);
@@ -150,13 +150,13 @@ export const useMessages = () => {
             }
           }
         });
-        console.log('✅ Notification sent successfully');
+        
       } catch (notificationError) {
         console.error('Failed to send notification:', notificationError);
         // Don't fail the message sending if notification fails
       }
 
-      console.log('✅ Message sent successfully:', data);
+      
       toast({
         title: "Meddelande skickat",
         description: "Ditt meddelande har skickats framgångsrikt"

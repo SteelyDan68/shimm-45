@@ -40,7 +40,7 @@ export const usePredictiveJourney = () => {
 
     setLoading(true);
     try {
-      console.log('🔮 Generating journey prediction for user:', user.id);
+      
 
       // Samla kontext för AI-analys
       const contextData = {
@@ -84,7 +84,7 @@ export const usePredictiveJourney = () => {
       }
 
       setCurrentPrediction(prediction);
-      console.log('✅ Journey prediction generated successfully');
+      
       return prediction;
 
     } catch (error) {

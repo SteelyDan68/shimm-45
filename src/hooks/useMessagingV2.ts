@@ -102,8 +102,6 @@ export const useMessagingV2 = () => {
     if (!user) return;
 
     try {
-      console.log('🔍 Fetching conversations for user:', user.id);
-      console.log('🔍 User email:', user.email);
       
       // Simplified query utan nested selects som kan orsaka problem
       const { data: conversationsData, error } = await supabase
@@ -115,7 +113,7 @@ export const useMessagingV2 = () => {
 
       if (error) throw error;
 
-      console.log('✅ Conversations loaded:', conversationsData?.length);
+      
 
       // Enrich with participant profiles and unread counts
       const enrichedConversations = await Promise.all(
@@ -212,9 +210,9 @@ export const useMessagingV2 = () => {
     if (!user || !content.trim()) return false;
 
     try {
-      console.log('📤 Sending message:', { conversationId, messageType, contentLength: content.length });
+      
 
-      console.log('🔍 Checking conversation access for user:', user.id, 'in conversation:', conversationId);
+      
       
       // First verify user has access to this conversation
       const { data: conversationCheck } = await supabase
@@ -495,7 +493,7 @@ export const useMessagingV2 = () => {
   useEffect(() => {
     if (!user) return;
 
-    console.log('🚀 Initializing messaging system for user:', user.id);
+    
     
     // Load initial data
     fetchConversations();
@@ -518,7 +516,7 @@ export const useMessagingV2 = () => {
           fetchConversations();
         })
         .subscribe((status) => {
-          console.log('📡 Conversations channel status:', status);
+          
           if (status === 'SUBSCRIBED') {
             setConnectionStatus('connected');
           }
@@ -532,7 +530,7 @@ export const useMessagingV2 = () => {
           schema: 'public', 
           table: 'messages_v2'
         }, (payload) => {
-          console.log('💬 Message update:', payload.eventType);
+          
           if (payload.new && 'conversation_id' in payload.new) {
             fetchMessages(payload.new.conversation_id as string);
             fetchConversations(); // Update last message
@@ -548,7 +546,7 @@ export const useMessagingV2 = () => {
           schema: 'public',
           table: 'user_presence'
         }, () => {
-          console.log('👥 Presence update detected');
+          
           // Could fetch presence data here
         })
         .subscribe();
@@ -563,7 +561,7 @@ export const useMessagingV2 = () => {
 
     // Cleanup
     return () => {
-      console.log('🧹 Cleaning up messaging subscriptions');
+      
       if (conversationsChannel) supabase.removeChannel(conversationsChannel);
       if (messagesChannel) supabase.removeChannel(messagesChannel);
       if (presenceChannel) supabase.removeChannel(presenceChannel);
