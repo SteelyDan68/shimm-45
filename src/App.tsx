@@ -29,7 +29,7 @@ import { MobileOptimization } from "@/pages/MobileOptimization";
 import { UnifiedUserProfile } from "./components/UnifiedUserProfile";
 import { ClientProfile } from "./pages/ClientProfile";
 import { UserProfile } from "./pages/UserProfile";
-import UserCrmProfile from "./pages/UserCrmProfile";
+
 import { ClientList } from "./components/ClientList";
 import ClientDashboard from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";

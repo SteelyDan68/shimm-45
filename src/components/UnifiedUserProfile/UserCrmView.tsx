@@ -296,26 +296,87 @@ export const UserCrmView = ({
               <CardTitle>Sociala Plattformar</CardTitle>
             </CardHeader>
             <CardContent>
-              {extendedProfile?.social_platforms?.length > 0 ? (
+              {isEditing ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {extendedProfile.social_platforms.map((platform: any, index: number) => (
+                  <div>
+                    <Label>Instagram</Label>
+                    <Input 
+                      value={editData.instagram_handle || ''} 
+                      onChange={(e) => setEditData({...editData, instagram_handle: e.target.value})}
+                      placeholder="@användarnamn"
+                    />
+                  </div>
+                  <div>
+                    <Label>YouTube</Label>
+                    <Input 
+                      value={editData.youtube_handle || ''} 
+                      onChange={(e) => setEditData({...editData, youtube_handle: e.target.value})}
+                      placeholder="@kanalnamn"
+                    />
+                  </div>
+                  <div>
+                    <Label>TikTok</Label>
+                    <Input 
+                      value={editData.tiktok_handle || ''} 
+                      onChange={(e) => setEditData({...editData, tiktok_handle: e.target.value})}
+                      placeholder="@användarnamn"
+                    />
+                  </div>
+                  <div>
+                    <Label>Facebook</Label>
+                    <Input 
+                      value={editData.facebook_handle || ''} 
+                      onChange={(e) => setEditData({...editData, facebook_handle: e.target.value})}
+                      placeholder="@sidnamn"
+                    />
+                  </div>
+                  <div>
+                    <Label>Twitter/X</Label>
+                    <Input 
+                      value={editData.twitter_handle || ''} 
+                      onChange={(e) => setEditData({...editData, twitter_handle: e.target.value})}
+                      placeholder="@användarnamn"
+                    />
+                  </div>
+                  <div>
+                    <Label>Snapchat</Label>
+                    <Input 
+                      value={editData.snapchat_handle || ''} 
+                      onChange={(e) => setEditData({...editData, snapchat_handle: e.target.value})}
+                      placeholder="@användarnamn"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { platform: 'Instagram', handle: profile.instagram_handle || extendedProfile?.instagram_handle },
+                    { platform: 'YouTube', handle: profile.youtube_handle || extendedProfile?.youtube_handle },
+                    { platform: 'TikTok', handle: profile.tiktok_handle || extendedProfile?.tiktok_handle },
+                    { platform: 'Facebook', handle: profile.facebook_handle || extendedProfile?.facebook_handle },
+                    { platform: 'Twitter/X', handle: profile.twitter_handle || extendedProfile?.twitter_handle },
+                    { platform: 'Snapchat', handle: profile.snapchat_handle || extendedProfile?.snapchat_handle }
+                  ].filter(item => item.handle).map((social, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
-                      {getSocialIcon(platform.platform)}
+                      {getSocialIcon(social.platform)}
                       <div>
-                        <div className="font-medium">{platform.platform}</div>
-                        <div className="text-sm text-muted-foreground">{platform.username}</div>
-                        {platform.followerCount && (
-                          <div className="text-xs text-muted-foreground">
-                            {platform.followerCount.toLocaleString()} följare
-                          </div>
-                        )}
+                        <div className="font-medium">{social.platform}</div>
+                        <div className="text-sm text-muted-foreground">@{social.handle}</div>
                       </div>
                     </div>
                   ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  Inga sociala plattformar registrerade
+                  {![
+                    profile.instagram_handle || extendedProfile?.instagram_handle,
+                    profile.youtube_handle || extendedProfile?.youtube_handle,
+                    profile.tiktok_handle || extendedProfile?.tiktok_handle,
+                    profile.facebook_handle || extendedProfile?.facebook_handle,
+                    profile.twitter_handle || extendedProfile?.twitter_handle,
+                    profile.snapchat_handle || extendedProfile?.snapchat_handle
+                  ].some(Boolean) && (
+                    <div className="col-span-2 text-center py-8 text-muted-foreground">
+                      Inga sociala plattformar registrerade
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
