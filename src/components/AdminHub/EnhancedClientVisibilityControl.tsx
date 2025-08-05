@@ -87,14 +87,23 @@ export function EnhancedClientVisibilityControl() {
     try {
       setLoading(true);
       
-      // 1. Hämta alla klienter med roller
+      // 1. Hämta alla klienter från attribut-systemet
+      const { data: clientAttributeData, error: attributeError } = await supabase
+        .from('user_attributes')
+        .select('user_id')
+        .like('attribute_key', 'role_%')
+        .eq('attribute_value', '"client"')
+        .eq('is_active', true);
+
+      if (attributeError) throw attributeError;
+      
+      const clientIds = clientAttributeData?.map(attr => attr.user_id) || [];
+      
+      // 2. Hämta profiler för dessa klienter
       const { data: clientProfiles, error: profileError } = await supabase
         .from('profiles')
-        .select(`
-          id, email, first_name, last_name, avatar_url,
-          user_roles!inner(role)
-        `)
-        .eq('user_roles.role', 'client');
+        .select('id, email, first_name, last_name, avatar_url')
+        .in('id', clientIds);
 
       if (profileError) throw profileError;
 
@@ -117,11 +126,13 @@ export function EnhancedClientVisibilityControl() {
             .eq('user_id', clientId)
             .maybeSingle(),
             
-          // Coach assignments - manuell join
+          // Coach assignments från attribut-systemet
           supabase
-            .from('coach_client_assignments')
-            .select('coach_id, assigned_at, is_active')
-            .eq('client_id', clientId),
+            .from('user_attributes')
+            .select('user_id, attribute_value')
+            .eq('user_id', clientId)
+            .like('attribute_key', 'coach_client_%')
+            .eq('is_active', true),
             
           // Assessment states
           supabase
@@ -153,15 +164,22 @@ export function EnhancedClientVisibilityControl() {
             .limit(10)
         ]);
 
-        // Hämta coach-profiler manuellt
+        // Hämta coach-profiler från attribut-data
         const coachProfiles = assignments.data?.length > 0 ? await Promise.all(
           assignments.data.map(async (assignment) => {
+            // assignment.attribute_value är coach relationship data
+            const relationshipData = assignment.attribute_value as any;
             const { data: coachProfile } = await supabase
               .from('profiles')
               .select('id, first_name, last_name, email')
-              .eq('id', assignment.coach_id)
+              .eq('id', assignment.user_id) // user_id är coach_id i detta fall
               .maybeSingle();
-            return { ...assignment, coach_profile: coachProfile };
+            return { 
+              coach_id: assignment.user_id,
+              assigned_at: relationshipData.assigned_at,
+              is_active: relationshipData.is_active,
+              coach_profile: coachProfile 
+            };
           })
         ) : [];
 
@@ -192,7 +210,7 @@ export function EnhancedClientVisibilityControl() {
           });
         }
         
-        if (assignments.data?.filter(a => a.is_active).length === 0) {
+        if (assignments.data?.filter(a => (a.attribute_value as any)?.is_active).length === 0) {
           criticalIssues.push({
             type: 'no_coach',
             severity: 'high' as const,
@@ -289,14 +307,18 @@ export function EnhancedClientVisibilityControl() {
 
   const assignCoach = async (clientId: string, coachId: string) => {
     try {
-      const { error } = await supabase
-        .from('coach_client_assignments')
-        .insert({
+      // Använd nya attribut-systemet för coach tilldelning
+      const { error } = await supabase.rpc('set_user_attribute', {
+        _user_id: coachId,
+        _attribute_key: 'coach_client_' + clientId,
+        _attribute_value: {
           client_id: clientId,
-          coach_id: coachId,
-          assigned_by: (await supabase.auth.getUser()).data.user?.id,
-          is_active: true
-        });
+          assigned_at: new Date().toISOString(),
+          is_active: true,
+          assigned_by: (await supabase.auth.getUser()).data.user?.id
+        },
+        _attribute_type: 'relationship'
+      });
         
       if (error) throw error;
       

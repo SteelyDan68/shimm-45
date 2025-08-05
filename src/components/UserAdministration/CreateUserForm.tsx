@@ -56,26 +56,34 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
   const loadCoaches = async () => {
     try {
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('profiles')
         .select(`
-          user_id,
-          profiles:user_id (
-            id,
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .eq('role', 'coach');
+          id,
+          first_name,
+          last_name,
+          email
+        `);
 
       if (error) throw error;
 
-      const coachList = data
-        ?.filter(item => item.profiles)
-        .map(item => item.profiles)
-        .filter(Boolean) || [];
+      // Filtrera bara de som har coach-roll från attribut-systemet
+      const coachProfiles = [];
+      for (const profile of data || []) {
+        const { data: roleData } = await supabase
+          .from('user_attributes')
+          .select('user_id')
+          .eq('user_id', profile.id)
+          .like('attribute_key', 'role_%')
+          .eq('attribute_value', '"coach"')
+          .eq('is_active', true)
+          .limit(1);
+        
+        if (roleData && roleData.length > 0) {
+          coachProfiles.push(profile);
+        }
+      }
 
-      setCoaches(coachList);
+      setCoaches(coachProfiles);
     } catch (error) {
       console.error('Error loading coaches:', error);
     }
@@ -133,15 +141,18 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
       // Om användaren skapades framgångsrikt och ska tilldelas en coach
       if (data.success && formData.assignCoach && formData.coachId && formData.role === 'client') {
         try {
-          const { error: relationError } = await supabase
-            .from('coach_client_assignments')
-            .insert({
-              coach_id: formData.coachId,
+          // Skapa coach-klient relation i nya attributsystemet
+          const { error: relationError } = await supabase.rpc('set_user_attribute', {
+            _user_id: formData.coachId,
+            _attribute_key: 'coach_client_' + data.user.id,
+            _attribute_value: {
               client_id: data.user.id,
-              assigned_by: user?.id,
               assigned_at: new Date().toISOString(),
-              is_active: true
-            });
+              is_active: true,
+              assigned_by: user?.id
+            },
+            _attribute_type: 'relationship'
+          });
 
           if (relationError) {
             console.error('Error assigning coach:', relationError);

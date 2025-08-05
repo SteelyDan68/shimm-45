@@ -264,15 +264,17 @@ export function CentralUserManager() {
   const loadUserRoles = async () => {
     try {
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('user_id, role')
-        .in('role', ['superadmin', 'admin', 'coach', 'client']);
+        .from('user_attributes')
+        .select('user_id, attribute_value')
+        .like('attribute_key', 'role_%')
+        .eq('is_active', true);
 
       if (error) throw error;
 
       const rolesByUser: Record<string, AppRole[]> = {};
-      data?.forEach(({ user_id, role }) => {
+      data?.forEach(({ user_id, attribute_value }) => {
         if (!rolesByUser[user_id]) rolesByUser[user_id] = [];
+        rolesByUser[user_id].push(attribute_value as AppRole);
         rolesByUser[user_id].push(role as AppRole);
       });
 
