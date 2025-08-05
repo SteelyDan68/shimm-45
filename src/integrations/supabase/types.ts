@@ -1020,6 +1020,39 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_client_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          client_id: string | null
+          coach_id: string | null
+          created_at: string | null
+          id: string | null
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       coach_insights: {
         Row: {
           acknowledged_at: string | null
@@ -3754,6 +3787,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          expires_at: string | null
+          id: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          expires_at?: string | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          expires_at?: string | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       weekly_email_logs: {
         Row: {
