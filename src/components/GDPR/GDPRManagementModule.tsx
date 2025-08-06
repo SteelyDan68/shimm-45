@@ -136,6 +136,72 @@ export const GDPRManagementModule: React.FC = () => {
         </div>
       </div>
 
+      {/* Direct Stefan Deletion */}
+      <Card className="border-orange-200">
+        <CardHeader className="bg-orange-50">
+          <CardTitle className="flex items-center gap-2 text-orange-700">
+            <UserX className="h-5 w-5" />
+            Direktradering: Stefan Hallgren
+          </CardTitle>
+          <CardDescription className="text-orange-600">
+            Manuell radering av stefan.hallgren@happyminds.com för testning.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <Button
+            onClick={async () => {
+              try {
+                setIsProcessing(true);
+                const result = await deleteUserCompletely('stefan.hallgren@happyminds.com');
+                
+                if (result.errors && result.errors.length > 0) {
+                  toast({
+                    title: "Radering delvis misslyckades",
+                    description: `${result.errors.join(', ')}`,
+                    variant: "destructive"
+                  });
+                } else if (result.user_found) {
+                  toast({
+                    title: "Stefan Hallgren raderad",
+                    description: "Användaren har raderats fullständigt från systemet",
+                  });
+                } else {
+                  toast({
+                    title: "Användaren kunde inte hittas",
+                    description: "Stefan Hallgren fanns inte i systemet",
+                    variant: "destructive"
+                  });
+                }
+              } catch (error: any) {
+                console.error('Direct deletion error:', error);
+                toast({
+                  title: "Radering misslyckades",
+                  description: error.message,
+                  variant: "destructive"
+                });
+              } finally {
+                setIsProcessing(false);
+              }
+            }}
+            disabled={isProcessing}
+            variant="destructive"
+            className="w-full bg-orange-600 hover:bg-orange-700"
+          >
+            {isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Raderar Stefan...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Radera Stefan Hallgren fullständigt
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* GDPR Deletion Section */}
       <Card className="border-red-200">
         <CardHeader className="bg-red-50">
