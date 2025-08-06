@@ -135,8 +135,8 @@ export const GDPRAdminDashboard: React.FC = () => {
 
     setIsProcessing(true);
     try {
-      // Genomför dataradering
-      const result = await deleteUserCompletely(request.user_email);
+      // Genomför dataradering med user_id istället för email
+      const result = await deleteUserCompletely(request.user_id);
       
       if (result.user_found) {
         // Uppdatera request som genomförd
@@ -146,8 +146,18 @@ export const GDPRAdminDashboard: React.FC = () => {
         
         toast({
           title: "Dataradering genomförd",
-          description: `Användaren ${request.user_email} har raderats fullständigt`,
+          description: `Användaren har raderats fullständigt från systemet`,
         });
+        
+        // Force refresh of ALL data sources
+        await Promise.all([
+          refreshRequests(),
+          refreshNotifications(),
+          // Trigger global user data refresh
+          window.dispatchEvent(new CustomEvent('userDataChanged'))
+        ]);
+        
+        setSelectedRequest(null);
       } else {
         toast({
           title: "Användaren kunde inte hittas",
@@ -156,6 +166,7 @@ export const GDPRAdminDashboard: React.FC = () => {
         });
       }
     } catch (error: any) {
+      console.error('GDPR deletion error:', error);
       toast({
         title: "Fel vid dataradering",
         description: error.message,

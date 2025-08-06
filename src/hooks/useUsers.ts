@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useGlobalUserEvents } from '@/hooks/useGlobalUserEvents';
 
 export interface User {
   id: string;
@@ -20,6 +21,7 @@ export const useUsers = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchUsers = async () => {
+    console.log('🔄 Fetching users from database...');
     try {
       setLoading(true);
       
@@ -79,14 +81,15 @@ export const useUsers = () => {
     fetchUsers();
   };
 
+  // Global event listeners för real-time uppdateringar
+  useGlobalUserEvents((eventType, detail) => {
+    console.log(`🔄 useUsers: Received event ${eventType}`, detail);
+    fetchUsers();
+  }, ['userDataChanged', 'gdprActionCompleted', 'userDeleted', 'userCreated', 'userUpdated']);
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  return {
-    users,
-    loading,
-    error,
-    refreshUsers
-  };
+  return { users, loading, error, refetch: fetchUsers, refreshUsers: fetchUsers };
 };

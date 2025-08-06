@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { triggerUserEvent } from '@/hooks/useGlobalUserEvents';
 
 export interface UserDeletionResult {
   user_found: boolean;
@@ -16,6 +17,7 @@ export interface UserDeletionResult {
  * Uses the edge function for complete deletion with Service Role Key
  */
 export async function deleteUserCompletely(identifier: string): Promise<UserDeletionResult> {
+  console.log(`🔍 Starting COMPLETE user deletion for: ${identifier}`);
   try {
     console.log(`🔍 Initiating complete user deletion for: ${identifier}`);
     
@@ -43,6 +45,13 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
     
     // Handle the new response format
     if (data?.success) {
+      console.log('✅ Deletion successful:', data);
+      
+      // Trigger comprehensive global refresh events
+      triggerUserEvent('userDeleted', { action: 'gdpr_deletion', userId: identifier });
+      triggerUserEvent('gdprActionCompleted', { action: 'deletion', userId: identifier });
+      triggerUserEvent('userDataChanged', { action: 'deletion_completed' });
+      
       return {
         user_found: true,
         deleted_profile: true,
@@ -54,10 +63,9 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
         errors: []
       };
     } else {
+      console.error('❌ Deletion failed:', data?.error);
       throw new Error(data?.error || 'Unknown deletion error');
     }
-    
-    return data as UserDeletionResult;
 
   } catch (error: any) {
     console.error('User deletion failed:', error);

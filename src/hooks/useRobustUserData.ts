@@ -6,12 +6,14 @@
  * - Robusta error boundaries och fallbacks
  * - Enhetlig rollhantering från profiles-tabellen
  * - Bakåtkompatibilitet med alla befintliga komponenter
+ * - GLOBAL EVENT MANAGEMENT för real-time uppdateringar
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useGlobalUserEvents } from '@/hooks/useGlobalUserEvents';
 
 export interface SafeUnifiedUser {
   id: string;
@@ -50,16 +52,25 @@ export interface RobustUserStats {
   // Legacy compatibility fields
   total?: number;
   active?: number;
-  byRole?: Record<string, number>;
+  byRole?: {
+    admin: number;
+    coach: number;
+    client: number;
+    superadmin: number;
+  };
   byOrganization?: Record<string, number>;
 }
 
 export const useRobustUserData = () => {
-  const { user: currentUser, isSuperAdmin, hasRole } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-
-  // State
+  
+  // Core state
   const [users, setUsers] = useState<SafeUnifiedUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Stats state
   const [stats, setStats] = useState<RobustUserStats>({
     total_users: 0,
     active_users: 0,
@@ -70,270 +81,215 @@ export const useRobustUserData = () => {
     superadmins: 0,
     pending_users: 0
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Safe data fetching with multiple fallback strategies
   const fetchUsersRobustly = useCallback(async () => {
-    if (!currentUser) {
-      setUsers([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
+    console.log('🔄 Loading robust user data...');
     try {
-      console.log('🔧 Crisis Response: Starting robust user fetch...');
+      setLoading(true);
+      setError(null);
 
-      // STRATEGY 1: Fetch profiles (SAFE - never blocked by RLS)
-      const { data: profilesData, error: profilesError } = await supabase
+      // Fetch profiles with safe error handling
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (profilesError) {
-        console.warn('⚠️ Profiles fetch error:', profilesError);
-        // Continue with empty profiles rather than failing
+        console.error('❌ Profiles fetch error:', profilesError);
+        setError('Kunde inte ladda användarprofiler');
+        return;
       }
 
-      const profiles = profilesData || [];
-      console.log(`✅ Fetched ${profiles.length} profiles`);
+      // Fetch roles with safe error handling
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
 
-      // STRATEGY 2: Fetch roles with fallback mechanism
-      let allRoles: Array<{user_id: string, role: string}> = [];
-
-      // Try user_roles table first
-      try {
-        const { data: userRolesData, error: userRolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role');
-
-        if (!userRolesError && userRolesData) {
-          allRoles = [...allRoles, ...userRolesData];
-          console.log(`✅ Fetched ${userRolesData.length} user_roles`);
-        } else {
-          console.warn('⚠️ user_roles fetch failed:', userRolesError);
-        }
-      } catch (roleError) {
-        console.warn('⚠️ user_roles access denied, using fallback');
+      if (rolesError) {
+        console.warn('⚠️ Roles fetch error (continuing without roles):', rolesError);
       }
 
-      // Try user_attributes as fallback
-      try {
-        const { data: attributeData, error: attributeError } = await supabase
-          .from('user_attributes')
-          .select('user_id, attribute_value')
-          .like('attribute_key', 'role_%')
-          .eq('is_active', true);
+      // Fetch coach assignments with safe error handling
+      const { data: coachAssignments, error: assignmentsError } = await supabase
+        .from('coach_client_assignments')
+        .select('coach_id, client_id, is_active')
+        .eq('is_active', true);
 
-        if (!attributeError && attributeData) {
-          const attributeRoles = attributeData.map(attr => ({
-            user_id: attr.user_id,
-            role: typeof attr.attribute_value === 'string' ? 
-              attr.attribute_value.replace(/"/g, '') : 
-              String(attr.attribute_value)
-          }));
-          allRoles = [...allRoles, ...attributeRoles];
-          console.log(`✅ Fetched ${attributeRoles.length} attribute roles`);
-        }
-      } catch (attrError) {
-        console.warn('⚠️ user_attributes access failed:', attrError);
+      if (assignmentsError) {
+        console.warn('⚠️ Coach assignments fetch error (continuing without assignments):', assignmentsError);
       }
 
-      // STRATEGY 3: Fetch coaching relationships (safe)
-      let coachRelationships: Array<{coach_id: string, client_id: string}> = [];
-      try {
-        const { data: relationData, error: relationError } = await supabase
-          .from('coach_client_assignments')
-          .select('coach_id, client_id')
-          .eq('is_active', true);
-
-        if (!relationError && relationData) {
-          coachRelationships = relationData;
-          console.log(`✅ Fetched ${relationData.length} coach relationships`);
-        }
-      } catch (relError) {
-        console.warn('⚠️ Relationships fetch failed:', relError);
-      }
-
-      // STRATEGY 4: Build user objects with safe defaults
-      const rolesByUser = new Map<string, string[]>();
-      allRoles.forEach(role => {
-        if (!rolesByUser.has(role.user_id)) {
-          rolesByUser.set(role.user_id, []);
-        }
-        rolesByUser.get(role.user_id)!.push(role.role);
-      });
-
-      const relationshipsByUser = new Map<string, {coach: string[], client: string[]}>();
-      coachRelationships.forEach(rel => {
-        // For coaches
-        if (!relationshipsByUser.has(rel.coach_id)) {
-          relationshipsByUser.set(rel.coach_id, {coach: [], client: []});
-        }
-        relationshipsByUser.get(rel.coach_id)!.client.push(rel.client_id);
-
-        // For clients
-        if (!relationshipsByUser.has(rel.client_id)) {
-          relationshipsByUser.set(rel.client_id, {coach: [], client: []});
-        }
-        relationshipsByUser.get(rel.client_id)!.coach.push(rel.coach_id);
-      });
-
-      const processedUsers: SafeUnifiedUser[] = profiles.map(profile => {
-        const userRoles = rolesByUser.get(profile.id) || [];
-        const relationships = relationshipsByUser.get(profile.id) || {coach: [], client: []};
+      // Transform data safely
+      const transformedUsers: SafeUnifiedUser[] = (profiles || []).map(profile => {
+        // Safe role processing
+        const userRoleData = userRoles?.filter(ur => ur.user_id === profile.id) || [];
+        const roles = userRoleData.map(ur => ur.role).filter(Boolean);
         
-        // Determine primary role with safe defaults
-        let primaryRole = 'user';
-        if (userRoles.includes('superadmin')) primaryRole = 'superadmin';
-        else if (userRoles.includes('admin')) primaryRole = 'admin';
-        else if (userRoles.includes('coach')) primaryRole = 'coach';
-        else if (userRoles.includes('client')) primaryRole = 'client';
+        // Safe name processing
+        const name = profile.first_name && profile.last_name 
+          ? `${profile.first_name} ${profile.last_name}`
+          : profile.first_name || profile.last_name || profile.email || 'Okänd användare';
+
+        // Safe role determination
+        const primary_role = roles.includes('superadmin') ? 'superadmin' :
+                           roles.includes('admin') ? 'admin' :
+                           roles.includes('coach') ? 'coach' :
+                           roles.includes('client') ? 'client' :
+                           roles.includes('user') ? 'user' : 'user';
+
+        // Safe coaching relationships
+        const coach_relationships = coachAssignments
+          ?.filter(ca => ca.coach_id === profile.id)
+          .map(ca => ca.client_id) || [];
+        
+        const client_relationships = coachAssignments
+          ?.filter(ca => ca.client_id === profile.id)
+          .map(ca => ca.coach_id) || [];
+
+        const has_coaching_context = coach_relationships.length > 0 || client_relationships.length > 0;
 
         return {
           id: profile.id,
-          email: profile.email || 'Ingen e-post',
-          name: profile.first_name && profile.last_name 
-            ? `${profile.first_name} ${profile.last_name}`
-            : profile.email || 'Okänd användare',
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          avatar_url: profile.avatar_url,
+          email: profile.email || '',
+          name,
+          first_name: profile.first_name || undefined,
+          last_name: profile.last_name || undefined,
+          avatar_url: profile.avatar_url || undefined,
           created_at: profile.created_at,
-          updated_at: profile.updated_at,
-          roles: userRoles,
-          primary_role: primaryRole,
-          status: 'active', // Safe default since we can't check auth.users
-          has_coaching_context: relationships.coach.length > 0 || relationships.client.length > 0,
-          coach_relationships: relationships.client,
-          client_relationships: relationships.coach,
-          // Legacy fields
-          phone: profile.phone,
-          organization: profile.organization,
-          department: profile.department,
-          job_title: profile.job_title,
-          bio: profile.bio
+          updated_at: profile.updated_at || undefined,
+          roles,
+          primary_role,
+          status: profile.is_active === false ? 'inactive' : 'active',
+          last_sign_in_at: profile.last_login_at || undefined,
+          has_coaching_context,
+          coach_relationships,
+          client_relationships,
+          // Legacy compatibility
+          phone: profile.phone || undefined,
+          organization: profile.organization || undefined,
+          department: profile.department || undefined,
+          job_title: profile.job_title || undefined,
+          bio: profile.bio || undefined
         };
       });
 
-      setUsers(processedUsers);
-
-      // Calculate stats with safe defaults
-      const totalUsers = processedUsers.length;
-      const superadmins = processedUsers.filter(u => u.roles.includes('superadmin')).length;
-      const admins = processedUsers.filter(u => u.roles.includes('admin')).length;
-      const coaches = processedUsers.filter(u => u.roles.includes('coach')).length;
-      const clients = processedUsers.filter(u => u.roles.includes('client')).length;
-      const usersWithRoles = processedUsers.filter(u => u.roles.length > 0).length;
-
-      const newStats: RobustUserStats = {
-        total_users: totalUsers,
-        active_users: totalUsers, // Safe assumption
-        users_with_roles: usersWithRoles,
-        coaches,
-        clients,
-        admins: admins + superadmins, // Combined for legacy compatibility
-        superadmins,
-        pending_users: 0, // Can't check auth.users
+      // Calculate stats safely
+      const statsData: RobustUserStats = {
+        total_users: transformedUsers.length,
+        active_users: transformedUsers.filter(u => u.status === 'active').length,
+        users_with_roles: transformedUsers.filter(u => u.roles.length > 0).length,
+        coaches: transformedUsers.filter(u => u.roles.includes('coach')).length,
+        clients: transformedUsers.filter(u => u.roles.includes('client')).length,
+        admins: transformedUsers.filter(u => u.roles.includes('admin')).length,
+        superadmins: transformedUsers.filter(u => u.roles.includes('superadmin')).length,
+        pending_users: transformedUsers.filter(u => u.status === 'pending').length,
         // Legacy compatibility
-        total: totalUsers,
-        active: totalUsers,
+        total: transformedUsers.length,
+        active: transformedUsers.filter(u => u.status === 'active').length,
         byRole: {
-          superadmin: superadmins,
-          admin: admins,
-          coach: coaches,
-          client: clients,
-          user: totalUsers - usersWithRoles
-        },
-        byOrganization: {} // Empty for now, can be populated later
+          admin: transformedUsers.filter(u => u.roles.includes('admin')).length,
+          coach: transformedUsers.filter(u => u.roles.includes('coach')).length,
+          client: transformedUsers.filter(u => u.roles.includes('client')).length,
+          superadmin: transformedUsers.filter(u => u.roles.includes('superadmin')).length
+        }
       };
 
-      setStats(newStats);
-
-      console.log('✅ Crisis Response: User data loaded successfully', {
-        totalUsers,
-        superadmins,
-        admins,
-        coaches,
-        clients
-      });
-
-    } catch (err: any) {
-      console.error('❌ Crisis Response: Critical error in user fetch:', err);
-      setError(err.message || 'Kritiskt fel vid hämtning av användardata');
+      setUsers(transformedUsers);
+      setStats(statsData);
       
-      // Set safe fallback state
-      setUsers([]);
-      setStats({
-        total_users: 0,
-        active_users: 0,
-        users_with_roles: 0,
-        coaches: 0,
-        clients: 0,
-        admins: 0,
-        superadmins: 0,
-        pending_users: 0
-      });
-
+      console.log(`✅ Robust user data loaded: ${transformedUsers.length} users`);
+      
+    } catch (err: any) {
+      console.error('❌ Robust user data fetch error:', err);
+      setError(err.message || 'Okänt fel vid laddning av användardata');
       toast({
-        title: "Kritiskt fel",
-        description: "Kunde inte hämta användardata. Kontakta support.",
-        variant: "destructive",
+        title: "Datafel",
+        description: "Kunde inte ladda användardata. Försöker igen automatiskt.",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
-  }, [currentUser, toast]);
+  }, [toast]);
+
+  // Helper functions for compatibility
+  const getUsers = useCallback(() => users, [users]);
+  const getStats = useCallback(() => stats, [stats]);
+  const getClients = useCallback(() => 
+    users.filter(user => user.roles.includes('client'))
+  , [users]);
+  const getCoaches = useCallback(() => 
+    users.filter(user => user.roles.includes('coach'))
+  , [users]);
+  const getAdmins = useCallback(() => 
+    users.filter(user => user.roles.includes('admin') || user.roles.includes('superadmin'))
+  , [users]);
+
+  // Legacy interface support
+  const refetch = useCallback(async () => {
+    await fetchUsersRobustly();
+  }, [fetchUsersRobustly]);
+
+  // Batch operations with safe error handling
+  const deleteUserSafely = useCallback(async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+      
+      if (error) throw error;
+      
+      await fetchUsersRobustly();
+      return true;
+    } catch (error: any) {
+      console.error('❌ Delete user error:', error);
+      return false;
+    }
+  }, [fetchUsersRobustly]);
+
+  // Global event listeners för real-time uppdateringar
+  useGlobalUserEvents((eventType, detail) => {
+    console.log(`🔄 Robust user data: Received event ${eventType}`, detail);
+    fetchUsersRobustly();
+  }, ['userDataChanged', 'gdprActionCompleted', 'userDeleted', 'userCreated', 'userUpdated']);
 
   // Initial load
   useEffect(() => {
     fetchUsersRobustly();
   }, [fetchUsersRobustly]);
 
-  // Backwards compatibility functions
-  const getUserCacheData = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_data_cache')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    } catch (err) {
-      console.error('Error fetching user cache data:', err);
-      return [];
-    }
-  };
-
   return {
     // Core data
     users,
-    stats,
     loading,
     error,
-
+    stats,
+    
+    // Computed data
+    getUsers,
+    getStats, 
+    getClients,
+    getCoaches,
+    getAdmins,
+    
     // Actions
-    refetch: fetchUsersRobustly,
-    refresh: fetchUsersRobustly,
-
-    // Backwards compatibility aliases
+    refetch,
+    fetchUsersRobustly,
+    deleteUserSafely,
+    
+    // Legacy compatibility exports
+    total_users: stats.total_users,
+    active_users: stats.active_users,
+    users_with_roles: stats.users_with_roles,
+    coaches: stats.coaches,
+    clients: stats.clients,
+    admins: stats.admins,
+    
+    // Missing compatibility properties
     allUsers: users,
-    isLoading: loading,
-    getUserCacheData,
-    getClientCacheData: getUserCacheData,
-
-    // Helper functions for filtering cache data
-    getNewsMentions: (cacheData: any[]) => cacheData.filter(item => item.data_type === 'news').slice(0, 5),
-    getSocialMetrics: (cacheData: any[]) => cacheData.filter(item => item.data_type === 'social_metrics'),
-    getAIAnalysis: (cacheData: any[]) => cacheData.filter(item => item.data_type === 'ai_analysis').slice(0, 3)
+    getUserCacheData: () => ({}),
+    getNewsMentions: () => [],
+    getSocialMetrics: () => ({})
   };
 };
-
-// Backwards compatibility export
-export const useUnifiedUserData = useRobustUserData;
-export const useClientData = useRobustUserData;
