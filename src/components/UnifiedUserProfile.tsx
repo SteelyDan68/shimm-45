@@ -17,7 +17,7 @@ import {
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
-import { useExtendedProfile } from '@/hooks/useExtendedProfile';
+import { useUnifiedProfile } from '@/hooks/useUnifiedProfile';
 
 // Import specialized components
 import { ClientProfileView } from './UnifiedUserProfile/ClientProfileView';
@@ -43,7 +43,7 @@ export const UnifiedUserProfile = () => {
   
   // SINGLE SOURCE OF TRUTH: All data fetched via user_id
   const { profile, loading: profileLoading, hasRole, roles } = useUserData(userId);
-  const { getExtendedProfile } = useExtendedProfile();
+  const { getProfile } = useUnifiedProfile();
   const { isSuperAdmin, isAdmin, canManageUsers } = useAuth();
   
   
@@ -116,7 +116,7 @@ export const UnifiedUserProfile = () => {
       setLoading(true);
       
       // Load extended profile data
-      const extData = await getExtendedProfile();
+      const extData = await getProfile();
       setExtendedProfile(extData);
       
     } catch (error) {
