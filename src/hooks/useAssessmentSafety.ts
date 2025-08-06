@@ -18,27 +18,46 @@ export interface AssessmentState {
   device_info: Record<string, any>;
 }
 
+export interface AssessmentSafetyConfig {
+  isActive: boolean;
+  hasUnsavedChanges: boolean;
+  assessmentType: string;
+  assessmentKey?: string;
+  currentStep: string;
+  formData: Record<string, any>;
+  onStateRestore?: (data: any) => void;
+  preventAccidentalSubmission?: boolean;
+  autoSaveInterval?: number;
+  onBeforeExit?: () => void;
+}
+
 export interface AssessmentSafetyOptions {
-  autoSaveInterval?: number; // milliseconds
+  autoSaveInterval?: number;
   conflictResolution?: 'overwrite' | 'merge' | 'new_version';
   enableRecovery?: boolean;
   trackDeviceInfo?: boolean;
 }
 
 /**
- * ASSESSMENT SAFETY HOOK - Robust state management med auto-save och recovery
- * Förhindrar dataförlust och hanterar conflicfts intelligent
+ * ASSESSMENT SAFETY HOOK - Robust state management with auto-save and recovery
  */
 export const useAssessmentSafety = (
-  assessmentType: string,
-  assessmentKey: string,
+  config: AssessmentSafetyConfig | string,
+  assessmentKey?: string,
   options: AssessmentSafetyOptions = {}
 ) => {
   const { user } = useAuth();
   const { toast } = useToast();
   
+  // Support both old and new signature
+  const isOldSignature = typeof config === 'string';
+  const assessmentType = isOldSignature ? config : config.assessmentType;
+  const actualAssessmentKey = isOldSignature ? assessmentKey! : config.assessmentKey || '';
+  const formData = isOldSignature ? {} : config.formData;
+  const currentStep = isOldSignature ? '1' : config.currentStep;
+  
   const {
-    autoSaveInterval = 30000, // 30 sekunder
+    autoSaveInterval = isOldSignature ? options.autoSaveInterval || 30000 : config.autoSaveInterval || 30000,
     conflictResolution = 'new_version',
     enableRecovery = true,
     trackDeviceInfo = true
@@ -53,7 +72,29 @@ export const useAssessmentSafety = (
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastSaveDataRef = useRef<string>('');
 
-  // Device fingerprinting för conflict detection
+  // Helper to convert database form_data to Record<string, any>
+  const convertFormData = (data: any): Record<string, any> => {
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data);
+      } catch {
+        return {};
+      }
+    }
+    return data || {};
+  };
+
+  // Helper to convert database record to AssessmentState
+  const convertToAssessmentState = (dbRecord: any): AssessmentState => {
+    return {
+      ...dbRecord,
+      form_data: convertFormData(dbRecord.form_data),
+      metadata: convertFormData(dbRecord.metadata),
+      device_info: convertFormData(dbRecord.device_info)
+    };
+  };
+
+  // Device fingerprinting
   const getDeviceInfo = useCallback(() => {
     if (!trackDeviceInfo) return {};
     
@@ -66,18 +107,17 @@ export const useAssessmentSafety = (
     };
   }, [trackDeviceInfo]);
 
-  // Ladda eller återställ assessment state
+  // Load assessment state
   const loadAssessmentState = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
     try {
-      // Försök först hitta existerande draft
       const { data: existingState, error } = await supabase
         .from('assessment_states')
         .select('*')
         .eq('user_id', user.id)
-        .eq('assessment_key', assessmentKey)
+        .eq('assessment_key', actualAssessmentKey)
         .eq('is_draft', true)
         .order('last_saved_at', { ascending: false })
         .limit(1)
@@ -88,11 +128,11 @@ export const useAssessmentSafety = (
       }
 
       if (existingState) {
-        setAssessmentState(existingState);
-        lastSaveDataRef.current = JSON.stringify(existingState.form_data);
+        const state = convertToAssessmentState(existingState);
+        setAssessmentState(state);
+        lastSaveDataRef.current = JSON.stringify(state.form_data);
         
-        // Visa recovery notification om data är gammal
-        const lastSaved = new Date(existingState.last_saved_at);
+        const lastSaved = new Date(state.last_saved_at);
         const hoursSinceLastSave = (Date.now() - lastSaved.getTime()) / (1000 * 60 * 60);
         
         if (hoursSinceLastSave > 1) {
@@ -101,17 +141,17 @@ export const useAssessmentSafety = (
             description: `Din senaste session från ${lastSaved.toLocaleString('sv-SE')} har återställts.`,
             variant: "default"
           });
-          setRecoveredData(existingState.form_data);
+          setRecoveredData(state.form_data);
         }
       } else if (enableRecovery) {
-        // Försök återställa från recovery function
         const { data: recoveryData } = await supabase.rpc('recover_assessment_draft', {
           p_user_id: user.id,
-          p_assessment_key: assessmentKey
+          p_assessment_key: actualAssessmentKey
         });
 
-        if (recoveryData?.recovered) {
-          setRecoveredData(recoveryData.form_data);
+        if (recoveryData && typeof recoveryData === 'object' && 'recovered' in recoveryData && recoveryData.recovered) {
+          const formData = convertFormData((recoveryData as any).form_data);
+          setRecoveredData(formData);
           toast({
             title: "Data återställd",
             description: "Vi hittade tidigare osparad data som har återställts.",
@@ -129,13 +169,12 @@ export const useAssessmentSafety = (
     } finally {
       setIsLoading(false);
     }
-  }, [user, assessmentKey, enableRecovery, toast]);
+  }, [user, actualAssessmentKey, enableRecovery, toast]);
 
-  // Auto-save funktion
+  // Auto-save function
   const performAutoSave = useCallback(async (formData: Record<string, any>, currentStep: string) => {
     if (!user || !formData) return;
 
-    // Kontrollera om data faktiskt har ändrats
     const currentDataString = JSON.stringify(formData);
     if (currentDataString === lastSaveDataRef.current) {
       return;
@@ -145,7 +184,7 @@ export const useAssessmentSafety = (
       const saveData = {
         user_id: user.id,
         assessment_type: assessmentType,
-        assessment_key: assessmentKey,
+        assessment_key: actualAssessmentKey,
         current_step: currentStep,
         form_data: formData,
         metadata: {
@@ -159,7 +198,6 @@ export const useAssessmentSafety = (
       };
 
       if (assessmentState?.id) {
-        // Uppdatera befintlig
         const { data, error } = await supabase
           .from('assessment_states')
           .update({
@@ -173,10 +211,8 @@ export const useAssessmentSafety = (
           .single();
 
         if (error) throw error;
-        
-        setAssessmentState(data);
+        setAssessmentState(convertToAssessmentState(data));
       } else {
-        // Skapa ny
         const { data, error } = await supabase
           .from('assessment_states')
           .insert(saveData)
@@ -184,22 +220,18 @@ export const useAssessmentSafety = (
           .single();
 
         if (error) throw error;
-        
-        setAssessmentState(data);
+        setAssessmentState(convertToAssessmentState(data));
       }
 
       lastSaveDataRef.current = currentDataString;
       setLastAutoSave(new Date());
       setHasUnsavedChanges(false);
-
-      console.log('📱 Auto-save completed successfully');
     } catch (error) {
       console.error('Auto-save failed:', error);
-      // Visa inte toast för auto-save failures för att inte störa användaren
     }
-  }, [user, assessmentType, assessmentKey, conflictResolution, assessmentState, getDeviceInfo]);
+  }, [user, assessmentType, actualAssessmentKey, conflictResolution, assessmentState, getDeviceInfo]);
 
-  // Manuell save funktion
+  // Manual save function
   const saveAssessmentState = useCallback(async (
     formData: Record<string, any>, 
     currentStep: string,
@@ -211,7 +243,7 @@ export const useAssessmentSafety = (
       const saveData = {
         user_id: user.id,
         assessment_type: assessmentType,
-        assessment_key: assessmentKey,
+        assessment_key: actualAssessmentKey,
         current_step: currentStep,
         form_data: formData,
         metadata: {
@@ -237,14 +269,15 @@ export const useAssessmentSafety = (
 
         if (error) throw error;
         
-        setAssessmentState(data);
+        const state = convertToAssessmentState(data);
+        setAssessmentState(state);
         toast({
           title: "Sparat",
           description: "Dina svar har sparats säkert.",
           variant: "default"
         });
         
-        return data;
+        return state;
       } else {
         const { data, error } = await supabase
           .from('assessment_states')
@@ -254,14 +287,15 @@ export const useAssessmentSafety = (
 
         if (error) throw error;
         
-        setAssessmentState(data);
+        const state = convertToAssessmentState(data);
+        setAssessmentState(state);
         toast({
           title: "Sparat",
           description: "Dina svar har sparats säkert.",
           variant: "default"
         });
         
-        return data;
+        return state;
       }
     } catch (error) {
       console.error('Save failed:', error);
@@ -272,9 +306,9 @@ export const useAssessmentSafety = (
       });
       throw error;
     }
-  }, [user, assessmentType, assessmentKey, conflictResolution, assessmentState, getDeviceInfo, toast]);
+  }, [user, assessmentType, actualAssessmentKey, conflictResolution, assessmentState, getDeviceInfo, toast]);
 
-  // Radera draft
+  // Clear draft
   const clearDraft = useCallback(async () => {
     if (!assessmentState?.id) return;
 
@@ -306,6 +340,41 @@ export const useAssessmentSafety = (
     }
   }, [assessmentState, toast]);
 
+  // Missing methods that components expect
+  const updateLastInteraction = useCallback(() => {
+    // Update last interaction timestamp
+    setLastAutoSave(new Date());
+  }, []);
+
+  const safeSubmit = useCallback(async (submitFunction: () => Promise<void>, preventDoubleSubmission?: boolean) => {
+    try {
+      await submitFunction();
+      // Clear draft after successful submission
+      if (assessmentState?.id) {
+        await clearDraft();
+      }
+    } catch (error) {
+      console.error('Safe submit failed:', error);
+      throw error;
+    }
+  }, [assessmentState, clearDraft]);
+
+  const safeNavigate = useCallback(async (navigateFunction: () => void, step?: string, requiresConfirmation?: boolean) => {
+    if (hasUnsavedChanges) {
+      // Auto-save before navigation
+      await performAutoSave(formData, currentStep);
+    }
+    navigateFunction();
+  }, [hasUnsavedChanges, performAutoSave, formData, currentStep]);
+
+  const manualSave = useCallback(async () => {
+    return await saveAssessmentState(formData, currentStep, true);
+  }, [saveAssessmentState, formData, currentStep]);
+
+  const clearDraftState = useCallback(() => {
+    clearDraft();
+  }, [clearDraft]);
+
   // Data change tracking
   const trackDataChange = useCallback((newData: Record<string, any>) => {
     const currentDataString = JSON.stringify(newData);
@@ -314,16 +383,7 @@ export const useAssessmentSafety = (
     }
   }, []);
 
-  // Setup auto-save timer
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearInterval(autoSaveTimerRef.current);
-      }
-    };
-  }, []);
-
-  // Start auto-save för specifik data
+  // Start auto-save
   const startAutoSave = useCallback((formData: Record<string, any>, currentStep: string) => {
     if (autoSaveTimerRef.current) {
       clearInterval(autoSaveTimerRef.current);
@@ -358,6 +418,15 @@ export const useAssessmentSafety = (
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+      }
+    };
+  }, []);
+
   // Initial load
   useEffect(() => {
     loadAssessmentState();
@@ -378,6 +447,13 @@ export const useAssessmentSafety = (
     startAutoSave,
     stopAutoSave,
     loadAssessmentState,
+    
+    // New methods that components expect
+    updateLastInteraction,
+    safeSubmit,
+    safeNavigate,
+    manualSave,
+    clearDraftState,
     
     // Utils
     setHasUnsavedChanges,
