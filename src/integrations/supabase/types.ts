@@ -1808,6 +1808,107 @@ export type Database = {
         }
         Relationships: []
       }
+      gdpr_notifications: {
+        Row: {
+          admin_user_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          notification_type: string
+          priority: string | null
+          read_at: string | null
+          request_id: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          notification_type: string
+          priority?: string | null
+          read_at?: string | null
+          request_id: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          notification_type?: string
+          priority?: string | null
+          read_at?: string | null
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gdpr_notifications_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "gdpr_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gdpr_requests: {
+        Row: {
+          admin_notes: string | null
+          approved_by: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          priority: string | null
+          reason: string | null
+          request_type: string
+          requested_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+          user_message: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          reason?: string | null
+          request_type: string
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+          user_message?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          reason?: string | null
+          request_type?: string
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+          user_message?: string | null
+        }
+        Relationships: []
+      }
       import_requests: {
         Row: {
           completed_at: string | null
