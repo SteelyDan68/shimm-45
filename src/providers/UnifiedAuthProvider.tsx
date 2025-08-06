@@ -340,17 +340,32 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
 
   const signOut = async () => {
     try {
+      console.log('🔥 signOut: Starting logout process...', {
+        currentUser: user?.id,
+        currentSession: session?.access_token ? 'exists' : 'missing',
+        roles: roles
+      });
+
+      // Check if we already have a valid session
+      const { data: currentSession } = await supabase.auth.getSession();
+      console.log('🔥 signOut: Current session check:', {
+        sessionExists: !!currentSession.session,
+        sessionId: currentSession.session?.access_token ? 'exists' : 'missing'
+      });
+
       const { error } = await supabase.auth.signOut();
       
       if (error) {
+        console.error('🔥 signOut: Supabase signOut error:', error);
         toast({
           title: "Utloggningsfel",
-          description: error.message,
+          description: `Auth session missing: ${error.message}`,
           variant: "destructive",
         });
         return { error };
       }
 
+      console.log('🔥 signOut: Successfully signed out, clearing state...');
       setUser(null);
       setSession(null);
       setProfile(null);
@@ -363,9 +378,10 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
 
       return { error: null };
     } catch (error: any) {
+      console.error('🔥 signOut: Unexpected error:', error);
       toast({
         title: "Utloggningsfel",
-        description: error.message,
+        description: `Oväntat fel: ${error.message}`,
         variant: "destructive",
       });
       return { error };
