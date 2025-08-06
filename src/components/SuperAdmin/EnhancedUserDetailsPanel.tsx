@@ -65,43 +65,93 @@ export const EnhancedUserDetailsPanel: React.FC<EnhancedUserDetailsPanelProps> =
   const loadPillarAndAssessmentData = async () => {
     setLoadingPillarData(true);
     try {
-      // Load pillar progress
-      const { data: pillarProgress, error: pillarError } = await supabase
-        .from('user_pillar_activations')
-        .select(`
-          *,
-          pillar_assessments (
-            id,
-            scores,
-            ai_analysis,
-            created_at
-          )
-        `)
-        .eq('user_id', userData.id)
-        .eq('is_active', true);
+      // Try multiple data sources for pillar information
+      let pillarActivations: any[] = [];
+      let pillarAssessments: any[] = [];
+      let pathEntries: any[] = [];
 
-      if (pillarError) throw pillarError;
+      // 1. Try path_entries first (newer system)
+      try {
+        const { data: pathData, error: pathError } = await supabase
+          .from('path_entries')
+          .select('*')
+          .eq('user_id', userData.id)
+          .in('type', ['pillar_activation', 'pillar_assessment', 'pillar_activity'])
+          .order('created_at', { ascending: false });
+        
+        if (!pathError && pathData) {
+          pathEntries = pathData;
+        }
+      } catch (error) {
+        console.warn('Could not load from path_entries:', error);
+      }
 
-      // Load assessment rounds
-      const { data: assessments, error: assessmentError } = await supabase
-        .from('assessment_rounds')
-        .select('*')
-        .eq('user_id', userData.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      // 2. Try pillar activations
+      try {
+        const { data: activations, error: activationError } = await supabase
+          .from('user_pillar_activations')
+          .select('*')
+          .eq('user_id', userData.id);
 
-      if (assessmentError) throw assessmentError;
+        if (!activationError && activations) {
+          pillarActivations = activations;
+        }
+      } catch (error) {
+        console.warn('Could not load pillar activations:', error);
+      }
 
-      setPillarData(pillarProgress || []);
-      setAssessmentHistory(assessments || []);
+      // 3. Try pillar assessments
+      try {
+        const { data: assessments, error: assessmentError } = await supabase
+          .from('pillar_assessments')
+          .select('*')
+          .eq('user_id', userData.id)
+          .order('created_at', { ascending: false });
+
+        if (!assessmentError && assessments) {
+          pillarAssessments = assessments;
+        }
+      } catch (error) {
+        console.warn('Could not load pillar assessments:', error);
+      }
+
+      // 4. Try assessment rounds as fallback
+      try {
+        const { data: assessmentRounds, error: roundsError } = await supabase
+          .from('assessment_rounds')
+          .select('*')
+          .eq('user_id', userData.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (!roundsError && assessmentRounds) {
+          pillarAssessments = [...pillarAssessments, ...assessmentRounds];
+        }
+      } catch (error) {
+        console.warn('Could not load assessment rounds:', error);
+      }
+
+      // Combine all data sources
+      const combinedPillarData = [
+        ...pillarActivations,
+        ...pathEntries.filter(entry => entry.type === 'pillar_activation')
+      ];
+
+      const combinedAssessments = [
+        ...pillarAssessments,
+        ...pathEntries.filter(entry => ['pillar_assessment', 'pillar_activity'].includes(entry.type))
+      ];
+
+      setPillarData(combinedPillarData);
+      setAssessmentHistory(combinedAssessments);
+
+      console.log(`Loaded ${combinedPillarData.length} pillar records and ${combinedAssessments.length} assessments`);
 
     } catch (error) {
       console.error('Error loading pillar data:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda pillar-data",
-        variant: "destructive"
-      });
+      // Set empty data instead of showing error for missing pillar data
+      setPillarData([]);
+      setAssessmentHistory([]);
     } finally {
       setLoadingPillarData(false);
     }

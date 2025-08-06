@@ -109,7 +109,12 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       // Load intelligence data if permitted
       let intelligenceData = null;
       if (canViewIntelligence) {
-        intelligenceData = await loadProfile(userId);
+        try {
+          intelligenceData = await loadProfile(userId);
+        } catch (error) {
+          console.warn('Intelligence data not available:', error);
+          // Intelligence data is optional, continue without it
+        }
       }
 
       // Combine all data
@@ -129,11 +134,27 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       
     } catch (error) {
       console.error('Failed to load complete user data:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda fullständig användardata",
-        variant: "destructive"
-      });
+      // Only show error toast for critical failures, not missing optional data
+      if (error instanceof Error && !error.message.includes('Intelligence') && !error.message.includes('pillar')) {
+        toast({
+          title: "Fel",
+          description: "Kunde inte ladda grundläggande användardata",
+          variant: "destructive"
+        });
+      }
+      // Still set basic user data even if extended data fails
+      const basicUserData: SelectedUserData = {
+        id: userId,
+        basicInfo: users.find(u => u.id === userId),
+        extendedProfile: null,
+        intelligenceData: null,
+        assessmentData: {},
+        relationships: {
+          asCoach: users.filter(u => u.coach_id === userId),
+          asClient: users.find(u => u.id === users.find(u => u.id === userId)?.coach_id) || null
+        }
+      };
+      setSelectedUserData(basicUserData);
     } finally {
       setLoadingUserData(false);
     }

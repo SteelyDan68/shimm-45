@@ -300,9 +300,14 @@ export const useIntelligenceHub = (options: UseIntelligenceHubOptions = {}) => {
       // Build intelligence profiles for search results
       const intelligenceProfiles: IntelligenceProfile[] = [];
       for (const profile of profilesData || []) {
-        const intelligenceProfile = await buildIntelligenceProfile(profile.id);
-        if (intelligenceProfile) {
-          intelligenceProfiles.push(intelligenceProfile);
+        try {
+          const intelligenceProfile = await buildIntelligenceProfile(profile.id);
+          if (intelligenceProfile) {
+            intelligenceProfiles.push(intelligenceProfile);
+          }
+        } catch (error) {
+          console.warn(`Failed to build intelligence profile for ${profile.id}:`, error);
+          // Continue with other profiles
         }
       }
 
