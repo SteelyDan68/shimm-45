@@ -219,6 +219,7 @@ const EnhancedPillarGateway: React.FC<EnhancedPillarGatewayProps> = ({
                   <Button 
                     className="w-full mt-3"
                     variant={status === 'required' ? 'default' : 'outline'}
+                    onClick={() => handlePillarClick(pillarKey)}
                   >
                     <Play className="w-4 h-4 mr-2" />
                     Starta assessment

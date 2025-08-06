@@ -303,7 +303,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={handleShowPillarJourney}
+                  onClick={() => navigate('/six-pillars?startAssessment=true')}
                 >
                   Starta assessment
                 </Button>

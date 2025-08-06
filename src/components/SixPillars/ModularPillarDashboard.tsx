@@ -327,7 +327,9 @@ export const ModularPillarDashboard = ({
           setIsRetakeLoading(true);
           try {
             await retakePillar(retakePillarKey);
-            // Auto-start new assessment
+            // Force refresh to show visual reset
+            window.location.reload();
+            // Auto-start new assessment (will happen after reload)
             setSelectedPillar(retakePillarKey);
             setRetakePillarKey(null);
           } catch (error) {

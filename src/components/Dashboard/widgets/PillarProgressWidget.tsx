@@ -204,7 +204,8 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
           try {
             await retakePillar(retakePillarKey);
             setRetakePillarKey(null);
-            // Widget will refresh automatically through hooks
+            // Force refresh to show visual reset
+            window.location.reload();
           } catch (error) {
             console.error('Failed to retake pillar:', error);
           } finally {

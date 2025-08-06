@@ -69,7 +69,30 @@ const DashboardContent: React.FC<{
 
   const handleWidgetAction = (widgetId: string, actionId: string) => {
     console.log(`Widget ${widgetId} action: ${actionId}`);
-    // Implementera widget-specifika actions här
+    
+    // Implementera widget-specifika actions
+    switch (actionId) {
+      case 'start-assessment':
+        // Navigera till pillar assessment flow
+        window.location.href = '/six-pillars?startAssessment=true';
+        break;
+      case 'view-tasks':
+        window.location.href = '/tasks';
+        break;
+      case 'view-progress':
+        window.location.href = '/pillar-journey';
+        break;
+      case 'create-task':
+        // Navigate to task creation
+        window.location.href = '/tasks?create=true';
+        break;
+      case 'schedule-session':
+        // Navigate to coaching session scheduling
+        window.location.href = '/calendar?createSession=true';
+        break;
+      default:
+        console.log('Unknown action:', actionId);
+    }
   };
 
   const handleWidgetConfigChange = (widgetId: string, config: Record<string, any>) => {
