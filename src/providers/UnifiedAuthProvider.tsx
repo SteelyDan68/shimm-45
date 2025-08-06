@@ -201,16 +201,25 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
         .select('role')
         .eq('user_id', userId);
 
+      console.log('🔥 UnifiedAuth: Raw role data:', { data, error });
+
       if (error) {
-        console.error('Error fetching roles:', error);
+        console.error('🔥 UnifiedAuth: Error fetching roles:', error);
+        setRoles([]); // Set empty array on error
         return;
       }
 
       const userRoles = data?.map(item => item.role) as AppRole[] || [];
-      console.log('🔥 UnifiedAuth: Found roles:', userRoles);
+      console.log('🔥 UnifiedAuth: Found roles:', userRoles, 'Setting roles state...');
       setRoles(userRoles);
+      
+      // Verify the roles were set
+      setTimeout(() => {
+        console.log('🔥 UnifiedAuth: Roles state after setting:', userRoles);
+      }, 100);
     } catch (error) {
-      console.error('Error in fetchUserRoles:', error);
+      console.error('🔥 UnifiedAuth: Error in fetchUserRoles:', error);
+      setRoles([]); // Set empty array on error
     }
   }, []);
 
