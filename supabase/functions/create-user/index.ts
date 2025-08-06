@@ -9,9 +9,16 @@ const corsHeaders = {
 interface CreateUserRequest {
   email: string;
   password?: string;
-  first_name: string;
-  last_name: string;
-  roles: string[];
+  firstName: string;
+  lastName: string;
+  role: string;
+  extendedProfile?: {
+    phone?: string;
+    organization?: string;
+    job_title?: string;
+    bio?: string;
+  };
+  sendInviteEmail?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,9 +29,9 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('🚀 Create User Function Started');
     
-    const { email, password, first_name, last_name, roles }: CreateUserRequest = await req.json();
+    const { email, password, firstName, lastName, role, extendedProfile }: CreateUserRequest = await req.json();
     
-    console.log(`Creating user: ${email} with roles: ${roles.join(', ')}`);
+    console.log(`Creating user: ${email} with role: ${role}`);
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -56,8 +63,12 @@ const handler = async (req: Request): Promise<Response> => {
       .insert({
         id: authUser.user!.id,
         email,
-        first_name,
-        last_name,
+        first_name: firstName,
+        last_name: lastName,
+        phone: extendedProfile?.phone || '',
+        organization: extendedProfile?.organization || '',
+        job_title: extendedProfile?.job_title || '',
+        bio: extendedProfile?.bio || '',
       });
 
     if (profileError) {
@@ -69,22 +80,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Profile created successfully');
 
-    // 3. Add roles
-    console.log('Adding roles...');
-    for (const role of roles) {
-      const { error: roleError } = await supabaseClient
-        .from('user_roles')
-        .insert({
-          user_id: authUser.user!.id,
-          role: role,
-        });
-      
-      if (roleError) {
-        console.error(`Role error for ${role}:`, roleError);
-        // Continue with other roles even if one fails
-      } else {
-        console.log(`Role ${role} added successfully`);
-      }
+    // 3. Add role
+    console.log('Adding role...');
+    const { error: roleError } = await supabaseClient
+      .from('user_roles')
+      .insert({
+        user_id: authUser.user!.id,
+        role: role,
+      });
+    
+    if (roleError) {
+      console.error(`Role error for ${role}:`, roleError);
+      // Clean up auth user and profile
+      await supabaseClient.auth.admin.deleteUser(authUser.user!.id);
+      throw new Error(`Failed to add role: ${roleError.message}`);
+    } else {
+      console.log(`Role ${role} added successfully`);
     }
 
     console.log('✅ User created successfully');
