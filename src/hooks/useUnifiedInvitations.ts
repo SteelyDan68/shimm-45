@@ -64,9 +64,9 @@ export const useUnifiedInvitations = (): UseUnifiedInvitationsReturn => {
     setError(null);
 
     try {
-      console.log('🚀 Unified Invitations: Sending request', request);
+      console.log('🚀 Unified Invitations: Sending request to send-invitations', request);
 
-      const { data, error: edgeError } = await supabase.functions.invoke('unified-invitations', {
+      const { data, error: edgeError } = await supabase.functions.invoke('send-invitations', {
         body: request
       });
 
