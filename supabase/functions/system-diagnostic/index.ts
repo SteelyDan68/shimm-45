@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('🧪 Test 1: Database connection...');
     const { data: dbTest, error: dbError } = await supabaseClient
       .from('profiles')
-      .select('count(*)')
+      .select('id')
       .limit(1);
     
     if (dbError) {
