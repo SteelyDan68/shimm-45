@@ -133,7 +133,14 @@ export function TopNavigation() {
               {/* Sign Out */}
               <div className="py-1">
                 <DropdownMenuItem 
-                  onClick={signOut}
+                  onClick={async () => {
+                    try {
+                      await signOut();
+                      navigate('/');
+                    } catch (error) {
+                      console.error('Logout error:', error);
+                    }
+                  }}
                   className="flex items-center w-full px-3 py-2 text-sm text-destructive focus:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
                 >
                   <LogOut className="h-4 w-4 mr-3" />
