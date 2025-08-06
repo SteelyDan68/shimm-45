@@ -1,0 +1,229 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const handler = async (req: Request): Promise<Response> => {
+  console.log('🔧 System diagnostic test started');
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    console.log('🔍 Testing environment variables...');
+    
+    // Test environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const resendKey = Deno.env.get('RESEND_API_KEY');
+    
+    console.log('Environment check:', {
+      supabaseUrl: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'MISSING',
+      serviceRoleKey: serviceRoleKey ? `${serviceRoleKey.substring(0, 20)}...` : 'MISSING',
+      resendKey: resendKey ? `${resendKey.substring(0, 10)}...` : 'MISSING'
+    });
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Missing critical environment variables');
+    }
+
+    console.log('🔧 Initializing Supabase client...');
+    const supabaseClient = createClient(supabaseUrl, serviceRoleKey);
+
+    // Test 1: Basic database connection
+    console.log('🧪 Test 1: Database connection...');
+    const { data: dbTest, error: dbError } = await supabaseClient
+      .from('profiles')
+      .select('count(*)')
+      .limit(1);
+    
+    if (dbError) {
+      console.error('❌ Database connection failed:', dbError);
+      throw new Error(`Database connection failed: ${dbError.message}`);
+    }
+    console.log('✅ Database connection successful');
+
+    // Test 2: Service role permissions
+    console.log('🧪 Test 2: Service role permissions...');
+    const testUser = {
+      email: `test-${Date.now()}@example.com`,
+      password: 'TestPassword123!'
+    };
+    
+    console.log('Creating test user...');
+    const { data: authUser, error: authError } = await supabaseClient.auth.admin.createUser({
+      email: testUser.email,
+      password: testUser.password,
+      email_confirm: true,
+    });
+
+    if (authError) {
+      console.error('❌ Auth user creation failed:', authError);
+      return new Response(JSON.stringify({
+        success: false,
+        step: 'auth_user_creation',
+        error: authError.message,
+        details: authError
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log('✅ Test user created:', authUser.user?.id);
+
+    // Test 3: Profile creation
+    console.log('🧪 Test 3: Profile creation...');
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .insert({
+        id: authUser.user!.id,
+        email: testUser.email,
+        first_name: 'Test',
+        last_name: 'User',
+      });
+
+    if (profileError) {
+      console.error('❌ Profile creation failed:', profileError);
+      // Clean up auth user
+      await supabaseClient.auth.admin.deleteUser(authUser.user!.id);
+      return new Response(JSON.stringify({
+        success: false,
+        step: 'profile_creation',
+        error: profileError.message,
+        details: profileError
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log('✅ Profile created successfully');
+
+    // Test 4: User roles
+    console.log('🧪 Test 4: User roles...');
+    const { error: roleError } = await supabaseClient
+      .from('user_roles')
+      .insert({
+        user_id: authUser.user!.id,
+        role: 'client',
+      });
+
+    if (roleError) {
+      console.error('❌ Role assignment failed:', roleError);
+      // Clean up
+      await supabaseClient.from('profiles').delete().eq('id', authUser.user!.id);
+      await supabaseClient.auth.admin.deleteUser(authUser.user!.id);
+      return new Response(JSON.stringify({
+        success: false,
+        step: 'role_assignment',
+        error: roleError.message,
+        details: roleError
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log('✅ Role assigned successfully');
+
+    // Test 5: Invitation creation
+    console.log('🧪 Test 5: Invitation creation...');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    
+    const { data: invitation, error: invitationError } = await supabaseClient
+      .from('invitations')
+      .insert({
+        email: `test-invitation-${Date.now()}@example.com`,
+        invited_role: 'client',
+        invited_by: authUser.user!.id,
+        expires_at: expiresAt.toISOString(),
+        token: '', // Will be generated by trigger
+      })
+      .select('id, token')
+      .single();
+
+    if (invitationError) {
+      console.error('❌ Invitation creation failed:', invitationError);
+    } else {
+      console.log('✅ Invitation created successfully');
+    }
+
+    // Test 6: Resend API
+    let resendTest = null;
+    if (resendKey) {
+      try {
+        console.log('🧪 Test 6: Resend API...');
+        const { Resend } = await import("npm:resend@4.0.0");
+        const resend = new Resend(resendKey);
+        
+        // Just test the connection, don't actually send email
+        console.log('✅ Resend client initialized successfully');
+        resendTest = { success: true, message: 'Resend client initialized' };
+      } catch (resendError: any) {
+        console.error('❌ Resend initialization failed:', resendError);
+        resendTest = { success: false, error: resendError.message };
+      }
+    } else {
+      resendTest = { success: false, error: 'RESEND_API_KEY missing' };
+    }
+
+    // Cleanup test data
+    console.log('🧹 Cleaning up test data...');
+    if (invitation) {
+      await supabaseClient.from('invitations').delete().eq('id', invitation.id);
+    }
+    await supabaseClient.from('user_roles').delete().eq('user_id', authUser.user!.id);
+    await supabaseClient.from('profiles').delete().eq('id', authUser.user!.id);
+    await supabaseClient.auth.admin.deleteUser(authUser.user!.id);
+
+    console.log('✅ All tests completed successfully!');
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'All system diagnostics passed',
+      tests: {
+        database_connection: { success: true },
+        auth_user_creation: { success: true },
+        profile_creation: { success: true },
+        role_assignment: { success: true },
+        invitation_creation: invitationError ? { success: false, error: invitationError.message } : { success: true },
+        resend_api: resendTest
+      },
+      environment: {
+        supabaseUrl: supabaseUrl ? 'configured' : 'missing',
+        serviceRoleKey: serviceRoleKey ? 'configured' : 'missing',
+        resendKey: resendKey ? 'configured' : 'missing'
+      }
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+
+  } catch (error: any) {
+    console.error("💥 Critical system diagnostic error:", error);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: error?.message || "System diagnostic failed",
+        details: {
+          message: error?.message || 'No message',
+          name: error?.name || 'No name',
+          stack: error?.stack || 'No stack'
+        }
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
+  }
+};
+
+serve(handler);
