@@ -97,6 +97,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<string>('active'); // Default visa bara aktiva
   const [activeTab, setActiveTab] = useState('overview');
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
