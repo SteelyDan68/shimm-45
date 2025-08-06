@@ -49,7 +49,7 @@ export const useGDPRRequests = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, roles } = useAuth();
   const { toast } = useToast();
   
   const isAdmin = user && (hasRole('admin') || hasRole('superadmin'));
@@ -58,6 +58,16 @@ export const useGDPRRequests = () => {
   const loadRequests = async () => {
     try {
       setLoading(true);
+      
+      console.log('🔥 useGDPRRequests: Loading requests...', {
+        user: user?.id,
+        userEmail: user?.email,
+        isAdmin: isAdmin,
+        hasRole_admin: hasRole('admin'),
+        hasRole_superadmin: hasRole('superadmin'),
+        roles: roles
+      });
+      
       let query = supabase
         .from('gdpr_requests')
         .select('*')
@@ -65,13 +75,20 @@ export const useGDPRRequests = () => {
 
       // Om inte admin, visa bara egna requests
       if (!isAdmin) {
+        console.log('🔥 useGDPRRequests: Not admin, filtering by user_id:', user?.id);
         query = query.eq('user_id', user?.id);
+      } else {
+        console.log('🔥 useGDPRRequests: Admin access - loading all requests');
       }
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔥 useGDPRRequests: Database error:', error);
+        throw error;
+      }
 
+      console.log('🔥 useGDPRRequests: Loaded requests:', data?.length || 0, data);
       setRequests((data || []) as GDPRRequest[]);
     } catch (err: any) {
       console.error('Error loading GDPR requests:', err);
