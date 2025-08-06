@@ -1,12 +1,8 @@
 import React from 'react';
-import EnhancedClientDashboard from '@/components/Dashboard/EnhancedClientDashboard';
+import { DashboardOrchestrator } from '@/components/Dashboard/DashboardOrchestrator';
 
 const ClientDashboard = () => {
-  return (
-    <div className="p-6">
-      <EnhancedClientDashboard />
-    </div>
-  );
+  return <DashboardOrchestrator layout="full" />;
 };
 
 export default ClientDashboard;

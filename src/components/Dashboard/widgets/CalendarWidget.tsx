@@ -1,202 +1,156 @@
 /**
- * 📅 CALENDAR WIDGET - Kommande aktiviteter och events
+ * 📅 CALENDAR WIDGET - Kommande aktiviteter och kalenderhändelser
  */
-
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, ArrowRight, Plus } from 'lucide-react';
 import { WidgetProps } from '../types/dashboard-types';
-import { format, formatDistanceToNow } from 'date-fns';
+import { useCalendarData } from '@/hooks/useCalendarData';
+import { Calendar, Clock, MapPin } from 'lucide-react';
+import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
-const CalendarWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
-  
-  // Mock calendar data - detta kommer senare från calendar hooks
-  const events = [
-    {
-      id: '1',
-      title: 'Coaching session med Stefan',
-      description: 'Månatlig uppföljning av utvecklingsresan',
-      startTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Imorgon
-      endTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000), // 1h
-      category: 'coaching',
-      location: 'Video call'
-    },
-    {
-      id: '2',
-      title: 'Pillar Assessment: Skills',
-      description: 'Genomför Skills-bedömningen',
-      startTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 dagar
-      endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000), // 45min
-      category: 'assessment',
-      location: 'Online'
-    },
-    {
-      id: '3',
-      title: 'Daglig reflektion',
-      description: 'Utvärdera dagens framsteg',
-      startTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 18 * 60 * 60 * 1000), // Imorgon 18:00
-      endTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 18.5 * 60 * 60 * 1000), // 30min
-      category: 'reflection',
-      location: null
+const CalendarWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
+  const { events, loading, error } = useCalendarData({
+    dateRange: {
+      start: new Date(),
+      end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
     }
-  ];
+  });
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'coaching': return 'default';
-      case 'assessment': return 'secondary';
-      case 'reflection': return 'outline';
-      case 'habit': return 'destructive';
-      default: return 'outline';
+  const maxItems = widget.config?.maxItems || 5;
+  const upcomingEvents = events?.slice(0, maxItems) || [];
+
+  const getEventTypeColor = (type: string) => {
+    switch (type) {
+      case 'task': return 'bg-primary/10 text-primary';
+      case 'coaching': return 'bg-secondary/10 text-secondary';
+      case 'assessment': return 'bg-accent/10 text-accent';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'coaching': return 'Coaching';
-      case 'assessment': return 'Bedömning';
-      case 'reflection': return 'Reflektion';
-      case 'habit': return 'Vana';
-      default: return category;
+  const getPriorityColor = (priority?: string) => {
+    switch (priority) {
+      case 'high': return 'border-l-red-500';
+      case 'medium': return 'border-l-yellow-500';
+      case 'low': return 'border-l-green-500';
+      default: return 'border-l-muted';
     }
   };
 
-  const upcomingEvents = events
-    .filter(event => event.startTime > new Date())
-    .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
-    .slice(0, widget.config?.maxItems || 5);
-
-  return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">Kommande Aktiviteter</span>
-          <Badge variant="secondary" className="text-xs">
-            {upcomingEvents.length}
-          </Badge>
-        </div>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onAction?.('create-event')}
-          className="w-8 h-8 p-0"
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Events List */}
-      <div className="space-y-2">
-        {upcomingEvents.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Inga kommande aktiviteter</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-2"
-              onClick={() => onAction?.('view-calendar')}
-            >
-              Öppna kalender
-            </Button>
-          </div>
-        ) : (
-          upcomingEvents.map((event) => {
-            const isToday = format(event.startTime, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-            const isTomorrow = format(event.startTime, 'yyyy-MM-dd') === format(new Date(Date.now() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
-            
-            return (
-              <div 
-                key={event.id}
-                className={`p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors ${
-                  isToday ? 'border-blue-200 bg-blue-50' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <Calendar className="w-4 h-4 mt-0.5 text-blue-600" />
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm leading-tight">
-                        {event.title}
-                      </p>
-                      
-                      {event.description && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {event.description}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <Badge 
-                          variant={getCategoryColor(event.category) as any} 
-                          className="text-xs"
-                        >
-                          {getCategoryLabel(event.category)}
-                        </Badge>
-                        
-                        {widget.config?.showTime && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3" />
-                            {isToday ? 'Idag' : isTomorrow ? 'Imorgon' : 
-                             formatDistanceToNow(event.startTime, { locale: sv, addSuffix: true })}
-                            {' '}
-                            {format(event.startTime, 'HH:mm')}
-                          </div>
-                        )}
-                        
-                        {event.location && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="w-3 h-3" />
-                            {event.location}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onAction?.(`view-event-${event.id}`)}
-                    className="w-8 h-8 p-0 ml-2"
-                  >
-                    <ArrowRight className="w-3 h-3" />
-                  </Button>
+  if (loading) {
+    return (
+      <Card className="h-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <Calendar className="w-4 h-4" />
+            {widget.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-3 animate-pulse">
+                <div className="w-10 h-10 bg-muted rounded-md" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-3 bg-muted rounded w-3/4" />
+                  <div className="h-2 bg-muted rounded w-1/2" />
                 </div>
               </div>
-            );
-          })
-        )}
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-      {/* Footer Actions */}
-      {upcomingEvents.length > 0 && (
-        <div className="flex gap-2">
-          <Button 
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => onAction?.('view-calendar')}
-          >
-            <Calendar className="w-4 h-4 mr-2" />
-            Öppna Kalender
-          </Button>
-          
-          <Button 
-            size="sm"
-            onClick={() => onAction?.('create-event')}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Ny
-          </Button>
-        </div>
-      )}
-    </div>
+  if (error) {
+    return (
+      <Card className="h-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <Calendar className="w-4 h-4" />
+            {widget.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Kunde inte ladda kalenderhändelser</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium">
+          <Calendar className="w-4 h-4" />
+          {widget.title}
+        </CardTitle>
+        {widget.description && (
+          <p className="text-xs text-muted-foreground">{widget.description}</p>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {upcomingEvents.length === 0 ? (
+          <div className="text-center py-4">
+            <Calendar className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Inga kommande aktiviteter</p>
+          </div>
+        ) : (
+          upcomingEvents.map((event) => (
+            <div
+              key={event.id}
+              className={`p-3 rounded-lg border-l-4 bg-card hover:bg-accent/5 transition-colors ${getPriorityColor(event.priority)}`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-medium truncate">{event.title}</h4>
+                  {event.description && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {event.description}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {format(new Date(event.date), 'MMM d, HH:mm', { locale: sv })}
+                    </div>
+                    {event.description && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        Online
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1 ml-2">
+                  <Badge 
+                    variant="secondary" 
+                    className={`text-xs ${getEventTypeColor(event.type)}`}
+                  >
+                    {event.type === 'path_entry' ? 'Uppgift' : 
+                     event.type === 'assessment' ? 'Assessment' :
+                     event.type === 'custom_event' ? 'Händelse' : 
+                     event.category || event.type}
+                  </Badge>
+                  {event.priority && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs"
+                    >
+                      {event.priority === 'high' ? 'Hög' :
+                       event.priority === 'medium' ? 'Medium' : 'Låg'}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
