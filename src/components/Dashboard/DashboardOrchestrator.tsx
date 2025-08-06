@@ -82,6 +82,12 @@ const DashboardContent: React.FC<{
       case 'view-progress':
         window.location.href = '/pillar-journey';
         break;
+      case 'view-pillars':
+        window.location.href = '/six-pillars';
+        break;
+      case 'continue-journey':
+        window.location.href = '/pillar-journey';
+        break;
       case 'create-task':
         // Navigate to task creation
         window.location.href = '/tasks?create=true';
@@ -91,7 +97,16 @@ const DashboardContent: React.FC<{
         window.location.href = '/calendar?createSession=true';
         break;
       default:
-        console.log('Unknown action:', actionId);
+        // Handle pillar-specific actions
+        if (actionId.startsWith('start-pillar-')) {
+          const pillarKey = actionId.replace('start-pillar-', '');
+          window.location.href = `/six-pillars/${pillarKey}`;
+        } else if (actionId.startsWith('view-pillar-')) {
+          const pillarKey = actionId.replace('view-pillar-', '');
+          window.location.href = `/pillar-journey?pillar=${pillarKey}`;
+        } else {
+          console.log('Unknown action:', actionId);
+        }
     }
   };
 
