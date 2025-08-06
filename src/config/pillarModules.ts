@@ -143,299 +143,429 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
   skills: {
     key: 'skills',
     name: 'Färdigheter & Utveckling',
-    description: 'Utvärdera och utveckla dina professionella kompetenser strategiskt. Fokuserar på målinriktad kompetensutveckling och praktisk tillämpning.',
+    description: 'Utvärdera och utveckla dina professionella kompetenser strategiskt med neuroplastisk precision. Fokuserar på evidensbaserad kompetensutveckling och optimal inlärning.',
     icon: '🎯',
     color: '#3B82F6',
     questions: [
-      // Nuvarande kompetensnivå och självförtroende
-      { key: 'core_competence', text: 'Hur kompetent känner du dig inom ditt huvudområde?', type: 'slider', weight: 1.3, min: 1, max: 10 },
-      { key: 'skill_application', text: 'Hur väl kan du tillämpa dina färdigheter i praktiken?', type: 'slider', weight: 1.2, min: 1, max: 10 },
-      { key: 'learning_efficiency', text: 'Hur effektivt lär du dig nya saker?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 1: NUVARANDE KOMPETENSNIVÅ & SJÄLVFÖRTROENDE ===
+      { key: 'kompetens_karnomrade', text: 'Jag känner mig mycket kompetent inom mitt huvudområde', type: 'slider', min: 0, max: 100, weight: 1.3 },
+      { key: 'praktisk_tillämpning', text: 'Jag tillämpar mina färdigheter effektivt i verkliga situationer', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'inlarningsformaga', text: 'Jag lär mig nya färdigheter snabbt och effektivt', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'sjalvfortroende_expertis', text: 'Jag känner mig trygg i min professionella expertis', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'kunskapsbredd', text: 'Jag har bred kunskap som kompletterar min kärnkompetens', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Utvecklingsprocess och metoder
-      { key: 'structured_learning', text: 'Har du en strukturerad plan för din kompetensutveckling?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'feedback_integration', text: 'Hur bra är du på att ta emot och använda feedback?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'practice_consistency', text: 'Övar du dina färdigheter regelbundet och konsekvent?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 2: UTVECKLINGSPROCESS & NEUROPLASTISK METODIK ===
+      { key: 'strukturerad_utveckling', text: 'Jag följer en strukturerad plan för min kompetensutveckling', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'feedback_integration', text: 'Jag tar emot och använder feedback för att förbättras', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'deliberate_practice', text: 'Jag övar mina färdigheter medvetet och systematiskt', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'reflektion_larande', text: 'Jag reflekterar regelbundet över min utveckling', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'progressivt_utmanande', text: 'Jag utmanar mig kontinuerligt med svårare uppgifter', type: 'slider', min: 0, max: 100, weight: 1.1 },
       
-      // Problemlösning och kreativitet
-      { key: 'complex_problem_solving', text: 'Känner du dig trygg när du möter komplexa utmaningar?', type: 'slider', weight: 1.2, min: 1, max: 10 },
-      { key: 'innovative_thinking', text: 'Kommer du ofta på nya sätt att lösa problem?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'adaptability', text: 'Anpassar du dig lätt till nya verktyg och metoder?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      // === SEKTION 3: PROBLEMLÖSNING & KREATIV TILLÄMPNING ===
+      { key: 'komplexa_utmaningar', text: 'Jag känner mig trygg när jag möter komplexa problem', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'innovativ_problemlosning', text: 'Jag hittar ofta kreativa lösningar på svåra problem', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'anpassningsformaga', text: 'Jag anpassar mig snabbt till nya verktyg och metoder', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'kritiskt_tankande', text: 'Jag analyserar problem grundligt innan jag löser dem', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'experimentell_attityd', text: 'Jag vågar testa nya metoder och tillvägagångssätt', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Kunskapsdelning och samarbete
-      { key: 'knowledge_sharing', text: 'Delar du gärna din kunskap med andra?', type: 'slider', weight: 0.9, min: 1, max: 10 },
-      { key: 'collaborative_learning', text: 'Lär du dig effektivt tillsammans med andra?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      // === SEKTION 4: KUNSKAPSDELNING & SAMARBETSLÄRANDE ===
+      { key: 'kunskapsdelning', text: 'Jag delar gärna min kunskap och hjälper andra att utvecklas', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'samarbetslärande', text: 'Jag lär mig effektivt tillsammans med andra kollegor', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'mentorskap', text: 'Jag är bra på att både ge och ta emot mentorskap', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      { key: 'tvärfunktionellt_arbete', text: 'Jag samarbetar väl med människor från andra områden', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
-      // Självstyrning och målsättning
-      { key: 'goal_clarity', text: 'Har du tydliga mål för din kompetensutveckling?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'progress_tracking', text: 'Följer du upp din utveckling systematiskt?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      // === SEKTION 5: MÅLSÄTTNING & PROGRESSMÄTNING ===
+      { key: 'tydliga_mal', text: 'Jag har tydliga och mätbara mål för min utveckling', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'progress_tracking', text: 'Jag följer upp min utveckling systematiskt och regelbundet', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'milstolpe_planering', text: 'Jag bryter ner stora mål i mindre, hanterbara steg', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'långsiktig_vision', text: 'Jag har en klar vision för var jag vill vara om 2-3 år', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Djupgående reflektion
-      { key: 'core_expertise', text: 'Vad är du absolut bäst på och vad gör dig unik inom ditt område?', type: 'text', weight: 0.6 },
-      { key: 'skill_gaps', text: 'Vilka specifika färdigheter behöver du utveckla för att nå nästa nivå?', type: 'text', weight: 0.6 },
-      { key: 'learning_preferences', text: 'Hur lär du dig bäst? Ge konkreta exempel på framgångsrika inlärningssituationer.', type: 'text', weight: 0.5 },
-      { key: 'growth_challenges', text: 'Vad hindrar dig mest från att utvecklas snabbare?', type: 'text', weight: 0.5 },
-      { key: 'expertise_vision', text: 'Hur ser du dig själv som expert om 2-3 år? Vad vill du vara känd för?', type: 'text', weight: 0.5 }
+      // === SEKTION 6: DJUPANALYS & NEUROPLASTISK PLANERING ===
+      { key: 'karnexpertis_analys', text: 'Definiera dina 3 främsta expertområden och vad som gör dig unik. Vilka specifika kunskaper/färdigheter utgör din konkurrensfördel?', type: 'text', weight: 0.8 },
+      { key: 'skill_gap_kartlaggning', text: 'Kartlägg de 5 viktigaste färdigheterna du behöver utveckla för att nå nästa nivå. Prioritera dem efter påverkan på dina mål.', type: 'text', weight: 0.8 },
+      { key: 'larande_optimering', text: 'Beskriv din optimala inlärningsmiljö och -metod. När lär du dig bäst och vilka faktorer maximerar din neuroplastiska potential?', type: 'text', weight: 0.7 },
+      { key: 'utvecklingshinder', text: 'Identifiera de största hindren för din kompetensutveckling. Vad stoppar dig från att utvecklas snabbare och hur kan dessa övervinnas?', type: 'text', weight: 0.7 },
+      { key: 'expertis_framtidsvision', text: 'Beskriv din vision som expert om 2-3 år. Vilken typ av problem vill du lösa och vilken påverkan vill du ha i din bransch?', type: 'text', weight: 0.6 },
+      { key: 'neuroplastisk_strategi', text: 'Hur skulle en 66-dagars intensiv utvecklingsresa se ut för dig? Vilka dagliga micro-practices skulle maximera din kompetensutveckling?', type: 'text', weight: 0.6 }
     ],
     scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Procentbaserade frågor (0-100% skala)
+      const percentageKeys = ['kompetens_karnomrade', 'praktisk_tillämpning', 'inlarningsformaga', 'sjalvfortroende_expertis', 
+                             'kunskapsbredd', 'strukturerad_utveckling', 'feedback_integration', 'deliberate_practice', 
+                             'reflektion_larande', 'progressivt_utmanande', 'komplexa_utmaningar', 'innovativ_problemlosning',
+                             'anpassningsformaga', 'kritiskt_tankande', 'experimentell_attityd', 'kunskapsdelning',
+                             'samarbetslärande', 'mentorskap', 'tvärfunktionellt_arbete', 'tydliga_mal', 'progress_tracking',
+                             'milstolpe_planering', 'långsiktig_vision'];
+      
+      percentageKeys.forEach(key => {
         const question = PILLAR_MODULES.skills.questions.find(q => q.key === key);
-        if (question && question.type === 'slider' && typeof value === 'number') {
-          totalScore += value * (question.weight || 1);
+        if (question && typeof answers[key] === 'number') {
+          const percentage = answers[key]; // 0-100
+          // Konvertera till poäng där 50% = neutral (0), <50% = negativ, >50% = positiv
+          const normalizedScore = (percentage - 50) / 50; // Range: -1 till +1
+          const finalScore = Math.max(-1, Math.min(1, normalizedScore)) * 5 + 5; // Range: 0-10
+          
+          totalScore += finalScore * (question.weight || 1);
           totalWeight += (question.weight || 1);
         }
       });
       
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 5;
     },
     insightGeneration: (answers: Record<string, any>, score: number) => {
-      const insights: Record<string, any> = {
-        overallScore: score,
-        focusArea: answers.main_focus_area || '',
-        missingSkills: answers.missing_tools_knowledge || '',
-        strengths: [],
-        developmentAreas: [],
-        recommendations: []
-      };
+      const criticalAreas = [];
+      const strongAreas = [];
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Analysera utvecklingsområden baserat på nya procentskalan
+      const percentageKeys = ['kompetens_karnomrade', 'praktisk_tillämpning', 'inlarningsformaga', 'sjalvfortroende_expertis', 
+                             'kunskapsbredd', 'strukturerad_utveckling', 'feedback_integration', 'deliberate_practice', 
+                             'reflektion_larande', 'progressivt_utmanande', 'komplexa_utmaningar', 'innovativ_problemlosning',
+                             'anpassningsformaga', 'kritiskt_tankande', 'experimentell_attityd', 'kunskapsdelning',
+                             'samarbetslärande', 'mentorskap', 'tvärfunktionellt_arbete', 'tydliga_mal', 'progress_tracking',
+                             'milstolpe_planering', 'långsiktig_vision'];
+      
+      percentageKeys.forEach(key => {
+        const value = answers[key];
         if (typeof value === 'number') {
-          if (value >= 8) insights.strengths.push(key);
-          if (value <= 4) insights.developmentAreas.push(key);
+          if (value <= 30) criticalAreas.push(key); // 30% eller lägre = kritiskt område
+          if (value >= 80) strongAreas.push(key);   // 80% eller högre = styrkeområde
         }
       });
       
-      return insights;
+      return {
+        criticalAreas,
+        strongAreas,
+        overallStatus: score >= 7 ? 'strong' : score >= 5 ? 'moderate' : 'needs_attention',
+        focusArea: answers.karnexpertis_analys || '',
+        developmentPlan: answers.neuroplastisk_strategi || ''
+      };
     }
   },
 
   talent: {
     key: 'talent',
     name: 'Talang & Styrkor',
-    description: 'Identifiera och maximera dina naturliga begåvningar. Fokuserar på att förstå och utveckla det som gör dig unik och framstående.',
+    description: 'Upptäck och maximera dina naturliga begåvningar med neuroplastisk precision. Fokuserar på att identifiera, utveckla och strategiskt utnyttja det som gör dig exceptionell.',
     icon: '⭐',
     color: '#F59E0B',
     questions: [
-      // Talangidentifiering och medvetenhet
-      { key: 'natural_gifts', text: 'Känner du tydligt till vad du är naturligt begåvad för?', type: 'slider', weight: 1.3, min: 1, max: 10 },
-      { key: 'effortless_excellence', text: 'Finns det saker som känns lätta för dig men svåra för andra?', type: 'slider', weight: 1.2, min: 1, max: 10 },
-      { key: 'talent_recognition', text: 'Uppmärksammar andra regelbundet dina specifika styrkor?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 1: TALANGIDENTIFIERING & NATURLIG BEGÅVNING ===
+      { key: 'naturlig_begavning', text: 'Jag vet tydligt vad jag är naturligt begåvad för', type: 'slider', min: 0, max: 100, weight: 1.3 },
+      { key: 'anstrangningslost_excellens', text: 'Jag presterar lätt inom mina talangområden medan andra kämpar', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'extern_bekraftelse', text: 'Andra uppmärksammar och berömer regelbundet mina specifika styrkor', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'intuitivt_masterskap', text: 'Jag förstår vissa saker intuitivt utan att behöva träna mycket', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'snabb_inlarning', text: 'Jag lär mig exponentiellt snabbare inom vissa områden', type: 'slider', min: 0, max: 100, weight: 1.1 },
       
-      // Flow och optimal prestanda
-      { key: 'flow_frequency', text: 'Hur ofta hamnar du i ett "flow-tillstånd" där tiden flyger?', type: 'slider', weight: 1.2, min: 1, max: 10 },
-      { key: 'energy_from_talents', text: 'Ger dina talanger dig energi snarare än att tära på den?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'natural_learning', text: 'Lär du dig vissa saker märkbart snabbare än andra?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 2: FLOW-TILLSTÅND & OPTIMAL PRESTANDA ===
+      { key: 'flow_frekvens', text: 'Jag hamnar ofta i flow-tillstånd där tiden bara försvinner', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'energi_fran_talanger', text: 'Mina talanger ger mig energi istället för att trötta ut mig', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'effortless_state', text: 'Jag känner mig som "i min rätta element" när jag använder mina talanger', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'optimal_prestanda', text: 'Jag presterar på min högsta nivå när jag får använda mina talanger', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'naturlig_rytm', text: 'Jag hittar naturligt den optimala rytmen och metoden inom mina talangområden', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Talantutnyttjande och utveckling
-      { key: 'talent_utilization', text: 'Använder du dina största talanger dagligen i ditt arbete?', type: 'slider', weight: 1.3, min: 1, max: 10 },
-      { key: 'strength_investment', text: 'Investerar du tid i att utveckla dina starkaste områden?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'talent_stretching', text: 'Utmanar du dina talanger med allt svårare uppgifter?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      // === SEKTION 3: STRATEGISKT TALANTUTNYTTJANDE ===
+      { key: 'dagligt_utnyttjande', text: 'Jag använder mina största talanger dagligen i mitt arbete/liv', type: 'slider', min: 0, max: 100, weight: 1.3 },
+      { key: 'medveten_utveckling', text: 'Jag investerar medvetet tid i att utveckla mina starkaste områden', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'progressiv_utmaning', text: 'Jag utmanar kontinuerligt mina talanger med svårare uppgifter', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'strategisk_fokusering', text: 'Jag fokuserar mer på att utveckla styrkor än att fixa svagheter', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'talang_kombinationer', text: 'Jag kombinerar mina talanger på unika sätt för maximal påverkan', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Autenticitet och passion
-      { key: 'authentic_self', text: 'Känner du dig som din äkta själv när du använder dina talanger?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'intrinsic_motivation', text: 'Motiveras du inifrån av att använda dina talanger?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'talent_joy', text: 'Känner du glädje och tillfredsställelse i dina talangsområden?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      // === SEKTION 4: AUTENTICITET & PASSION ===
+      { key: 'akta_sjalv', text: 'Jag känner mig som min äkta själv när jag använder mina talanger', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'inre_motivation', text: 'Jag motiveras inifrån av att utveckla och använda mina talanger', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'djup_tillfredsställelse', text: 'Jag känner djup glädje och tillfredsställelse från mina talangområden', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'naturlig_passion', text: 'Min passion för mina talangområden kommer naturligt och uthålligt', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Impact och värdeskapande
-      { key: 'unique_contribution', text: 'Bidrar dina talanger med något unikt som andra inte kan ge?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'talent_impact', text: 'Skapar dina talanger tydligt värde för andra?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      // === SEKTION 5: VÄRDESKAPANDE & UNIK CONTRIBUTION ===
+      { key: 'unikt_bidrag', text: 'Mina talanger bidrar med något unikt som andra inte kan erbjuda', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'varde_for_andra', text: 'Mina talanger skapar tydligt och mätbart värde för andra', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'eftertragade_expertis', text: 'Människor söker aktivt upp mig för mina specifika talanger', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'monetär_värdering', text: 'Jag kan få bra betalt för mina talanger och expertis', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
-      // Djupgående talanganalys
-      { key: 'signature_talents', text: 'Vilka är dina 3 starkaste talanger som gör dig unik? Beskriv dem i detalj.', type: 'text', weight: 0.7 },
-      { key: 'effortless_achievements', text: 'Vad har du åstadkommit som kändes naturligt och lätt för dig?', type: 'text', weight: 0.6 },
-      { key: 'childhood_patterns', text: 'Vad var du naturligt bra på redan som barn? Vilka mönster ser du?', type: 'text', weight: 0.5 },
-      { key: 'energy_givers', text: 'Vilka aktiviteter ger dig mest energi och får dig att känna dig levande?', type: 'text', weight: 0.6 },
-      { key: 'talent_potential', text: 'Hur skulle du kunna utveckla dina talanger till nästa nivå?', type: 'text', weight: 0.5 }
+      // === SEKTION 6: DJUPANALYS & NEUROPLASTISK UTVECKLING ===
+      { key: 'signatur_talanger', text: 'Identifiera dina 3 mest utmärkande talanger. Beskriv detaljerat vad som gör dig exceptionell inom dessa områden och hur de manifesteras.', type: 'text', weight: 0.8 },
+      { key: 'anstrangningslosa_prestationer', text: 'Beskriv konkreta prestationer som kändes nästan för lätta för dig. Vad är det andra kämpar med som du gör naturligt?', type: 'text', weight: 0.7 },
+      { key: 'barndom_indikatorer', text: 'Vilka tidiga tecken på dina talanger såg du redan som barn? Beskriv specifika exempel och mönster.', type: 'text', weight: 0.6 },
+      { key: 'energigivande_aktiviteter', text: 'Vilka specifika aktiviteter inom dina talangområden ger dig mest energi och får dig att känna dig fullt levande?', type: 'text', weight: 0.6 },
+      { key: 'talanggap_analys', text: 'Var finns det outnyttjad potential i dina talanger? Hur skulle du kunna utveckla dem till nästa nivå?', type: 'text', weight: 0.6 },
+      { key: 'neuroplastisk_talangutveckling', text: 'Designa en 66-dagars intensiv talangutvecklingsplan. Vilka dagliga practices skulle maximera din talangpotential?', type: 'text', weight: 0.6 }
     ],
     scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Procentbaserade frågor (0-100% skala)
+      const percentageKeys = ['naturlig_begavning', 'anstrangningslost_excellens', 'extern_bekraftelse', 'intuitivt_masterskap',
+                             'snabb_inlarning', 'flow_frekvens', 'energi_fran_talanger', 'effortless_state', 'optimal_prestanda',
+                             'naturlig_rytm', 'dagligt_utnyttjande', 'medveten_utveckling', 'progressiv_utmaning',
+                             'strategisk_fokusering', 'talang_kombinationer', 'akta_sjalv', 'inre_motivation',
+                             'djup_tillfredsställelse', 'naturlig_passion', 'unikt_bidrag', 'varde_for_andra',
+                             'eftertragade_expertis', 'monetär_värdering'];
+      
+      percentageKeys.forEach(key => {
         const question = PILLAR_MODULES.talent.questions.find(q => q.key === key);
-        if (question && question.type === 'slider' && typeof value === 'number') {
-          totalScore += value * (question.weight || 1);
+        if (question && typeof answers[key] === 'number') {
+          const percentage = answers[key]; // 0-100
+          // Konvertera till poäng där 50% = neutral (0), <50% = negativ, >50% = positiv
+          const normalizedScore = (percentage - 50) / 50; // Range: -1 till +1
+          const finalScore = Math.max(-1, Math.min(1, normalizedScore)) * 5 + 5; // Range: 0-10
+          
+          totalScore += finalScore * (question.weight || 1);
           totalWeight += (question.weight || 1);
         }
       });
       
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 5;
     },
     insightGeneration: (answers: Record<string, any>, score: number) => {
-      const insights: Record<string, any> = {
-        overallScore: score,
-        naturalStrengths: answers.natural_strengths || '',
-        flowExperiences: answers.flow_experiences_detail || '',
-        underutilizedTalents: answers.underutilized_talents || '',
-        strengths: [],
-        developmentAreas: [],
-        recommendations: []
-      };
+      const criticalAreas = [];
+      const strongAreas = [];
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Analysera talangområden baserat på nya procentskalan
+      const percentageKeys = ['naturlig_begavning', 'anstrangningslost_excellens', 'extern_bekraftelse', 'intuitivt_masterskap',
+                             'snabb_inlarning', 'flow_frekvens', 'energi_fran_talanger', 'effortless_state', 'optimal_prestanda',
+                             'naturlig_rytm', 'dagligt_utnyttjande', 'medveten_utveckling', 'progressiv_utmaning',
+                             'strategisk_fokusering', 'talang_kombinationer', 'akta_sjalv', 'inre_motivation',
+                             'djup_tillfredsställelse', 'naturlig_passion', 'unikt_bidrag', 'varde_for_andra',
+                             'eftertragade_expertis', 'monetär_värdering'];
+      
+      percentageKeys.forEach(key => {
+        const value = answers[key];
         if (typeof value === 'number') {
-          if (value >= 8) insights.strengths.push(key);
-          if (value <= 4) insights.developmentAreas.push(key);
+          if (value <= 30) criticalAreas.push(key); // 30% eller lägre = kritiskt område
+          if (value >= 80) strongAreas.push(key);   // 80% eller högre = styrkeområde
         }
       });
       
-      return insights;
+      return {
+        criticalAreas,
+        strongAreas,
+        overallStatus: score >= 7 ? 'strong' : score >= 5 ? 'moderate' : 'needs_attention',
+        signatureTalents: answers.signatur_talanger || '',
+        developmentPotential: answers.talanggap_analys || '',
+        neuroplasticPlan: answers.neuroplastisk_talangutveckling || ''
+      };
     }
   },
 
   brand: {
     key: 'brand',
     name: 'Varumärke & Position',
-    description: 'Bygg ett starkt och autentiskt personligt varumärke. Fokuserar på att skapa en tydlig, konsekvent identitet som resonerar med din målgrupp.',
+    description: 'Bygg ett starkt och autentiskt personligt varumärke med neuroplastisk strategi. Fokuserar på att skapa en magnetisk identitet som attraherar rätt möjligheter.',
     icon: '🎨',
     color: '#8B5CF6',
     questions: [
-      // Varumärkesklarhet och autenticitet
-      { key: 'brand_identity_clarity', text: 'Har du en kristallklar bild av vad ditt varumärke representerar?', type: 'slider', weight: 1.3, min: 1, max: 10 },
-      { key: 'authentic_self_expression', text: 'Uttrycker ditt varumärke vem du verkligen är?', type: 'slider', weight: 1.2, min: 1, max: 10 },
-      { key: 'consistent_messaging', text: 'Är ditt budskap konsekvent över alla dina kanaler?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 1: VARUMÄRKESKLARHET & AUTENTICITET ===
+      { key: 'varumärke_klarhet', text: 'Jag har en kristallklar bild av vad mitt varumärke representerar', type: 'slider', min: 0, max: 100, weight: 1.3 },
+      { key: 'autentiskt_uttryck', text: 'Mitt varumärke uttrycker perfekt vem jag verkligen är', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'konsekvent_budskap', text: 'Mitt budskap är konsekvent över alla mina kanaler och plattformar', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'värdegrund_tydlighet', text: 'Mina kärnvärden och principer syns tydligt i mitt varumärke', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'personlighet_genomskinlighet', text: 'Min personlighet skiner igenom på ett äkta sätt', type: 'slider', min: 0, max: 100, weight: 1.1 },
       
-      // Målgruppsförståelse och positionering
-      { key: 'audience_connection', text: 'Förstår du djupt vad din målgrupp verkligen behöver?', type: 'slider', weight: 1.2, min: 1, max: 10 },
-      { key: 'market_positioning', text: 'Har du en tydlig och unik position på din marknad?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'competitive_differentiation', text: 'Sticker du ut tydligt från andra inom ditt område?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 2: MÅLGRUPPSFÖRSTÅELSE & MARKNADSPOSITIONERING ===
+      { key: 'målgrupp_djupförståelse', text: 'Jag förstår djupt vad min målgrupp verkligen behöver och önskar', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'unik_marknadsposition', text: 'Jag har en tydlig och unik position på min marknad', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'konkurrensfördel', text: 'Jag sticker ut tydligt och positivt från andra inom mitt område', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'nichspecialisering', text: 'Jag är erkänt stark inom min specifika nisch eller expertområde', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'marknadskännedom', text: 'Jag förstår min marknad och dess trender mycket väl', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Visuell identitet och kommunikation
-      { key: 'visual_consistency', text: 'Har du en stark och konsekvent visuell profil?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'storytelling_power', text: 'Berättar du din historia på ett fängslande sätt?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'content_value', text: 'Tillför ditt innehåll verkligt värde för din målgrupp?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 3: VISUELL IDENTITET & KOMMUNIKATION ===
+      { key: 'visuell_konsistens', text: 'Jag har en stark och igenkännbar visuell profil', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'berättarkraft', text: 'Jag berättar min historia på ett fängslande och minnevärt sätt', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'innehållsvärde', text: 'Mitt innehåll tillför verkligt och mätbart värde för min målgrupp', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'kommunikationsstil', text: 'Min kommunikationsstil är distintik och lätt att känna igen', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'professionell_närvaro', text: 'Jag upprätthåller en professionell och trovärdig närvaro', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Engagemang och förtroende
-      { key: 'audience_engagement', text: 'Skapar du äkta engagemang och interaktion?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'trust_building', text: 'Bygger du systematiskt förtroende med din målgrupp?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'reputation_awareness', text: 'Är du medveten om hur andra uppfattar ditt varumärke?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      // === SEKTION 4: ENGAGEMANG & FÖRTROENDEBYGGANDE ===
+      { key: 'äkta_engagemang', text: 'Jag skapar genuint engagemang och meningsfulla interaktioner', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'förtroende_byggande', text: 'Jag bygger systematiskt förtroende genom konsekvent leverans', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'rykte_medvetenhet', text: 'Jag är fullt medveten om hur andra uppfattar mitt varumärke', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'community_byggande', text: 'Jag bygger en lojal community omkring mitt varumärke', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'social_proof', text: 'Jag har stark social proof och positiva rekommendationer', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
-      // Utveckling och anpassning
-      { key: 'brand_evolution', text: 'Utvecklar du ditt varumärke strategiskt över tid?', type: 'slider', weight: 0.9, min: 1, max: 10 },
-      { key: 'feedback_integration', text: 'Lyssnar du på och anpassar dig efter feedback?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      // === SEKTION 5: UTVECKLING & STRATEGISK ANPASSNING ===
+      { key: 'strategisk_utveckling', text: 'Jag utvecklar mitt varumärke strategiskt och medvetet över tid', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'feedback_integration', text: 'Jag lyssnar på och anpassar mig intelligent efter feedback', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'trend_anpassning', text: 'Jag anpassar mig till relevanta trender utan att förlora min autenticitet', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      { key: 'varumärke_mätning', text: 'Jag mäter och utvärderar mitt varumärkes påverkan regelbundet', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
-      // Strategisk reflektion
-      { key: 'brand_essence', text: 'Beskriv kärnan i ditt varumärke - vad representerar du i en mening?', type: 'text', weight: 0.7 },
-      { key: 'ideal_perception', text: 'Hur vill du att din drömpublik ska beskriva dig till andra?', type: 'text', weight: 0.6 },
-      { key: 'value_proposition', text: 'Vad är din unika värdeerbjudande? Varför ska människor välja just dig?', type: 'text', weight: 0.6 },
-      { key: 'brand_gaps', text: 'Vad är skillnaden mellan hur du vill uppfattas och hur du faktiskt uppfattas?', type: 'text', weight: 0.6 },
-      { key: 'brand_evolution_vision', text: 'Hur ser du ditt varumärke om 2-3 år? Vad vill du vara känd för?', type: 'text', weight: 0.5 }
+      // === SEKTION 6: DJUPANALYS & NEUROPLASTISK VARUMÄRKESBYGGANDE ===
+      { key: 'varumärke_kärna', text: 'Definiera kärnan i ditt varumärke i EN mening. Vad representerar du fundamentalt och vad gör dig oumbärlig?', type: 'text', weight: 0.8 },
+      { key: 'ideal_perception', text: 'Beskriv exakt hur du vill att din drömpublik ska beskriva dig till andra. Vilka specifika ord och känslor vill du väcka?', type: 'text', weight: 0.7 },
+      { key: 'värdeerbjudande_analys', text: 'Artikulera ditt unika värdeerbjudande. Varför ska människor välja just dig framför alla andra alternativ?', type: 'text', weight: 0.7 },
+      { key: 'perception_gap', text: 'Analysera skillnaden mellan hur du vill uppfattas och hur du faktiskt uppfattas. Vad behöver justeras?', type: 'text', weight: 0.6 },
+      { key: 'varumärke_evolution_vision', text: 'Designa din varumärkesvision för 2-3 år framåt. Vad vill du vara känd för och hur når du dit?', type: 'text', weight: 0.6 },
+      { key: 'neuroplastisk_varumärke_strategi', text: 'Skapa en 66-dagars plan för att neuroplastiskt förstärka ditt varumärke. Vilka dagliga handlingar skulle bygga din önskade image?', type: 'text', weight: 0.6 }
     ],
     scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Procentbaserade frågor (0-100% skala)
+      const percentageKeys = ['varumärke_klarhet', 'autentiskt_uttryck', 'konsekvent_budskap', 'värdegrund_tydlighet',
+                             'personlighet_genomskinlighet', 'målgrupp_djupförståelse', 'unik_marknadsposition', 
+                             'konkurrensfördel', 'nichspecialisering', 'marknadskännedom', 'visuell_konsistens',
+                             'berättarkraft', 'innehållsvärde', 'kommunikationsstil', 'professionell_närvaro',
+                             'äkta_engagemang', 'förtroende_byggande', 'rykte_medvetenhet', 'community_byggande',
+                             'social_proof', 'strategisk_utveckling', 'feedback_integration', 'trend_anpassning',
+                             'varumärke_mätning'];
+      
+      percentageKeys.forEach(key => {
         const question = PILLAR_MODULES.brand.questions.find(q => q.key === key);
-        if (question && question.type === 'slider' && typeof value === 'number') {
-          totalScore += value * (question.weight || 1);
+        if (question && typeof answers[key] === 'number') {
+          const percentage = answers[key]; // 0-100
+          // Konvertera till poäng där 50% = neutral (0), <50% = negativ, >50% = positiv
+          const normalizedScore = (percentage - 50) / 50; // Range: -1 till +1
+          const finalScore = Math.max(-1, Math.min(1, normalizedScore)) * 5 + 5; // Range: 0-10
+          
+          totalScore += finalScore * (question.weight || 1);
           totalWeight += (question.weight || 1);
         }
       });
       
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 5;
     },
     insightGeneration: (answers: Record<string, any>, score: number) => {
-      const insights: Record<string, any> = {
-        overallScore: score,
-        desiredPerception: answers.desired_perception || '',
-        currentSignaling: answers.current_signaling || '',
-        targetAudience: answers.target_audience_detail || '',
-        coreValues: answers.core_values || '',
-        uniqueSellingPoint: answers.unique_selling_point || '',
-        strengths: [],
-        developmentAreas: [],
-        recommendations: []
-      };
+      const criticalAreas = [];
+      const strongAreas = [];
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Analysera varumärkesområden baserat på nya procentskalan
+      const percentageKeys = ['varumärke_klarhet', 'autentiskt_uttryck', 'konsekvent_budskap', 'värdegrund_tydlighet',
+                             'personlighet_genomskinlighet', 'målgrupp_djupförståelse', 'unik_marknadsposition', 
+                             'konkurrensfördel', 'nichspecialisering', 'marknadskännedom', 'visuell_konsistens',
+                             'berättarkraft', 'innehållsvärde', 'kommunikationsstil', 'professionell_närvaro',
+                             'äkta_engagemang', 'förtroende_byggande', 'rykte_medvetenhet', 'community_byggande',
+                             'social_proof', 'strategisk_utveckling', 'feedback_integration', 'trend_anpassning',
+                             'varumärke_mätning'];
+      
+      percentageKeys.forEach(key => {
+        const value = answers[key];
         if (typeof value === 'number') {
-          if (value >= 8) insights.strengths.push(key);
-          if (value <= 4) insights.developmentAreas.push(key);
+          if (value <= 30) criticalAreas.push(key); // 30% eller lägre = kritiskt område
+          if (value >= 80) strongAreas.push(key);   // 80% eller högre = styrkeområde
         }
       });
       
-      return insights;
+      return {
+        criticalAreas,
+        strongAreas,
+        overallStatus: score >= 7 ? 'strong' : score >= 5 ? 'moderate' : 'needs_attention',
+        brandCore: answers.varumärke_kärna || '',
+        valueProposition: answers.värdeerbjudande_analys || '',
+        strategicPlan: answers.neuroplastisk_varumärke_strategi || ''
+      };
     }
   },
 
   economy: {
     key: 'economy',
     name: 'Ekonomi & Hållbarhet',
-    description: 'Bygg finansiell stabilitet och hållbar ekonomisk tillväxt. Fokuserar på intäktsoptimering, kostnadseffektivitet och långsiktig ekonomisk planering.',
+    description: 'Bygg finansiell resiliens och exponentiell ekonomisk tillväxt. Fokuserar på neuroplastisk värdeskapande, systematisk intäktsoptimering och hållbar välståndsutveckling.',
     icon: '💰',
     color: '#059669',
     questions: [
-      // Intäkter och värdeskapande
-      { key: 'revenue_predictability', text: 'Hur förutsägbara är dina inkomster månad till månad?', type: 'slider', weight: 1.3, min: 1, max: 10 },
-      { key: 'income_diversification', text: 'Har du flera olika inkomstströmmar?', type: 'slider', weight: 1.2, min: 1, max: 10 },
-      { key: 'pricing_confidence', text: 'Känner du dig trygg med att ta betalt för ditt värde?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'value_monetization', text: 'Förvandlar du effektivt ditt värde till intäkter?', type: 'slider', weight: 1.2, min: 1, max: 10 },
+      // === SEKTION 1: INTÄKTSSTABILITET & VÄRDESKAPANDE ===
+      { key: 'intäkt_förutsägbarhet', text: 'Mina inkomster är stabila och förutsägbara månad till månad', type: 'slider', min: 0, max: 100, weight: 1.3 },
+      { key: 'inkomst_diversifiering', text: 'Jag har flera starka och pålitliga inkomstströmmar', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'prissättnings_självförtroende', text: 'Jag känner mig helt trygg med att ta full betalt för mitt värde', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'värde_monetisering', text: 'Jag förvandlar effektivt min expertis och värde till intäkter', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'passiv_intäktspotential', text: 'Jag utvecklar intäktsströmmar som genererar pengar utan min direkta tid', type: 'slider', min: 0, max: 100, weight: 1.1 },
       
-      // Kostnadshantering och effektivitet
-      { key: 'cost_awareness', text: 'Har du full kontroll över dina affärsutgifter?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'investment_roi', text: 'Mäter du avkastningen på dina investeringar?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'operational_efficiency', text: 'Arbetar du kostnadseffektivt och smart?', type: 'slider', weight: 1.0, min: 1, max: 10 },
+      // === SEKTION 2: KOSTNADSHANTERING & FINANSIELL INTELLIGENS ===
+      { key: 'kostnadskontroll', text: 'Jag har fullständig kontroll och överblick över alla mina utgifter', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'investering_avkastning', text: 'Jag mäter och optimerar avkastningen på alla mina investeringar', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'operationell_effektivitet', text: 'Jag arbetar maximalt kostnadseffektivt och eliminerar slöseri', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'skatteoptimering', text: 'Jag optimerar min skattesituation lagligt och strategiskt', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'finansiell_literacy', text: 'Jag förstår djupt finansiella nyckeltal och affärsprinciper', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Finansiell planering och säkerhet
-      { key: 'emergency_buffer', text: 'Har du ekonomisk buffert för oväntade situationer?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'financial_goals', text: 'Har du tydliga finansiella mål och planer?', type: 'slider', weight: 1.1, min: 1, max: 10 },
-      { key: 'cash_flow_management', text: 'Hanterar du kassaflödet proaktivt?', type: 'slider', weight: 1.1, min: 1, max: 10 },
+      // === SEKTION 3: FINANSIELL SÄKERHET & PLANERING ===
+      { key: 'ekonomisk_buffert', text: 'Jag har stark ekonomisk buffert för oväntade situationer', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'finansiella_mål', text: 'Jag har kristallklara finansiella mål och detaljerade planer', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'kassaflöde_hantering', text: 'Jag hanterar kassaflödet proaktivt och förutseende', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'långsiktig_planering', text: 'Jag planerar och sparar strategiskt för långsiktiga mål', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'risk_hantering', text: 'Jag hanterar finansiella risker intelligent och systematiskt', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Tillväxt och skalning
-      { key: 'growth_investment', text: 'Investerar du strategiskt för framtida tillväxt?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'scalability_focus', text: 'Bygger du affärsmodeller som kan skala?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'market_opportunity', text: 'Ser du och agerar på ekonomiska möjligheter?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      // === SEKTION 4: TILLVÄXT & SKALNING ===
+      { key: 'tillväxt_investeringar', text: 'Jag investerar strategiskt och beräknat för framtida tillväxt', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'skalbarhet_fokus', text: 'Jag bygger affärsmodeller och system som kan skala exponentiellt', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'marknadsmöjligheter', text: 'Jag identifierar och agerar snabbt på ekonomiska möjligheter', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'affärsutveckling', text: 'Jag utvecklar kontinuerligt nya sätt att skapa värde och intäkter', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'innovation_investeringar', text: 'Jag investerar i innovation och framtidsteknologier', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
-      // Ekonomisk kunskap och kompetens
-      { key: 'financial_literacy', text: 'Förstår du ekonomiska nyckeltal och principer?', type: 'slider', weight: 1.0, min: 1, max: 10 },
-      { key: 'tax_optimization', text: 'Optimerar du din skattesituation lagligt?', type: 'slider', weight: 0.9, min: 1, max: 10 },
+      // === SEKTION 5: EKONOMISK MINDSET & STRATEGI ===
+      { key: 'överflöd_mindset', text: 'Jag har ett starkt överflöd-mindset och ser ekonomiska möjligheter överallt', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'ekonomisk_disciplin', text: 'Jag har stark finansiell disciplin och håller mig till mina planer', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'värdealignment', text: 'Min ekonomiska strategi är helt alignad med mina värderingar', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      { key: 'kontinuerlig_optimering', text: 'Jag optimerar kontinuerligt mina ekonomiska processer och strategier', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
-      // Strategisk ekonomisk reflektion
-      { key: 'revenue_strategy', text: 'Beskriv din huvudsakliga intäktsstrategi. Hur tjänar du pengar och hur ska det utvecklas?', type: 'text', weight: 0.7 },
-      { key: 'pricing_philosophy', text: 'Hur sätter du priser? Vad baserar du din prissättning på?', type: 'text', weight: 0.6 },
-      { key: 'growth_investments', text: 'Vad investerar du i för att växa ekonomiskt? Vad ger bäst avkastning?', type: 'text', weight: 0.6 },
-      { key: 'financial_obstacles', text: 'Vad är dina största ekonomiska utmaningar och hur planerar du att lösa dem?', type: 'text', weight: 0.6 },
-      { key: 'economic_vision', text: 'Hur ser din ekonomiska vision ut om 3 år? Vad är målet?', type: 'text', weight: 0.5 }
+      // === SEKTION 6: DJUPANALYS & NEUROPLASTISK EKONOMISK UTVECKLING ===
+      { key: 'intäkt_strategi_analys', text: 'Analysera din huvudsakliga intäktsstrategi i detalj. Hur tjänar du pengar idag och hur ska detta utvecklas de närmaste 2 åren?', type: 'text', weight: 0.8 },
+      { key: 'prissättnings_filosofi', text: 'Beskriv din prissättningsfilosofi och -strategi. Hur bestämmer du värdet på ditt erbjudande och optimerar du priser?', type: 'text', weight: 0.7 },
+      { key: 'tillväxt_investeringsplan', text: 'Kartlägg dina viktigaste tillväxtinvesteringar. Vad ger högst ROI och hur mäter du framgång?', type: 'text', weight: 0.7 },
+      { key: 'ekonomiska_hinder', text: 'Identifiera dina största ekonomiska begränsningar. Vad hindrar exponentiell tillväxt och hur kan detta lösas?', type: 'text', weight: 0.6 },
+      { key: 'ekonomisk_framtidsvision', text: 'Designa din ekonomiska vision för 3-5 år framåt. Vad är ditt välståndsmål och hur når du dit?', type: 'text', weight: 0.6 },
+      { key: 'neuroplastisk_ekonomi_strategi', text: 'Skapa en 66-dagars plan för neuroplastisk ekonomisk utveckling. Vilka dagliga habits skulle transformera din ekonomiska situation?', type: 'text', weight: 0.6 }
     ],
     scoreCalculation: (answers: Record<string, any>) => {
       let totalScore = 0;
       let totalWeight = 0;
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Procentbaserade frågor (0-100% skala)
+      const percentageKeys = ['intäkt_förutsägbarhet', 'inkomst_diversifiering', 'prissättnings_självförtroende', 
+                             'värde_monetisering', 'passiv_intäktspotential', 'kostnadskontroll', 'investering_avkastning',
+                             'operationell_effektivitet', 'skatteoptimering', 'finansiell_literacy', 'ekonomisk_buffert',
+                             'finansiella_mål', 'kassaflöde_hantering', 'långsiktig_planering', 'risk_hantering',
+                             'tillväxt_investeringar', 'skalbarhet_fokus', 'marknadsmöjligheter', 'affärsutveckling',
+                             'innovation_investeringar', 'överflöd_mindset', 'ekonomisk_disciplin', 'värdealignment',
+                             'kontinuerlig_optimering'];
+      
+      percentageKeys.forEach(key => {
         const question = PILLAR_MODULES.economy.questions.find(q => q.key === key);
-        if (question && question.type === 'slider' && typeof value === 'number') {
-          totalScore += value * (question.weight || 1);
+        if (question && typeof answers[key] === 'number') {
+          const percentage = answers[key]; // 0-100
+          // Konvertera till poäng där 50% = neutral (0), <50% = negativ, >50% = positiv
+          const normalizedScore = (percentage - 50) / 50; // Range: -1 till +1
+          const finalScore = Math.max(-1, Math.min(1, normalizedScore)) * 5 + 5; // Range: 0-10
+          
+          totalScore += finalScore * (question.weight || 1);
           totalWeight += (question.weight || 1);
         }
       });
       
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 0;
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 5;
     },
     insightGeneration: (answers: Record<string, any>, score: number) => {
-      const insights: Record<string, any> = {
-        overallScore: score,
-        currentSituation: answers.current_financial_situation || '',
-        incomeOpportunities: answers.income_opportunities || '',
-        savingsAndGoals: answers.savings_and_goals || '',
-        obstacles: answers.financial_obstacles || '',
-        alternativeStrategies: answers.alternative_income_living || '',
-        strengths: [],
-        developmentAreas: [],
-        recommendations: []
-      };
+      const criticalAreas = [];
+      const strongAreas = [];
       
-      Object.entries(answers).forEach(([key, value]) => {
+      // Analysera ekonomiska områden baserat på nya procentskalan
+      const percentageKeys = ['intäkt_förutsägbarhet', 'inkomst_diversifiering', 'prissättnings_självförtroende', 
+                             'värde_monetisering', 'passiv_intäktspotential', 'kostnadskontroll', 'investering_avkastning',
+                             'operationell_effektivitet', 'skatteoptimering', 'finansiell_literacy', 'ekonomisk_buffert',
+                             'finansiella_mål', 'kassaflöde_hantering', 'långsiktig_planering', 'risk_hantering',
+                             'tillväxt_investeringar', 'skalbarhet_fokus', 'marknadsmöjligheter', 'affärsutveckling',
+                             'innovation_investeringar', 'överflöd_mindset', 'ekonomisk_disciplin', 'värdealignment',
+                             'kontinuerlig_optimering'];
+      
+      percentageKeys.forEach(key => {
+        const value = answers[key];
         if (typeof value === 'number') {
-          if (value >= 8) insights.strengths.push(key);
-          if (value <= 4) insights.developmentAreas.push(key);
+          if (value <= 30) criticalAreas.push(key); // 30% eller lägre = kritiskt område
+          if (value >= 80) strongAreas.push(key);   // 80% eller högre = styrkeområde
         }
       });
       
-      return insights;
+      return {
+        criticalAreas,
+        strongAreas,
+        overallStatus: score >= 7 ? 'strong' : score >= 5 ? 'moderate' : 'needs_attention',
+        revenueStrategy: answers.intäkt_strategi_analys || '',
+        growthPlan: answers.tillväxt_investeringsplan || '',
+        neuroplasticStrategy: answers.neuroplastisk_ekonomi_strategi || ''
+      };
     }
   },
 
