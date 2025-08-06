@@ -37,7 +37,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
 import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
-import { AdminHub } from "./pages/AdminHub";
+
 import { UnifiedUserManagementPage } from "./pages/UnifiedUserManagement";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
 import { InvitationSignup } from "./pages/InvitationSignup";
@@ -130,7 +130,7 @@ const AppRoutes = () => {
                 <Route path="/intelligence/:userId" element={<Intelligence />} />
                 <Route path="/client-intelligence" element={<ClientIntelligencePage />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
-               <Route path="/admin-hub/*" element={<AdminHub />} />
+               
             <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
             <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
                 <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
