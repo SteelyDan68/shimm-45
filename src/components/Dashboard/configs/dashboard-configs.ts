@@ -66,6 +66,19 @@ const CLIENT_CONFIG: DashboardConfig = {
       }
     },
     {
+      id: 'client-analytics',
+      type: 'client-analytics',
+      title: 'Min Utvecklingsanalys',
+      description: 'Snabbstatistik och länkar till fullständig analys',
+      icon: BarChart3,
+      span: 4,
+      minHeight: 300,
+      order: 3,
+      permissions: ['read-own-data'],
+      isVisible: true,
+      isConfigurable: false
+    },
+    {
       id: 'quick-stats',
       type: 'stats',
       title: 'Snabbstatistik', 
@@ -73,7 +86,7 @@ const CLIENT_CONFIG: DashboardConfig = {
       icon: BarChart3,
       span: 4,
       minHeight: 300,
-      order: 3,
+      order: 4,
       permissions: ['read-own-data'],
       isVisible: true,
       isConfigurable: false

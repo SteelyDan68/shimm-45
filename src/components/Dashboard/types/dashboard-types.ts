@@ -15,10 +15,11 @@ export type DashboardLayout =
 
 export type WidgetType = 
   | 'welcome'
-  | 'stats'
+  | 'stats' 
   | 'pillar-progress'
   | 'tasks'
   | 'calendar'
+  | 'client-analytics'
   | 'client-overview'
   | 'coaching-tools'
   | 'analytics'
@@ -70,6 +71,8 @@ export interface DashboardContextState {
 }
 
 export interface DashboardStats {
+  userId?: string;
+  userName?: string;
   totalUsers?: number;
   activeClients?: number;
   completedAssessments?: number;

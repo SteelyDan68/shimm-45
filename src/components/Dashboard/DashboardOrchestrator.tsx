@@ -207,6 +207,8 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
     const completedTasks = tasks?.filter(task => task.status === 'completed') || [];
     
     return {
+      userId: effectiveUserId,
+      userName: user?.email || '',
       // Client stats
       completedPillars,
       activeTasks: activeTasks.length,
@@ -225,7 +227,7 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
       // General stats
       completedAssessments: completedPillars
     };
-  }, [getCompletedPillars, getActivatedPillars, tasks, clients, coachStats]);
+  }, [effectiveUserId, user, getCompletedPillars, getActivatedPillars, tasks, clients, coachStats]);
 
   // 🎨 RENDER LOGIC
   if (layout === 'embedded') {

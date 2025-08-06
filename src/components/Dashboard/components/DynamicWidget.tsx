@@ -17,6 +17,7 @@ const StatsWidget = lazy(() => import('../widgets/StatsWidget'));
 const PillarProgressWidget = lazy(() => import('../widgets/PillarProgressWidget'));
 const TasksWidget = lazy(() => import('../widgets/TasksWidget'));
 const CalendarWidget = lazy(() => import('../widgets/CalendarWidget'));
+const ClientAnalyticsWidget = lazy(() => import('../widgets/ClientAnalyticsWidget'));
 const ClientOverviewWidget = lazy(() => import('../widgets/ClientOverviewWidget'));
 const CoachingToolsWidget = lazy(() => import('../widgets/CoachingToolsWidget'));
 const ActivityFeedWidget = lazy(() => import('../widgets/ActivityFeedWidget'));
@@ -32,6 +33,7 @@ const WIDGET_COMPONENTS = {
   'pillar-progress': PillarProgressWidget,
   'tasks': TasksWidget,
   'calendar': CalendarWidget,
+  'client-analytics': ClientAnalyticsWidget,
   'client-overview': ClientOverviewWidget,
   'coaching-tools': CoachingToolsWidget,
   'activity-feed': ActivityFeedWidget,
