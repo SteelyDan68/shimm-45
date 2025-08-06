@@ -1,9 +1,14 @@
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { TrendingUp, CheckCircle, Clock, Target } from 'lucide-react';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { useCentralizedData } from '@/hooks/useCentralizedData';
+import { PillarRetakeDialog } from '@/components/Shared/PillarRetakeDialog';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
+import { PillarKey } from '@/types/sixPillarsModular';
 
 interface PillarJourney {
   id: string;
@@ -39,6 +44,10 @@ export const PillarProgressTracker = ({
     isHealthy,
     refreshAllData 
   } = useCentralizedData(userId);
+  
+  const { retakePillar } = useSixPillarsModular(userId);
+  const [retakePillarKey, setRetakePillarKey] = useState<PillarKey | null>(null);
+  const [isRetakeLoading, setIsRetakeLoading] = useState(false);
 
   console.log('📊 PillarProgressTracker: Using REAL metrics:', metrics);
 
@@ -139,15 +148,14 @@ export const PillarProgressTracker = ({
                     <Badge variant="secondary" className="bg-green-100 text-green-800">
                       Slutförd
                     </Badge>
-                    <button 
-                      className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded hover:bg-orange-200 transition-colors"
-                      onClick={() => {
-                        // Implementera retake funktionalitet här
-                        console.log('Retake pillar:', journey.pillarKey);
-                      }}
+                    <Button 
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                      onClick={() => setRetakePillarKey(journey.pillarKey as PillarKey)}
                     >
                       Gör om
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -162,6 +170,28 @@ export const PillarProgressTracker = ({
             <p className="text-sm">Välj ditt första utvecklingsområde för att börja!</p>
           </div>
         )}
+
+        {/* Retake Dialog */}
+        <PillarRetakeDialog
+          isOpen={retakePillarKey !== null}
+          pillarKey={retakePillarKey!}
+          isLoading={isRetakeLoading}
+          onConfirm={async () => {
+            if (!retakePillarKey) return;
+            
+            setIsRetakeLoading(true);
+            try {
+              await retakePillar(retakePillarKey);
+              setRetakePillarKey(null);
+              await refreshAllData(); // Refresh all data
+            } catch (error) {
+              console.error('Failed to retake pillar:', error);
+            } finally {
+              setIsRetakeLoading(false);
+            }
+          }}
+          onCancel={() => setRetakePillarKey(null)}
+        />
       </CardContent>
     </Card>
   );

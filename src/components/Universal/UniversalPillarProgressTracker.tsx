@@ -245,9 +245,13 @@ export const UniversalPillarProgressTracker: React.FC<UniversalPillarProgressTra
                          variant="ghost"
                          size="sm"
                          onClick={() => {
+                           // Get retakePillar from universalAccess
+                           const retakeFunction = universalAccess.retakePillar || (() => {
+                             console.warn('Retake function not available in universal access');
+                           });
+                           
                            if (window.confirm(`Är du säker på att du vill göra om ${pillar.pillar_key}? Alla tidigare resultat och beroenden kommer att raderas.`)) {
-                             // Call the universal access retake function
-                             universalAccess.retakePillar?.(pillar.pillar_key);
+                             retakeFunction(pillar.pillar_key);
                            }
                          }}
                          className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"

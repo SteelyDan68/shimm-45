@@ -2,7 +2,7 @@
  * 🎯 PILLAR PROGRESS WIDGET - Six Pillars utvecklingsöversikt
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -10,6 +10,9 @@ import { Target, CheckCircle, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { WidgetProps } from '../types/dashboard-types';
 import { useUserPillars } from '@/hooks/useUserPillars';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { PillarRetakeDialog } from '@/components/Shared/PillarRetakeDialog';
+import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
+import { PillarKey } from '@/types/sixPillarsModular';
 
 const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   const { user } = useAuth();
@@ -18,6 +21,10 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
     getActivatedPillars,
     loading 
   } = useUserPillars(user?.id || '');
+  
+  const { retakePillar } = useSixPillarsModular(user?.id);
+  const [retakePillarKey, setRetakePillarKey] = useState<PillarKey | null>(null);
+  const [isRetakeLoading, setIsRetakeLoading] = useState(false);
 
   const completedPillars = getCompletedPillars();
   const activatedPillars = getActivatedPillars();
@@ -142,7 +149,7 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onAction?.(`retake-pillar-${pillar.key}`)}
+                      onClick={() => setRetakePillarKey(pillar.key as PillarKey)}
                       className="w-8 h-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
                       title="Gör om pillar"
                     >
@@ -184,6 +191,28 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
           </Button>
         )}
       </div>
+
+      {/* Retake Dialog */}
+      <PillarRetakeDialog
+        isOpen={retakePillarKey !== null}
+        pillarKey={retakePillarKey!}
+        isLoading={isRetakeLoading}
+        onConfirm={async () => {
+          if (!retakePillarKey) return;
+          
+          setIsRetakeLoading(true);
+          try {
+            await retakePillar(retakePillarKey);
+            setRetakePillarKey(null);
+            // Widget will refresh automatically through hooks
+          } catch (error) {
+            console.error('Failed to retake pillar:', error);
+          } finally {
+            setIsRetakeLoading(false);
+          }
+        }}
+        onCancel={() => setRetakePillarKey(null)}
+      />
     </div>
   );
 };

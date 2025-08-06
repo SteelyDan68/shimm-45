@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useUniversalPillarAccess, type UniversalPillarAccessReturn } from './useUniversalPillarAccess';
 import { useSixPillarsModular } from './useSixPillarsModular';
+import { PillarKey } from '@/types/sixPillarsModular';
 
 type AccessLevel = 'none' | 'view' | 'edit' | 'admin';
 
@@ -24,7 +25,7 @@ export interface RoleBasedPillarAccess extends UniversalPillarAccessReturn {
   isViewingOwnData: boolean;
   
   // Additional functionality
-  retakePillar?: (pillarKey: string) => Promise<void>;
+  retakePillar?: (pillarKey: PillarKey) => Promise<void>;
 }
 
 export const useRoleBasedPillarAccess = (targetUserId?: string): RoleBasedPillarAccess => {
