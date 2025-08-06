@@ -9,7 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   LogOut,
   User,
-  Settings,
+  Shield,
   HelpCircle,
   MessageSquare
 } from "lucide-react";
@@ -114,7 +114,7 @@ export function TopNavigation() {
                 {(hasRole('superadmin') || hasRole('admin')) && (
                   <DropdownMenuItem asChild>
                     <NavLink to="/administration" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
-                      <Settings className="h-4 w-4 mr-3 text-muted-foreground" />
+                      <Shield className="h-4 w-4 mr-3 text-muted-foreground" />
                       <span>Administration</span>
                     </NavLink>
                   </DropdownMenuItem>
