@@ -40,6 +40,23 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
     }
 
     console.log('Deletion result:', data);
+    
+    // Handle the new response format
+    if (data?.success) {
+      return {
+        user_found: true,
+        deleted_profile: true,
+        deleted_roles: 0,
+        deleted_assessments: 0,
+        deleted_tasks: 0,
+        deleted_messages: 0,
+        deleted_other_data: 0,
+        errors: []
+      };
+    } else {
+      throw new Error(data?.error || 'Unknown deletion error');
+    }
+    
     return data as UserDeletionResult;
 
   } catch (error: any) {
