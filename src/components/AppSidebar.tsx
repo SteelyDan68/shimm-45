@@ -171,14 +171,14 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild tooltip={!open ? "Unified User Command Center" : undefined}>
                     <NavLink 
                       to="/unified-users" 
-                      className={`${getNavCls("/unified-users")} transition-colors rounded-md bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-200/50`}
+                      className={`${getNavCls("/unified-users")} transition-colors rounded-md`}
                       title={!open ? "Unified User Command Center" : undefined}
                     >
-                      <Crown className="h-4 w-4 flex-shrink-0 text-purple-600" />
+                      <Crown className="h-4 w-4 flex-shrink-0 text-primary" />
                       {open && (
                         <div className="flex flex-col">
-                          <span className="font-semibold text-purple-800">Unified User Center</span>
-                          <span className="text-xs text-purple-600">Komplett användarhantering</span>
+                          <span className="font-semibold text-foreground">Unified User Center</span>
+                          <span className="text-xs text-muted-foreground">Komplett användarhantering</span>
                         </div>
                       )}
                     </NavLink>
@@ -191,10 +191,10 @@ export function AppSidebar() {
                       className={`${getNavCls("/intelligence-hub")} transition-colors rounded-md`}
                       title={!open ? "Intelligence Hub" : undefined}
                     >
-                      <Brain className="h-4 w-4 flex-shrink-0 text-blue-600" />
+                      <Brain className="h-4 w-4 flex-shrink-0 text-primary" />
                       {open && (
                         <div className="flex flex-col">
-                          <span className="font-semibold">Intelligence Hub</span>
+                          <span className="font-semibold text-foreground">Intelligence Hub</span>
                           <span className="text-xs text-muted-foreground">Analys & Insikter</span>
                         </div>
                       )}
