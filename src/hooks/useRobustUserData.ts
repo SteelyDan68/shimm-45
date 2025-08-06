@@ -288,8 +288,8 @@ export const useRobustUserData = () => {
     
     // Missing compatibility properties
     allUsers: users,
-    getUserCacheData: () => ({}),
-    getNewsMentions: () => [],
-    getSocialMetrics: () => ({})
+    getUserCacheData: (userId?: string) => [],
+    getNewsMentions: (cacheData?: any[]) => cacheData?.filter(item => item.data_type === 'news') || [],
+    getSocialMetrics: (cacheData?: any[]) => cacheData?.filter(item => item.data_type === 'social') || []
   };
 };
