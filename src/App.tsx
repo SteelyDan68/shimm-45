@@ -127,6 +127,7 @@ const AppRoutes = () => {
                 <Route path="/ai-coaching" element={<AICoaching />} />
                 <Route path="/testing" element={<TestingPage />} />
                <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
+               <Route path="/six-pillars/:pillarKey" element={<SixPillars />} />
                <Route path="/mobile" element={<MobileOptimization />} />
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />

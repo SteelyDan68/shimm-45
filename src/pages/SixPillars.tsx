@@ -1,11 +1,12 @@
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ModularPillarDashboard } from '@/components/SixPillars/ModularPillarDashboard';
+import { PillarAssessmentPage } from '@/components/SixPillars/PillarAssessmentPage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HelpTooltip } from '@/components/HelpTooltip';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   TrendingUp, 
   Heart, 
@@ -23,10 +24,16 @@ import {
 // Huvudpolicy från UX Expert: Pedagogisk progression och tydlig informationsarkitektur
 export const SixPillars = () => {
   const { user, profile } = useAuth();
+  const { pillarKey } = useParams<{ pillarKey: string }>();
   const navigate = useNavigate();
 
   if (!user || !profile) {
     return <div>Laddar...</div>;
+  }
+
+  // Om vi har en pillarKey, visa assessment-sidan
+  if (pillarKey) {
+    return <PillarAssessmentPage />;
   }
 
   const pillarIntros = [
