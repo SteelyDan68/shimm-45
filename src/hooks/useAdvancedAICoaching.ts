@@ -221,20 +221,29 @@ export const useAdvancedAICoaching = () => {
   }, [currentSession, user]);
 
   // Generate personalized coaching plan
-  const generateCoachingPlan = useCallback(async (duration: number = 30) => {
+  const generateCoachingPlan = useCallback(async (duration: number = 30, preferences?: any) => {
     if (!user) return null;
 
     setIsAnalyzing(true);
 
     try {
-      // Call AI planning function
-      const { data: planResult, error } = await supabase.functions.invoke('advanced-ai-coaching', {
-        body: {
-          action: 'generate_plan',
-          userId: user.id,
-          duration
-        }
-      });
+      // Call enhanced AI planning function if preferences provided
+      const functionName = preferences ? 'enhanced-ai-planning' : 'advanced-ai-coaching';
+      const body = preferences 
+        ? {
+            user_id: user.id,
+            preferences,
+            assessment_data: null,
+            context_data: null
+          }
+        : {
+            action: 'generate_plan',
+            userId: user.id,
+            duration,
+            preferences
+          };
+
+      const { data: planResult, error } = await supabase.functions.invoke(functionName, { body });
 
       if (error) throw error;
 

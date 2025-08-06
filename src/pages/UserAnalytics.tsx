@@ -87,7 +87,6 @@ export default function UserAnalytics() {
         .from('assessment_rounds')
         .select('*')
         .eq('user_id', targetUserId)
-        .not('ai_analysis', 'is', null)
         .order('created_at', { ascending: false });
 
       if (analysesError) throw analysesError;

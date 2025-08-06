@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { PreferencesDialog, CoachingPreferences } from './PreferencesDialog';
 
 export function CoachingDashboard() {
   const {
@@ -88,8 +89,14 @@ export function CoachingDashboard() {
     setSessionFeedback({ rating: 5, comment: '' });
   };
 
+  const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
+
   const handleGenerateCoachingPlan = async () => {
-    await generateCoachingPlan(30); // 30 days plan
+    setShowPreferencesDialog(true);
+  };
+
+  const handlePreferencesSet = async (preferences: any) => {
+    await generateCoachingPlan(preferences.duration * 7, preferences); // Convert weeks to days
   };
 
   const formatSessionDuration = (duration: number) => {
@@ -130,12 +137,7 @@ export function CoachingDashboard() {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => {
-                  handleGenerateCoachingPlan();
-                  // Switch to plan tab after generating
-                  const planTab = document.querySelector('[value="plan"]') as HTMLElement;
-                  planTab?.click();
-                }}
+                onClick={handleGenerateCoachingPlan}
                 disabled={isAnalyzing}
               >
                 Skapa plan
@@ -387,7 +389,7 @@ export function CoachingDashboard() {
                 <p className="text-muted-foreground mb-4">
                   Skapa en personaliserad utvecklingsplan med AI
                 </p>
-                <Button onClick={() => handleGenerateCoachingPlan()}>
+                <Button onClick={handleGenerateCoachingPlan}>
                   Generera Plan
                 </Button>
               </CardContent>
@@ -617,6 +619,13 @@ export function CoachingDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Preferences Dialog */}
+      <PreferencesDialog
+        open={showPreferencesDialog}
+        onOpenChange={setShowPreferencesDialog}
+        onPreferencesSet={handlePreferencesSet}
+      />
     </div>
   );
 }
