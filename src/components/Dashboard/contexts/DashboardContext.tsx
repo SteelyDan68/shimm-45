@@ -75,7 +75,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   const { user } = useAuth();
   const { isClient, isCoach, isAdmin, isSuperAdmin } = useRoleCache();
 
-  // Determine user role
+  // Determine user role with fallback to client
   const getUserRole = (): UserRole | null => {
     if (providedRole) return providedRole;
     
@@ -83,6 +83,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     if (isAdmin) return 'admin';
     if (isCoach) return 'coach';
     if (isClient) return 'client';
+    
+    // Fallback: If user exists but no specific role found, default to client
+    if (user?.id) {
+      console.log('🔄 DashboardContext: No specific role found, defaulting to client');
+      return 'client';
+    }
     
     return null;
   };
