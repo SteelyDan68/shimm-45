@@ -36,7 +36,8 @@ import {
   Settings,
   Eye,
   Save,
-  X
+  X,
+  CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useUsers } from '@/hooks/useUsers';
@@ -78,6 +79,10 @@ interface UserExtended {
   personal_number?: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
+  is_active?: boolean;
+  deactivated_at?: string;
+  deactivated_by?: string;
+  deactivation_reason?: string;
 }
 
 interface UserManagementStats {
@@ -160,7 +165,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
     setActiveTab('profile');
   };
 
-  // Handle user deletion with confirmation
+  // Handle user soft deletion with confirmation
   const handleDeleteUser = async (userId: string) => {
     if (!canDeleteUsers) {
       toast({
@@ -181,37 +186,96 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       return;
     }
 
-    if (!confirm(`Är du säker på att du vill radera användaren "${userToDelete.email}" permanent? Denna åtgärd kan inte ångras och kommer radera ALL data enligt GDPR.`)) {
+    if (!confirm(`Är du säker på att du vill inaktivera användaren "${userToDelete.email}"? Användaren kommer att markeras som inaktiv men kan återaktiveras senare. För fullständig GDPR-radering, använd GDPR-modulen.`)) {
       return;
     }
     
     try {
       setDeletingUserId(userId);
       
-      // Call the comprehensive deletion function
-      const identifier = userToDelete.email || `${userToDelete.first_name} ${userToDelete.last_name}`;
-      const result = await deleteUserCompletely(identifier);
+      // Call the soft deletion function
+      const { softDeleteUser } = await import('@/utils/userSoftDelete');
+      const result = await softDeleteUser(userId, 'admin_deactivation');
 
-      if (result.errors && result.errors.length > 0) {
+      if (!result.success) {
         toast({
-          title: "Delvis fel vid borttagning",
-          description: `Vissa data kunde inte tas bort: ${result.errors.join(', ')}`,
+          title: "Fel vid inaktivering",
+          description: result.message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Användare raderad",
-          description: `Användaren ${userToDelete.email} har raderats från systemet enligt GDPR`,
+          title: "Användare inaktiverad",
+          description: `Användaren ${userToDelete.email} har inaktiverats och kan återaktiveras vid behov`,
         });
       }
       
       // Refresh the user list to reflect changes
       refreshUsers();
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('Error deactivating user:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte radera användaren",
+        description: "Kunde inte inaktivera användaren",
+        variant: "destructive"
+      });
+    } finally {
+      setDeletingUserId(null);
+    }
+  };
+
+  // Handle user reactivation
+  const handleReactivateUser = async (userId: string) => {
+    if (!canDeleteUsers) {
+      toast({
+        title: "Otillräckliga behörigheter",
+        description: "Endast superadmins kan återaktivera användare",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const userToReactivate = extendedUsers.find(u => u.id === userId);
+    if (!userToReactivate) {
+      toast({
+        title: "Fel",
+        description: "Användaren kunde inte hittas",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!confirm(`Är du säker på att du vill återaktivera användaren "${userToReactivate.email}"?`)) {
+      return;
+    }
+    
+    try {
+      setDeletingUserId(userId);
+      
+      // Call the reactivation function
+      const { reactivateUser } = await import('@/utils/userSoftDelete');
+      const result = await reactivateUser(userId);
+
+      if (!result.success) {
+        toast({
+          title: "Fel vid återaktivering",
+          description: result.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Användare återaktiverad",
+          description: `Användaren ${userToReactivate.email} har återaktiverats`,
+        });
+      }
+      
+      // Refresh the user list to reflect changes
+      refreshUsers();
+    } catch (error) {
+      console.error('Error reactivating user:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte återaktivera användaren",
         variant: "destructive"
       });
     } finally {
@@ -470,23 +534,45 @@ export const UnifiedUserCommandCenter: React.FC = () => {
                               </Link>
                             </DropdownMenuItem>
                             {canDeleteUsers && (
-                              <DropdownMenuItem 
-                                onClick={(e) => { e.stopPropagation(); handleDeleteUser(user.id); }}
-                                className="text-destructive"
-                                disabled={deletingUserId === user.id}
-                              >
-                                {deletingUserId === user.id ? (
-                                  <>
-                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-destructive mr-2"></div>
-                                    GDPR-radering...
-                                  </>
+                              <>
+                                {user.is_active ? (
+                                  <DropdownMenuItem 
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteUser(user.id); }}
+                                    className="text-amber-600"
+                                    disabled={deletingUserId === user.id}
+                                  >
+                                    {deletingUserId === user.id ? (
+                                      <>
+                                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-amber-600 mr-2"></div>
+                                        Inaktiverar...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Inaktivera
+                                      </>
+                                    )}
+                                  </DropdownMenuItem>
                                 ) : (
-                                  <>
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    GDPR-radera
-                                  </>
+                                  <DropdownMenuItem 
+                                    onClick={(e) => { e.stopPropagation(); handleReactivateUser(user.id); }}
+                                    className="text-green-600"
+                                    disabled={deletingUserId === user.id}
+                                  >
+                                    {deletingUserId === user.id ? (
+                                      <>
+                                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-600 mr-2"></div>
+                                        Återaktiverar...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                                        Återaktivera
+                                      </>
+                                    )}
+                                  </DropdownMenuItem>
                                 )}
-                              </DropdownMenuItem>
+                              </>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>

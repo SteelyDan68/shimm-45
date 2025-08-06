@@ -25,6 +25,8 @@ import { TestingPage } from "@/pages/TestingPage";
 import { SixPillars } from "@/pages/SixPillars";
 import { MobileOptimization } from "@/pages/MobileOptimization";
 
+import GDPRManagement from './pages/GDPRManagement';
+import UnifiedUserManagement from './pages/UnifiedUserManagement';
 // UNIFIED USER PROFILE - Single Source of Truth
 import { UnifiedUserProfile } from "./components/UnifiedUserProfile";
 import { ClientProfile } from "./pages/ClientProfile";
@@ -132,8 +134,9 @@ const AppRoutes = () => {
                 <Route path="/client-intelligence" element={<ClientIntelligencePage />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
                
-            <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
-            <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
+             <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
+             <Route path="/gdpr-management" element={<GDPRManagement />} />
+             <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
                 <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />

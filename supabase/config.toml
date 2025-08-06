@@ -71,10 +71,13 @@ verify_jwt = false
 [functions.user-deletion]
 verify_jwt = true
 
-[functions.unified-ai-orchestrator]
+[functions.user-soft-delete]
 verify_jwt = true
 
-[functions.generate-prd-document]
+[functions.user-reactivate]
+verify_jwt = true
+
+[functions.unified-ai-orchestrator]
 verify_jwt = false
 
 [functions.stefan-ai-chat]

@@ -426,32 +426,34 @@ export function CentralUserManager() {
 
     setDeletingUserId(userId);
     try {
-      const identifier = userToDelete.email || `${userToDelete.first_name} ${userToDelete.last_name}`;
-      const result = await deleteUserCompletely(identifier);
+      // Use soft delete instead of full deletion
+      const { softDeleteUser } = await import('@/utils/userSoftDelete');
+      const result = await softDeleteUser(userId, 'admin_deactivation');
 
-      if (result.errors && result.errors.length > 0) {
+      if (!result.success) {
         toast({
-          title: "Delvis fel vid borttagning",
-          description: `Vissa data kunde inte tas bort: ${result.errors.join(', ')}`,
+          title: "Fel vid inaktivering",
+          description: result.message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Användare borttagen",
-          description: "Användaren och all relaterad data har tagits bort"
+          title: "Användare inaktiverad",
+          description: `Användaren har inaktiverats och kan återaktiveras vid behov. För fullständig GDPR-radering, använd GDPR-modulen.`,
         });
       }
 
-      await refreshAllData();
+      // Refresh users after successful deletion
+      refetchUsers();
     } catch (error: any) {
+      console.error('Error deactivating user:', error);
       toast({
-        title: "Fel",
-        description: "Kunde inte ta bort användare: " + error.message,
+        title: "Fel vid inaktivering",
+        description: error.message || "Kunde inte inaktivera användaren",
         variant: "destructive"
       });
     } finally {
       setDeletingUserId(null);
-      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -1430,10 +1432,10 @@ export function CentralUserManager() {
               {deletingUserId === selectedUser?.id ? (
                 <>
                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
-                  GDPR-radering pågår...
+                  Inaktiverar användare...
                 </>
               ) : (
-                'GDPR-radera användare'
+                'Inaktivera användare'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

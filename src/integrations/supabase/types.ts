@@ -2834,6 +2834,9 @@ export type Database = {
           custom_fields: Json | null
           data_retention_until: string | null
           date_of_birth: string | null
+          deactivated_at: string | null
+          deactivated_by: string | null
+          deactivation_reason: string | null
           deletion_requested_at: string | null
           department: string | null
           email: string | null
@@ -2845,6 +2848,7 @@ export type Database = {
           height: string | null
           id: string
           instagram_handle: string | null
+          is_active: boolean
           job_title: string | null
           last_login_at: string | null
           last_name: string | null
@@ -2896,6 +2900,9 @@ export type Database = {
           custom_fields?: Json | null
           data_retention_until?: string | null
           date_of_birth?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
+          deactivation_reason?: string | null
           deletion_requested_at?: string | null
           department?: string | null
           email?: string | null
@@ -2907,6 +2914,7 @@ export type Database = {
           height?: string | null
           id: string
           instagram_handle?: string | null
+          is_active?: boolean
           job_title?: string | null
           last_login_at?: string | null
           last_name?: string | null
@@ -2958,6 +2966,9 @@ export type Database = {
           custom_fields?: Json | null
           data_retention_until?: string | null
           date_of_birth?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
+          deactivation_reason?: string | null
           deletion_requested_at?: string | null
           department?: string | null
           email?: string | null
@@ -2969,6 +2980,7 @@ export type Database = {
           height?: string | null
           id?: string
           instagram_handle?: string | null
+          is_active?: boolean
           job_title?: string | null
           last_login_at?: string | null
           last_name?: string | null
@@ -4242,6 +4254,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      reactivate_user: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       reset_user_welcome_assessment: {
         Args: { _user_id: string }
         Returns: string
@@ -4258,6 +4274,10 @@ export type Database = {
           _attribute_type?: string
         }
         Returns: undefined
+      }
+      soft_delete_user: {
+        Args: { user_uuid: string; deactivation_reason?: string }
+        Returns: string
       }
       sparsevec_out: {
         Args: { "": unknown }
