@@ -4,7 +4,16 @@ import {
   Users, 
   User, 
   Search,
-  ChevronDown
+  ChevronDown,
+  Crown,
+  Shield,
+  Brain,
+  Target,
+  MessageSquare,
+  Calendar,
+  BarChart3,
+  Settings,
+  Bell
 } from "lucide-react";
 import {
   Sidebar,
@@ -149,6 +158,34 @@ export function AppSidebar() {
             </SidebarGroup>
           </Collapsible>
         ))}
+
+        {/* 🌟 UNIFIED USER COMMAND CENTER - Enterprise Grade Management */}
+        {(hasRole('superadmin') || hasRole('admin') || hasRole('coach')) && (
+          <SidebarGroup>
+            <SidebarGroupLabel>🌟 MASTERBOARD</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip={!open ? "Unified User Command Center" : undefined}>
+                    <NavLink 
+                      to="/unified-users" 
+                      className={`${getNavCls("/unified-users")} transition-colors rounded-md bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-200/50`}
+                      title={!open ? "Unified User Command Center" : undefined}
+                    >
+                      <Crown className="h-4 w-4 flex-shrink-0 text-purple-600" />
+                      {open && (
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-purple-800">Unified User Center</span>
+                          <span className="text-xs text-purple-600">Komplett användarhantering</span>
+                        </div>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Quick Search - Only when expanded */}
         {open && (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (

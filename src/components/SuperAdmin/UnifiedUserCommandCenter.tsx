@@ -38,6 +38,7 @@ import { useExtendedProfile } from '@/hooks/useExtendedProfile';
 import { useToast } from '@/hooks/use-toast';
 import { CreateUserForm } from '@/components/UserAdministration/CreateUserForm';
 import { SendInvitationForm } from '@/components/InvitationSystem/SendInvitationForm';
+import { EnhancedUserDetailsPanel } from './EnhancedUserDetailsPanel';
 import { deleteUserCompletely } from '@/utils/userDeletion';
 
 interface SelectedUserData {
@@ -401,7 +402,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
           {/* Right Panel - User Details */}
           <div className="col-span-8">
             {selectedUserData ? (
-              <UserDetailsPanel 
+              <EnhancedUserDetailsPanel 
                 userData={selectedUserData}
                 onRoleChange={handleRoleChange}
                 onDeleteUser={handleDeleteUser}
