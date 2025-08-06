@@ -188,11 +188,26 @@ const handler = async (req: Request): Promise<Response> => {
       } catch (emailError: any) {
         console.error(`❌ Error processing ${email}:`, emailError);
         console.error(`❌ Error details for ${email}:`, {
-          message: emailError.message,
-          name: emailError.name,
-          stack: emailError.stack
+          message: emailError?.message || 'No message',
+          name: emailError?.name || 'No name',
+          stack: emailError?.stack || 'No stack',
+          error_type: typeof emailError,
+          error_value: emailError
         });
-        errors.push(`${email}: ${emailError.message || 'Okänt fel uppstod'}`);
+        
+        // Robust error message handling
+        let errorMessage = 'Okänt fel uppstod';
+        if (emailError) {
+          if (typeof emailError === 'string') {
+            errorMessage = emailError;
+          } else if (emailError.message) {
+            errorMessage = emailError.message;
+          } else if (emailError.toString && typeof emailError.toString === 'function') {
+            errorMessage = emailError.toString();
+          }
+        }
+        
+        errors.push(`${email}: ${errorMessage}`);
       }
     }
 
