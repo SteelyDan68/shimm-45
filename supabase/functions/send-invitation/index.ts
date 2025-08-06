@@ -99,8 +99,9 @@ const handler = async (req: Request): Promise<Response> => {
     if (emailResponse.error) {
       console.error('Resend error:', emailResponse.error);
       
-      // Check if this is a domain verification issue (common in development)
-      if (emailResponse.error.message?.includes('testing emails') || 
+      // Check if this is API key issue, domain verification, or development restriction
+      if (emailResponse.error.message?.includes('API key is invalid') ||
+          emailResponse.error.message?.includes('testing emails') || 
           emailResponse.error.message?.includes('verify a domain') ||
           emailResponse.error.message?.includes('own email address')) {
         
@@ -108,12 +109,12 @@ const handler = async (req: Request): Promise<Response> => {
         
         return new Response(JSON.stringify({ 
           success: true, 
-          message: `Inbjudan skapad! (Email kunde inte skickas - Resend kräver domänverifiering för att skicka till andra än ${invitedBy})`,
+          message: `Inbjudan skapad! Email kunde inte skickas (${emailResponse.error.message}). Använd denna länk: ${appUrl}/invitation-signup?token=${invitation.token}`,
           invitation_id: invitation.id,
           invitation_token: invitation.token,
           invitation_url: `${appUrl}/invitation-signup?token=${invitation.token}`,
           dev_mode: true,
-          note: 'För att skicka emails: Verifiera en domän på resend.com/domains'
+          note: 'För att skicka emails: Konfigurera RESEND_API_KEY och verifiera en domän på resend.com'
         }), {
           status: 200,
           headers: {
