@@ -22,7 +22,7 @@ interface EnhancedClientDashboardProps {
 const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
   className = ""
 }) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { isClient } = useRoleCache(); // Use cached role check
   const navigate = useNavigate();
   const [showPillarJourney, setShowPillarJourney] = useState(false);
@@ -118,7 +118,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-purple-600" />
-            Hej {user?.user_metadata?.first_name || 'där'}! 👋
+            Välkommen {user?.user_metadata?.first_name || profile?.first_name || user?.email?.split('@')[0] || 'Anna'}! 👋
           </CardTitle>
         </CardHeader>
         <CardContent>
