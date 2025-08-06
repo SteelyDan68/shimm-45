@@ -129,7 +129,12 @@ export function CoachingDashboard() {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => generateCoachingPlan()}
+                onClick={() => {
+                  generateCoachingPlan();
+                  // Switch to plan tab after generating
+                  const planTab = document.querySelector('[value="plan"]') as HTMLElement;
+                  planTab?.click();
+                }}
                 disabled={isAnalyzing}
               >
                 Skapa plan
