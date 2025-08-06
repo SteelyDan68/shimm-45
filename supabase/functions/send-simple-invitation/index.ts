@@ -144,7 +144,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('📨 Resend response:', JSON.stringify(emailResponse, null, 2));
 
     if (emailResponse.error) {
-      console.error('❌ Resend error:', emailResponse.error);
+      console.error('❌ Resend error details:', {
+        error: emailResponse.error,
+        errorType: typeof emailResponse.error,
+        errorMessage: emailResponse.error?.message || 'No message',
+        errorName: emailResponse.error?.name || 'No name'
+      });
       
       // Handle development restrictions
       if (emailResponse.error.message?.includes('testing emails') || 
@@ -164,7 +169,7 @@ const handler = async (req: Request): Promise<Response> => {
           headers: { "Content-Type": "application/json", ...corsHeaders },
         });
       } else {
-        throw new Error(`Email sending failed: ${emailResponse.error.message}`);
+        throw new Error(`Email sending failed: ${emailResponse.error?.message || emailResponse.error?.toString() || 'Unknown Resend error'}`);
       }
     }
 

@@ -68,12 +68,15 @@ const handler = async (req: Request): Promise<Response> => {
         first_name: requestData.profile_data.first_name,
         last_name: requestData.profile_data.last_name,
         phone: requestData.profile_data.phone || null,
-        address: requestData.profile_data.address || null,
-        city: requestData.profile_data.city || null,
-        postal_code: requestData.profile_data.postal_code || null,
-        country: requestData.profile_data.country || null,
-        date_of_birth: requestData.profile_data.date_of_birth || null,
         bio: requestData.profile_data.bio || null,
+        date_of_birth: requestData.profile_data.date_of_birth || null,
+        // address är jsonb, så vi sätter det korrekt
+        address: requestData.profile_data.address ? {
+          street: requestData.profile_data.address,
+          city: requestData.profile_data.city || '',
+          postal_code: requestData.profile_data.postal_code || '',
+          country: requestData.profile_data.country || ''
+        } : null,
       });
 
     if (profileError) {
