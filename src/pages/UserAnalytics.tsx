@@ -84,11 +84,12 @@ export default function UserAnalytics() {
     try {
       console.log('🔄 Loading user analytics for:', targetUserId);
       
-      // Load pillar assessments (corrected table name)
-      const { data: analyses, error: analysesError } = await supabase
-        .from('pillar_assessments')
+      // Load pillar assessments from path_entries (correct data source)
+      const { data: analysisEntries, error: analysesError } = await supabase
+        .from('path_entries')
         .select('*')
         .eq('user_id', targetUserId)
+        .eq('type', 'assessment')
         .order('created_at', { ascending: false });
 
       if (analysesError) {
@@ -118,16 +119,17 @@ export default function UserAnalytics() {
         eventData: entry.metadata
       }));
 
-      // Transform analyses using correct field names from pillar_assessments
-      const processedAnalyses: PillarAnalysis[] = (analyses || []).map(analysis => {
+      // Transform path_entries assessment data to match expected interface
+      const processedAnalyses: PillarAnalysis[] = (analysisEntries || []).map(entry => {
+        const metadata = entry.metadata as any;
         return {
-          id: analysis.id,
-          pillar_type: analysis.pillar_key, // pillar_assessments uses pillar_key
-          ai_analysis: analysis.ai_analysis || '',
-          calculated_score: analysis.calculated_score || 0,
-          created_at: analysis.created_at,
-          assessment_data: analysis.assessment_data,
-          insights: analysis.insights
+          id: entry.id,
+          pillar_type: metadata?.pillar_key || 'unknown',
+          ai_analysis: entry.content || 'Analys inte tillgänglig än',
+          calculated_score: metadata?.assessment_score || 0,
+          created_at: entry.created_at,
+          assessment_data: metadata?.assessment_data,
+          insights: metadata?.insights || {}
         };
       });
 
@@ -136,7 +138,7 @@ export default function UserAnalytics() {
 
       toast({
         title: "Analys laddad",
-        description: `${analyses?.length || 0} analyser och ${timeline.length} aktiviteter hämtade`
+        description: `${analysisEntries?.length || 0} analyser och ${timeline.length} aktiviteter hämtade`
       });
 
     } catch (error: any) {
