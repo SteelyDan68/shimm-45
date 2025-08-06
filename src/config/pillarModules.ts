@@ -19,29 +19,29 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
     icon: '💚',
     color: '#10B981',
     questions: [
-      // Stress och emotionell hälsa (fokuserade på påverkbara faktorer)
-      { key: 'stress_hantering', text: 'Hur väl hanterar du stress i vardagen?', type: 'slider', min: 1, max: 10, weight: 1.2 },
-      { key: 'energiniva', text: 'Hur är din energinivå under en normal dag?', type: 'slider', min: 1, max: 10, weight: 1.2 },
-      { key: 'sovkvalitet', text: 'Hur nöjd är du med din sömn?', type: 'slider', min: 1, max: 10, weight: 1.1 },
-      { key: 'emotionell_balans', text: 'Känner du dig emotionellt balanserad?', type: 'slider', min: 1, max: 10, weight: 1.1 },
-      { key: 'tid_for_vila', text: 'Har du tid för vila och återhämtning?', type: 'slider', min: 1, max: 10, weight: 1.0 },
+      // Stress och emotionell hälsa (i jagperspektiv med procentskala)
+      { key: 'stress_hantering', text: 'Jag hanterar stress bra i vardagen', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'energiniva', text: 'Min energinivå är utmärkt på dagarna', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'sovkvalitet', text: 'Min sömn är bra och jag vaknar utvilad', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'emotionell_balans', text: 'Jag känner mig emotionellt balanserad', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'tid_for_vila', text: 'Jag har tillräckligt med tid för vila och återhämtning', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
       // Fysisk hälsa och välbefinnande
-      { key: 'fysisk_aktivitet', text: 'Hur nöjd är du med din fysiska aktivitetsnivå?', type: 'slider', min: 1, max: 10, weight: 1.0 },
-      { key: 'kostvanor', text: 'Hur nöjd är du med dina matvanor?', type: 'slider', min: 1, max: 10, weight: 0.9 },
-      { key: 'halsorutiner', text: 'Följer du hälsosamma rutiner regelbundet?', type: 'slider', min: 1, max: 10, weight: 0.9 },
+      { key: 'fysisk_aktivitet', text: 'Jag är nöjd med min fysiska aktivitetsnivå', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'kostvanor', text: 'Jag äter på ett sätt som får mig att må bra', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      { key: 'halsorutiner', text: 'Jag följer hälsosamma rutiner regelbundet', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
       // Socialt stöd och relationer
-      { key: 'socialt_stod', text: 'Känner du dig stöttad av människor omkring dig?', type: 'slider', min: 1, max: 10, weight: 1.0 },
-      { key: 'tid_med_nara', text: 'Får du tillräckligt med kvalitetstid med nära personer?', type: 'slider', min: 1, max: 10, weight: 0.9 },
+      { key: 'socialt_stod', text: 'Jag känner mig stöttad av människor omkring mig', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'tid_med_nara', text: 'Jag får tillräckligt med kvalitetstid med nära personer', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
       // Work-life balance och gränser
-      { key: 'arbete_vila_balans', text: 'Hur bra är balansen mellan arbete och vila?', type: 'slider', min: 1, max: 10, weight: 1.1 },
-      { key: 'personliga_granser', text: 'Är du bra på att sätta och hålla personliga gränser?', type: 'slider', min: 1, max: 10, weight: 1.0 },
+      { key: 'arbete_vila_balans', text: 'Jag har en bra balans mellan arbete och vila', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'personliga_granser', text: 'Jag är bra på att sätta och hålla personliga gränser', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
       // Självreflektion och personlig utveckling
-      { key: 'sjalvkansla', text: 'Hur är din självkänsla och självförtroende?', type: 'slider', min: 1, max: 10, weight: 1.0 },
-      { key: 'meningsfullhet', text: 'Känner du att ditt liv har mening och syfte?', type: 'slider', min: 1, max: 10, weight: 0.9 },
+      { key: 'sjalvkansla', text: 'Jag har god självkänsla och självförtroende', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'meningsfullhet', text: 'Jag känner att mitt liv har mening och syfte', type: 'slider', min: 0, max: 100, weight: 0.9 },
       
       // Öppna frågor för djupare insikt
       { key: 'stress_triggers', text: 'Vad är dina största stressutlösare och hur påverkar de dig?', type: 'text', weight: 0.5 },
@@ -53,43 +53,45 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
       let totalScore = 0;
       let totalWeight = 0;
 
-      // Hinder score (lägre är bättre, så vi inverterar)
-      const hinderKeys = ['mediestress', 'social_media_press', 'kritik_hat', 'prestationsangest', 'tidsbrist', 'balans_arbete_privatliv', 'ekonomisk_oro', 'relationsproblem', 'halsoproblem', 'sjalvkansla', 'perfektionism', 'kontrollbehov', 'ensamhet'];
-      const hinderScores = hinderKeys.map(key => typeof answers[key] === 'number' ? answers[key] : 5);
+      // Nya procentbaserade frågor (0-100% skala)
+      const percentageKeys = ['stress_hantering', 'energiniva', 'sovkvalitet', 'emotionell_balans', 'tid_for_vila', 
+                             'fysisk_aktivitet', 'kostvanor', 'halsorutiner', 'socialt_stod', 'tid_med_nara', 
+                             'arbete_vila_balans', 'personliga_granser', 'sjalvkansla', 'meningsfullhet'];
+      
+      percentageKeys.forEach(key => {
+        const question = PILLAR_MODULES.self_care.questions.find(q => q.key === key);
+        if (question && typeof answers[key] === 'number') {
+          const percentage = answers[key]; // 0-100
+          // Konvertera till poäng där 50% = neutral (0), <50% = negativ, >50% = positiv
+          const normalizedScore = (percentage - 50) / 50; // Range: -1 till +1
+          const finalScore = Math.max(-1, Math.min(1, normalizedScore)) * 5 + 5; // Range: 0-10
+          
+          totalScore += finalScore * (question.weight || 1);
+          totalWeight += (question.weight || 1);
+        }
+      });
+
+      // Fallback för gamla hinder-data om det finns
+      const hinderKeys = ['mediestress', 'social_media_press', 'kritik_hat', 'prestationsangest', 'tidsbrist', 'balans_arbete_privatliv', 'ekonomisk_oro', 'relationsproblem', 'halsoproblem', 'perfektionism', 'kontrollbehov', 'ensamhet'];
+      const hinderScores = hinderKeys.filter(key => typeof answers[key] === 'number').map(key => answers[key]);
       if (hinderScores.length > 0) {
         const avgHinder = hinderScores.reduce((a, b) => a + b, 0) / hinderScores.length;
-        const hinderScore = (10 - avgHinder) / 10;
-        totalScore += hinderScore * 0.4;
-        totalWeight += 0.4;
+        const hinderScore = (10 - avgHinder) / 10 * 10; // Inverterar skalan
+        totalScore += hinderScore * 0.3;
+        totalWeight += 0.3;
       }
 
-      // Functional access score
+      // Functional access score (gamla systemet som backup)
       const functionalKeys = ['mat_access', 'sovplats_access', 'hygien_access', 'kommunikation_access'];
-      const functionalValues = functionalKeys.map(key => answers[key] || 'ja');
-      const yesCount = functionalValues.filter(v => v === 'ja').length;
-      const functionalScore = yesCount / functionalValues.length;
-      totalScore += functionalScore * 0.3;
-      totalWeight += 0.3;
-
-      // Opportunities score
-      const oppKeys = ['be_om_hjalp', 'traning_rorelse', 'energi_meddelanden', 'lasa_information'];
-      const oppValues = oppKeys.map(key => typeof answers[key] === 'number' ? answers[key] : 3);
-      if (oppValues.length > 0) {
-        const avgOpp = oppValues.reduce((a, b) => a + b, 0) / oppValues.length;
-        const oppScore = avgOpp / 5;
-        totalScore += oppScore * 0.2;
+      const functionalValues = functionalKeys.filter(key => answers[key]).map(key => answers[key]);
+      if (functionalValues.length > 0) {
+        const yesCount = functionalValues.filter(v => v === 'ja').length;
+        const functionalScore = yesCount / functionalValues.length * 10;
+        totalScore += functionalScore * 0.2;
         totalWeight += 0.2;
       }
 
-      // Relationship support score
-      const relKeys = ['prata_regelbundet', 'familj_vanner'];
-      const relValues = relKeys.map(key => answers[key] || 'ja');
-      const relYesCount = relValues.filter(v => v === 'ja').length;
-      const relScore = relYesCount / relValues.length;
-      totalScore += relScore * 0.1;
-      totalWeight += 0.1;
-
-      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) : 5;
+      return totalWeight > 0 ? Math.round((totalScore / totalWeight) * 10) / 10 : 5;
     },
     insightGeneration: (answers, score) => {
       const criticalAreas = [];

@@ -189,37 +189,31 @@ export const ModularPillarAssessment = ({
             {(question.type === 'scale' || question.type === 'slider') && (
               <div className="px-2">
                 <Slider
-                  value={[answers[question.key] || question.min || 1]}
+                  value={[answers[question.key] || (pillarKey === 'self_care' ? 50 : question.min || 1)]}
                   onValueChange={(value) => handleAnswerChange(question.key, value[0])}
-                  max={question.max || 10}
-                  min={question.min || 1}
-                  step={question.type === 'slider' ? 1 : 1}
+                  max={question.max || (pillarKey === 'self_care' ? 100 : 10)}
+                  min={question.min || (pillarKey === 'self_care' ? 0 : 1)}
+                  step={1}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>
-                    {question.type === 'slider' ? `${question.min || 0}%` : `Låg (${question.min || 1})`}
+                    {pillarKey === 'self_care' ? 'Håller inte med alls (0%)' : `Låg (${question.min || 1})`}
                   </span>
                   <span className="font-medium text-primary">
-                    {answers[question.key] || question.min || 1}
-                    {question.type === 'slider' ? '%' : ''}
+                    {answers[question.key] || (pillarKey === 'self_care' ? 50 : question.min || 1)}
+                    {pillarKey === 'self_care' ? '%' : ''}
                   </span>
                   <span>
-                    {question.type === 'slider' ? `${question.max || 100}%` : `Hög (${question.max || 10})`}
+                    {pillarKey === 'self_care' ? 'Håller med helt (100%)' : `Hög (${question.max || 10})`}
                   </span>
                 </div>
-                {/* Visa beskrivande text för hinder (self_care) */}
-                {pillarKey === 'self_care' && question.max === 10 && (
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Inget hinder</span>
-                    <span>Stort hinder</span>
-                  </div>
-                )}
-                {/* Visa beskrivande text för möjligheter (self_care) */}
-                {pillarKey === 'self_care' && question.max === 5 && (
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Mycket svårt</span>
-                    <span>Enkelt & naturligt</span>
+                {/* Visa beskrivande text för self_care med procent-skala */}
+                {pillarKey === 'self_care' && question.max === 100 && (
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>Håller inte med alls</span>
+                    <span className="text-muted-foreground">Håller med delvis</span>
+                    <span>Håller med helt</span>
                   </div>
                 )}
               </div>
