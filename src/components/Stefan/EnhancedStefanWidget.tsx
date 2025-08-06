@@ -51,7 +51,7 @@ export const EnhancedStefanWidget: React.FC = () => {
   const { journeyState } = useUserJourney();
   const { sendMotivationalMessage } = useProactiveMessaging();
   const { toast } = useToast();
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true); // Startar som minimerad
   const [showDetailed, setShowDetailed] = useState(false);
   const [activeTab, setActiveTab] = useState<'insights' | 'predictions'>('insights');
   const [currentMood, setCurrentMood] = useState('encouraging');
