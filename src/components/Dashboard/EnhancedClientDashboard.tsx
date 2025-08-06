@@ -28,7 +28,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
   const [showPillarJourney, setShowPillarJourney] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const { tasks, loading: tasksLoading } = useTasks(isClient ? user?.id : undefined);
+  const { tasks, loading: tasksLoading } = useTasks(user?.id); // Always pass user.id for client dashboards
   
   // CRITICAL FIX: Use real pillar data from path_entries
   const { 
