@@ -48,6 +48,7 @@ import { InviteUserForm } from './InviteUserForm';
 import { UserProfileEditor } from './UserProfileEditor';
 import { UserRoleManager } from './UserRoleManager';
 import { CoachAssignmentManager } from './CoachAssignmentManager';
+import { deleteUserCompletely } from '@/utils/userDeletion';
 
 interface UserExtended {
   id: string;
@@ -93,6 +94,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('overview');
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   const { user: currentUser, hasRole } = useAuth();
   const { users, loading, refreshUsers } = useUsers();
@@ -169,16 +171,41 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       return;
     }
 
-    if (!confirm('Är du säker på att du vill radera denna användare permanent? Denna åtgärd kan inte ångras.')) {
+    const userToDelete = extendedUsers.find(u => u.id === userId);
+    if (!userToDelete) {
+      toast({
+        title: "Fel",
+        description: "Användaren kunde inte hittas",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!confirm(`Är du säker på att du vill radera användaren "${userToDelete.email}" permanent? Denna åtgärd kan inte ångras och kommer radera ALL data enligt GDPR.`)) {
       return;
     }
     
     try {
-      // Call the deletion edge function
-      toast({
-        title: "Användare raderad",
-        description: "Användaren har raderats från systemet",
-      });
+      setDeletingUserId(userId);
+      
+      // Call the comprehensive deletion function
+      const identifier = userToDelete.email || `${userToDelete.first_name} ${userToDelete.last_name}`;
+      const result = await deleteUserCompletely(identifier);
+
+      if (result.errors && result.errors.length > 0) {
+        toast({
+          title: "Delvis fel vid borttagning",
+          description: `Vissa data kunde inte tas bort: ${result.errors.join(', ')}`,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Användare raderad",
+          description: `Användaren ${userToDelete.email} har raderats från systemet enligt GDPR`,
+        });
+      }
+      
+      // Refresh the user list to reflect changes
       refreshUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -187,6 +214,8 @@ export const UnifiedUserCommandCenter: React.FC = () => {
         description: "Kunde inte radera användaren",
         variant: "destructive"
       });
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -444,9 +473,19 @@ export const UnifiedUserCommandCenter: React.FC = () => {
                               <DropdownMenuItem 
                                 onClick={(e) => { e.stopPropagation(); handleDeleteUser(user.id); }}
                                 className="text-destructive"
+                                disabled={deletingUserId === user.id}
                               >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Radera
+                                {deletingUserId === user.id ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-destructive mr-2"></div>
+                                    GDPR-radering...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    GDPR-radera
+                                  </>
+                                )}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

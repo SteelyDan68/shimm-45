@@ -1425,8 +1425,16 @@ export function CentralUserManager() {
             <AlertDialogAction
               onClick={() => selectedUser && deleteUser(selectedUser.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletingUserId === selectedUser?.id}
             >
-              Ta bort användare
+              {deletingUserId === selectedUser?.id ? (
+                <>
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                  GDPR-radering pågår...
+                </>
+              ) : (
+                'GDPR-radera användare'
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
