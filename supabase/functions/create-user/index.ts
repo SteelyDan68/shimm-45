@@ -59,29 +59,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Auth user created successfully:', authUser.user!.id);
 
-    // 2. Create profile
-    console.log('Creating profile...');
+    // 2. Update profile with extended data (trigger already created basic profile)
+    console.log('Updating profile with extended data...');
     const { error: profileError } = await supabaseClient
       .from('profiles')
-      .insert({
-        id: authUser.user!.id,
-        email,
-        first_name: firstName,
-        last_name: lastName,
+      .update({
         phone: extendedProfile?.phone || '',
         organization: extendedProfile?.organization || '',
         job_title: extendedProfile?.job_title || '',
         bio: extendedProfile?.bio || '',
-      });
+      })
+      .eq('id', authUser.user!.id);
 
     if (profileError) {
-      console.error('Profile error:', profileError);
+      console.error('Profile update error:', profileError);
       // Clean up auth user
       await supabaseClient.auth.admin.deleteUser(authUser.user!.id);
-      throw new Error(`Failed to create profile: ${profileError.message}`);
+      throw new Error(`Failed to update profile: ${profileError.message}`);
     }
 
-    console.log('Profile created successfully');
+    console.log('Profile updated successfully');
 
     // 3. Add role
     console.log('Adding role...');
