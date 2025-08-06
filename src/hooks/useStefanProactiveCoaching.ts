@@ -46,11 +46,12 @@ export const useStefanProactiveCoaching = () => {
     try {
       setIsAnalyzing(true);
 
-      // Fetch user pillar assessments
+      // Fetch user pillar assessments från path_entries
       const { data: pillarAssessments } = await supabase
-        .from('pillar_assessments')
-        .select('*')
+        .from('path_entries')
+        .select('id, content, metadata, created_at')
         .eq('user_id', user.id)
+        .eq('type', 'assessment')
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -62,19 +63,22 @@ export const useStefanProactiveCoaching = () => {
         .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order('created_at', { ascending: false });
 
-      // Calculate pillar scores
+      // Calculate pillar scores från path_entries metadata
       const pillarScores: Record<string, number> = {};
       pillarAssessments?.forEach(assessment => {
-        if (assessment.pillar_key && assessment.calculated_score) {
-          pillarScores[assessment.pillar_key] = assessment.calculated_score || 0;
+        const metadata = assessment.metadata as any;
+        if (metadata?.pillar_key && metadata?.assessment_score) {
+          pillarScores[metadata.pillar_key] = metadata.assessment_score || 0;
         }
       });
 
-      // Determine assessment trends
+      // Determine assessment trends från path_entries
       let assessmentTrends: 'improving' | 'declining' | 'stable' = 'stable';
       if (pillarAssessments && pillarAssessments.length >= 2) {
-        const latest = pillarAssessments[0]?.calculated_score || 0;
-        const previous = pillarAssessments[1]?.calculated_score || 0;
+        const latestMeta = pillarAssessments[0]?.metadata as any;
+        const previousMeta = pillarAssessments[1]?.metadata as any;
+        const latest = latestMeta?.assessment_score || 0;
+        const previous = previousMeta?.assessment_score || 0;
         if (latest > previous + 0.5) assessmentTrends = 'improving';
         else if (latest < previous - 0.5) assessmentTrends = 'declining';
       }

@@ -62,12 +62,13 @@ export const ClientAnalyticsWidget = ({
     try {
       setIsLoading(true);
 
-      // Hämta analyser
+      // Hämta analyser från path_entries (korrekt datakälla)
       const { data: analyses, error: analysesError } = await supabase
-        .from('assessment_rounds')
-        .select('pillar_type, ai_analysis, scores, created_at')
+        .from('path_entries')
+        .select('id, content, metadata, created_at')
         .eq('user_id', userId)
-        .not('ai_analysis', 'is', null);
+        .eq('type', 'assessment')
+        .not('content', 'is', null);
 
       if (analysesError) throw analysesError;
 
@@ -80,6 +81,28 @@ export const ClientAnalyticsWidget = ({
 
       if (activitiesError) throw activitiesError;
 
+      // Process assessment data från path_entries
+      const totalAnalyses = analyses?.length || 0;
+      let totalScore = 0;
+      let scoreCount = 0;
+
+      analyses?.forEach(analysis => {
+        const metadata = analysis.metadata as any;
+        if (metadata?.assessment_score) {
+          totalScore += metadata.assessment_score;
+          scoreCount++;
+        }
+      });
+
+      const avgScore = scoreCount > 0 ? totalScore / scoreCount : 0;
+
+      // Räkna senaste veckans analyser
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const recentActivities = analyses?.filter(analysis => 
+        new Date(analysis.created_at) > oneWeekAgo
+      ).length || 0;
+
       // Hämta uppgifter
       const { data: tasks, error: tasksError } = await supabase
         .from('tasks')
@@ -89,24 +112,9 @@ export const ClientAnalyticsWidget = ({
 
       if (tasksError) throw tasksError;
 
-      // Beräkna genomsnittlig poäng
-      let avgScore = 0;
-      if (analyses && analyses.length > 0) {
-        const totalScore = analyses.reduce((sum, analysis) => {
-          const scores = analysis.scores as any;
-          if (scores && typeof scores === 'object') {
-            const scoresArray = Object.values(scores as object) as number[];
-            const avgForAnalysis = scoresArray.reduce((s: number, score: any) => s + (Number(score) || 0), 0) / scoresArray.length;
-            return sum + avgForAnalysis;
-          }
-          return sum;
-        }, 0);
-        avgScore = totalScore / analyses.length;
-      }
-
       setQuickStats({
-        totalAnalyses: analyses?.length || 0,
-        recentActivities: activities?.length || 0,
+        totalAnalyses,
+        recentActivities,
         completedTasks: tasks?.length || 0,
         avgScore
       });

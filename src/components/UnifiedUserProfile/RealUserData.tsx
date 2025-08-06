@@ -55,11 +55,12 @@ export const RealUserData = ({ userId, profile }: RealUserDataProps) => {
         journeyResult,
         pillarResult
       ] = await Promise.all([
-        // Assessment data
+        // Assessment data från path_entries
         supabase
-          .from('assessment_rounds')
-          .select('id, created_at, pillar_type')
-          .eq('user_id', userId),
+          .from('path_entries')
+          .select('id, created_at, metadata')
+          .eq('user_id', userId)
+          .eq('type', 'assessment'),
         
         // Task data
         supabase
@@ -141,7 +142,7 @@ export const RealUserData = ({ userId, profile }: RealUserDataProps) => {
       supabase
         .channel(`user-${userId}-assessments`)
         .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'assessment_rounds', filter: `user_id=eq.${userId}` },
+          { event: '*', schema: 'public', table: 'path_entries', filter: `user_id=eq.${userId}` },
           () => loadUserMetrics()
         )
         .subscribe(),

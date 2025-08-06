@@ -60,26 +60,28 @@ export const AnalysisHub = ({
       setIsLoading(true);
       
       const { data: analyses, error } = await supabase
-        .from('assessment_rounds')
-        .select('id, pillar_type, ai_analysis, scores, created_at')
+        .from('path_entries')
+        .select('id, content, metadata, created_at')
         .eq('user_id', userId)
-        .not('ai_analysis', 'is', null)
+        .eq('type', 'assessment')
+        .not('content', 'is', null)
         .order('created_at', { ascending: false })
         .limit(compact ? 3 : 5);
 
       if (error) throw error;
 
-      // Process analyses with calculated scores
-      const processedAnalyses: PillarAnalysis[] = (analyses || []).map(analysis => {
-        const scores = analysis.scores as any;
-        const avgScore = scores && typeof scores === 'object' 
-          ? Object.values(scores as object).reduce((sum: number, score: any) => sum + (Number(score) || 0), 0) / Object.keys(scores as object).length
-          : 0;
+      // Process analyses från path_entries
+      const processedAnalyses: PillarAnalysis[] = (analyses || []).map(entry => {
+        const metadata = entry.metadata as any;
+        const assessmentScore = metadata?.assessment_score || 0;
         
         return {
-          ...analysis,
-          calculated_score: avgScore,
-          ai_analysis: analysis.ai_analysis || ''
+          id: entry.id,
+          pillar_type: metadata?.pillar_key || 'unknown',
+          created_at: entry.created_at,
+          calculated_score: assessmentScore,
+          ai_analysis: entry.content || '',
+          scores: metadata?.assessment_data || {}
         };
       });
 
@@ -87,10 +89,11 @@ export const AnalysisHub = ({
 
       // Get total count
       const { count } = await supabase
-        .from('assessment_rounds')
+        .from('path_entries')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
-        .not('ai_analysis', 'is', null);
+        .eq('type', 'assessment')
+        .not('content', 'is', null);
 
       setTotalAnalyses(count || 0);
 

@@ -131,11 +131,12 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
     
     setIsProcessing(true);
     try {
-      // Get real assessment data from the latest assessment
+      // Get real assessment data from the latest assessment i path_entries
       const { data: assessments, error: assessmentError } = await supabase
-        .from('assessment_rounds')
-        .select('scores, answers, pillar_type')
+        .from('path_entries')
+        .select('content, metadata, created_at')
         .eq('user_id', userId)
+        .eq('type', 'assessment')
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -145,10 +146,11 @@ export const ClientJourneyOrchestrator = memo(({ userId, userName, className }: 
       }
 
       const latestAssessment = assessments?.[0];
+      const metadata = latestAssessment?.metadata as any;
       const assessmentData = latestAssessment ? {
-        scores: latestAssessment.scores || { self_care: 5, stress_management: 5, work_life_balance: 5 },
-        responses: latestAssessment.answers || { main_challenge: "Utveckling", goal: "Förbättring" },
-        pillarKey: latestAssessment.pillar_type || 'self_care'
+        scores: metadata?.assessment_data || { self_care: 5, stress_management: 5, work_life_balance: 5 },
+        responses: metadata?.assessment_data || { main_challenge: "Utveckling", goal: "Förbättring" },
+        pillarKey: metadata?.pillar_key || 'self_care'
       } : {
         scores: { self_care: 5, stress_management: 5, work_life_balance: 5 },
         responses: { main_challenge: "Utveckling", goal: "Förbättring" },
