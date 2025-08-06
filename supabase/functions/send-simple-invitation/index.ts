@@ -135,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send the email
     const emailResponse = await resend.emails.send({
-      from: "HappyMinds <stefan.hallgren@gmail.com>", // Use your verified email
+      from: "HappyMinds <noreply@shimms.com>", // Use your verified domain
       to: [email],
       subject: "Inbjudan till HappyMinds plattformen",
       html,
