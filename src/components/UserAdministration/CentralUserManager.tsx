@@ -38,8 +38,8 @@ import { useAuth, type AppRole } from '@/providers/UnifiedAuthProvider';
 import { useUnifiedUserData, type UnifiedUser } from '@/hooks/useUnifiedUserData';
 import { useUserRelationships, type UserRelationship } from '@/hooks/useUserRelationships';
 import { useUserManagement } from '@/hooks/useUserManagement';
-import type { ExtendedProfileData } from '@/types/extendedProfile';
-import { PRIMARY_ROLES, PLATFORMS, COUNTRIES } from '@/types/extendedProfile';
+import type { UnifiedProfileData } from '@/types/unifiedProfile';
+import { GENDER_OPTIONS, SOCIAL_PLATFORMS, COUNTRIES } from '@/types/unifiedProfile';
 
 // Utils
 import { supabase } from '@/integrations/supabase/client';
@@ -1709,22 +1709,22 @@ function UserManagementCard({
  * User Edit Form Component
  */
 interface UserEditFormProps {
-  userData: ExtendedProfileData;
-  onDataChange: (data: ExtendedProfileData) => void;
+  userData: UnifiedProfileData;
+  onDataChange: (data: UnifiedProfileData) => void;
   onSave: () => void;
   onCancel: () => void;
   isLoading: boolean;
 }
 
 function UserEditForm({ userData, onDataChange, onSave, onCancel, isLoading }: UserEditFormProps) {
-  const updateField = (field: keyof ExtendedProfileData, value: any) => {
+  const updateField = (field: keyof UnifiedProfileData, value: any) => {
     onDataChange({
       ...userData,
       [field]: value
     });
   };
 
-  const updateNestedField = (parent: keyof ExtendedProfileData, field: string, value: any) => {
+  const updateNestedField = (parent: keyof UnifiedProfileData, field: string, value: any) => {
     const parentData = userData[parent] as any || {};
     onDataChange({
       ...userData,
@@ -1808,41 +1808,25 @@ function UserEditForm({ userData, onDataChange, onSave, onCancel, isLoading }: U
               <Label htmlFor="organization">Organisation</Label>
               <Input
                 id="organization"
-                value={userData.organization || ''}
-                onChange={(e) => updateField('organization', e.target.value)}
+                value={userData.professional?.organization || ''}
+                onChange={(e) => updateNestedField('professional', 'organization', e.target.value)}
               />
             </div>
             <div>
               <Label htmlFor="department">Avdelning</Label>
               <Input
                 id="department"
-                value={userData.department || ''}
-                onChange={(e) => updateField('department', e.target.value)}
+                value={userData.professional?.department || ''}
+                onChange={(e) => updateNestedField('professional', 'department', e.target.value)}
               />
             </div>
             <div>
               <Label htmlFor="job_title">Jobbtitel</Label>
               <Input
                 id="job_title"
-                value={userData.job_title || ''}
-                onChange={(e) => updateField('job_title', e.target.value)}
+                value={userData.professional?.job_title || ''}
+                onChange={(e) => updateNestedField('professional', 'job_title', e.target.value)}
               />
-            </div>
-            <div>
-              <Label htmlFor="primary_role">Primär roll</Label>
-              <Select 
-                value={userData.primary_role || ''} 
-                onValueChange={(value) => updateField('primary_role', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Välj primär roll" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRIMARY_ROLES.map(role => (
-                    <SelectItem key={role} value={role}>{role}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </CardContent>
@@ -1867,11 +1851,11 @@ function UserEditForm({ userData, onDataChange, onSave, onCancel, isLoading }: U
               />
             </div>
             <div>
-              <Label htmlFor="postalCode">Postnummer</Label>
+              <Label htmlFor="postal_code">Postnummer</Label>
               <Input
-                id="postalCode"
-                value={userData.address?.postalCode || ''}
-                onChange={(e) => updateNestedField('address', 'postalCode', e.target.value)}
+                id="postal_code"
+                value={userData.address?.postal_code || ''}
+                onChange={(e) => updateNestedField('address', 'postal_code', e.target.value)}
               />
             </div>
             <div>
