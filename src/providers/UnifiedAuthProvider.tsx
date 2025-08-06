@@ -191,21 +191,23 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
     }
   }, []);
 
+  // FIXED: Fetch user roles from user_roles table (not user_attributes)
   const fetchUserRoles = useCallback(async (userId: string) => {
     try {
+      console.log('🔥 UnifiedAuth: Fetching roles for user:', userId);
+      
       const { data, error } = await supabase
-        .from('user_attributes')
-        .select('attribute_value')
-        .eq('user_id', userId)
-        .like('attribute_key', 'role_%')
-        .eq('is_active', true);
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
 
       if (error) {
         console.error('Error fetching roles:', error);
         return;
       }
 
-      const userRoles = data?.map(item => item.attribute_value as string) as AppRole[] || [];
+      const userRoles = data?.map(item => item.role) as AppRole[] || [];
+      console.log('🔥 UnifiedAuth: Found roles:', userRoles);
       setRoles(userRoles);
     } catch (error) {
       console.error('Error in fetchUserRoles:', error);

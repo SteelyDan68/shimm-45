@@ -38,7 +38,7 @@ interface DashboardStats {
 }
 
 export const Dashboard = () => {
-  const { user, hasRole, profile } = useAuth();
+  const { user, hasRole, profile, roles, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { clients: unifiedClients, loading: clientsLoading } = useUnifiedClients();
@@ -64,19 +64,27 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      // Redirect clients to their own dashboard
-      if (hasRole('client') && !hasRole('admin') && !hasRole('superadmin') && !hasRole('coach')) {
-        navigate('/client-dashboard');
-        return;
+      console.log('🔥 Dashboard: Current user roles:', roles);
+      
+      // FIXED: Wait for roles to be loaded before redirecting
+      if (roles.length > 0) {
+        // Redirect clients to their own dashboard
+        if (hasRole('client') && !hasRole('admin') && !hasRole('superadmin') && !hasRole('coach')) {
+          console.log('🔥 Dashboard: Redirecting client to client dashboard');
+          navigate('/client-dashboard', { replace: true });
+          return;
+        }
+        // Redirect coaches to their coach dashboard
+        if (hasRole('coach') && !hasRole('admin') && !hasRole('superadmin')) {
+          console.log('🔥 Dashboard: Redirecting coach to coach dashboard');
+          navigate('/coach', { replace: true });
+          return;
+        }
       }
-      // Redirect coaches to their coach dashboard
-      if (hasRole('coach') && !hasRole('admin') && !hasRole('superadmin')) {
-        navigate('/coach');
-        return;
-      }
+      
       loadDashboardData();
     }
-  }, [user, hasRole, navigate, unifiedClients, clientsLoading]);
+  }, [user, hasRole, navigate, unifiedClients, clientsLoading, roles]);
 
   const checkClientOnboardingStatus = async () => {
     try {
