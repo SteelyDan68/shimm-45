@@ -27,9 +27,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log('🚀 Create User Function Started');
+    console.log('🚀 Create User Function Started - Version 2.0');
     
-    const { email, password, firstName, lastName, role, extendedProfile }: CreateUserRequest = await req.json();
+    const requestBody = await req.json();
+    console.log('📥 Received request body:', JSON.stringify(requestBody, null, 2));
+    
+    const { email, password, firstName, lastName, role, extendedProfile }: CreateUserRequest = requestBody;
     
     console.log(`Creating user: ${email} with role: ${role}`);
 
@@ -104,6 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
       success: true,
       message: `Användare ${email} skapad`,
       user_id: authUser.user!.id,
+      user: { id: authUser.user!.id }, // Frontend förväntar sig detta format
       generated_password: !password ? userPassword : undefined,
     }), {
       status: 200,
