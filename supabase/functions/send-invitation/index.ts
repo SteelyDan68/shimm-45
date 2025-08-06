@@ -1,10 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { Resend } from 'npm:resend@2.0.0';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
 interface InvitationRequest {
   email: string;
@@ -92,18 +95,83 @@ const handler = async (req: Request): Promise<Response> => {
     const appUrl = 'https://00a0d53e-45e2-45a5-8d70-ae3e74d84396.lovableproject.com';
     const invitationUrl = `${appUrl}/invitation-signup?token=${invitation.token}`;
 
-    console.log('✅ Invitation sent successfully');
+    console.log('Sending email via Resend...');
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      message: `Inbjudan skickad till ${email}`,
-      invitation_id: invitation.id,
-      invitation_url: invitationUrl,
-      dev_mode: true // Indicate this is dev mode without email sending
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    // Send email via Resend
+    try {
+      const emailResponse = await resend.emails.send({
+        from: 'HappyMinds <onboarding@resend.dev>',
+        to: [email],
+        subject: `Inbjudan till HappyMinds - ${role}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+              Välkommen till HappyMinds!
+            </h1>
+            
+            <p style="font-size: 16px; line-height: 1.5; color: #555;">
+              Du har blivit inbjuden att gå med i HappyMinds som <strong>${role}</strong>.
+            </p>
+            
+            ${custom_message ? `
+              <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0;">
+                <p style="margin: 0; font-style: italic;">${custom_message}</p>
+              </div>
+            ` : ''}
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${invitationUrl}" 
+                 style="background-color: #007bff; color: white; padding: 12px 30px; 
+                        text-decoration: none; border-radius: 5px; font-weight: bold;
+                        display: inline-block;">
+                Acceptera inbjudan
+              </a>
+            </div>
+            
+            <p style="font-size: 14px; color: #666; margin-top: 30px;">
+              Eller kopiera och klistra in denna länk i din webbläsare:
+            </p>
+            <p style="background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; 
+                      word-break: break-all; font-size: 12px;">
+              ${invitationUrl}
+            </p>
+            
+            <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+              Denna inbjudan är giltig i 7 dagar. Om du inte har begärt denna inbjudan kan du ignorera detta e-postmeddelande.
+            </p>
+          </div>
+        `,
+      });
+
+      console.log('Email sent successfully:', emailResponse);
+
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: `Inbjudan skickad till ${email}`,
+        invitation_id: invitation.id,
+        invitation_url: invitationUrl,
+        email_sent: true
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      
+      // Email failed but invitation was created, so it's partial success
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: `Inbjudan skapad men e-post kunde inte skickas till ${email}`,
+        invitation_id: invitation.id,
+        invitation_url: invitationUrl,
+        email_sent: false,
+        email_error: emailError.message
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
   } catch (error: any) {
     console.error("❌ Invitation error:", error);
