@@ -44,12 +44,16 @@ const handler = async (req: Request): Promise<Response> => {
     // Generate password if not provided
     const userPassword = password || Math.random().toString(36).slice(-12) + 'A1!';
 
-    // 1. Create auth user
+    // 1. Create auth user with proper metadata
     console.log('Creating auth user...');
     const { data: authUser, error: authError } = await supabaseClient.auth.admin.createUser({
       email,
       password: userPassword,
       email_confirm: true,
+      user_metadata: {
+        first_name: firstName,
+        last_name: lastName,
+      }
     });
 
     if (authError) {
