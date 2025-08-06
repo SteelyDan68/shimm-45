@@ -64,22 +64,22 @@ export const UserProfileEditor: React.FC<UserProfileEditorProps> = ({
         last_name: user.last_name || '',
         email: user.email || '',
         phone: user.phone || '',
-        address: user.address || '',
-        city: user.city || '',
-        postal_code: user.postal_code || '',
-        country: user.country || 'Sverige',
+        address: user.address?.street || '',
+        city: user.address?.city || '',
+        postal_code: user.address?.postal_code || '',
+        country: user.address?.country || 'Sverige',
         date_of_birth: user.date_of_birth || '',
         bio: user.bio || '',
         avatar_url: user.avatar_url || '',
-        linkedin_url: user.linkedin_url || '',
-        twitter_url: user.twitter_url || '',
-        facebook_url: user.facebook_url || '',
-        instagram_url: user.instagram_url || '',
+        linkedin_url: user.social_links?.linkedin || '',
+        twitter_url: user.social_links?.twitter || '',
+        facebook_url: user.social_links?.facebook || '',
+        instagram_url: user.social_links?.instagram || '',
         job_title: user.job_title || '',
         organization: user.organization || '',
-        personal_number: user.personal_number || '',
-        emergency_contact_name: user.emergency_contact_name || '',
-        emergency_contact_phone: user.emergency_contact_phone || ''
+        personal_number: user.profile_extended?.personal_number || '',
+        emergency_contact_name: user.profile_extended?.emergency_contact?.name || '',
+        emergency_contact_phone: user.profile_extended?.emergency_contact?.phone || ''
       });
     }
   }, [user]);
@@ -134,9 +134,44 @@ export const UserProfileEditor: React.FC<UserProfileEditorProps> = ({
 
     setLoading(true);
     try {
+      // Mappa fälten till rätt tabellstruktur
+      const updateData = {
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        email: profileData.email,
+        phone: profileData.phone,
+        bio: profileData.bio,
+        avatar_url: profileData.avatar_url,
+        job_title: profileData.job_title,
+        organization: profileData.organization,
+        date_of_birth: profileData.date_of_birth || null,
+        // Adressinformation som jsonb
+        address: {
+          street: profileData.address,
+          city: profileData.city,
+          postal_code: profileData.postal_code,
+          country: profileData.country
+        },
+        // Sociala länkar som jsonb
+        social_links: {
+          linkedin: profileData.linkedin_url,
+          twitter: profileData.twitter_url,
+          facebook: profileData.facebook_url,
+          instagram: profileData.instagram_url
+        },
+        // Övrig information i profile_extended
+        profile_extended: {
+          personal_number: profileData.personal_number,
+          emergency_contact: {
+            name: profileData.emergency_contact_name,
+            phone: profileData.emergency_contact_phone
+          }
+        }
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .update(profileData)
+        .update(updateData)
         .eq('id', user.id);
 
       if (error) throw error;
