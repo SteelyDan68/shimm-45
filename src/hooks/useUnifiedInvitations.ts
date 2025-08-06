@@ -64,10 +64,19 @@ export const useUnifiedInvitations = (): UseUnifiedInvitationsReturn => {
     setError(null);
 
     try {
-      console.log('🚀 Unified Invitations: Sending request to send-invitations', request);
+      console.log('🚀 Unified Invitations: Sending request to send-simple-invitation', request);
 
-      const { data, error: edgeError } = await supabase.functions.invoke('send-invitations', {
-        body: request
+      // Transform request for simple invitation (single email only)
+      const emailArray = Array.isArray(request.emails) ? request.emails : [request.emails];
+      const firstEmail = emailArray[0];
+      const simpleRequest = {
+        email: firstEmail,
+        role: request.role,
+        custom_message: request.custom_message || ''
+      };
+
+      const { data, error: edgeError } = await supabase.functions.invoke('send-simple-invitation', {
+        body: simpleRequest
       });
 
       if (edgeError) {
@@ -79,28 +88,45 @@ export const useUnifiedInvitations = (): UseUnifiedInvitationsReturn => {
         throw new Error('Inget svar från inbjudningsfunktion');
       }
 
-      if (!data.success) {
-        console.error('❌ Invitation function reported failure:', data);
-        throw new Error(data.error || 'Inbjudningsfunktionen misslyckades');
-      }
+      // Transform simple response to unified format
+      const unifiedResponse: InvitationResponse = {
+        success: data.success,
+        message: data.message,
+        results: [{
+          email: firstEmail,
+          success: data.success,
+          invitation_id: data.invitation_id,
+          email_id: data.email_id,
+          invitation_url: data.invitation_url,
+          dev_mode: data.dev_mode,
+          error: data.success ? undefined : (data.error || 'Unknown error')
+        }],
+        errors: data.success ? undefined : [data.error || 'Unknown error'],
+        summary: {
+          total_requested: 1,
+          successful: data.success ? 1 : 0,
+          failed: data.success ? 0 : 1,
+          success_rate: data.success ? '100%' : '0%'
+        }
+      };
 
-      console.log('✅ Invitations sent successfully:', data);
+      console.log('✅ Invitations sent successfully:', unifiedResponse);
 
       // Visa framgångsmeddelande
-      if (data.summary.successful > 0) {
-        toast.success(`🎉 ${data.message}`, {
-          description: `Framgångsgrad: ${data.summary.success_rate}`
+      if (unifiedResponse.summary.successful > 0) {
+        toast.success(`🎉 ${unifiedResponse.message}`, {
+          description: data.dev_mode ? 'Utvecklingsläge: E-post kunde inte skickas' : `Framgångsgrad: ${unifiedResponse.summary.success_rate}`
         });
       }
 
       // Visa varningar för fel
-      if (data.errors && data.errors.length > 0) {
-        toast.warning('⚠️ Vissa inbjudningar misslyckades', {
-          description: `${data.summary.failed} av ${data.summary.total_requested} misslyckades`
+      if (unifiedResponse.errors && unifiedResponse.errors.length > 0) {
+        toast.warning('⚠️ Inbjudning misslyckades', {
+          description: unifiedResponse.errors[0]
         });
       }
 
-      return data as InvitationResponse;
+      return unifiedResponse;
 
     } catch (err: any) {
       console.error('❌ Unified Invitations error:', err);
