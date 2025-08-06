@@ -378,7 +378,7 @@ export const UnifiedProfileForm: React.FC<UnifiedProfileFormProps> = ({
                     id="first_name"
                     value={formData.first_name}
                     onChange={(e) => handleInputChange('first_name', e.target.value)}
-                    disabled={!canEdit || isClientView}
+                    disabled={!canEdit}
                     className={!formData.first_name ? 'border-destructive' : ''}
                   />
                 </div>
@@ -390,7 +390,7 @@ export const UnifiedProfileForm: React.FC<UnifiedProfileFormProps> = ({
                     id="last_name"
                     value={formData.last_name}
                     onChange={(e) => handleInputChange('last_name', e.target.value)}
-                    disabled={!canEdit || isClientView}
+                    disabled={!canEdit}
                     className={!formData.last_name ? 'border-destructive' : ''}
                   />
                 </div>
