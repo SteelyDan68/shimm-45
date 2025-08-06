@@ -19,44 +19,69 @@ export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
     icon: '💚',
     color: '#10B981',
     questions: [
+      // === SEKTION 1: GRUNDLÄGGANDE VÄLBEFINNANDE ===
       // Stress och emotionell hälsa (i jagperspektiv med procentskala)
-      { key: 'stress_hantering', text: 'Jag hanterar stress bra i vardagen', type: 'slider', min: 0, max: 100, weight: 1.2 },
-      { key: 'energiniva', text: 'Min energinivå är utmärkt på dagarna', type: 'slider', min: 0, max: 100, weight: 1.2 },
-      { key: 'sovkvalitet', text: 'Min sömn är bra och jag vaknar utvilad', type: 'slider', min: 0, max: 100, weight: 1.1 },
-      { key: 'emotionell_balans', text: 'Jag känner mig emotionellt balanserad', type: 'slider', min: 0, max: 100, weight: 1.1 },
-      { key: 'tid_for_vila', text: 'Jag har tillräckligt med tid för vila och återhämtning', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'stress_hantering', text: 'Jag hanterar stress bra i vardagen', type: 'slider', min: 0, max: 100, weight: 1.3 },
+      { key: 'energiniva', text: 'Min energinivå är utmärkt på dagarna', type: 'slider', min: 0, max: 100, weight: 1.3 },
+      { key: 'sovkvalitet', text: 'Min sömn är bra och jag vaknar utvilad', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'emotionell_balans', text: 'Jag känner mig emotionellt balanserad', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'tid_for_vila', text: 'Jag har tillräckligt med tid för vila och återhämtning', type: 'slider', min: 0, max: 100, weight: 1.1 },
       
       // Fysisk hälsa och välbefinnande
-      { key: 'fysisk_aktivitet', text: 'Jag är nöjd med min fysiska aktivitetsnivå', type: 'slider', min: 0, max: 100, weight: 1.0 },
-      { key: 'kostvanor', text: 'Jag äter på ett sätt som får mig att må bra', type: 'slider', min: 0, max: 100, weight: 0.9 },
-      { key: 'halsorutiner', text: 'Jag följer hälsosamma rutiner regelbundet', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      { key: 'fysisk_aktivitet', text: 'Jag är nöjd med min fysiska aktivitetsnivå', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'kostvanor', text: 'Jag äter på ett sätt som får mig att må bra', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'halsorutiner', text: 'Jag följer hälsosamma rutiner regelbundet', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
+      // === SEKTION 2: RESURSER & MÖJLIGHETER (SJÄLVEFFEKTIVITET) ===
       // Socialt stöd och relationer
-      { key: 'socialt_stod', text: 'Jag känner mig stöttad av människor omkring mig', type: 'slider', min: 0, max: 100, weight: 1.0 },
-      { key: 'tid_med_nara', text: 'Jag får tillräckligt med kvalitetstid med nära personer', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      { key: 'socialt_stod', text: 'Jag känner mig stöttad av människor omkring mig', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'nara_relationer', text: 'Jag har människor i mitt liv som verkligen bryr sig om mig', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'professionellt_natverk', text: 'Jag har tillgång till människor som kan hjälpa mig professionellt', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
+      // Ekonomiska och praktiska resurser
+      { key: 'ekonomisk_stabilitet', text: 'Jag känner mig ekonomiskt trygg för framtiden', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'praktiska_resurser', text: 'Jag har tillgång till de praktiska resurser jag behöver', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'teknisk_kompetens', text: 'Jag känner mig bekväm med teknik och digitala verktyg', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      
+      // Personliga styrkor och förmågor
+      { key: 'problemlosning', text: 'Jag är bra på att lösa problem som uppstår', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'anpassningsformaga', text: 'Jag anpassar mig lätt till nya situationer', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'sjalvkansla', text: 'Jag har god självkänsla och självförtroende', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'framtidsoptimism', text: 'Jag ser ljust på min framtid', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      
+      // === SEKTION 3: LIVSKVALITET & BALANS ===
       // Work-life balance och gränser
-      { key: 'arbete_vila_balans', text: 'Jag har en bra balans mellan arbete och vila', type: 'slider', min: 0, max: 100, weight: 1.1 },
-      { key: 'personliga_granser', text: 'Jag är bra på att sätta och hålla personliga gränser', type: 'slider', min: 0, max: 100, weight: 1.0 },
+      { key: 'arbete_vila_balans', text: 'Jag har en bra balans mellan arbete och vila', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'personliga_granser', text: 'Jag är bra på att sätta och hålla personliga gränser', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'meningsfullhet', text: 'Jag känner att mitt liv har mening och syfte', type: 'slider', min: 0, max: 100, weight: 1.2 },
+      { key: 'kreativitet_uttryck', text: 'Jag har utrymme för kreativitet och personligt uttryck', type: 'slider', min: 0, max: 100, weight: 1.0 },
       
-      // Självreflektion och personlig utveckling
-      { key: 'sjalvkansla', text: 'Jag har god självkänsla och självförtroende', type: 'slider', min: 0, max: 100, weight: 1.0 },
-      { key: 'meningsfullhet', text: 'Jag känner att mitt liv har mening och syfte', type: 'slider', min: 0, max: 100, weight: 0.9 },
+      // Lärande och utveckling
+      { key: 'larande_motivation', text: 'Jag känner motivation att lära mig nya saker', type: 'slider', min: 0, max: 100, weight: 1.1 },
+      { key: 'personlig_tillvaxt', text: 'Jag utvecklas som person på ett sätt som känns rätt', type: 'slider', min: 0, max: 100, weight: 1.1 },
       
-      // Öppna frågor för djupare insikt
-      { key: 'stress_triggers', text: 'Vad är dina största stressutlösare och hur påverkar de dig?', type: 'text', weight: 0.5 },
-      { key: 'energy_patterns', text: 'När på dagen har du mest/minst energi och vad påverkar detta?', type: 'text', weight: 0.5 },
-      { key: 'self_care_activities', text: 'Vilka aktiviteter får dig att känna dig mest avslappnad och återställd?', type: 'text', weight: 0.5 },
-      { key: 'improvement_areas', text: 'Vilket område inom self care skulle du mest vilja förbättra?', type: 'text', weight: 0.5 }
+      // === SEKTION 4: DJUPANALYS (WHEEL OF LIFE INTEGRATION) ===
+      // Öppna frågor för holistisk förståelse
+      { key: 'livsomraden_analys', text: 'Bedöm dina 8 livsområden (Karriär, Ekonomi, Hälsa, Relationer, Personlig utveckling, Rekreation, Fysisk miljö, Bidrag till samhället). Vilket område behöver mest uppmärksamhet just nu?', type: 'text', weight: 0.8 },
+      { key: 'styrkor_resurser', text: 'Vilka är dina 3 största styrkor/resurser som du kan bygga vidare på för att förbättra ditt välbefinnande?', type: 'text', weight: 0.8 },
+      { key: 'energigivare', text: 'Vilka aktiviteter, människor eller miljöer ger dig mest energi och välbefinnande?', type: 'text', weight: 0.7 },
+      { key: 'stress_triggers', text: 'Vad är dina största stressutlösare och vilka tidiga varningssignaler märker du?', type: 'text', weight: 0.7 },
+      { key: 'support_system', text: 'Beskriv ditt stödsystem - vem vänder du dig till vid olika typer av utmaningar?', type: 'text', weight: 0.7 },
+      { key: 'framtidsvisioner', text: 'Hur ser ditt ideala liv ut om 3 år? Vad behöver förändras för att komma dit?', type: 'text', weight: 0.6 },
+      { key: 'tidigare_framgangar', text: 'Berätta om en period när du mådde riktigt bra. Vad utmärkte den tiden?', type: 'text', weight: 0.6 },
+      { key: 'hinder_mojligheter', text: 'Vilka är dina största hinder just nu, och vilka oupptäckta möjligheter finns det?', type: 'text', weight: 0.6 }
     ],
     scoreCalculation: (answers) => {
       let totalScore = 0;
       let totalWeight = 0;
 
-      // Nya procentbaserade frågor (0-100% skala)
+      // Nya procentbaserade frågor (0-100% skala) - uppdaterad lista med alla nya frågor
       const percentageKeys = ['stress_hantering', 'energiniva', 'sovkvalitet', 'emotionell_balans', 'tid_for_vila', 
-                             'fysisk_aktivitet', 'kostvanor', 'halsorutiner', 'socialt_stod', 'tid_med_nara', 
-                             'arbete_vila_balans', 'personliga_granser', 'sjalvkansla', 'meningsfullhet'];
+                             'fysisk_aktivitet', 'kostvanor', 'halsorutiner', 'socialt_stod', 'nara_relationer', 
+                             'professionellt_natverk', 'ekonomisk_stabilitet', 'praktiska_resurser', 'teknisk_kompetens',
+                             'problemlosning', 'anpassningsformaga', 'sjalvkansla', 'framtidsoptimism',
+                             'arbete_vila_balans', 'personliga_granser', 'meningsfullhet', 'kreativitet_uttryck',
+                             'larande_motivation', 'personlig_tillvaxt'];
       
       percentageKeys.forEach(key => {
         const question = PILLAR_MODULES.self_care.questions.find(q => q.key === key);
