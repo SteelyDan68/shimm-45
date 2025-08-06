@@ -48,23 +48,67 @@ export async function deleteUserCompletely(identifier: string): Promise<UserDele
       console.log('✅ Deletion successful:', data);
       
       // Trigger comprehensive global refresh events
-      triggerUserEvent('userDeleted', { action: 'gdpr_deletion', userId: identifier });
-      triggerUserEvent('gdprActionCompleted', { action: 'deletion', userId: identifier });
-      triggerUserEvent('userDataChanged', { action: 'deletion_completed' });
+      triggerUserEvent('userDeleted', { 
+        userId: identifier,
+        action: 'gdpr_complete_deletion',
+        email: identifier.includes('@') ? identifier : undefined
+      });
       
       return {
         user_found: true,
         deleted_profile: true,
+        deleted_roles: data.total_deleted || 0,
+        deleted_assessments: 0,
+        deleted_tasks: 0,
+        deleted_messages: 0,
+        deleted_other_data: data.total_deleted || 0,
+        errors: []
+      };
+    } else {
+      // Check if it's a successful message but without success flag
+      const isActuallySuccessful = data?.message && 
+        (data.message.includes('completely deleted') || data.message.includes('Results:'));
+      
+      if (isActuallySuccessful) {
+        console.log('✅ Deletion successful (legacy format):', data);
+        
+        // Parse the results from the message
+        const messageText = data.message;
+        const totalDeleted = messageText.split(', ').length - 1; // Rough estimate
+        
+        // Trigger comprehensive global refresh events
+        triggerUserEvent('userDeleted', { 
+          userId: identifier,
+          action: 'gdpr_complete_deletion',
+          email: identifier.includes('@') ? identifier : undefined
+        });
+        
+        return {
+          user_found: true,
+          deleted_profile: true,
+          deleted_roles: totalDeleted,
+          deleted_assessments: 0,
+          deleted_tasks: 0,
+          deleted_messages: 0,
+          deleted_other_data: totalDeleted,
+          errors: []
+        };
+      }
+      
+      // Handle failure case
+      const errorMessage = data?.message || 'Unknown deletion error';
+      console.error('❌ Deletion failed:', errorMessage);
+      
+      return {
+        user_found: errorMessage.includes('not found') ? false : true,
+        deleted_profile: false,
         deleted_roles: 0,
         deleted_assessments: 0,
         deleted_tasks: 0,
         deleted_messages: 0,
         deleted_other_data: 0,
-        errors: []
+        errors: [errorMessage]
       };
-    } else {
-      console.error('❌ Deletion failed:', data?.error);
-      throw new Error(data?.error || 'Unknown deletion error');
     }
 
   } catch (error: any) {
