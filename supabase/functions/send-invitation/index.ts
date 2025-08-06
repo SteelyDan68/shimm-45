@@ -42,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Creating invitation in database...');
     
     // Create invitation
-    const { data: invitation, error: createError } = await supabaseClient
+    let { data: invitation, error: createError } = await supabaseClient
       .from('invitations')
       .insert({
         email,
