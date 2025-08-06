@@ -100,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email via Resend
     try {
       const emailResponse = await resend.emails.send({
-        from: 'HappyMinds <noreply@yourdomain.com>', // Replace with your verified domain
+        from: 'HappyMinds <noreply@send.yourdomain.com>', // Replace 'yourdomain.com' with your actual domain
         to: [email],
         subject: `Inbjudan till HappyMinds - ${role}`,
         html: `
