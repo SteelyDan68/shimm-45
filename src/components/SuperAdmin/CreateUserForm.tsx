@@ -76,7 +76,19 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess }) => 
         throw new Error('Minst en roll måste tilldelas');
       }
 
+      // Test system diagnostic first
+      console.log('🧪 Testing system diagnostic...');
+      const { data: diagData, error: diagError } = await supabase.functions.invoke('system-diagnostic');
+      
+      if (diagError) {
+        console.error('❌ System diagnostic failed:', diagError);
+        throw new Error(`System diagnostic fel: ${diagError.message}`);
+      }
+      
+      console.log('✅ System diagnostic success:', diagData);
+
       // Create user via edge function
+      console.log('🚀 Calling create-user function...');
       const { data, error } = await supabase.functions.invoke('create-user', {
         body: {
           email: formData.email,
@@ -87,7 +99,10 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess }) => 
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Create user error:', error);
+        throw error;
+      }
 
       toast({
         title: "Användare skapad",
