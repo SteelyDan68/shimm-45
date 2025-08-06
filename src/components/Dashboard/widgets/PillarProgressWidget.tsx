@@ -34,8 +34,8 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
 
   const getPillarData = () => {
     return allPillars.map(pillar => {
-      const completed = completedPillars.some(cp => cp.pillar_key === pillar.key);
-      const activated = activatedPillars.some(ap => ap.pillar_key === pillar.key);
+      const completed = completedPillars.some(cp => cp === pillar.key);
+      const activated = activatedPillars.some(ap => ap === pillar.key);
       
       return {
         ...pillar,
