@@ -795,51 +795,66 @@ export type Database = {
           assessment_key: string | null
           assessment_type: string
           auto_save_count: number
+          auto_saved_at: string | null
           completed_at: string | null
+          conflict_resolution: string | null
           created_at: string
           current_step: string
+          device_info: Json | null
           form_data: Json
           id: string
           is_draft: boolean
           last_saved_at: string
           metadata: Json
+          parent_draft_id: string | null
           started_at: string
           updated_at: string
           user_id: string
+          version: number | null
         }
         Insert: {
           abandoned_at?: string | null
           assessment_key?: string | null
           assessment_type: string
           auto_save_count?: number
+          auto_saved_at?: string | null
           completed_at?: string | null
+          conflict_resolution?: string | null
           created_at?: string
           current_step: string
+          device_info?: Json | null
           form_data?: Json
           id?: string
           is_draft?: boolean
           last_saved_at?: string
           metadata?: Json
+          parent_draft_id?: string | null
           started_at?: string
           updated_at?: string
           user_id: string
+          version?: number | null
         }
         Update: {
           abandoned_at?: string | null
           assessment_key?: string | null
           assessment_type?: string
           auto_save_count?: number
+          auto_saved_at?: string | null
           completed_at?: string | null
+          conflict_resolution?: string | null
           created_at?: string
           current_step?: string
+          device_info?: Json | null
           form_data?: Json
           id?: string
           is_draft?: boolean
           last_saved_at?: string
           metadata?: Json
+          parent_draft_id?: string | null
           started_at?: string
           updated_at?: string
           user_id?: string
+          version?: number | null
         }
         Relationships: []
       }
@@ -975,6 +990,69 @@ export type Database = {
           id?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      calendar_actionables: {
+        Row: {
+          ai_generated: boolean | null
+          ai_recommendation_id: string | null
+          completed_at: string | null
+          completion_percentage: number | null
+          completion_status: string | null
+          created_at: string | null
+          description: string | null
+          estimated_duration: number | null
+          id: string
+          neuroplasticity_day: number | null
+          pillar_key: string
+          priority: string | null
+          scheduled_date: string | null
+          timeline_reference: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          user_notes: string | null
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          ai_recommendation_id?: string | null
+          completed_at?: string | null
+          completion_percentage?: number | null
+          completion_status?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          neuroplasticity_day?: number | null
+          pillar_key: string
+          priority?: string | null
+          scheduled_date?: string | null
+          timeline_reference?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          user_notes?: string | null
+        }
+        Update: {
+          ai_generated?: boolean | null
+          ai_recommendation_id?: string | null
+          completed_at?: string | null
+          completion_percentage?: number | null
+          completion_status?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          neuroplasticity_day?: number | null
+          pillar_key?: string
+          priority?: string | null
+          scheduled_date?: string | null
+          timeline_reference?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          user_notes?: string | null
         }
         Relationships: []
       }
@@ -4380,6 +4458,10 @@ export type Database = {
       reactivate_user: {
         Args: { user_uuid: string }
         Returns: string
+      }
+      recover_assessment_draft: {
+        Args: { p_user_id: string; p_assessment_key: string }
+        Returns: Json
       }
       reset_user_welcome_assessment: {
         Args: { _user_id: string }

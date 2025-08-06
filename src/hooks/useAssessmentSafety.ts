@@ -1,415 +1,386 @@
-import { useEffect, useCallback, useRef } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-export interface AssessmentSafetyConfig {
-  isActive: boolean;
-  hasUnsavedChanges: boolean;
-  assessmentType: 'welcome' | 'pillar' | 'open_track';
-  assessmentKey?: string; // för pillar assessments
-  currentStep: string;
-  formData: Record<string, any>;
-  onBeforeExit?: () => Promise<boolean>;
-  onStateRestore?: (data: Record<string, any>) => void;
-  preventAccidentalSubmission?: boolean;
-  autoSaveInterval?: number;
+export interface AssessmentState {
+  id?: string;
+  user_id: string;
+  assessment_type: string;
+  assessment_key: string;
+  current_step: string;
+  form_data: Record<string, any>;
+  metadata: Record<string, any>;
+  is_draft: boolean;
+  version: number;
+  auto_save_count: number;
+  last_saved_at: string;
+  device_info: Record<string, any>;
+}
+
+export interface AssessmentSafetyOptions {
+  autoSaveInterval?: number; // milliseconds
+  conflictResolution?: 'overwrite' | 'merge' | 'new_version';
+  enableRecovery?: boolean;
+  trackDeviceInfo?: boolean;
 }
 
 /**
- * Förbättrad Assessment Safety Hook med GDPR-journaling och single source of truth
- * - Persistent state management med auto-save
- * - GDPR-kompatibel händelseloggning  
- * - Förhindrar data loss och ger användaren kontroll
- * - Integrerar med autonomous coach system
+ * ASSESSMENT SAFETY HOOK - Robust state management med auto-save och recovery
+ * Förhindrar dataförlust och hanterar conflicfts intelligent
  */
-export const useAssessmentSafety = (config: AssessmentSafetyConfig) => {
-  const { toast } = useToast();
+export const useAssessmentSafety = (
+  assessmentType: string,
+  assessmentKey: string,
+  options: AssessmentSafetyOptions = {}
+) => {
   const { user } = useAuth();
-  const preventSubmissionRef = useRef(false);
-  const lastInteractionRef = useRef<Date>(new Date());
-  const assessmentStateIdRef = useRef<string | null>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { toast } = useToast();
+  
+  const {
+    autoSaveInterval = 30000, // 30 sekunder
+    conflictResolution = 'new_version',
+    enableRecovery = true,
+    trackDeviceInfo = true
+  } = options;
 
-  // Log assessment event till GDPR-kompatibel logg
-  const logAssessmentEvent = useCallback(async (
-    eventType: string,
-    eventData: Record<string, any> = {}
-  ) => {
-    if (!user?.id) return;
+  const [assessmentState, setAssessmentState] = useState<AssessmentState | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastAutoSave, setLastAutoSave] = useState<Date | null>(null);
+  const [recoveredData, setRecoveredData] = useState<any>(null);
 
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSaveDataRef = useRef<string>('');
+
+  // Device fingerprinting för conflict detection
+  const getDeviceInfo = useCallback(() => {
+    if (!trackDeviceInfo) return {};
+    
+    return {
+      user_agent: navigator.userAgent,
+      timestamp: new Date().toISOString(),
+      screen_resolution: `${screen.width}x${screen.height}`,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      language: navigator.language
+    };
+  }, [trackDeviceInfo]);
+
+  // Ladda eller återställ assessment state
+  const loadAssessmentState = useCallback(async () => {
+    if (!user) return;
+
+    setIsLoading(true);
     try {
-      await supabase.from('assessment_events').insert({
-        user_id: user.id,
-        assessment_state_id: assessmentStateIdRef.current,
-        event_type: eventType,
-        event_data: {
-          ...eventData,
-          assessment_type: config.assessmentType,
-          assessment_key: config.assessmentKey,
-          current_step: config.currentStep,
-          timestamp: new Date().toISOString()
-        },
-        session_id: sessionStorage.getItem('session_id') || undefined,
-        user_agent: navigator.userAgent
-      });
-    } catch (error) {
-      console.warn('Failed to log assessment event:', error);
-    }
-  }, [user?.id, config.assessmentType, config.assessmentKey, config.currentStep]);
-
-  // Ladda befintligt draft state
-  const loadDraftState = useCallback(async () => {
-    if (!user?.id) return null;
-
-    try {
-      const { data, error } = await supabase
+      // Försök först hitta existerande draft
+      const { data: existingState, error } = await supabase
         .from('assessment_states')
         .select('*')
         .eq('user_id', user.id)
-        .eq('assessment_type', config.assessmentType)
-        .eq('assessment_key', config.assessmentKey || '')
+        .eq('assessment_key', assessmentKey)
         .eq('is_draft', true)
+        .order('last_saved_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
 
-      if (data) {
-        assessmentStateIdRef.current = data.id;
-        await logAssessmentEvent('data_restored', { restored_data_keys: Object.keys(data.form_data) });
+      if (existingState) {
+        setAssessmentState(existingState);
+        lastSaveDataRef.current = JSON.stringify(existingState.form_data);
         
-        if (config.onStateRestore && data.form_data && typeof data.form_data === 'object') {
-          config.onStateRestore(data.form_data as Record<string, any>);
+        // Visa recovery notification om data är gammal
+        const lastSaved = new Date(existingState.last_saved_at);
+        const hoursSinceLastSave = (Date.now() - lastSaved.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastSave > 1) {
+          toast({
+            title: "Tidigare data återställd",
+            description: `Din senaste session från ${lastSaved.toLocaleString('sv-SE')} har återställts.`,
+            variant: "default"
+          });
+          setRecoveredData(existingState.form_data);
         }
+      } else if (enableRecovery) {
+        // Försök återställa från recovery function
+        const { data: recoveryData } = await supabase.rpc('recover_assessment_draft', {
+          p_user_id: user.id,
+          p_assessment_key: assessmentKey
+        });
+
+        if (recoveryData?.recovered) {
+          setRecoveredData(recoveryData.form_data);
+          toast({
+            title: "Data återställd",
+            description: "Vi hittade tidigare osparad data som har återställts.",
+            variant: "default"
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading assessment state:', error);
+      toast({
+        title: "Fel vid laddning",
+        description: "Kunde inte ladda tidigare data.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, assessmentKey, enableRecovery, toast]);
+
+  // Auto-save funktion
+  const performAutoSave = useCallback(async (formData: Record<string, any>, currentStep: string) => {
+    if (!user || !formData) return;
+
+    // Kontrollera om data faktiskt har ändrats
+    const currentDataString = JSON.stringify(formData);
+    if (currentDataString === lastSaveDataRef.current) {
+      return;
+    }
+
+    try {
+      const saveData = {
+        user_id: user.id,
+        assessment_type: assessmentType,
+        assessment_key: assessmentKey,
+        current_step: currentStep,
+        form_data: formData,
+        metadata: {
+          auto_save: true,
+          save_timestamp: new Date().toISOString(),
+          conflict_resolution: conflictResolution
+        },
+        is_draft: true,
+        device_info: getDeviceInfo(),
+        auto_saved_at: new Date().toISOString()
+      };
+
+      if (assessmentState?.id) {
+        // Uppdatera befintlig
+        const { data, error } = await supabase
+          .from('assessment_states')
+          .update({
+            ...saveData,
+            version: (assessmentState.version || 1) + 1,
+            auto_save_count: (assessmentState.auto_save_count || 0) + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', assessmentState.id)
+          .select()
+          .single();
+
+        if (error) throw error;
         
+        setAssessmentState(data);
+      } else {
+        // Skapa ny
+        const { data, error } = await supabase
+          .from('assessment_states')
+          .insert(saveData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        setAssessmentState(data);
+      }
+
+      lastSaveDataRef.current = currentDataString;
+      setLastAutoSave(new Date());
+      setHasUnsavedChanges(false);
+
+      console.log('📱 Auto-save completed successfully');
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      // Visa inte toast för auto-save failures för att inte störa användaren
+    }
+  }, [user, assessmentType, assessmentKey, conflictResolution, assessmentState, getDeviceInfo]);
+
+  // Manuell save funktion
+  const saveAssessmentState = useCallback(async (
+    formData: Record<string, any>, 
+    currentStep: string,
+    isDraft: boolean = true
+  ) => {
+    if (!user) return null;
+
+    try {
+      const saveData = {
+        user_id: user.id,
+        assessment_type: assessmentType,
+        assessment_key: assessmentKey,
+        current_step: currentStep,
+        form_data: formData,
+        metadata: {
+          manual_save: true,
+          save_timestamp: new Date().toISOString(),
+          conflict_resolution: conflictResolution
+        },
+        is_draft: isDraft,
+        device_info: getDeviceInfo()
+      };
+
+      if (assessmentState?.id) {
+        const { data, error } = await supabase
+          .from('assessment_states')
+          .update({
+            ...saveData,
+            version: (assessmentState.version || 1) + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', assessmentState.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        setAssessmentState(data);
         toast({
-          title: "Pågående bedömning hittad",
-          description: "Dina tidigare svar har återställts. Du kan fortsätta där du slutade.",
+          title: "Sparat",
+          description: "Dina svar har sparats säkert.",
+          variant: "default"
+        });
+        
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from('assessment_states')
+          .insert(saveData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        setAssessmentState(data);
+        toast({
+          title: "Sparat",
+          description: "Dina svar har sparats säkert.",
           variant: "default"
         });
         
         return data;
       }
     } catch (error) {
-      console.error('Error loading draft state:', error);
+      console.error('Save failed:', error);
+      toast({
+        title: "Sparning misslyckades",
+        description: "Kunde inte spara dina svar. Försök igen.",
+        variant: "destructive"
+      });
+      throw error;
     }
-    
-    return null;
-  }, [user?.id, config.assessmentType, config.assessmentKey, config.onStateRestore, logAssessmentEvent, toast]);
+  }, [user, assessmentType, assessmentKey, conflictResolution, assessmentState, getDeviceInfo, toast]);
 
-  // Spara assessment state
-  const saveAssessmentState = useCallback(async (isAutoSave = false) => {
-    if (!user?.id || !config.formData) return false;
+  // Radera draft
+  const clearDraft = useCallback(async () => {
+    if (!assessmentState?.id) return;
 
     try {
-      const stateData = {
-        user_id: user.id,
-        assessment_type: config.assessmentType,
-        assessment_key: config.assessmentKey || '',
-        current_step: config.currentStep,
-        form_data: config.formData,
-        metadata: {
-          last_updated: new Date().toISOString(),
-          auto_save_count: isAutoSave ? 1 : 0
-        },
-        last_saved_at: new Date().toISOString()
-      };
+      const { error } = await supabase
+        .from('assessment_states')
+        .delete()
+        .eq('id', assessmentState.id);
 
-      if (assessmentStateIdRef.current) {
-        const { error } = await supabase
-          .from('assessment_states')
-          .update(stateData)
-          .eq('id', assessmentStateIdRef.current);
-        
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
-          .from('assessment_states')
-          .insert(stateData)
-          .select('id')
-          .single();
-        
-        if (error) throw error;
-        assessmentStateIdRef.current = data.id;
-      }
+      if (error) throw error;
 
-      await logAssessmentEvent(
-        isAutoSave ? 'auto_saved' : 'manually_saved',
-        { form_data_size: JSON.stringify(config.formData).length }
-      );
-
-      if (!isAutoSave) {
-        toast({
-          title: "Framsteg sparat",
-          description: "Dina svar har sparats och du kan fortsätta senare.",
-          variant: "default"
-        });
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error saving assessment state:', error);
-      if (!isAutoSave) {
-        toast({
-          title: "Kunde inte spara",
-          description: "Ett fel uppstod när vi skulle spara dina svar. Försök igen.",
-          variant: "destructive"
-        });
-      }
-      return false;
-    }
-  }, [user?.id, config.assessmentType, config.assessmentKey, config.currentStep, config.formData, logAssessmentEvent, toast]);
-
-  // Auto-save funktionalitet
-  const scheduleAutoSave = useCallback(() => {
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-
-    if (config.hasUnsavedChanges && config.isActive) {
-      autoSaveTimeoutRef.current = setTimeout(() => {
-        saveAssessmentState(true);
-      }, config.autoSaveInterval || 30000); // 30 sekunder default
-    }
-  }, [config.hasUnsavedChanges, config.isActive, config.autoSaveInterval, saveAssessmentState]);
-
-  // Uppdatera senaste interaktion och schemalägg auto-save
-  const updateLastInteraction = useCallback(() => {
-    lastInteractionRef.current = new Date();
-    scheduleAutoSave();
-  }, [scheduleAutoSave]);
-
-  // Kontrollera om åtgärden är avsiktlig
-  const isIntentionalAction = useCallback(() => {
-    const timeSinceLastInteraction = Date.now() - lastInteractionRef.current.getTime();
-    return timeSinceLastInteraction > 1000;
-  }, []);
-
-  // Initialisering och cleanup
-  useEffect(() => {
-    if (config.isActive && user?.id) {
-      // Ladda befintligt draft när hook aktiveras
-      loadDraftState();
+      setAssessmentState(null);
+      setHasUnsavedChanges(false);
+      setRecoveredData(null);
+      lastSaveDataRef.current = '';
       
-      // Logga att assessment har startats/återupptagits
-      logAssessmentEvent('assessment_started', {
-        current_step: config.currentStep
+      toast({
+        title: "Draft raderad",
+        description: "Alla sparade data har raderats.",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Clear draft failed:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte radera draft.",
+        variant: "destructive"
       });
     }
+  }, [assessmentState, toast]);
 
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, [config.isActive, user?.id]);
+  // Data change tracking
+  const trackDataChange = useCallback((newData: Record<string, any>) => {
+    const currentDataString = JSON.stringify(newData);
+    if (currentDataString !== lastSaveDataRef.current) {
+      setHasUnsavedChanges(true);
+    }
+  }, []);
 
-  // Förhindra oavsiktlig sidomladdning med förbättrad hantering
+  // Setup auto-save timer
   useEffect(() => {
-    if (!config.isActive) return;
-
-    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-      if (config.hasUnsavedChanges) {
-        // Auto-save innan användaren lämnar
-        await saveAssessmentState(true);
-        
-        e.preventDefault();
-        e.returnValue = 'Du har en pågående bedömning. Den sparas automatiskt så du kan fortsätta senare.';
-        return e.returnValue;
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
       }
     };
+  }, []);
 
-    const handlePopState = async (e: PopStateEvent) => {
-      if (config.hasUnsavedChanges) {
+  // Start auto-save för specifik data
+  const startAutoSave = useCallback((formData: Record<string, any>, currentStep: string) => {
+    if (autoSaveTimerRef.current) {
+      clearInterval(autoSaveTimerRef.current);
+    }
+
+    autoSaveTimerRef.current = setInterval(() => {
+      if (hasUnsavedChanges) {
+        performAutoSave(formData, currentStep);
+      }
+    }, autoSaveInterval);
+  }, [hasUnsavedChanges, performAutoSave, autoSaveInterval]);
+
+  // Stop auto-save
+  const stopAutoSave = useCallback(() => {
+    if (autoSaveTimerRef.current) {
+      clearInterval(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+  }, []);
+
+  // Browser navigation guard
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
         e.preventDefault();
-        
-        const shouldExit = await new Promise<boolean>((resolve) => {
-          const userChoice = window.confirm(
-            'Du har en pågående bedömning. Vill du:\n\n' +
-            '• Klicka OK för att spara och lämna\n' +
-            '• Klicka Avbryt för att fortsätta bedömningen'
-          );
-          resolve(userChoice);
-        });
-
-        if (shouldExit) {
-          await saveAssessmentState(false);
-          await logAssessmentEvent('assessment_abandoned', {
-            reason: 'user_navigation',
-            current_step: config.currentStep
-          });
-        } else {
-          // Förhindra navigation
-          window.history.pushState(null, '', window.location.href);
-          await logAssessmentEvent('navigation_blocked', {
-            reason: 'user_choice_continue'
-          });
-        }
+        e.returnValue = '';
+        return '';
       }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
-    // Förhindra tillbaka-knappen när det finns osparade ändringar
-    if (config.hasUnsavedChanges) {
-      window.history.pushState(null, '', window.location.href);
-    }
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [config.isActive, config.hasUnsavedChanges, config.currentStep, saveAssessmentState, logAssessmentEvent]);
-
-  // Säker submit med fullständig state cleanup
-  const safeSubmit = useCallback(async (
-    submitFn: () => Promise<void>,
-    requiresDoubleConfirm: boolean = true
-  ) => {
-    updateLastInteraction();
-
-    // Dubbel bekräftelse för kritiska åtgärder
-    if (requiresDoubleConfirm && config.preventAccidentalSubmission) {
-      const confirmed = window.confirm(
-        '🎯 Slutför bedömning\n\n' +
-        'Är du säker på att du vill skicka in din bedömning?\n\n' +
-        '✅ Du får omedelbar AI-analys\n' +
-        '✅ Personliga rekommendationer\n' +
-        '✅ Stefan kommer kontakta dig\n\n' +
-        'Detta kan inte ångras.'
-      );
-      
-      if (!confirmed) {
-        await logAssessmentEvent('submission_cancelled', {
-          reason: 'user_declined_confirmation'
-        });
-        return false;
-      }
-    }
-
-    try {
-      // Markera assessment som completed
-      if (assessmentStateIdRef.current) {
-        await supabase
-          .from('assessment_states')
-          .update({
-            is_draft: false,
-            completed_at: new Date().toISOString()
-          })
-          .eq('id', assessmentStateIdRef.current);
-      }
-
-      await logAssessmentEvent('assessment_completed', {
-        completion_time_seconds: Date.now() - lastInteractionRef.current.getTime()
-      });
-
-      await submitFn();
-      
-      // Rensa auto-save timeout
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Safe submit error:', error);
-      
-      await logAssessmentEvent('submission_failed', {
-        error_message: error instanceof Error ? error.message : 'Unknown error'
-      });
-      
-      toast({
-        title: "Fel vid inlämning",
-        description: "Något gick fel. Dina svar är sparade, försök igen.",
-        variant: "destructive"
-      });
-      return false;
-    }
-  }, [config.preventAccidentalSubmission, updateLastInteraction, logAssessmentEvent, toast]);
-
-  // Säker steg-navigering med auto-save
-  const safeNavigate = useCallback(async (
-    navigationFn: () => void,
-    newStep: string,
-    requiresConfirmation: boolean = false
-  ) => {
-    updateLastInteraction();
-
-    if (requiresConfirmation && config.hasUnsavedChanges) {
-      const userChoice = window.confirm(
-        '💾 Spara framsteg?\n\n' +
-        'Du har osparade ändringar. Vill du spara innan du fortsätter?\n\n' +
-        '• Klicka OK för att spara och fortsätta\n' +
-        '• Klicka Avbryt för att fortsätta utan att spara'
-      );
-      
-      if (userChoice) {
-        await saveAssessmentState(false);
-      }
-    } else if (config.hasUnsavedChanges) {
-      // Auto-save vid steg-övergång
-      await saveAssessmentState(true);
-    }
-
-    await logAssessmentEvent('step_changed', {
-      from_step: config.currentStep,
-      to_step: newStep
-    });
-
-    navigationFn();
-    return true;
-  }, [config.hasUnsavedChanges, config.currentStep, updateLastInteraction, saveAssessmentState, logAssessmentEvent]);
-
-  // Manuell spara-funktion för användaren
-  const manualSave = useCallback(async () => {
-    updateLastInteraction();
-    const success = await saveAssessmentState(false);
-    return success;
-  }, [updateLastInteraction, saveAssessmentState]);
-
-  // Återställ från draft
-  const restoreFromDraft = useCallback(async () => {
-    const draftData = await loadDraftState();
-    return draftData;
-  }, [loadDraftState]);
-
-  // Rensa draft state (vid avbrott)
-  const clearDraftState = useCallback(async () => {
-    if (!assessmentStateIdRef.current) return;
-
-    try {
-      await supabase
-        .from('assessment_states')
-        .update({
-          abandoned_at: new Date().toISOString()
-        })
-        .eq('id', assessmentStateIdRef.current);
-
-      await logAssessmentEvent('assessment_abandoned', {
-        reason: 'user_explicit_abandon'
-      });
-
-      assessmentStateIdRef.current = null;
-      
-      toast({
-        title: "Bedömning avbruten",
-        description: "Dina svar har raderats.",
-        variant: "default"
-      });
-    } catch (error) {
-      console.error('Error clearing draft state:', error);
-    }
-  }, [logAssessmentEvent, toast]);
+  // Initial load
+  useEffect(() => {
+    loadAssessmentState();
+  }, [loadAssessmentState]);
 
   return {
-    safeSubmit,
-    safeNavigate,
-    manualSave,
-    restoreFromDraft,
-    clearDraftState,
-    updateLastInteraction,
-    isIntentionalAction,
-    scheduleAutoSave,
+    // State
+    assessmentState,
+    isLoading,
+    hasUnsavedChanges,
+    lastAutoSave,
+    recoveredData,
+    
+    // Actions
+    saveAssessmentState,
+    clearDraft,
+    trackDataChange,
+    startAutoSave,
+    stopAutoSave,
+    loadAssessmentState,
+    
+    // Utils
+    setHasUnsavedChanges,
+    setRecoveredData
   };
 };
