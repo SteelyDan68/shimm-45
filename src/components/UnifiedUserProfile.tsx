@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { useUserData } from '@/hooks/useUserData';
-import { useUnifiedProfile } from '@/hooks/useUnifiedProfile';
 
 // Import specialized components
 import { ClientProfileView } from './UnifiedUserProfile/ClientProfileView';
@@ -43,7 +43,6 @@ export const UnifiedUserProfile = () => {
   
   // SINGLE SOURCE OF TRUTH: All data fetched via user_id
   const { profile, loading: profileLoading, hasRole, roles } = useUserData(userId);
-  const { getProfile } = useUnifiedProfile();
   const { isSuperAdmin, isAdmin, canManageUsers } = useAuth();
   
   
@@ -65,11 +64,6 @@ export const UnifiedUserProfile = () => {
       return true;
     }
     
-    // Emergency hardcoded access
-    if (user?.email === 'stefan.hallgren@gmail.com') {
-      return true;
-    }
-
     // Admin access
     if (isAdmin()) {
       return true;
@@ -84,7 +78,6 @@ export const UnifiedUserProfile = () => {
     if (canManageUsers) {
       return true;
     }
-    
     
     return false;
   }, [user?.id, user?.email, userId, isSuperAdmin, isAdmin, canManageUsers]);
@@ -115,9 +108,9 @@ export const UnifiedUserProfile = () => {
     try {
       setLoading(true);
       
-      // Load extended profile data
-      const extData = await getProfile();
-      setExtendedProfile(extData);
+      // Extended profile is now handled by useUserData hook
+      // No need for additional API calls
+      setExtendedProfile(profile);
       
     } catch (error) {
       console.error('Error loading user data:', error);

@@ -68,12 +68,26 @@ export const EnhancedCoachInsights = () => {
 
       if (insightsError) throw insightsError;
 
-      // Formatera insights data
+      // Hämta klientnamn från profiles
+      const clientIds = Array.from(new Set((insightsData || []).map(insight => insight.user_id)));
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', clientIds);
+      
+      const clientNames = Object.fromEntries(
+        (profilesData || []).map(profile => [
+          profile.id, 
+          `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Okänd klient'
+        ])
+      );
+
+      // Formatera insights data med riktiga klientnamn
       const formattedInsights = (insightsData || []).map(insight => ({
         ...insight,
         action_points: Array.isArray(insight.action_points) ? insight.action_points : [],
         data_sources: Array.isArray(insight.data_sources) ? insight.data_sources : [],
-        client_name: 'Klient', // Placeholder - kan förbättras senare
+        client_name: clientNames[insight.user_id] || 'Okänd klient',
         client_progress: 0
       })) as CoachInsight[];
 
@@ -101,7 +115,7 @@ export const EnhancedCoachInsights = () => {
         const formattedTriggers = (triggersData || []).map(trigger => ({
           ...trigger,
           trigger_data: typeof trigger.trigger_data === 'object' ? trigger.trigger_data : {},
-          client_name: 'Klient' // Placeholder
+          client_name: clientNames[trigger.user_id] || 'Okänd klient'
         })) as AutonomousTrigger[];
 
         setTriggers(formattedTriggers);

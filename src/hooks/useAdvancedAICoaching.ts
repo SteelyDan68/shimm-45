@@ -185,28 +185,13 @@ export const useAdvancedAICoaching = () => {
     } catch (error) {
       console.error('Error starting coaching session:', error);
       
-      // Fallback with enhanced mock recommendations
-      const mockRecommendations = generateMockRecommendations(type);
-      const sessionId = crypto.randomUUID();
-      
-      const session: CoachingSession = {
-        id: sessionId,
-        userId: user.id,
-        startTime: new Date(),
-        type,
-        context: { userId: user.id, ...context },
-        recommendations: mockRecommendations
-      };
-
-      setCurrentSession(session);
-      setRecommendations(mockRecommendations);
-
       toast({
-        title: "Session Startad (Offline Mode)",
-        description: "Genererade lokala rekommendationer baserat på användardata",
+        title: "Kunde inte starta session",
+        description: "Försök igen eller kontakta support om problemet kvarstår",
+        variant: "destructive"
       });
 
-      return session;
+      return null;
 
     } finally {
       setIsAnalyzing(false);
@@ -260,10 +245,13 @@ export const useAdvancedAICoaching = () => {
     } catch (error) {
       console.error('Error generating coaching plan:', error);
       
-      // Fallback with mock plan
-      const mockPlan = generateMockCoachingPlan(duration);
-      setCoachingPlan(mockPlan);
-      return mockPlan;
+      toast({
+        title: "Kunde inte generera plan",
+        description: "Försök igen eller kontakta support om problemet kvarstår",
+        variant: "destructive"
+      });
+
+      return null;
 
     } finally {
       setIsAnalyzing(false);
@@ -289,7 +277,7 @@ export const useAdvancedAICoaching = () => {
 
     } catch (error) {
       console.error('Error getting adaptive recommendations:', error);
-      return generateMockRecommendations('assessment');
+      return [];
     }
   }, [user, sessionHistory]);
 
@@ -441,98 +429,3 @@ export const useAdvancedAICoaching = () => {
       : 0
   };
 };
-
-// Mock data generators
-function generateMockRecommendations(type: CoachingSession['type']): AICoachingRecommendation[] {
-  const baseRecommendations = [
-    {
-      id: 'rec_1',
-      type: 'action' as const,
-      title: 'Implementera morgonrutin',
-      description: 'Skapa en strukturerad morgonrutin för att öka produktivitet och välbefinnande.',
-      reasoning: 'Baserat på din självvårdspoäng och rapporterade utmaningar med morgonenergi.',
-      priority: 'high' as const,
-      category: 'Självvård',
-      estimatedTime: 30,
-      difficulty: 'medium' as const,
-      expectedOutcome: 'Förbättrad energi och fokus under dagen',
-      metrics: ['Energinivå', 'Produktivitet', 'Humör'],
-      resources: [
-        {
-          type: 'article' as const,
-          title: 'Vetenskaplig guide till morgonrutiner',
-          url: 'https://example.com/morning-routine'
-        }
-      ]
-    },
-    {
-      id: 'rec_2',
-      type: 'learning' as const,
-      title: 'Fördjupa teknisk kompetens',
-      description: 'Identifiera och utveckla en specifik teknisk färdighet inom ditt fokusområde.',
-      reasoning: 'Din kompetensanalys visar potential för utveckling inom tekniska färdigheter.',
-      priority: 'medium' as const,
-      category: 'Kompetensutveckling',
-      estimatedTime: 120,
-      difficulty: 'hard' as const,
-      expectedOutcome: 'Ökad teknisk expertis och marknadsvärde',
-      metrics: ['Teknisk kompetens', 'Självförtroende', 'Karriärmöjligheter']
-    },
-    {
-      id: 'rec_3',
-      type: 'reflection' as const,
-      title: 'Veckovis reflektion',
-      description: 'Avsätt tid varje vecka för reflektion över framsteg och utmaningar.',
-      reasoning: 'Regelbunden reflektion är nyckeln till kontinuerlig förbättring och självkännedom.',
-      priority: 'medium' as const,
-      category: 'Personlig utveckling',
-      estimatedTime: 20,
-      difficulty: 'easy' as const,
-      expectedOutcome: 'Ökad självmedvetenhet och målklarhet',
-      metrics: ['Självkännedom', 'Målklarhet', 'Personlig tillväxt']
-    }
-  ];
-
-  return baseRecommendations;
-}
-
-function generateMockCoachingPlan(duration: number): PersonalizedCoachingPlan {
-  const weeksCount = Math.ceil(duration / 7);
-  
-  return {
-    userId: 'user_id',
-    generatedAt: new Date(),
-    duration,
-    focusAreas: ['Självvård', 'Kompetensutveckling', 'Målsättning'],
-    weeklyGoals: Array.from({ length: weeksCount }, (_, i) => ({
-      week: i + 1,
-      goals: [
-        `Vecka ${i + 1}: Etablera nya rutiner`,
-        `Utveckla ${['självvård', 'tekniska färdigheter', 'reflektion'][i % 3]}`
-      ],
-      activities: generateMockRecommendations('planning').slice(0, 2)
-    })),
-    milestones: [
-      {
-        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        description: 'Första veckans genomförande',
-        successCriteria: ['Följt morgonrutin 5/7 dagar', 'Genomfört planerad reflektion']
-      },
-      {
-        date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-        description: 'Rutiner etablerade',
-        successCriteria: ['Konsekvent morgonrutin', 'Påbörjad kompetensutveckling']
-      }
-    ],
-    adaptationTriggers: [
-      {
-        condition: 'Låg genomförandegrad < 50%',
-        action: 'Minska målens komplexitet och öka stöd'
-      },
-      {
-        condition: 'Hög genomförandegrad > 90%',
-        action: 'Öka utmaningsnivån och lägg till nya mål'
-      }
-    ]
-  };
-}
