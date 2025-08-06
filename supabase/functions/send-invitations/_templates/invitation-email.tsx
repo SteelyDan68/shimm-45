@@ -1,15 +1,4 @@
 import React from 'npm:react@18.3.1';
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Section,
-  Text,
-  Link,
-  Button,
-  Hr,
-} from 'npm:@react-email/components@0.0.22';
 
 interface InvitationEmailProps {
   invitedBy: string;
@@ -24,143 +13,106 @@ export const InvitationEmail: React.FC<InvitationEmailProps> = ({
   invitationToken,
   role,
   appUrl,
-  customMessage
+  customMessage,
 }) => {
   const invitationUrl = `${appUrl}/invitation-signup?token=${invitationToken}`;
 
   return (
-    <Html>
-      <Head />
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={box}>
-            <Text style={h1}>Du har fått en inbjudan!</Text>
-            
-            <Text style={paragraph}>
-              {invitedBy} har bjudit in dig till plattformen som {role}.
-            </Text>
-
-            {customMessage && (
-              <>
-                <Text style={paragraphBold}>Personligt meddelande:</Text>
-                <Text style={messageBox}>
-                  {customMessage}
-                </Text>
-              </>
-            )}
-
-            <Text style={paragraph}>
-              Klicka på knappen nedan för att acceptera inbjudan och skapa ditt konto:
-            </Text>
-
-            <Button style={button} href={invitationUrl}>
+    <html>
+      <head>
+        <meta charSet="utf-8" />
+        <title>Inbjudan till plattformen</title>
+        <style>{`
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 10px 10px 0 0;
+          }
+          .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+          }
+          .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+          }
+          .footer {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+          }
+          .custom-message {
+            background: #fff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+        `}</style>
+      </head>
+      <body>
+        <div className="header">
+          <h1>Välkommen till plattformen!</h1>
+          <p>Du har blivit inbjuden av {invitedBy}</p>
+        </div>
+        
+        <div className="content">
+          <h2>Din inbjudan</h2>
+          <p>
+            Du har blivit inbjuden att gå med i vår plattform som <strong>{role}</strong>.
+          </p>
+          
+          {customMessage && (
+            <div className="custom-message">
+              <h3>Personligt meddelande:</h3>
+              <p>{customMessage}</p>
+            </div>
+          )}
+          
+          <p>Klicka på knappen nedan för att acceptera din inbjudan och skapa ditt konto:</p>
+          
+          <div style={{ textAlign: 'center' }}>
+            <a href={invitationUrl} className="button">
               Acceptera inbjudan
-            </Button>
-
-            <Text style={paragraph}>
-              Eller kopiera och klistra in denna länk i din webbläsare:
-            </Text>
-            
-            <Text style={linkText}>
-              <Link href={invitationUrl} style={link}>
-                {invitationUrl}
-              </Link>
-            </Text>
-
-            <Hr style={hr} />
-            
-            <Text style={footer}>
-              Denna inbjudan kommer att upphöra inom 7 dagar. Om du inte vill gå med kan du ignorera detta email.
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
+            </a>
+          </div>
+          
+          <p>
+            Om knappen inte fungerar kan du kopiera och klistra in följande länk i din webbläsare:
+          </p>
+          <p style={{ wordBreak: 'break-all', background: '#f0f0f0', padding: '10px', borderRadius: '4px' }}>
+            {invitationUrl}
+          </p>
+        </div>
+        
+        <div className="footer">
+          <p>Denna inbjudan är giltig i 7 dagar.</p>
+          <p>Om du inte förväntade dig denna inbjudan kan du ignorera detta e-postmeddelande.</p>
+        </div>
+      </body>
+    </html>
   );
-};
-
-// Styles
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-};
-
-const box = {
-  padding: '0 48px',
-};
-
-const h1 = {
-  color: '#333',
-  fontSize: '24px',
-  fontWeight: 'bold',
-  margin: '40px 0',
-  padding: '0',
-  textAlign: 'center' as const,
-};
-
-const paragraph = {
-  color: '#525f7f',
-  fontSize: '16px',
-  lineHeight: '24px',
-  textAlign: 'left' as const,
-};
-
-const paragraphBold = {
-  ...paragraph,
-  fontWeight: 'bold',
-  marginBottom: '8px',
-};
-
-const messageBox = {
-  backgroundColor: '#f8f9fa',
-  border: '1px solid #e9ecef',
-  borderRadius: '6px',
-  padding: '16px',
-  color: '#495057',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '16px 0',
-};
-
-const button = {
-  backgroundColor: '#5469d4',
-  borderRadius: '5px',
-  color: '#fff',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'block',
-  width: '100%',
-  padding: '12px 0',
-  margin: '24px 0',
-};
-
-const linkText = {
-  ...paragraph,
-  fontSize: '14px',
-  color: '#666',
-};
-
-const link = {
-  color: '#5469d4',
-  textDecoration: 'underline',
-};
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
-};
-
-const footer = {
-  color: '#8898aa',
-  fontSize: '12px',
-  lineHeight: '16px',
 };
