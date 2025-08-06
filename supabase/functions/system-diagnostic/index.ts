@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log('🔧 System diagnostic test started');
+  console.log('🔧 System diagnostic test started - VERSION 2.0');
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
