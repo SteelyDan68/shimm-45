@@ -18,7 +18,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log('🚀 Send Invitation Function Started');
+    console.log('🚀 Send Invitation Function Started - Version 2.1');
     
     const { email, role, custom_message = '' }: InvitationRequest = await req.json();
     
