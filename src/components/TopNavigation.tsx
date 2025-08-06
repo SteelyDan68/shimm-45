@@ -8,11 +8,9 @@ import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   LogOut,
-  User,
   Shield,
   HelpCircle,
-  MessageSquare,
-  BarChart3
+  MessageSquare
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,22 +47,9 @@ export function TopNavigation() {
           <GlobalSearchBar variant={isMobile ? "compact" : "full"} className="w-full" />
         </div>
 
-        {/* Messages & Notifications - More Prominent */}
+        {/* Messages & Quick Actions - Clean and focused */}
         <div className="flex items-center gap-3">
           <MessageIcon />
-          
-          {/* Quick Message Button for Coaches */}
-          {(roles.includes('coach') || roles.includes('admin') || roles.includes('superadmin')) && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/messages?action=compose')}
-              className="hidden md:flex items-center gap-2"
-            >
-              <MessageSquare className="h-4 w-4" />
-              <span className="hidden lg:inline">Nytt meddelande</span>
-            </Button>
-          )}
           
           {/* Email - Desktop Only */}
           {!isMobile && (
@@ -103,22 +88,8 @@ export function TopNavigation() {
                 </p>
               </div>
               
-              {/* Navigation Links */}
+              {/* RENSAD NAVIGATION - Endast essentiella användarfunktioner */}
               <div className="py-1">
-                <DropdownMenuItem asChild>
-                  <NavLink to="/user-analytics" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
-                    <BarChart3 className="h-4 w-4 mr-3 text-muted-foreground" />
-                    <span>Min Utvecklingsanalys</span>
-                  </NavLink>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem asChild>
-                  <NavLink to="/edit-profile" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
-                    <User className="h-4 w-4 mr-3 text-muted-foreground" />
-                    <span>Min Profil</span>
-                  </NavLink>
-                </DropdownMenuItem>
-                
                 {(hasRole('superadmin') || hasRole('admin')) && (
                   <DropdownMenuItem asChild>
                     <NavLink to="/administration" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">

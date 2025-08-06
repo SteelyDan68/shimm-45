@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -65,6 +65,7 @@ export default function UserAnalytics() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [pillarAnalyses, setPillarAnalyses] = useState<PillarAnalysis[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
@@ -73,6 +74,7 @@ export default function UserAnalytics() {
   const [selectedAnalysis, setSelectedAnalysis] = useState<PillarAnalysis | null>(null);
 
   const targetUserId = userId || user?.id;
+  const activeTab = searchParams.get('tab') || 'analyses';
 
   // 📊 LOAD COMPLETE USER ANALYTICS
   const loadUserAnalytics = async () => {
@@ -226,7 +228,7 @@ export default function UserAnalytics() {
       </div>
 
       {/* 📊 MAIN ANALYTICS TABS */}
-      <Tabs defaultValue="analyses" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={(value) => setSearchParams({ tab: value })} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="analyses" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />

@@ -1,22 +1,26 @@
+/**
+ * 🎯 CLEAN & INTUITIVE SIDEBAR NAVIGATION
+ * Single source of truth för all navigation - inget cluttering!
+ */
+
 import { NavLink, useLocation } from "react-router-dom";
 import { 
-  Home, 
-  Users, 
-  User, 
-  Search,
-  ChevronDown,
-  Crown,
-  Shield,
-  Brain,
-  Target,
-  MessageSquare,
-  Calendar,
+  LayoutDashboard, 
   BarChart3,
-  Settings,
-  Bell,
-  Users2,
-  Download
+  Target,
+  CheckSquare,
+  Calendar,
+  User,
+  Brain,
+  MessageSquare,
+  Lightbulb,
+  Users,
+  Shield,
+  Search,
+  Settings
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/UnifiedAuthProvider";
 import {
   Sidebar,
   SidebarContent,
@@ -26,230 +30,190 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useNavigation } from '@/hooks/useNavigation';
-import { useUnifiedClients } from '@/hooks/useUnifiedClients';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
-
-interface Client {
-  id: string;
-  name: string;
-  category: string;
-  status: string;
-  user_id?: string;
-}
 
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
   const { hasRole } = useAuth();
-  const { navigation, isActive } = useNavigation();
-  const { clients: unifiedClients } = useUnifiedClients();
-  const [openGroups, setOpenGroups] = useState<string[]>(['Huvudmeny']);
-  
-  // Map unified clients to sidebar format
-  const clients = unifiedClients.map(client => ({
-    id: client.id,
-    name: client.name,
-    category: client.category || 'general',
-    status: client.status,
-    user_id: client.id
-  }));
-
   const currentPath = location.pathname;
-  
-  const toggleGroup = (groupTitle: string) => {
-    setOpenGroups(prev => 
-      prev.includes(groupTitle) 
-        ? prev.filter(g => g !== groupTitle)
-        : [...prev, groupTitle]
-    );
-  };
 
-  const getNavCls = (itemUrl: string) => 
-    isActive(itemUrl) ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
+  // 🎯 CLEAN NAVIGATION - Client-focused items first
+  const clientNavigation = [
+    { 
+      title: "Dashboard", 
+      url: "/client-dashboard", 
+      icon: LayoutDashboard,
+      tooltip: "Huvudöversikt"
+    },
+    { 
+      title: "Min Utvecklingsanalys", 
+      url: "/user-analytics", 
+      icon: BarChart3,
+      tooltip: "Pillar-analyser och framsteg"
+    },
+    { 
+      title: "Sex Utvecklingspelare", 
+      url: "/six-pillars", 
+      icon: Target,
+      tooltip: "Bedömningar och utvecklingsresor"
+    },
+    { 
+      title: "Uppgifter", 
+      url: "/tasks", 
+      icon: CheckSquare,
+      tooltip: "Utvecklingsuppgifter"
+    },
+    { 
+      title: "Kalender", 
+      url: "/calendar", 
+      icon: Calendar,
+      tooltip: "Schemaläggning och aktiviteter"
+    },
+    { 
+      title: "AI-Coachning", 
+      url: "/ai-coaching", 
+      icon: Brain,
+      tooltip: "Personlig AI-utveckling"
+    },
+    { 
+      title: "Min Profil", 
+      url: "/edit-profile", 
+      icon: User,
+      tooltip: "Personlig information"
+    }
+  ];
 
+  // 🎯 TOOLS & COMMUNICATION
+  const toolsNavigation = [
+    { 
+      title: "Meddelanden", 
+      url: "/messages", 
+      icon: MessageSquare,
+      tooltip: "Kommunikation"
+    },
+    { 
+      title: "Globalsökning", 
+      url: "/search", 
+      icon: Search,
+      tooltip: "Sök i systemet"
+    },
+    { 
+      title: "Stefan AI Chat", 
+      url: "/stefan-chat", 
+      icon: Lightbulb,
+      tooltip: "AI-assistent"
+    }
+  ];
+
+  // 🎯 ADMIN NAVIGATION - Only for authorized users
+  const adminNavigation = [
+    { 
+      title: "Användarhantering", 
+      url: "/unified-users", 
+      icon: Users,
+      tooltip: "Hantera användare"
+    },
+    { 
+      title: "Administration", 
+      url: "/administration", 
+      icon: Shield,
+      tooltip: "Systemadministration"
+    }
+  ];
+
+  const isActive = (path: string) => currentPath === path;
+  const getNavCls = (path: string) => 
+    isActive(path) ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
 
   return (
     <Sidebar 
       variant="sidebar" 
-      collapsible="icon"
-      className="border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 z-30"
+      className={cn(
+        "border-r transition-all duration-300",
+        open ? "w-72" : "w-14"
+      )}
     >
       <SidebarContent className="overflow-y-auto">
-        {/* Dynamic Navigation Groups */}
-        {navigation.map((group) => (
-          <Collapsible
-            key={group.title}
-            open={openGroups.includes(group.title)}
-            onOpenChange={() => toggleGroup(group.title)}
-          >
-            <SidebarGroup>
-              <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-muted/50 transition-colors rounded-md px-2 py-1">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {group.title}
-                  </span>
-                  {open && (
-                    <ChevronDown className={`h-3 w-3 transition-transform ${
-                      openGroups.includes(group.title) ? 'rotate-180' : ''
-                    }`} />
-                  )}
-                </CollapsibleTrigger>
-              </SidebarGroupLabel>
-              
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {group.items.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        {item.children ? (
-                          // Item with submenu
-                          <Collapsible key={`${item.title}-submenu`}>
-                            <SidebarMenuButton asChild>
-                              <CollapsibleTrigger className="flex w-full items-center justify-between">
-                                <div className="flex items-center">
-                                  <item.icon className="h-4 w-4 flex-shrink-0" />
-                                  {open && <span className="truncate ml-2">{item.title}</span>}
-                                </div>
-                                {open && <ChevronDown className="h-3 w-3" />}
-                              </CollapsibleTrigger>
-                            </SidebarMenuButton>
-                            <CollapsibleContent>
-                              <SidebarMenuSub>
-                                {item.children.map((child) => (
-                                  <SidebarMenuSubItem key={child.title}>
-                                    <SidebarMenuSubButton asChild>
-                                      <NavLink 
-                                        to={child.url} 
-                                        className={`${getNavCls(child.url)} transition-colors rounded-md pl-6`}
-                                      >
-                                        <child.icon className="h-4 w-4 flex-shrink-0" />
-                                        {open && <span className="truncate ml-2">{child.title}</span>}
-                                      </NavLink>
-                                    </SidebarMenuSubButton>
-                                  </SidebarMenuSubItem>
-                                ))}
-                              </SidebarMenuSub>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        ) : (
-                          // Regular item without submenu
-                          <SidebarMenuButton asChild tooltip={!open ? item.title : undefined}>
-                            <NavLink 
-                              to={item.url} 
-                              className={`${getNavCls(item.url)} transition-colors rounded-md`}
-                              title={!open ? item.title : undefined}
-                            >
-                              <item.icon className="h-4 w-4 flex-shrink-0" />
-                              {open && <span className="truncate">{item.title}</span>}
-                            </NavLink>
-                          </SidebarMenuButton>
-                        )}
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-        ))}
-
-        {/* 🌟 UNIFIED USER COMMAND CENTER - Enterprise Grade Management */}
-        {(hasRole('superadmin') || hasRole('admin') || hasRole('coach')) && (
-          <SidebarGroup>
-            <SidebarGroupLabel>🌟 MASTERBOARD</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip={!open ? "Unified User Command Center" : undefined}>
+        {/* 🏠 HUVUDNAVIGATION */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-primary font-semibold">
+            🏠 Huvudmeny
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {clientNavigation.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={!open ? item.tooltip : undefined}>
                     <NavLink 
-                      to="/unified-users" 
-                      className={`${getNavCls("/unified-users")} transition-colors rounded-md`}
-                      title={!open ? "Unified User Command Center" : undefined}
+                      to={item.url} 
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                        getNavCls(item.url)
+                      )}
                     >
-                      <Crown className="h-4 w-4 flex-shrink-0" />
-                      {open && <span className="truncate">Unified User Center</span>}
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {open && <span className="font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip={!open ? "Intelligence Hub" : undefined}>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* 🛠️ VERKTYG & KOMMUNIKATION */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-blue-600 font-semibold">
+            🛠️ Verktyg
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {toolsNavigation.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={!open ? item.tooltip : undefined}>
                     <NavLink 
-                      to="/intelligence-hub" 
-                      className={`${getNavCls("/intelligence-hub")} transition-colors rounded-md`}
-                      title={!open ? "Intelligence Hub" : undefined}
+                      to={item.url} 
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                        getNavCls(item.url)
+                      )}
                     >
-                      <Brain className="h-4 w-4 flex-shrink-0" />
-                      {open && <span className="truncate">Intelligence Hub</span>}
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {open && <span className="font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-        {/* Quick Search - Only when expanded */}
-        {open && (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
+        {/* 🔐 ADMIN - Only for authorized users */}
+        {(hasRole('admin') || hasRole('superadmin')) && (
           <SidebarGroup>
-            <SidebarGroupLabel>Snabbsökning</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-red-600 font-semibold">
+              🔐 Administration
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <NavLink to="/search" className={getNavCls("/search")}>
-                      <Search className="h-4 w-4" />
-                      <span>Sök användare</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {/* Recent Clients - Only for coaches/admins when expanded */}
-        {open && clients.length > 0 && (hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Senaste användare</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {clients.slice(0, 5).map((client) => (
-                  <SidebarMenuItem key={client.id}>
-                    <SidebarMenuButton asChild>
+                {adminNavigation.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={!open ? item.tooltip : undefined}>
                       <NavLink 
-                        to={`/user/${client.user_id || client.id}?context=client`} 
-                        className={`${getNavCls(`/user/${client.user_id || client.id}`)} group`}
+                        to={item.url} 
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                          getNavCls(item.url)
+                        )}
                       >
-                        <User className="h-4 w-4 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <span className="truncate text-sm">{client.name}</span>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {client.category}
-                          </div>
-                        </div>
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        {open && <span className="font-medium">{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
-                
-                {clients.length > 5 && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink to="/administration" className="text-xs text-muted-foreground hover:text-foreground">
-                        <Users className="h-4 w-4" />
-                        <span>Visa alla ({clients.length})</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
