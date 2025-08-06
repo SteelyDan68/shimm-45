@@ -153,6 +153,14 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
     loading: coachLoading 
   } = useRealCoachDashboard();
 
+  // Helper function to calculate velocity score
+  const calculateVelocityScore = (completedPillars: number, activeTasks: number, completedTasks: number): number => {
+    const baseScore = completedPillars * 15; // 15 points per completed pillar
+    const taskEngagement = Math.min(activeTasks * 3, 15); // Up to 15 points for active tasks
+    const completionBonus = Math.min(completedTasks * 2, 20); // Up to 20 points for completed tasks
+    return Math.min(baseScore + taskEngagement + completionBonus, 100);
+  };
+
   // 🧮 CALCULATE DASHBOARD STATS
   const dashboardStats: DashboardStats = useMemo(() => {
     const completedPillars = getCompletedPillars().length;
@@ -180,14 +188,6 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
       completedAssessments: completedPillars
     };
   }, [getCompletedPillars, getActivatedPillars, tasks, clients, coachStats]);
-
-  // Helper function to calculate velocity score
-  const calculateVelocityScore = (completedPillars: number, activeTasks: number, completedTasks: number): number => {
-    const baseScore = completedPillars * 15; // 15 points per completed pillar
-    const taskEngagement = Math.min(activeTasks * 3, 15); // Up to 15 points for active tasks
-    const completionBonus = Math.min(completedTasks * 2, 20); // Up to 20 points for completed tasks
-    return Math.min(baseScore + taskEngagement + completionBonus, 100);
-  };
 
   // 🎨 RENDER LOGIC
   if (layout === 'embedded') {
