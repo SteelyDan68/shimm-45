@@ -115,8 +115,8 @@ export const CreateUserForm = ({ onSuccess, onCancel }: CreateUserFormProps) => 
     setIsLoading(true);
 
     try {
-      // Anropa admin-create-user edge function
-      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+      // Anropa create-user edge function
+      const { data, error } = await supabase.functions.invoke('create-user', {
         body: {
           email: formData.email,
           password: formData.password,

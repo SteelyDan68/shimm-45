@@ -65,43 +65,10 @@ enable_signup = false
 enable_confirmations = false
 template = "Your code is {{ .Code }}"
 
-[functions.auth-webhook]
-verify_jwt = false
-
-[functions.user-deletion]
-verify_jwt = true
-
-[functions.user-soft-delete]
-verify_jwt = true
-
-[functions.user-reactivate]
-verify_jwt = true
-
-[functions.unified-ai-orchestrator]
-verify_jwt = false
-
-[functions.stefan-ai-chat]
-verify_jwt = true
-
-[functions.admin-password-reset]
-verify_jwt = true
-
-[functions.unified-invitations]
-verify_jwt = true
-
-[functions.send-invitation]
-verify_jwt = true
-
-[functions.send-invitations]
-verify_jwt = true
-
-[functions.send-simple-invitation]
-verify_jwt = true
-
 [functions.create-user]
 verify_jwt = true
 
-[functions.system-diagnostic]
+[functions.send-invitation]
 verify_jwt = true
 
 [edge_runtime]
