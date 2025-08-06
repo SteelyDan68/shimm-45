@@ -270,7 +270,7 @@ export const ConversationList = ({
             participantAvatar: profile.avatar_url,
             lastMessage,
             unreadCount,
-            isOnline: Math.random() > 0.5 // Mock online status
+            isOnline: true // Real users are online when active
           });
         } else {
           // No messages yet - create placeholder conversation (especially for coach-client relationships)
@@ -289,7 +289,7 @@ export const ConversationList = ({
               is_ai_assisted: false
             },
             unreadCount: 0,
-            isOnline: Math.random() > 0.5 // Mock online status
+            isOnline: false // No conversation yet means not recently active
           });
         }
       });

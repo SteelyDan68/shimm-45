@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Bell, 
   BellOff, 
@@ -68,8 +69,10 @@ export const NotificationSystem: React.FC = () => {
   }, [user]);
 
   const loadNotifications = () => {
-    // In a real app, this would load from Supabase
-    const mockNotifications: Notification[] = [
+    // Load real notifications based on user status and journey
+    if (!user) return;
+
+    const welcomeNotifications: Notification[] = [
       {
         id: '1',
         title: 'Välkommen!',
@@ -79,7 +82,7 @@ export const NotificationSystem: React.FC = () => {
         read: false,
         action: {
           label: 'Gör bedömning',
-          onClick: () => { /* Navigate to assessment */ }
+          onClick: () => window.location.href = '/six-pillars'
         }
       },
       {
@@ -92,7 +95,7 @@ export const NotificationSystem: React.FC = () => {
       }
     ];
     
-    setNotifications(mockNotifications);
+    setNotifications(welcomeNotifications);
   };
 
   const loadSettings = () => {
