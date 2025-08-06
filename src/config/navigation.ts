@@ -39,7 +39,7 @@ export const NAVIGATION_ROUTES = {
   COACH_DASHBOARD: "/coach",
   
   // User management - SINGLE SOURCE OF TRUTH: ONLY user_id
-  ADMIN_HUB: "/admin-hub",
+  UNIFIED_USERS: "/unified-users",
   ADMINISTRATION: "/administration",
   USERS: "/users",
   USER_PROFILE: (id: string, context?: string) => `/user/${id}${context ? `?context=${context}` : ''}`,
@@ -97,44 +97,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         icon: Home, 
         roles: ["client"],
         exact: true
-      }
-    ]
-  },
-  {
-    title: "Användare & Klienter",
-    roles: ["superadmin", "admin", "coach"],
-    items: [
-      {
-        title: "Admin Hub",
-        url: NAVIGATION_ROUTES.ADMIN_HUB,
-        icon: Settings,
-        roles: ["superadmin", "admin", "coach"],
-        children: [
-          {
-            title: "Dashboard",
-            url: NAVIGATION_ROUTES.ADMIN_HUB,
-            icon: Home,
-            roles: ["superadmin", "admin", "coach"]
-          },
-          {
-            title: "Migration",
-            url: `${NAVIGATION_ROUTES.ADMIN_HUB}/migration`,
-            icon: Database,
-            roles: ["superadmin"]
-          },
-          {
-            title: "Testing",
-            url: `${NAVIGATION_ROUTES.ADMIN_HUB}/testing`,
-            icon: Database,
-            roles: ["superadmin"]
-          }
-        ]
-      },
-      {
-        title: "Användare", 
-        url: NAVIGATION_ROUTES.USERS,
-        icon: Users,
-        roles: ["superadmin", "admin", "coach"]
       }
     ]
   },
@@ -197,10 +159,10 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
 export const QUICK_ACTIONS = {
   superadmin: [
     {
-      title: "Hantera användare",
-      description: "Skapa nya användare i systemet",
+      title: "Unified User Center",
+      description: "Komplett användarhantering",
       icon: Users,
-      url: NAVIGATION_ROUTES.ADMIN_HUB,
+      url: NAVIGATION_ROUTES.UNIFIED_USERS,
       variant: "default" as const
     },
     {
@@ -211,19 +173,19 @@ export const QUICK_ACTIONS = {
       variant: "secondary" as const
     },
     {
-      title: "Systemöversikt",
-      description: "Övervaka systemhälsa och prestanda",
-      icon: Settings,
-      url: NAVIGATION_ROUTES.ADMIN_HUB,
+      title: "Intelligence Hub",
+      description: "Analys och insikter",
+      icon: Brain,
+      url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
       variant: "outline" as const
     }
   ],
   admin: [
     {
-      title: "Hantera användare",
-      description: "Skapa nya användare i systemet",
+      title: "Unified User Center",
+      description: "Hantera användare och roller",
       icon: Users,
-      url: NAVIGATION_ROUTES.ADMIN_HUB,
+      url: NAVIGATION_ROUTES.UNIFIED_USERS,
       variant: "default" as const
     },
     {
@@ -234,19 +196,19 @@ export const QUICK_ACTIONS = {
       variant: "secondary" as const
     },
     {
-      title: "Organisationsöversikt",
-      description: "Hantera organisationen och medlemmar",
-      icon: Building2,
-      url: NAVIGATION_ROUTES.ADMIN_HUB,
+      title: "Intelligence Hub",
+      description: "Användaranalys och insikter",
+      icon: Brain,
+      url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
       variant: "outline" as const
     }
   ],
   coach: [
     {
-      title: "Hantera klienter",
-      description: "Registrera nya klienter",
+      title: "Unified User Center",
+      description: "Hantera klienter",
       icon: Users,
-      url: NAVIGATION_ROUTES.ADMIN_HUB,
+      url: NAVIGATION_ROUTES.UNIFIED_USERS,
       variant: "default" as const
     },
     {
@@ -257,10 +219,10 @@ export const QUICK_ACTIONS = {
       variant: "secondary" as const
     },
     {
-      title: "Skapa uppgift",
-      description: "Tilldela uppgifter till klienter",
-      icon: CheckSquare,
-      url: `${NAVIGATION_ROUTES.TASKS}?action=create`,
+      title: "Intelligence Hub",
+      description: "Klientanalys och progress",
+      icon: Brain,
+      url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
       variant: "outline" as const
     },
   ],

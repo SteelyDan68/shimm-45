@@ -49,7 +49,7 @@ import { UserProfileEditor } from './UserProfileEditor';
 import { UserRoleManager } from './UserRoleManager';
 import { CoachAssignmentManager } from './CoachAssignmentManager';
 
-interface User {
+interface UserExtended {
   id: string;
   name?: string;
   email: string;
@@ -68,6 +68,15 @@ interface User {
   country?: string;
   date_of_birth?: string;
   bio?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  job_title?: string;
+  organization?: string;
+  personal_number?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
 }
 
 interface UserManagementStats {
@@ -87,6 +96,9 @@ export const UnifiedUserCommandCenter: React.FC = () => {
 
   const { user: currentUser, hasRole } = useAuth();
   const { users, loading, refreshUsers } = useUsers();
+  
+  // Cast users to extended interface for full functionality
+  const extendedUsers = users as UserExtended[];
   const { toast } = useToast();
 
   // Permission checks
@@ -99,7 +111,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
 
   // Filtered users
   const filteredUsers = useMemo(() => {
-    return users.filter(user => {
+    return extendedUsers.filter(user => {
       const matchesSearch = searchTerm === '' || 
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,18 +124,18 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       
       return matchesSearch && matchesRole;
     });
-  }, [users, searchTerm, roleFilter]);
+  }, [extendedUsers, searchTerm, roleFilter]);
 
   // Enhanced stats
   const stats: UserManagementStats = useMemo(() => {
-    const totalUsers = users.length;
-    const usersByRole = users.reduce((acc, user) => {
+    const totalUsers = extendedUsers.length;
+    const usersByRole = extendedUsers.reduce((acc, user) => {
       const role = user.primary_role || 'user';
       acc[role] = (acc[role] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
     
-    const recentlyCreated = users.filter(user => {
+    const recentlyCreated = extendedUsers.filter(user => {
       if (!user.created_at) return false;
       const created = new Date(user.created_at);
       const weekAgo = new Date();
@@ -138,7 +150,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       activeCoaches: usersByRole.coach || 0,
       activeClients: usersByRole.client || 0
     };
-  }, [users]);
+  }, [extendedUsers]);
 
   // Handle user selection for detailed view
   const handleUserSelect = (userId: string) => {
@@ -183,7 +195,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
     return new Date(dateString).toLocaleDateString('sv-SE');
   };
 
-  const selectedUser = selectedUserId ? users.find(u => u.id === selectedUserId) : null;
+  const selectedUser = selectedUserId ? extendedUsers.find(u => u.id === selectedUserId) : null;
 
   if (loading) {
     return (

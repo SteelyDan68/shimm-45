@@ -184,6 +184,23 @@ export function AppSidebar() {
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip={!open ? "Intelligence Hub" : undefined}>
+                    <NavLink 
+                      to="/intelligence-hub" 
+                      className={`${getNavCls("/intelligence-hub")} transition-colors rounded-md`}
+                      title={!open ? "Intelligence Hub" : undefined}
+                    >
+                      <Brain className="h-4 w-4 flex-shrink-0 text-blue-600" />
+                      {open && (
+                        <div className="flex flex-col">
+                          <span className="font-semibold">Intelligence Hub</span>
+                          <span className="text-xs text-muted-foreground">Analys & Insikter</span>
+                        </div>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
