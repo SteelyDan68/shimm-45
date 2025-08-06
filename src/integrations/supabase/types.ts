@@ -1022,36 +1022,58 @@ export type Database = {
       }
       coach_client_assignments: {
         Row: {
-          assigned_at: string | null
-          assigned_by: string | null
-          client_id: string | null
-          coach_id: string | null
-          created_at: string | null
-          id: string | null
-          is_active: boolean | null
-          updated_at: string | null
+          assigned_at: string
+          assigned_by: string
+          client_id: string
+          coach_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
         }
         Insert: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          client_id?: string | null
-          coach_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          updated_at?: string | null
+          assigned_at?: string
+          assigned_by: string
+          client_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
         }
         Update: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          client_id?: string | null
-          coach_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          updated_at?: string | null
+          assigned_at?: string
+          assigned_by?: string
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coach_client_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_client_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_client_assignments_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coach_insights: {
         Row: {
