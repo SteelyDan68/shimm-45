@@ -211,15 +211,19 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
 
       const userRoles = data?.map(item => item.role) as AppRole[] || [];
       console.log('🔥 UnifiedAuth: Found roles:', userRoles, 'Setting roles state...');
-      setRoles(userRoles);
       
-      // Verify the roles were set
+      // Force update roles state
+      setRoles([]);
       setTimeout(() => {
-        console.log('🔥 UnifiedAuth: Roles state after setting:', userRoles);
-      }, 100);
+        setRoles(userRoles);
+        console.log('🔥 UnifiedAuth: Roles state forcefully updated:', userRoles);
+      }, 50);
+      
     } catch (error) {
       console.error('🔥 UnifiedAuth: Error in fetchUserRoles:', error);
-      setRoles([]); // Set empty array on error
+      // Fallback: assign client role if none found
+      setRoles(['client'] as AppRole[]);
+      console.log('🔥 UnifiedAuth: Fallback - assigned client role');
     }
   }, []);
 
