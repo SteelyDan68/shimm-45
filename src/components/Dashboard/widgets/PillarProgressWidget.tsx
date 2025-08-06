@@ -40,15 +40,28 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
   ];
 
   const getPillarData = () => {
-    return allPillars.map(pillar => {
+    return allPillars.map((pillar, index) => {
       const completed = completedPillars.some(cp => cp === pillar.key);
       const activated = activatedPillars.some(ap => ap === pillar.key);
+      
+      // Self-service logic: First pillar (self_care) är alltid tillgänglig
+      // Resten blir tillgängliga sekventiellt när föregående är klar
+      let available = false;
+      if (index === 0) {
+        // Första pillaren är alltid tillgänglig för self-service
+        available = true;
+      } else {
+        // Sekventiell logik: föregående pillar måste vara slutförd
+        const previousPillar = allPillars[index - 1];
+        const previousCompleted = completedPillars.some(cp => cp === previousPillar.key);
+        available = activated || completed || previousCompleted;
+      }
       
       return {
         ...pillar,
         completed,
         inProgress: activated && !completed,
-        available: activated || completed
+        available
       };
     });
   };
@@ -125,7 +138,7 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
                   <p className="text-xs text-muted-foreground">
                     {pillar.completed ? 'Slutförd' : 
                      pillar.inProgress ? 'Pågår' :
-                     pillar.available ? 'Tillgänglig' : 'Låst'}
+                     pillar.available ? 'Tillgänglig - Klicka för att starta' : 'Slutför föregående pillar först'}
                   </p>
                 </div>
               </div>
@@ -156,14 +169,25 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
                       ↻
                     </Button>
                   </div>
-                ) : (
+                ) : pillar.available ? (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onAction?.(`start-pillar-${pillar.key}`)}
                     className="w-8 h-8 p-0"
+                    title="Starta pillar"
                   >
                     <ArrowRight className="w-3 h-3" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled
+                    className="w-8 h-8 p-0 opacity-50"
+                    title="Slutför föregående pillar först"
+                  >
+                    <Target className="w-3 h-3" />
                   </Button>
                 )}
               </div>
@@ -182,14 +206,24 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
           Se Alla Pillars
         </Button>
         
-        {completedCount < pillars.length && (
-          <Button 
-            variant="outline"
-            onClick={() => onAction?.('continue-journey')}
-          >
-            Fortsätt
-          </Button>
-        )}
+        {(() => {
+          const nextPillar = pillars.find(p => p.available && !p.completed && !p.inProgress);
+          return nextPillar ? (
+            <Button 
+              variant="outline"
+              onClick={() => onAction?.(`start-pillar-${nextPillar.key}`)}
+            >
+              Starta {nextPillar.name}
+            </Button>
+          ) : completedCount < pillars.length ? (
+            <Button 
+              variant="outline"
+              onClick={() => onAction?.('continue-journey')}
+            >
+              Fortsätt
+            </Button>
+          ) : null;
+        })()}
       </div>
 
       {/* Retake Dialog */}
