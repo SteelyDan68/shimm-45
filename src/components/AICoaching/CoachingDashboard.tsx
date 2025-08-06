@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useUnifiedAI } from '@/hooks/useUnifiedAI';
+import { useAdvancedAICoaching } from '@/hooks/useAdvancedAICoaching';
 import { useToast } from '@/hooks/use-toast';
 import { CoachingTimeline } from '@/components/ClientPath/CoachingTimeline';
 import { 
@@ -25,25 +25,25 @@ import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 export function CoachingDashboard() {
-  const { coachingAnalysis, loading } = useUnifiedAI();
+  const {
+    currentSession,
+    isAnalyzing,
+    recommendations,
+    coachingPlan,
+    sessionHistory,
+    progressEntries,
+    hasActiveSession,
+    sessionDuration,
+    totalSessions,
+    averageSessionRating,
+    startCoachingSession,
+    endCoachingSession,
+    generateCoachingPlan,
+    implementRecommendation,
+    scheduleFollowUp
+  } = useAdvancedAICoaching();
+  
   const { toast } = useToast();
-  
-  // Local state for coaching dashboard
-  const [currentSession, setCurrentSession] = useState<any>(null);
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [coachingPlan, setCoachingPlan] = useState<any>(null);
-  const [sessionHistory, setSessionHistory] = useState<any[]>([]);
-  const [progressEntries, setProgressEntries] = useState<any[]>([]);
-  const [sessionDuration, setSessionDuration] = useState(0);
-  
-  // Computed values
-  const hasActiveSession = currentSession !== null;
-  const totalSessions = sessionHistory.length;
-  const averageSessionRating = sessionHistory.length > 0 
-    ? sessionHistory.reduce((acc, s) => acc + (s.userFeedback?.rating || 3), 0) / sessionHistory.length 
-    : 3;
-
   const [sessionFeedback, setSessionFeedback] = useState({ rating: 5, comment: '' });
 
   const getPriorityColor = (priority: string) => {
@@ -77,37 +77,20 @@ export function CoachingDashboard() {
   };
 
   const handleStartSession = async (type: 'assessment' | 'planning' | 'review' | 'emergency') => {
-    setCurrentSession({ id: Date.now().toString(), type, status: 'active' });
+    await startCoachingSession(type);
   };
 
   const handleEndSession = async () => {
-    setCurrentSession(null);
+    await endCoachingSession({
+      ...sessionFeedback,
+      implementedRecommendations: []
+    });
     setSessionFeedback({ rating: 5, comment: '' });
   };
 
-  const startCoachingSession = handleStartSession;
-  const endCoachingSession = handleEndSession;
-  const generateCoachingPlan = async () => setCoachingPlan({ 
-    title: "AI Plan", 
-    activities: [],
-    duration: 30,
-    focusAreas: ['Självvård', 'Kompetensutveckling', 'Målsättning'],
-    weeklyGoals: [
-      {
-        week: 1,
-        goals: ['Etablera morgonrutin', 'Påbörja reflektion'],
-        activities: []
-      }
-    ],
-    milestones: [
-      {
-        description: 'Första veckans genomförande',
-        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-      }
-    ]
-  });
-  const implementRecommendation = async (id: string) => setRecommendations(prev => prev.filter(r => r.id !== id));
-  const scheduleFollowUp = async () => toast({ title: "Uppföljning schemalagd" });
+  const handleGenerateCoachingPlan = async () => {
+    await generateCoachingPlan(30); // 30 days plan
+  };
 
   const formatSessionDuration = (duration: number) => {
     const minutes = Math.floor(duration / (1000 * 60));
@@ -148,7 +131,7 @@ export function CoachingDashboard() {
               <Button 
                 variant="outline"
                 onClick={() => {
-                  generateCoachingPlan();
+                  handleGenerateCoachingPlan();
                   // Switch to plan tab after generating
                   const planTab = document.querySelector('[value="plan"]') as HTMLElement;
                   planTab?.click();
@@ -382,7 +365,7 @@ export function CoachingDashboard() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => scheduleFollowUp()}
+                        onClick={() => scheduleFollowUp(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), true)}
                       >
                         <Calendar className="h-4 w-4 mr-2" />
                         Schemalägg uppföljning
@@ -404,7 +387,7 @@ export function CoachingDashboard() {
                 <p className="text-muted-foreground mb-4">
                   Skapa en personaliserad utvecklingsplan med AI
                 </p>
-                <Button onClick={() => generateCoachingPlan()}>
+                <Button onClick={() => handleGenerateCoachingPlan()}>
                   Generera Plan
                 </Button>
               </CardContent>
@@ -415,7 +398,7 @@ export function CoachingDashboard() {
                 <CardHeader>
                   <CardTitle>Personlig Utvecklingsplan</CardTitle>
                   <CardDescription>
-                    {coachingPlan.duration} dagar • {coachingPlan.focusAreas.join(', ')}
+                    {coachingPlan.duration} dagar • {coachingPlan.focusAreas?.join(', ')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -423,17 +406,17 @@ export function CoachingDashboard() {
                     <div>
                       <h4 className="font-semibold mb-2">Fokusområden:</h4>
                       <div className="flex flex-wrap gap-1">
-                        {coachingPlan.focusAreas.map((area, index) => (
+                        {coachingPlan.focusAreas?.map((area: string, index: number) => (
                           <Badge key={index} variant="secondary">
                             {area}
                           </Badge>
-                        ))}
+                        )) || <span className="text-muted-foreground">Inga fokusområden definierade</span>}
                       </div>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-2">Nästa milstolpe:</h4>
                       <p className="text-sm text-muted-foreground">
-                        {coachingPlan.milestones[0]?.description}
+                        {coachingPlan.milestones?.[0]?.description || 'Ingen milstolpe definierad'}
                       </p>
                     </div>
                   </div>
@@ -442,7 +425,7 @@ export function CoachingDashboard() {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Veckovis plan:</h3>
-                {coachingPlan.weeklyGoals.map((week) => (
+                {coachingPlan.weeklyGoals?.map((week: any) => (
                   <Card key={week.week}>
                     <CardHeader>
                       <CardTitle className="text-base">
