@@ -123,6 +123,18 @@ export const useStefanInterventions = () => {
       // Add to local state
       setInterventions(prev => [data as StefanIntervention, ...prev]);
       
+      // Log Stefan intervention analytics
+      await supabase.from('analytics_metrics').insert({
+        user_id: user.id,
+        metric_type: 'stefan_intervention_created',
+        metric_value: 1,
+        metadata: {
+          trigger_type: triggerType,
+          priority,
+          content_length: content.length
+        }
+      });
+      
       toast({
         title: "Stefan meddelande",
         description: content,
@@ -178,6 +190,17 @@ export const useStefanInterventions = () => {
         )
       );
 
+      // Log Stefan response analytics
+      await supabase.from('analytics_metrics').insert({
+        user_id: user.id,
+        metric_type: 'stefan_intervention_response',
+        metric_value: userResponse.length,
+        metadata: {
+          intervention_id: interventionId,
+          sentiment: sentiment
+        }
+      });
+
       return true;
     } catch (error) {
       console.error('Error updating user response:', error);
@@ -192,17 +215,23 @@ export const useStefanInterventions = () => {
     try {
       setAnalyzing(true);
 
-      // Call Stefan AI analysis edge function
+      // Call Stefan AI analysis edge function with unified orchestrator
       const { data: analysisResult, error } = await supabase.functions.invoke(
-        'stefan-enhanced-chat',
+        'unified-ai-orchestrator',
         {
           body: {
-            user_id: user.id,
-            analysis_type: 'comprehensive_behavior',
+            action: 'stefan_chat',
+            data: {
+              message: `Utför en omfattande beteendeanalys för användarens utvecklingsresa`,
+              analysisMode: 'comprehensive_behavior',
+              includeAssessmentData: true,
+              includePillarData: true,
+              includeConversationHistory: true
+            },
             context: {
-              include_pillar_data: true,
-              include_assessment_data: true,
-              include_conversation_history: true
+              userId: user.id,
+              language: 'sv',
+              priority: 'high'
             }
           }
         }
