@@ -174,13 +174,8 @@ export function AppSidebar() {
                       className={`${getNavCls("/unified-users")} transition-colors rounded-md`}
                       title={!open ? "Unified User Command Center" : undefined}
                     >
-                      <Crown className="h-4 w-4 flex-shrink-0 text-primary" />
-                      {open && (
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-foreground">Unified User Center</span>
-                          <span className="text-xs text-muted-foreground">Komplett användarhantering</span>
-                        </div>
-                      )}
+                      <Crown className="h-4 w-4 flex-shrink-0" />
+                      {open && <span className="truncate">Unified User Center</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -191,13 +186,8 @@ export function AppSidebar() {
                       className={`${getNavCls("/intelligence-hub")} transition-colors rounded-md`}
                       title={!open ? "Intelligence Hub" : undefined}
                     >
-                      <Brain className="h-4 w-4 flex-shrink-0 text-primary" />
-                      {open && (
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-foreground">Intelligence Hub</span>
-                          <span className="text-xs text-muted-foreground">Analys & Insikter</span>
-                        </div>
-                      )}
+                      <Brain className="h-4 w-4 flex-shrink-0" />
+                      {open && <span className="truncate">Intelligence Hub</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
