@@ -165,7 +165,7 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
       completedPillars,
       activeTasks: activeTasks.length,
       overallProgress: completedPillars > 0 ? (completedPillars / 6) * 100 : 0,
-      velocityScore: 75, // TODO: Calculate from real data
+      velocityScore: calculateVelocityScore(completedPillars, activeTasks.length, completedTasks.length),
       
       // Coach stats  
       activeClients: clients?.length || 0,
@@ -180,6 +180,14 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
       completedAssessments: completedPillars
     };
   }, [getCompletedPillars, getActivatedPillars, tasks, clients, coachStats]);
+
+  // Helper function to calculate velocity score
+  const calculateVelocityScore = (completedPillars: number, activeTasks: number, completedTasks: number): number => {
+    const baseScore = completedPillars * 15; // 15 points per completed pillar
+    const taskEngagement = Math.min(activeTasks * 3, 15); // Up to 15 points for active tasks
+    const completionBonus = Math.min(completedTasks * 2, 20); // Up to 20 points for completed tasks
+    return Math.min(baseScore + taskEngagement + completionBonus, 100);
+  };
 
   // 🎨 RENDER LOGIC
   if (layout === 'embedded') {

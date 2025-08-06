@@ -8,19 +8,45 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Target, CheckCircle, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { WidgetProps } from '../types/dashboard-types';
+import { useUserPillars } from '@/hooks/useUserPillars';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 
 const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
+  const { user } = useAuth();
+  const { 
+    getCompletedPillars, 
+    getActivatedPillars,
+    loading 
+  } = useUserPillars(user?.id || '');
+
+  const completedPillars = getCompletedPillars();
+  const activatedPillars = getActivatedPillars();
   
-  // Mock pillar data - detta kommer senare från useUserPillars
-  const pillars = [
-    { key: 'self_care', name: 'Self Care', completed: true, score: 85 },
-    { key: 'skills', name: 'Skills', completed: true, score: 78 },
-    { key: 'talent', name: 'Talent', completed: false, inProgress: true, score: 45 },
-    { key: 'brand', name: 'Brand', completed: false, inProgress: false, score: 0 },
-    { key: 'economy', name: 'Economy', completed: false, inProgress: false, score: 0 },
-    { key: 'open_track', name: 'Open Track', completed: false, inProgress: false, score: 0 }
+  // All possible pillars in order
+  const allPillars = [
+    { key: 'self_care', name: 'Self Care' },
+    { key: 'skills', name: 'Skills' },
+    { key: 'talent', name: 'Talent' },
+    { key: 'brand', name: 'Brand' },
+    { key: 'economy', name: 'Economy' },
+    { key: 'open_track', name: 'Open Track' }
   ];
 
+  const getPillarData = () => {
+    return allPillars.map(pillar => {
+      const completed = completedPillars.some(cp => cp.pillar_key === pillar.key);
+      const activated = activatedPillars.some(ap => ap.pillar_key === pillar.key);
+      
+      return {
+        ...pillar,
+        completed,
+        inProgress: activated && !completed,
+        available: activated || completed
+      };
+    });
+  };
+
+  const pillars = getPillarData();
   const completedCount = pillars.filter(p => p.completed).length;
   const totalProgress = (completedCount / pillars.length) * 100;
 
@@ -29,6 +55,25 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
     if (pillar.inProgress) return { label: 'Pågår', variant: 'secondary', icon: Clock };
     return { label: 'Ej påbörjad', variant: 'outline', icon: Target };
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <div className="animate-pulse">
+            <div className="h-6 bg-muted rounded w-32 mx-auto mb-2" />
+            <div className="h-8 bg-muted rounded w-20 mx-auto mb-2" />
+            <div className="h-2 bg-muted rounded" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-12 bg-muted rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -70,11 +115,11 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
                 
                 <div>
                   <p className="font-medium text-sm">{pillar.name}</p>
-                  {pillar.score > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Score: {pillar.score}/100
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {pillar.completed ? 'Slutförd' : 
+                     pillar.inProgress ? 'Pågår' :
+                     pillar.available ? 'Tillgänglig' : 'Låst'}
+                  </p>
                 </div>
               </div>
 

@@ -5,43 +5,20 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckSquare, Clock, AlertCircle, Plus, ArrowRight } from 'lucide-react';
+import { CheckSquare, Clock, AlertCircle, Plus, ArrowRight, Loader2 } from 'lucide-react';
 import { WidgetProps } from '../types/dashboard-types';
+import { useTasks } from '@/hooks/useTasks';
+import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 const TasksWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
-  
-  // Mock task data - detta kommer senare från useTasks
-  const tasks = [
-    {
-      id: '1',
-      title: 'Slutför Self Care assessment',
-      description: 'Genomför den sista delen av Self Care bedömningen',
-      priority: 'high',
-      status: 'in_progress',
-      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 dagar
-      category: 'assessment'
-    },
-    {
-      id: '2', 
-      title: 'Reflektion över personliga värderingar',
-      description: 'Skriv ner dina viktigaste värderingar och hur de påverkar ditt liv',
-      priority: 'medium',
-      status: 'not_started',
-      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 dagar
-      category: 'reflection'
-    },
-    {
-      id: '3',
-      title: 'Sätt upp daglig meditationsrutin',
-      description: 'Börja med 5 minuter meditation varje morgon',
-      priority: 'low',
-      status: 'not_started',
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dagar
-      category: 'habit'
-    }
-  ];
+  const { user } = useAuth();
+  const { tasks, loading } = useTasks(user?.id);
+
+  const activeTasks = tasks?.filter(task => task.status !== 'completed') || [];
+  const maxItems = widget.config?.maxItems || 5;
+  const displayTasks = activeTasks.slice(0, maxItems);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -68,9 +45,25 @@ const TasksWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
     }
   };
 
-  const activeTasks = tasks.filter(task => task.status !== 'completed');
-  const maxItems = widget.config?.maxItems || 5;
-  const displayTasks = activeTasks.slice(0, maxItems);
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Pågående Uppgifter</span>
+            <div className="animate-pulse bg-muted rounded px-2 py-1 w-8 h-5" />
+          </div>
+          <Loader2 className="w-4 h-4 animate-spin" />
+        </div>
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-16 bg-muted rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="space-y-4">
@@ -137,12 +130,13 @@ const TasksWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
                           variant={getPriorityColor(task.priority) as any} 
                           className="text-xs"
                         >
-                          {task.priority}
+                          {task.priority === 'high' ? 'Hög' :
+                           task.priority === 'medium' ? 'Medium' : 'Låg'}
                         </Badge>
                         
-                        {widget.config?.showDueDate && task.dueDate && (
+                        {widget.config?.showDueDate && task.deadline && (
                           <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(task.dueDate, { locale: sv, addSuffix: true })}
+                            {formatDistanceToNow(new Date(task.deadline), { locale: sv, addSuffix: true })}
                           </span>
                         )}
                       </div>
