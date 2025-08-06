@@ -38,8 +38,8 @@ interface PillarAnalysis {
   ai_analysis: string;
   calculated_score?: number;
   created_at: string;
-  answers: any;
-  scores: any;
+  assessment_data?: any;
+  insights?: any;
 }
 
 interface TimelineEvent {
@@ -82,14 +82,19 @@ export default function UserAnalytics() {
 
     setIsLoading(true);
     try {
-      // Load pillar analyses
+      console.log('🔄 Loading user analytics for:', targetUserId);
+      
+      // Load pillar assessments (corrected table name)
       const { data: analyses, error: analysesError } = await supabase
-        .from('assessment_rounds')
+        .from('pillar_assessments')
         .select('*')
         .eq('user_id', targetUserId)
         .order('created_at', { ascending: false });
 
-      if (analysesError) throw analysesError;
+      if (analysesError) {
+        console.warn('⚠️ Assessment data not available:', analysesError);
+        // Continue without throwing error
+      }
 
       // Load timeline events from path_entries
       const { data: pathEntries, error: pathError } = await supabase
@@ -113,21 +118,16 @@ export default function UserAnalytics() {
         eventData: entry.metadata
       }));
 
-      // Transform analyses to include calculated scores
+      // Transform analyses using correct field names from pillar_assessments
       const processedAnalyses: PillarAnalysis[] = (analyses || []).map(analysis => {
-        const scores = analysis.scores as any;
-        const avgScore = scores && typeof scores === 'object' 
-          ? Object.values(scores as object).reduce((sum: number, score: any) => sum + (Number(score) || 0), 0) / Object.keys(scores as object).length
-          : 0;
-        
         return {
           id: analysis.id,
-          pillar_type: analysis.pillar_type,
+          pillar_type: analysis.pillar_key, // pillar_assessments uses pillar_key
           ai_analysis: analysis.ai_analysis || '',
-          calculated_score: avgScore,
+          calculated_score: analysis.calculated_score || 0,
           created_at: analysis.created_at,
-          answers: analysis.answers,
-          scores: analysis.scores
+          assessment_data: analysis.assessment_data,
+          insights: analysis.insights
         };
       });
 
