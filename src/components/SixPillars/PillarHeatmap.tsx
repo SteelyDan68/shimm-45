@@ -53,13 +53,14 @@ export const PillarHeatmap = ({
   };
 
   const handlePillarClick = (pillar: PillarHeatmapData) => {
-    if (pillar.score === 0) return;
-    
-    // Use custom callback if provided
+    // Use custom callback if provided (även för obearbetade pelare)
     if (onPillarClick) {
       onPillarClick(pillar.pillar_key);
       return;
     }
+    
+    // Default navigation för obearbetade pelare - starta assessment
+    if (pillar.score === 0) return;
     
     // Default navigation for coach view - UNIFIED ROUTING
     if (isCoachView && clientId) {

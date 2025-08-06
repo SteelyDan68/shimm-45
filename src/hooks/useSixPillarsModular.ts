@@ -11,6 +11,7 @@ import {
   PillarKey,
   PillarHeatmapData 
 } from '@/types/sixPillarsModular';
+import { PILLAR_MODULES } from '@/config/pillarModules';
 
 // Helper function to calculate trend based on historical assessments
 function calculateTrend(pillarKey: string, assessments: any[]): 'stable' | 'up' | 'down' {
@@ -244,6 +245,62 @@ export const useSixPillarsModular = (clientId?: string) => {
     }
   };
 
+  /**
+   * DEPENDENCY MANAGEMENT: Radera alla dependencies när pillar görs om
+   */
+  const retakePillar = async (pillarKey: PillarKey): Promise<void> => {
+    if (!user?.id) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      // 1. Radera alla todos/actionables för denna pillar
+      await supabase.functions.invoke('clear-pillar-dependencies', {
+        body: { 
+          user_id: user.id, 
+          pillar_key: pillarKey,
+          dependency_types: ['todos', 'calendar_events', 'ai_recommendations', 'progress_entries', 'neuroplasticity_journeys']
+        }
+      });
+
+      // 2. Radera alla assessments för denna pillar (behåll bara den senaste draft om någon)
+      const { error: assessmentError } = await supabase
+        .from('assessment_rounds')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('pillar_type', pillarKey);
+
+      if (assessmentError) throw assessmentError;
+
+      // 3. Radera assessment states för denna pillar
+      const { error: stateError } = await supabase
+        .from('assessment_states')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('assessment_key', pillarKey);
+
+      if (stateError) throw stateError;
+
+      // 4. Refresh data
+      await refetchPillars();
+      
+      toast({
+        title: "Pillar återställd",
+        description: `${PILLAR_MODULES[pillarKey]?.name} har återställts. Alla tidigare resultat och uppgifter har raderats.`,
+        variant: "default"
+      });
+
+    } catch (error) {
+      console.error('Error retaking pillar:', error);
+      toast({
+        title: "Fel vid återställning",
+        description: "Kunde inte återställa pillaren. Försök igen.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   return {
     loading: loading || pillarsLoading,
     pillarDefinitions,
@@ -252,6 +309,7 @@ export const useSixPillarsModular = (clientId?: string) => {
     activatePillar,
     deactivatePillar,
     submitPillarAssessment,
+    retakePillar,
     getActivatedPillars,
     getLatestAssessment,
     generateHeatmapData,
