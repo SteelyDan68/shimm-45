@@ -11,7 +11,8 @@ import {
   User,
   Shield,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  BarChart3
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -104,6 +105,13 @@ export function TopNavigation() {
               
               {/* Navigation Links */}
               <div className="py-1">
+                <DropdownMenuItem asChild>
+                  <NavLink to="/user-analytics" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                    <BarChart3 className="h-4 w-4 mr-3 text-muted-foreground" />
+                    <span>Min Utvecklingsanalys</span>
+                  </NavLink>
+                </DropdownMenuItem>
+                
                 <DropdownMenuItem asChild>
                   <NavLink to="/edit-profile" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
                     <User className="h-4 w-4 mr-3 text-muted-foreground" />

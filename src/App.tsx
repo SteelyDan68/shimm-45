@@ -42,6 +42,7 @@ import { Administration } from "./pages/Administration";
 
 import { UnifiedUserManagementPage } from "./pages/UnifiedUserManagement";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
+import UserAnalytics from "./pages/UserAnalytics";
 import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
@@ -143,9 +144,11 @@ const AppRoutes = () => {
               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
                 <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
                 <Route path="/ai-insights" element={<AIInsights />} />
-                <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-                <Route path="/stefan/*" element={<StefanAICentralHub />} />
-               <Route path="*" element={<NotFound />} />
+                <Route path="/user-analytics" element={<UserAnalytics />} />
+                <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
+                 <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
+                 <Route path="/stefan/*" element={<StefanAICentralHub />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>
             </AppLayout>
