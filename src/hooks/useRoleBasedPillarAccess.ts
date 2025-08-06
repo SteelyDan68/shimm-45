@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useUniversalPillarAccess, type UniversalPillarAccessReturn } from './useUniversalPillarAccess';
+import { useSixPillarsModular } from './useSixPillarsModular';
 
 type AccessLevel = 'none' | 'view' | 'edit' | 'admin';
 
@@ -21,11 +22,15 @@ export interface RoleBasedPillarAccess extends UniversalPillarAccessReturn {
   canManageAllUsers: boolean;
   canViewOtherUsers: boolean;
   isViewingOwnData: boolean;
+  
+  // Additional functionality
+  retakePillar?: (pillarKey: string) => Promise<void>;
 }
 
 export const useRoleBasedPillarAccess = (targetUserId?: string): RoleBasedPillarAccess => {
   const { user, hasRole, isSuperAdmin } = useAuth();
   const universalAccess = useUniversalPillarAccess(targetUserId);
+  const { retakePillar } = useSixPillarsModular(targetUserId);
 
   // Determine user role and access level
   const { userRole, accessLevel, contextInfo } = useMemo(() => {
@@ -98,6 +103,9 @@ export const useRoleBasedPillarAccess = (targetUserId?: string): RoleBasedPillar
     // Role-specific helpers
     canManageAllUsers,
     canViewOtherUsers,
-    isViewingOwnData
+    isViewingOwnData,
+    
+    // Additional functionality
+    retakePillar: retakePillar
   };
 };

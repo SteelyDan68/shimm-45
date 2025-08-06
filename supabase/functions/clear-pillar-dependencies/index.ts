@@ -73,22 +73,37 @@ serve(async (req) => {
       }
     }
 
-    // 4. Radera progress entries för denna pillar
+    // 4. Radera progress entries för denna pillar från path_entries
     if (dependency_types.includes('progress_entries')) {
       const { error: progressError } = await supabaseClient
+        .from('path_entries')
+        .delete()
+        .eq('user_id', user_id)
+        .contains('metadata', { pillar_key })
+
+      if (progressError) {
+        console.error('Error deleting path entries:', progressError)
+      } else {
+        results.push('path_entries')
+      }
+    }
+
+    // 5. Radera coaching progress entries för denna pillar
+    if (dependency_types.includes('progress_entries')) {
+      const { error: coachingProgressError } = await supabaseClient
         .from('coaching_progress_entries')
         .delete()
         .eq('user_id', user_id)
         .ilike('title', `%${pillar_key}%`)
 
-      if (progressError) {
-        console.error('Error deleting progress entries:', progressError)
+      if (coachingProgressError) {
+        console.error('Error deleting coaching progress entries:', coachingProgressError)
       } else {
-        results.push('progress_entries')
+        results.push('coaching_progress_entries')
       }
     }
 
-    // 5. Uppdatera neuroplasticity journeys för att ta bort pillar-specifik data
+    // 6. Uppdatera neuroplasticity journeys för att ta bort pillar-specifik data
     if (dependency_types.includes('neuroplasticity_journeys')) {
       try {
         // Hämta användarens neuroplasticity journey data
@@ -121,7 +136,7 @@ serve(async (req) => {
       }
     }
 
-    // 6. Radera pillar-specifik data från user attributes
+    // 7. Radera pillar-specifik data från user attributes
     try {
       const { data: pillarData, error: getPillarError } = await supabaseClient.functions.invoke('get-user-attribute', {
         body: { user_id, attribute_key: 'pillar_assessments' }

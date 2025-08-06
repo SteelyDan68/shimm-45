@@ -27,6 +27,8 @@ export const UniversalPillarProgressTracker: React.FC<UniversalPillarProgressTra
   showActions = true,
   className = ''
 }) => {
+  const universalAccess = useRoleBasedPillarAccess(targetUserId);
+  
   const {
     pillarProgress,
     stats,
@@ -41,7 +43,7 @@ export const UniversalPillarProgressTracker: React.FC<UniversalPillarProgressTra
     refreshData,
     activatePillar,
     deactivatePillar
-  } = useRoleBasedPillarAccess(targetUserId);
+  } = universalAccess;
 
   // Access Control Check
   if (!canView) {
@@ -236,6 +238,24 @@ export const UniversalPillarProgressTracker: React.FC<UniversalPillarProgressTra
                         Aktivera
                       </Button>
                     )}
+                    
+                     {/* Retake option för slutförda pillars */}
+                     {pillar.completion_count > 0 && pillar.is_active && (
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => {
+                           if (window.confirm(`Är du säker på att du vill göra om ${pillar.pillar_key}? Alla tidigare resultat och beroenden kommer att raderas.`)) {
+                             // Call the universal access retake function
+                             universalAccess.retakePillar?.(pillar.pillar_key);
+                           }
+                         }}
+                         className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                         title="Gör om pelare - raderar all tidigare data"
+                       >
+                         Gör om
+                       </Button>
+                     )}
                   </div>
                 )}
               </div>

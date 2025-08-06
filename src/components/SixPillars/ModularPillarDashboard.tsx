@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Clock, RotateCcw, AlertTriangle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { PillarRetakeDialog } from '@/components/Shared/PillarRetakeDialog';
 import { PillarKey } from '@/types/sixPillarsModular';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { PillarHeatmap } from './PillarHeatmap';
@@ -44,6 +45,8 @@ export const ModularPillarDashboard = ({
     content: string;
     pillarName: string;
   } | null>(null);
+  const [retakePillarKey, setRetakePillarKey] = useState<PillarKey | null>(null);
+  const [isRetakeLoading, setIsRetakeLoading] = useState(false);
 
   const activatedPillars = getActivatedPillars();
   const heatmapData = generateHeatmapData();
@@ -252,59 +255,15 @@ export const ModularPillarDashboard = ({
                         </Button>
                         
                         {latestAssessment && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                className="text-muted-foreground hover:text-orange-600"
-                              >
-                                <RotateCcw className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="flex items-center gap-2">
-                                  <AlertTriangle className="h-5 w-5 text-orange-600" />
-                                  Gör om {pillarConfig.name}?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="space-y-2">
-                                  <p>
-                                    Är du säker på att du vill göra om denna pillar? 
-                                  </p>
-                                  <div className="bg-orange-50 border border-orange-200 rounded p-3 text-sm">
-                                    <p className="font-medium text-orange-800 mb-1">Detta kommer att radera:</p>
-                                    <ul className="text-orange-700 space-y-1">
-                                      <li>• Alla dina tidigare resultat och poäng</li>
-                                      <li>• Alla AI-genererade rekommendationer</li>
-                                      <li>• Alla todos och uppgifter i kalendern</li>
-                                      <li>• All progress och analys för denna pillar</li>
-                                    </ul>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Du får möjlighet att göra en helt ny bedömning från början.
-                                  </p>
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={async () => {
-                                    try {
-                                      await retakePillar(pillarKey);
-                                      // Auto-start new assessment
-                                      setSelectedPillar(pillarKey);
-                                    } catch (error) {
-                                      console.error('Failed to retake pillar:', error);
-                                    }
-                                  }}
-                                  className="bg-orange-600 hover:bg-orange-700"
-                                >
-                                  Ja, gör om pillaren
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="text-muted-foreground hover:text-orange-600"
+                            onClick={() => setRetakePillarKey(pillarKey)}
+                            title="Gör om pelare"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     )}
@@ -356,6 +315,29 @@ export const ModularPillarDashboard = ({
           </div>
         </div>
       )}
+
+      {/* Retake Dialog */}
+      <PillarRetakeDialog
+        isOpen={retakePillarKey !== null}
+        pillarKey={retakePillarKey!}
+        isLoading={isRetakeLoading}
+        onConfirm={async () => {
+          if (!retakePillarKey) return;
+          
+          setIsRetakeLoading(true);
+          try {
+            await retakePillar(retakePillarKey);
+            // Auto-start new assessment
+            setSelectedPillar(retakePillarKey);
+            setRetakePillarKey(null);
+          } catch (error) {
+            console.error('Failed to retake pillar:', error);
+          } finally {
+            setIsRetakeLoading(false);
+          }
+        }}
+        onCancel={() => setRetakePillarKey(null)}
+      />
 
       {/* Analysis Modal */}
       {showAnalysisModal && (

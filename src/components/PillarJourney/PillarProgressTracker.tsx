@@ -126,17 +126,28 @@ export const PillarProgressTracker = ({
             </h4>
             <div className="grid gap-2">
               {completedJourneys.map((journey) => (
-                <div key={journey.id} className="flex items-center justify-between p-2 bg-green-50 rounded">
-                  <span className="text-sm font-medium">{journey.pillarName}</span>
+                <div key={journey.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex-1">
+                    <span className="text-sm font-medium">{journey.pillarName}</span>
+                    {journey.completedAt && (
+                      <div className="text-xs text-muted-foreground">
+                        Slutförd {new Date(journey.completedAt).toLocaleDateString('sv-SE')}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="bg-green-100 text-green-800">
                       Slutförd
                     </Badge>
-                    {journey.completedAt && (
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(journey.completedAt).toLocaleDateString('sv-SE')}
-                      </span>
-                    )}
+                    <button 
+                      className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded hover:bg-orange-200 transition-colors"
+                      onClick={() => {
+                        // Implementera retake funktionalitet här
+                        console.log('Retake pillar:', journey.pillarKey);
+                      }}
+                    >
+                      Gör om
+                    </button>
                   </div>
                 </div>
               ))}

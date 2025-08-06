@@ -128,7 +128,28 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
                   {status.label}
                 </Badge>
                 
-                {!pillar.completed && (
+                {pillar.completed ? (
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onAction?.(`view-pillar-${pillar.key}`)}
+                      className="w-8 h-8 p-0"
+                      title="Visa resultat"
+                    >
+                      <ArrowRight className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onAction?.(`retake-pillar-${pillar.key}`)}
+                      className="w-8 h-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                      title="Gör om pillar"
+                    >
+                      ↻
+                    </Button>
+                  </div>
+                ) : (
                   <Button
                     variant="ghost"
                     size="sm"
