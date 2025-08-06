@@ -48,6 +48,7 @@ import { ClientIntelligencePage } from "./pages/ClientIntelligence";
 import { TasksPage } from "./pages/Tasks";
 import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChat";
+import { StefanAICentralHub } from "./components/Stefan/StefanAICentralHub";
 import { AIInsights } from "./pages/AIInsights";
 import NotFound from "./pages/NotFound";
 
@@ -136,10 +137,11 @@ const AppRoutes = () => {
                 <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
-               <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
-               <Route path="/ai-insights" element={<AIInsights />} />
-               <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-              <Route path="*" element={<NotFound />} />
+                <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
+                <Route path="/ai-insights" element={<AIInsights />} />
+                <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
+                <Route path="/stefan/*" element={<StefanAICentralHub />} />
+               <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>
             </AppLayout>

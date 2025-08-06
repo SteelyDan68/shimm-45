@@ -9,6 +9,7 @@ import { useAuth, usePermissions } from '@/providers/UnifiedAuthProvider';
 import { useUnifiedAI } from '@/hooks/useUnifiedAI';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ProactiveCoachingDashboard } from '@/components/Stefan/ProactiveCoachingDashboard';
 import {
   Brain,
   Settings,
@@ -130,26 +131,35 @@ export const StefanAIManagementCenter: React.FC = () => {
 
   const loadAnalytics = async () => {
     try {
-      // Load analytics from stefan_analytics table
+      // Load analytics from analytics_metrics table instead  
       const { data, error } = await supabase
-        .from('stefan_analytics')
+        .from('analytics_metrics')
         .select('*')
+        .eq('metric_type', 'stefan_intervention_created')
         .order('created_at', { ascending: false })
         .limit(100);
       
       if (error) throw error;
       
+      // Also get intervention response metrics
+      const { data: responseData } = await supabase
+        .from('analytics_metrics')
+        .select('*')
+        .eq('metric_type', 'stefan_intervention_response')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
       // Calculate aggregated metrics
-      const totalInteractions = data?.length || 0;
-      const avgResponseTime = data?.reduce((acc, item) => acc + (item.metric_value || 0), 0) / totalInteractions || 0;
-      const successRate = data?.filter(item => item.metric_type === 'success').length / totalInteractions * 100 || 0;
+      const totalInteractions = (data?.length || 0) + (responseData?.length || 0);
+      const avgResponseTime = data?.reduce((acc, item) => acc + (item.metric_value || 0), 0) / (data?.length || 1) || 0;
+      const successRate = responseData?.length ? (responseData.length / data?.length) * 100 : 0;
       
       setAnalytics({
         total_interactions: totalInteractions,
         avg_response_time: Math.round(avgResponseTime),
         success_rate: Math.round(successRate),
         memory_fragments: memories.length,
-        active_users: data?.filter(item => item.user_id).length || 0,
+        active_users: new Set([...(data?.map(d => d.user_id) || []), ...(responseData?.map(d => d.user_id) || [])]).size,
         weekly_growth: 12 // Calculate from time-based data
       });
     } catch (error) {
@@ -232,10 +242,14 @@ export const StefanAIManagementCenter: React.FC = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Översikt
+          </TabsTrigger>
+          <TabsTrigger value="coaching" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            Proaktiv Coaching
           </TabsTrigger>
           <TabsTrigger value="memory" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
@@ -341,6 +355,11 @@ export const StefanAIManagementCenter: React.FC = () => {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Proactive Coaching Tab */}
+        <TabsContent value="coaching" className="space-y-6">
+          <ProactiveCoachingDashboard />
         </TabsContent>
 
         {/* Memory Tab */}

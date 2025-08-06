@@ -135,8 +135,8 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["client"]
       },
       {
-        title: "Stefan AI",
-        url: NAVIGATION_ROUTES.STEFAN_CHAT,
+        title: "Stefan AI Hub",
+        url: "/stefan",
         icon: Brain,
         roles: ["superadmin", "admin", "coach", "client"]
       },
