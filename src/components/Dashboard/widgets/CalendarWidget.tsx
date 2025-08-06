@@ -11,7 +11,8 @@ import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 const CalendarWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
-  const { events, loading, error } = useCalendarData({
+  const { events = [], loading, error } = useCalendarData({
+    userId: undefined, // Will use auth context
     dateRange: {
       start: new Date(),
       end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
@@ -23,9 +24,9 @@ const CalendarWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'task': return 'bg-primary/10 text-primary';
-      case 'coaching': return 'bg-secondary/10 text-secondary';
-      case 'assessment': return 'bg-accent/10 text-accent';
+      case 'path_entry': return 'bg-primary/10 text-primary';
+      case 'assessment': return 'bg-secondary/10 text-secondary';
+      case 'custom_event': return 'bg-accent/10 text-accent';
       default: return 'bg-muted text-muted-foreground';
     }
   };
