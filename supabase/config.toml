@@ -98,6 +98,9 @@ verify_jwt = true
 [functions.send-simple-invitation]
 verify_jwt = true
 
+[functions.create-user]
+verify_jwt = true
+
 [edge_runtime]
 policy = "per_worker"
 inspector_port = 8083

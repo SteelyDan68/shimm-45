@@ -141,7 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log('📨 Resend response:', emailResponse);
+    console.log('📨 Resend response:', JSON.stringify(emailResponse, null, 2));
 
     if (emailResponse.error) {
       console.error('❌ Resend error:', emailResponse.error);
