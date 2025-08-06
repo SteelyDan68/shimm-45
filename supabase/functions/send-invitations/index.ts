@@ -114,15 +114,27 @@ const handler = async (req: Request): Promise<Response> => {
         const appUrl = 'https://00a0d53e-45e2-45a5-8d70-ae3e74d84396.lovableproject.com';
 
         // Render the email template
-        const html = await renderAsync(
-          React.createElement(InvitationEmail, {
-            invitedBy: 'Administratör',
-            invitationToken: invitation.token,
-            role: role === 'client' ? 'klient' : role === 'admin' ? 'administratör' : 'användare',
-            appUrl,
-            customMessage: custom_message,
-          })
-        );
+        let html;
+        try {
+          html = await renderAsync(
+            React.createElement(InvitationEmail, {
+              invitedBy: 'Administratör',
+              invitationToken: invitation.token,
+              role: role === 'client' ? 'klient' : role === 'admin' ? 'administratör' : 'användare',
+              appUrl,
+              customMessage: custom_message,
+            })
+          );
+        } catch (renderError) {
+          console.error(`Error rendering email template for ${email}:`, renderError);
+          // Fallback to simple HTML
+          html = `
+            <h1>Inbjudan till plattformen</h1>
+            <p>Du har blivit inbjuden att gå med i plattformen som ${role === 'client' ? 'klient' : role === 'admin' ? 'administratör' : 'användare'}.</p>
+            <p><a href="${appUrl}/invitation-signup?token=${invitation.token}">Klicka här för att acceptera inbjudan</a></p>
+            ${custom_message ? `<p><strong>Meddelande:</strong> ${custom_message}</p>` : ''}
+          `;
+        }
 
         // Send the email
         const emailResponse = await resend.emails.send({
