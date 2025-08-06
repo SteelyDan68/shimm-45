@@ -86,6 +86,9 @@ verify_jwt = true
 [functions.admin-password-reset]
 verify_jwt = true
 
+[functions.unified-invitations]
+verify_jwt = true
+
 [functions.send-invitation]
 verify_jwt = true
 
