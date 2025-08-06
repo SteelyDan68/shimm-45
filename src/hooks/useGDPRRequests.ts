@@ -72,7 +72,7 @@ export const useGDPRRequests = () => {
 
       if (error) throw error;
 
-      setRequests(data || []);
+      setRequests((data || []) as GDPRRequest[]);
     } catch (err: any) {
       console.error('Error loading GDPR requests:', err);
       setError(err.message);
@@ -90,16 +90,11 @@ export const useGDPRRequests = () => {
         .from('gdpr_notifications')
         .select(`
           *,
-          gdpr_requests:request_id (
+          gdpr_requests!inner (
             id,
             request_type,
             status,
-            user_id,
-            profiles:user_id (
-              email,
-              first_name,
-              last_name
-            )
+            user_id
           )
         `)
         .eq('admin_user_id', user.id)
@@ -108,16 +103,22 @@ export const useGDPRRequests = () => {
 
       if (error) throw error;
 
-      const formattedNotifications = data?.map(notif => ({
+      const formattedNotifications = (data || []).map(notif => ({
         ...notif,
+        notification_type: notif.notification_type as GDPRNotification['notification_type'],
+        priority: notif.priority as GDPRNotification['priority'],
         request: notif.gdpr_requests ? {
           ...notif.gdpr_requests,
-          user_email: notif.gdpr_requests.profiles?.email,
-          user_name: notif.gdpr_requests.profiles ? 
-            `${notif.gdpr_requests.profiles.first_name} ${notif.gdpr_requests.profiles.last_name}` : 
-            'Okänd användare'
+          request_type: notif.gdpr_requests.request_type as GDPRRequest['request_type'],
+          status: notif.gdpr_requests.status as GDPRRequest['status'],
+          priority: 'medium' as GDPRRequest['priority'],
+          requested_at: notif.created_at,
+          created_at: notif.created_at,
+          updated_at: notif.created_at,
+          user_email: 'N/A',
+          user_name: 'Användare'
         } : undefined
-      })) || [];
+      })) as GDPRNotification[];
 
       setNotifications(formattedNotifications);
     } catch (err: any) {

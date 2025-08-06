@@ -58,7 +58,7 @@ export const UserGDPRRequestForm: React.FC = () => {
     switch (type) {
       case 'data_export': return <Download className="h-4 w-4" />;
       case 'data_deletion': return <Trash2 className="h-4 w-4" />;
-      case 'data_portability': return <FileTransfer className="h-4 w-4" />;
+      case 'data_portability': return <ArrowRightLeft className="h-4 w-4" />;
       case 'data_access': return <Eye className="h-4 w-4" />;
       default: return <Shield className="h-4 w-4" />;
     }
@@ -161,7 +161,7 @@ export const UserGDPRRequestForm: React.FC = () => {
                   </SelectItem>
                   <SelectItem value="data_portability">
                     <div className="flex items-center gap-2">
-                      <FileTransfer className="h-4 w-4" />
+                      <ArrowRightLeft className="h-4 w-4" />
                       Dataportabilitet - Överför till annan tjänst
                     </div>
                   </SelectItem>

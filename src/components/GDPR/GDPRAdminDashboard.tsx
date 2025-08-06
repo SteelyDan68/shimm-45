@@ -20,7 +20,7 @@ import {
   Shield, 
   Download, 
   Trash2, 
-  FileTransfer as ArrowRightLeft, 
+  ArrowRightLeft, 
   Eye,
   Clock,
   CheckCircle2,
@@ -75,7 +75,7 @@ export const GDPRAdminDashboard: React.FC = () => {
     switch (type) {
       case 'data_export': return <Download className="h-4 w-4" />;
       case 'data_deletion': return <Trash2 className="h-4 w-4" />;
-      case 'data_portability': return <FileTransfer className="h-4 w-4" />;
+      case 'data_portability': return <ArrowRightLeft className="h-4 w-4" />;
       case 'data_access': return <Eye className="h-4 w-4" />;
       default: return <Shield className="h-4 w-4" />;
     }
