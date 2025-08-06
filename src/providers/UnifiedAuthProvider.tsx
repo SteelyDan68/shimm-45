@@ -347,22 +347,44 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
       });
 
       // Check if we already have a valid session
-      const { data: currentSession } = await supabase.auth.getSession();
+      const { data: currentSession, error: sessionError } = await supabase.auth.getSession();
       console.log('🔥 signOut: Current session check:', {
         sessionExists: !!currentSession.session,
-        sessionId: currentSession.session?.access_token ? 'exists' : 'missing'
+        sessionId: currentSession.session?.access_token ? 'exists' : 'missing',
+        sessionError: sessionError?.message
       });
 
-      const { error } = await supabase.auth.signOut();
+      // Force clear session from localStorage first
+      localStorage.removeItem('sb-gcoorbcglxczmukzcmqs-auth-token');
       
-      if (error) {
-        console.error('🔥 signOut: Supabase signOut error:', error);
+      // Try to sign out with different scope options
+      let signOutError = null;
+      
+      try {
+        // Try global sign out first (signs out from all devices)
+        const { error } = await supabase.auth.signOut({ scope: 'global' });
+        signOutError = error;
+      } catch (globalError) {
+        console.log('🔥 signOut: Global signout failed, trying local...', globalError);
+        // Fallback to local sign out
+        const { error } = await supabase.auth.signOut({ scope: 'local' });
+        signOutError = error;
+      }
+      
+      if (signOutError) {
+        console.error('🔥 signOut: Supabase signOut error:', signOutError);
+        
+        // Force clear state even if signOut fails
+        setUser(null);
+        setSession(null);
+        setProfile(null);
+        setRoles([]);
+        
         toast({
-          title: "Utloggningsfel",
-          description: `Auth session missing: ${error.message}`,
-          variant: "destructive",
+          title: "Utloggad",
+          description: "Session rensad (även med varning).",
         });
-        return { error };
+        return { error: null };
       }
 
       console.log('🔥 signOut: Successfully signed out, clearing state...');
@@ -373,18 +395,24 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
 
       toast({
         title: "Utloggad",
-        description: "Du har loggats ut.",
+        description: "Du har loggats ut från alla enheter.",
       });
 
       return { error: null };
     } catch (error: any) {
       console.error('🔥 signOut: Unexpected error:', error);
+      
+      // Force clear state on any error
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setRoles([]);
+      
       toast({
-        title: "Utloggningsfel",
-        description: `Oväntat fel: ${error.message}`,
-        variant: "destructive",
+        title: "Utloggad", 
+        description: "Session rensad (med varningar).",
       });
-      return { error };
+      return { error: null };
     }
   };
 
