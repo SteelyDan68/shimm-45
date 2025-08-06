@@ -13,7 +13,9 @@ import {
   Calendar,
   BarChart3,
   Settings,
-  Bell
+  Bell,
+  Users2,
+  Download
 } from "lucide-react";
 import {
   Sidebar,

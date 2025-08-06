@@ -131,7 +131,8 @@ const AppRoutes = () => {
                 <Route path="/client-intelligence" element={<ClientIntelligencePage />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
                <Route path="/admin-hub/*" element={<AdminHub />} />
-                <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
+            <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
+            <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
                 <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />

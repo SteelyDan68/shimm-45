@@ -1,0 +1,92 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  roles?: string[];
+  primary_role?: string;
+  coach_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const useUsers = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch profiles with user roles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          first_name,
+          last_name,
+          created_at,
+          updated_at
+        `);
+
+      if (profilesError) throw profilesError;
+
+      // Fetch user roles
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      // Combine data
+      const usersWithRoles = profiles?.map(profile => {
+        const userRoleData = userRoles?.filter(ur => ur.user_id === profile.id) || [];
+        const roles = userRoleData.map(ur => ur.role);
+        const primaryRole = roles.length > 0 ? roles[0] : 'user';
+
+        return {
+          id: profile.id,
+          email: profile.email,
+          name: profile.first_name && profile.last_name 
+            ? `${profile.first_name} ${profile.last_name}` 
+            : profile.first_name || profile.email,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          roles,
+          primary_role: primaryRole,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at
+        } as User;
+      }) || [];
+
+      setUsers(usersWithRoles);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshUsers = () => {
+    fetchUsers();
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  return {
+    users,
+    loading,
+    error,
+    refreshUsers
+  };
+};
