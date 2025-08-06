@@ -3083,6 +3083,54 @@ export type Database = {
         }
         Relationships: []
       }
+      stefan_behavior_analytics: {
+        Row: {
+          analysis_type: string
+          assessment_integration: Json | null
+          behavior_patterns: Json
+          confidence_score: number | null
+          created_at: string
+          expires_at: string | null
+          generated_at: string
+          id: string
+          insights: Json
+          is_active: boolean | null
+          pillar_correlations: Json | null
+          recommendations: Json
+          user_id: string
+        }
+        Insert: {
+          analysis_type: string
+          assessment_integration?: Json | null
+          behavior_patterns?: Json
+          confidence_score?: number | null
+          created_at?: string
+          expires_at?: string | null
+          generated_at?: string
+          id?: string
+          insights?: Json
+          is_active?: boolean | null
+          pillar_correlations?: Json | null
+          recommendations?: Json
+          user_id: string
+        }
+        Update: {
+          analysis_type?: string
+          assessment_integration?: Json | null
+          behavior_patterns?: Json
+          confidence_score?: number | null
+          created_at?: string
+          expires_at?: string | null
+          generated_at?: string
+          id?: string
+          insights?: Json
+          is_active?: boolean | null
+          pillar_correlations?: Json | null
+          recommendations?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       stefan_interactions: {
         Row: {
           ai_analysis: string | null
@@ -3130,6 +3178,60 @@ export type Database = {
           requires_followup?: boolean | null
           stefan_persona?: string
           user_id?: string
+          user_response?: string | null
+        }
+        Relationships: []
+      }
+      stefan_interventions: {
+        Row: {
+          ai_analysis: Json | null
+          content: string
+          context_data: Json
+          created_at: string
+          effectiveness_score: number | null
+          id: string
+          intervention_type: string
+          priority: string
+          responded_at: string | null
+          response_sentiment: string | null
+          trigger_type: string
+          updated_at: string
+          user_id: string
+          user_responded: boolean | null
+          user_response: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          content: string
+          context_data?: Json
+          created_at?: string
+          effectiveness_score?: number | null
+          id?: string
+          intervention_type?: string
+          priority?: string
+          responded_at?: string | null
+          response_sentiment?: string | null
+          trigger_type: string
+          updated_at?: string
+          user_id: string
+          user_responded?: boolean | null
+          user_response?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          content?: string
+          context_data?: Json
+          created_at?: string
+          effectiveness_score?: number | null
+          id?: string
+          intervention_type?: string
+          priority?: string
+          responded_at?: string | null
+          response_sentiment?: string | null
+          trigger_type?: string
+          updated_at?: string
+          user_id?: string
+          user_responded?: boolean | null
           user_response?: string | null
         }
         Relationships: []
@@ -3957,6 +4059,20 @@ export type Database = {
           category: string | null
           superadmin_count: number | null
           total_count: number | null
+        }
+        Relationships: []
+      }
+      stefan_intervention_summary: {
+        Row: {
+          avg_effectiveness_score: number | null
+          first_intervention_date: string | null
+          high_priority_interventions: number | null
+          last_intervention_date: string | null
+          responded_interventions: number | null
+          response_rate_percent: number | null
+          total_interventions: number | null
+          urgent_interventions: number | null
+          user_id: string | null
         }
         Relationships: []
       }
