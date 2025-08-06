@@ -35,6 +35,7 @@ import { IntegratedAdminDashboard } from "@/components/Admin/IntegratedAdminDash
 import { StefanAIManagementCenter } from "@/components/Admin/StefanAIManagementCenter";
 
 import { DataRightsCenter } from "@/components/DataRightsCenter";
+import { GDPRManagementModule } from "@/components/GDPR/GDPRManagementModule";
 import StefanTrainingData from "@/components/StefanTrainingData";
 import StefanMemoryManager from "@/components/Admin/StefanMemoryManager";
 
@@ -471,7 +472,7 @@ export function Administration() {
                 </p>
               </div>
               <div className="p-6">
-                <DataRightsCenter />
+                <GDPRManagementModule />
               </div>
             </div>
           </TabsContent>
