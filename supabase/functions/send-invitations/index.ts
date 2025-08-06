@@ -116,6 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
         // Render the email template
         let html;
         try {
+          console.log(`🎨 Rendering email template for ${email}...`);
           html = await renderAsync(
             React.createElement(InvitationEmail, {
               invitedBy: 'Administratör',
@@ -125,8 +126,14 @@ const handler = async (req: Request): Promise<Response> => {
               customMessage: custom_message,
             })
           );
-        } catch (renderError) {
-          console.error(`Error rendering email template for ${email}:`, renderError);
+          console.log(`✅ Email template rendered successfully for ${email}`);
+        } catch (renderError: any) {
+          console.error(`❌ Error rendering email template for ${email}:`, renderError);
+          console.error(`❌ Render error details:`, {
+            message: renderError.message,
+            name: renderError.name,
+            stack: renderError.stack
+          });
           // Fallback to simple HTML
           html = `
             <h1>Inbjudan till plattformen</h1>
@@ -134,6 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p><a href="${appUrl}/invitation-signup?token=${invitation.token}">Klicka här för att acceptera inbjudan</a></p>
             ${custom_message ? `<p><strong>Meddelande:</strong> ${custom_message}</p>` : ''}
           `;
+          console.log(`🔄 Using fallback HTML template for ${email}`);
         }
 
         // Send the email
@@ -178,8 +186,13 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
       } catch (emailError: any) {
-        console.error(`Error processing ${email}:`, emailError);
-        errors.push(`${email}: ${emailError.message}`);
+        console.error(`❌ Error processing ${email}:`, emailError);
+        console.error(`❌ Error details for ${email}:`, {
+          message: emailError.message,
+          name: emailError.name,
+          stack: emailError.stack
+        });
+        errors.push(`${email}: ${emailError.message || 'Okänt fel uppstod'}`);
       }
     }
 
