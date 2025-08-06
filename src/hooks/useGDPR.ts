@@ -58,9 +58,11 @@ export const useGDPR = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('data_export_requests')
+        .from('gdpr_requests')
         .insert({
-          user_id: user.id
+          user_id: user.id,
+          request_type: 'data_export',
+          status: 'pending'
         })
         .select()
         .single();
@@ -104,9 +106,11 @@ export const useGDPR = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('data_deletion_requests')
+        .from('gdpr_requests')
         .insert({
           user_id: user.id,
+          request_type: 'data_deletion',
+          status: 'pending',
           reason
         })
         .select()
@@ -180,20 +184,19 @@ export const useGDPR = () => {
 
     try {
       const { data, error } = await supabase
-        .from('data_export_requests')
+        .from('gdpr_requests')
         .select('*')
         .eq('user_id', user.id)
+        .eq('request_type', 'data_export')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return (data || []).map(item => ({
         id: item.id,
         status: item.status as GDPRRequest['status'],
-        request_date: item.request_date,
-        completed_date: item.completed_date,
-        download_url: item.download_url,
-        expires_at: item.expires_at,
-        error_message: item.error_message
+        request_date: item.requested_at || item.created_at,
+        completed_date: item.completed_at,
+        reason: item.reason
       }));
     } catch (error) {
       console.error('Error fetching export requests:', error);
@@ -207,17 +210,18 @@ export const useGDPR = () => {
 
     try {
       const { data, error } = await supabase
-        .from('data_deletion_requests')
+        .from('gdpr_requests')
         .select('*')
         .eq('user_id', user.id)
+        .eq('request_type', 'data_deletion')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return (data || []).map(item => ({
         id: item.id,
         status: item.status as GDPRRequest['status'],
-        request_date: item.request_date,
-        completed_date: item.completed_date,
+        request_date: item.requested_at || item.created_at,
+        completed_date: item.completed_at,
         reason: item.reason
       }));
     } catch (error) {
