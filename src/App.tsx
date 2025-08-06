@@ -35,7 +35,7 @@ import { UserProfile } from "./pages/UserProfile";
 import { ClientList } from "./components/ClientList";
 import ClientDashboard from "./pages/ClientDashboard";
 import { OnboardingPage } from "./pages/OnboardingPage";
-import EditProfilePage from "./pages/EditProfilePage";
+import UnifiedProfilePage from "./pages/UnifiedProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
 import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
@@ -108,7 +108,7 @@ const AppRoutes = () => {
                <Route path={NAVIGATION_ROUTES.DASHBOARD} element={<Dashboard />} />
               <Route path={NAVIGATION_ROUTES.CLIENT_DASHBOARD} element={<ClientDashboard />} />
                 <Route path={NAVIGATION_ROUTES.ONBOARDING} element={<OnboardingPage />} />
-                <Route path={NAVIGATION_ROUTES.EDIT_PROFILE} element={<EditProfilePage />} />
+                <Route path={NAVIGATION_ROUTES.EDIT_PROFILE} element={<UnifiedProfilePage />} />
                 <Route path="/client-assessment/:clientId" element={<ClientAssessmentPage />} />
               
                <Route path={NAVIGATION_ROUTES.COACH_DASHBOARD} element={<CoachDashboardPage />} />
