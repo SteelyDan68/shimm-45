@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     
     try {
       const { data: deletionResult, error: deletionError } = await supabase
-        .rpc('delete_user_completely', { user_uuid: userToDelete.id });
+        .rpc('delete_user_completely', { user_identifier: userToDelete.email });
 
       if (deletionError) {
         console.error('❌ Database deletion error:', deletionError);

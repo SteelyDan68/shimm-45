@@ -13,6 +13,10 @@ export interface User {
   coach_id?: string;
   created_at?: string;
   updated_at?: string;
+  is_active?: boolean;
+  deactivated_at?: string;
+  deactivated_by?: string;
+  deactivation_reason?: string;
 }
 
 export const useUsers = () => {
@@ -25,7 +29,7 @@ export const useUsers = () => {
     try {
       setLoading(true);
       
-      // Fetch profiles with user roles
+      // Fetch profiles with user roles AND activity status
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -34,7 +38,11 @@ export const useUsers = () => {
           first_name,
           last_name,
           created_at,
-          updated_at
+          updated_at,
+          is_active,
+          deactivated_at,
+          deactivated_by,
+          deactivation_reason
         `);
 
       if (profilesError) throw profilesError;
@@ -63,7 +71,11 @@ export const useUsers = () => {
           roles,
           primary_role: primaryRole,
           created_at: profile.created_at,
-          updated_at: profile.updated_at
+          updated_at: profile.updated_at,
+          is_active: profile.is_active,
+          deactivated_at: profile.deactivated_at,
+          deactivated_by: profile.deactivated_by,
+          deactivation_reason: profile.deactivation_reason
         } as User;
       }) || [];
 

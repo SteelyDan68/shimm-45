@@ -4238,7 +4238,7 @@ export type Database = {
         Returns: string
       }
       delete_user_completely: {
-        Args: { user_uuid: string }
+        Args: { user_identifier: string } | { user_uuid: string }
         Returns: string
       }
       generate_invitation_token: {
