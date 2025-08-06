@@ -62,7 +62,7 @@ export const useInvitations = () => {
 
       // Send invitation via edge function - it will handle database creation
       const { data, error } = await supabase.functions.invoke('send-invitation', {
-        body: { email, role, invitedBy: senderName }
+        body: { email, role, custom_message: inviterName }
       });
 
       if (error) {

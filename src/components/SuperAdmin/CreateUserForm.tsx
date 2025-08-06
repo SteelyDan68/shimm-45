@@ -81,20 +81,9 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess }) => 
         body: {
           email: formData.email,
           password: formData.password || undefined,
-          profile_data: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            phone: formData.phone,
-            address: formData.address,
-            city: formData.city,
-            postal_code: formData.postal_code,
-            country: formData.country,
-            date_of_birth: formData.date_of_birth,
-            bio: formData.bio
-          },
+          first_name: formData.first_name,
+          last_name: formData.last_name,
           roles: formData.roles,
-          send_invitation: formData.send_invitation,
-          notify_user: formData.notify_user
         }
       });
 

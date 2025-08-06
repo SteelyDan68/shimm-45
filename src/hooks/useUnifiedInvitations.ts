@@ -75,7 +75,7 @@ export const useUnifiedInvitations = (): UseUnifiedInvitationsReturn => {
         custom_message: request.custom_message || ''
       };
 
-      const { data, error: edgeError } = await supabase.functions.invoke('send-simple-invitation', {
+      const { data, error: edgeError } = await supabase.functions.invoke('send-invitation', {
         body: simpleRequest
       });
 

@@ -9,103 +9,70 @@ const corsHeaders = {
 interface CreateUserRequest {
   email: string;
   password: string;
-  profile_data: {
-    first_name: string;
-    last_name: string;
-    phone?: string;
-    address?: string;
-    city?: string;
-    postal_code?: string;
-    country?: string;
-    date_of_birth?: string;
-    bio?: string;
-  };
+  first_name: string;
+  last_name: string;
   roles: string[];
-  send_invitation?: boolean;
-  notify_user?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log('🚀 Create user request received');
-
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('📝 Parsing create user request...');
-    const requestData: CreateUserRequest = await req.json();
+    const { email, password, first_name, last_name, roles }: CreateUserRequest = await req.json();
     
-    console.log(`👤 Creating user: ${requestData.email}`);
+    console.log(`Creating user: ${email}`);
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Create user in auth.users
-    console.log('🔐 Creating auth user...');
+    // 1. Create auth user
     const { data: authUser, error: authError } = await supabaseClient.auth.admin.createUser({
-      email: requestData.email,
-      password: requestData.password,
+      email,
+      password,
       email_confirm: true,
     });
 
     if (authError) {
-      console.error('❌ Auth user creation failed:', authError);
+      console.error('Auth error:', authError);
       throw new Error(`Failed to create user: ${authError.message}`);
     }
 
-    console.log('✅ Auth user created:', authUser.user?.id);
-
-    // Create profile
-    console.log('👤 Creating user profile...');
+    // 2. Create simple profile
     const { error: profileError } = await supabaseClient
       .from('profiles')
       .insert({
         id: authUser.user!.id,
-        email: requestData.email,
-        first_name: requestData.profile_data.first_name,
-        last_name: requestData.profile_data.last_name,
-        phone: requestData.profile_data.phone || null,
-        bio: requestData.profile_data.bio || null,
-        date_of_birth: requestData.profile_data.date_of_birth || null,
-        // address är jsonb, så vi sätter det korrekt
-        address: requestData.profile_data.address ? {
-          street: requestData.profile_data.address,
-          city: requestData.profile_data.city || '',
-          postal_code: requestData.profile_data.postal_code || '',
-          country: requestData.profile_data.country || ''
-        } : null,
+        email,
+        first_name,
+        last_name,
       });
 
     if (profileError) {
-      console.error('❌ Profile creation failed:', profileError);
-      // Try to clean up auth user
+      console.error('Profile error:', profileError);
+      // Clean up auth user
       await supabaseClient.auth.admin.deleteUser(authUser.user!.id);
       throw new Error(`Failed to create profile: ${profileError.message}`);
     }
 
-    // Add roles
-    console.log('🎭 Adding user roles...');
-    for (const role of requestData.roles) {
-      const { error: roleError } = await supabaseClient
+    // 3. Add roles
+    for (const role of roles) {
+      await supabaseClient
         .from('user_roles')
         .insert({
           user_id: authUser.user!.id,
           role: role,
         });
-
-      if (roleError) {
-        console.error(`❌ Role ${role} assignment failed:`, roleError);
-      }
     }
 
-    console.log('✅ User created successfully');
+    console.log('User created successfully');
 
     return new Response(JSON.stringify({
       success: true,
-      message: `Användare ${requestData.email} skapad framgångsrikt`,
+      message: `Användare ${email} skapad`,
       user_id: authUser.user!.id,
     }), {
       status: 200,
@@ -113,11 +80,11 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
   } catch (error: any) {
-    console.error("💥 Critical error in create-user:", error);
+    console.error("Create user error:", error);
     
     return new Response(
       JSON.stringify({ 
-        error: error?.message || "Ett fel uppstod vid skapandet av användare"
+        error: error?.message || "Ett fel uppstod"
       }),
       {
         status: 500,
