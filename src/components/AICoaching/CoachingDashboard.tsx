@@ -87,7 +87,25 @@ export function CoachingDashboard() {
 
   const startCoachingSession = handleStartSession;
   const endCoachingSession = handleEndSession;
-  const generateCoachingPlan = async () => setCoachingPlan({ title: "AI Plan", activities: [] });
+  const generateCoachingPlan = async () => setCoachingPlan({ 
+    title: "AI Plan", 
+    activities: [],
+    duration: 30,
+    focusAreas: ['Självvård', 'Kompetensutveckling', 'Målsättning'],
+    weeklyGoals: [
+      {
+        week: 1,
+        goals: ['Etablera morgonrutin', 'Påbörja reflektion'],
+        activities: []
+      }
+    ],
+    milestones: [
+      {
+        description: 'Första veckans genomförande',
+        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      }
+    ]
+  });
   const implementRecommendation = async (id: string) => setRecommendations(prev => prev.filter(r => r.id !== id));
   const scheduleFollowUp = async () => toast({ title: "Uppföljning schemalagd" });
 
