@@ -188,13 +188,13 @@ export const useStefanRoleBasedData = (targetUserId?: string) => {
       const clientHealthScores: Record<string, number> = {};
       for (const client of assignedClients) {
         // Get client's pillar progress and calculate health score
-        const clientMetrics = await getCentralizedDataForUser(client.client_id);
-        clientHealthScores[client.client_id] = calculateHealthScore(clientMetrics);
+        const clientMetrics = await getCentralizedDataForUser(client.id);
+        clientHealthScores[client.id] = calculateHealthScore(clientMetrics);
       }
 
       // Find clients needing attention
       const clientsNeedingAttention = assignedClients.filter(client => 
-        clientHealthScores[client.client_id] < 50
+        clientHealthScores[client.id] < 50
       );
 
       // Get coaching effectiveness from sessions
@@ -243,21 +243,21 @@ export const useStefanRoleBasedData = (targetUserId?: string) => {
         .order('recorded_at', { ascending: false })
         .limit(100);
 
-      const { data: userCount } = await supabase
+      const { count: totalUsers } = await supabase
         .from('profiles')
-        .select('id', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true });
 
-      const { data: activeUserCount } = await supabase
+      const { count: activeUsers } = await supabase
         .from('path_entries')
-        .select('user_id', { count: 'exact', head: true })
-        .gte('timestamp', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       const interventionStats = stefanInterventions.getInterventionStats();
 
       const adminData: StefanAdminData = {
         // System Overview
-        totalUsers: userCount?.count || 0,
-        activeUsers: activeUserCount?.count || 0,
+        totalUsers: totalUsers || 0,
+        activeUsers: activeUsers || 0,
         totalInterventions: interventionStats.total,
         systemHealthScore: calculateSystemHealth(systemMetrics || []),
         
@@ -315,7 +315,7 @@ export const useStefanRoleBasedData = (targetUserId?: string) => {
   const refreshData = useCallback(async () => {
     await Promise.all([
       centralizedData.refreshAllData(),
-      stefanInterventions.refreshInterventions?.(),
+      stefanInterventions.fetchInterventions?.(),
       stefanCoaching.checkProactiveInterventions()
     ]);
     await computeRoleBasedData();

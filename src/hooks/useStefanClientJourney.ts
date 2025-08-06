@@ -75,9 +75,9 @@ export const useStefanClientJourney = (targetUserId?: string) => {
     
     setLoading(true);
     try {
-      // Load todos from tasks table
+      // Load todos from ai_coaching_recommendations table 
       const { data: tasksData } = await supabase
-        .from('tasks')
+        .from('ai_coaching_recommendations')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -87,31 +87,31 @@ export const useStefanClientJourney = (targetUserId?: string) => {
         title: task.title,
         description: task.description || '',
         pillarType: task.category || 'general',
-        priority: task.priority || 'medium',
-        status: task.completed ? 'completed' : 'pending',
+        priority: (task.priority as 'high' | 'medium' | 'low') || 'medium',
+        status: task.status === 'completed' ? 'completed' : 'pending',
         dueDate: task.due_date,
         createdAt: task.created_at,
-        completedAt: task.completed_at,
-        createdBy: task.created_by === userId ? 'self' : 'coach'
+        completedAt: task.implementation_date,
+        createdBy: 'stefan'
       }));
 
-      // Load journal entries from path_entries
+      // Load journal entries from coaching_progress_entries
       const { data: journalData } = await supabase
-        .from('path_entries')
+        .from('coaching_progress_entries')
         .select('*')
         .eq('user_id', userId)
-        .eq('type', 'journal')
-        .order('timestamp', { ascending: false })
+        .eq('entry_type', 'reflection')
+        .order('created_at', { ascending: false })
         .limit(20);
 
       const mappedJournalEntries: JournalEntry[] = (journalData || []).map(entry => ({
         id: entry.id,
         content: entry.description || '',
-        mood: entry.metadata?.mood || 'neutral',
-        pillarsReflected: entry.metadata?.pillars_reflected || [],
-        insights: entry.metadata?.insights || [],
-        createdAt: entry.timestamp,
-        isPrivate: entry.metadata?.is_private || false
+        mood: (typeof entry.metadata === 'object' && entry.metadata ? (entry.metadata as any).mood : 'neutral') || 'neutral',
+        pillarsReflected: (typeof entry.metadata === 'object' && entry.metadata ? (entry.metadata as any).pillars_reflected : []) || [],
+        insights: (typeof entry.metadata === 'object' && entry.metadata ? (entry.metadata as any).insights : []) || [],
+        createdAt: entry.created_at,
+        isPrivate: (typeof entry.metadata === 'object' && entry.metadata ? (entry.metadata as any).is_private : false) || false
       }));
 
       setTodos(mappedTodos);
@@ -281,7 +281,7 @@ export const useStefanClientJourney = (targetUserId?: string) => {
 
     try {
       const { data, error } = await supabase
-        .from('tasks')
+        .from('ai_coaching_recommendations')
         .insert({
           user_id: userId,
           title: todo.title,
@@ -289,7 +289,11 @@ export const useStefanClientJourney = (targetUserId?: string) => {
           category: todo.pillarType,
           priority: todo.priority,
           due_date: todo.dueDate,
-          completed: false
+          status: 'pending',
+          recommendation_type: 'task',
+          reasoning: 'User-created task',
+          expected_outcome: todo.description,
+          difficulty: 'medium'
         })
         .select()
         .single();
@@ -326,10 +330,10 @@ export const useStefanClientJourney = (targetUserId?: string) => {
   const completeTodo = useCallback(async (todoId: string) => {
     try {
       const { error } = await supabase
-        .from('tasks')
+        .from('ai_coaching_recommendations')
         .update({ 
-          completed: true, 
-          completed_at: new Date().toISOString() 
+          status: 'completed',
+          implementation_date: new Date().toISOString() 
         })
         .eq('id', todoId);
 
@@ -361,10 +365,11 @@ export const useStefanClientJourney = (targetUserId?: string) => {
 
     try {
       const { data, error } = await supabase
-        .from('path_entries')
+        .from('coaching_progress_entries')
         .insert({
           user_id: userId,
-          type: 'journal',
+          entry_type: 'reflection',
+          title: 'Journal Entry',
           description: entry.content,
           metadata: {
             mood: entry.mood,
@@ -372,7 +377,7 @@ export const useStefanClientJourney = (targetUserId?: string) => {
             insights: entry.insights,
             is_private: entry.isPrivate
           },
-          timestamp: new Date().toISOString()
+          visible_to_user: true
         })
         .select()
         .single();
@@ -382,7 +387,7 @@ export const useStefanClientJourney = (targetUserId?: string) => {
       const newEntry: JournalEntry = {
         id: data.id,
         ...entry,
-        createdAt: data.timestamp
+        createdAt: data.created_at
       };
 
       setJournalEntries(prev => [newEntry, ...prev]);

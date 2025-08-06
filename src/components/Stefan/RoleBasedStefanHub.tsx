@@ -284,9 +284,9 @@ const ClientOverviewTab: React.FC<{ clientData: any; navigate: any }> = ({ clien
               <div key={pillar} className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="capitalize">{pillar.replace('_', ' ')}</span>
-                  <span>{Math.round(progress)}%</span>
+                  <span>{Math.round(Number(progress) || 0)}%</span>
                 </div>
-                <Progress value={progress} className="h-2" />
+                <Progress value={Number(progress) || 0} className="h-2" />
               </div>
             ))}
           </div>
