@@ -1655,9 +1655,12 @@ export type Database = {
           is_active: boolean
           last_message_at: string | null
           metadata: Json | null
+          model: string | null
           participant_ids: string[]
+          status: string | null
           title: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           conversation_type?: string
@@ -1668,9 +1671,12 @@ export type Database = {
           is_active?: boolean
           last_message_at?: string | null
           metadata?: Json | null
+          model?: string | null
           participant_ids: string[]
+          status?: string | null
           title?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           conversation_type?: string
@@ -1681,9 +1687,12 @@ export type Database = {
           is_active?: boolean
           last_message_at?: string | null
           metadata?: Json | null
+          model?: string | null
           participant_ids?: string[]
+          status?: string | null
           title?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2251,6 +2260,7 @@ export type Database = {
       }
       messages: {
         Row: {
+          ai_model: string | null
           attachments: Json | null
           content: string
           conversation_id: string
@@ -2259,9 +2269,12 @@ export type Database = {
           metadata: Json
           role: Database["public"]["Enums"]["message_role"]
           sender_id: string
+          tokens: number | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
+          ai_model?: string | null
           attachments?: Json | null
           content: string
           conversation_id: string
@@ -2270,9 +2283,12 @@ export type Database = {
           metadata?: Json
           role?: Database["public"]["Enums"]["message_role"]
           sender_id: string
+          tokens?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          ai_model?: string | null
           attachments?: Json | null
           content?: string
           conversation_id?: string
@@ -2281,7 +2297,9 @@ export type Database = {
           metadata?: Json
           role?: Database["public"]["Enums"]["message_role"]
           sender_id?: string
+          tokens?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -4704,12 +4722,20 @@ export type Database = {
         Returns: undefined
       }
       match_ai_memories: {
-        Args: {
-          p_user_id: string
-          p_query_embedding: string
-          p_match_count?: number
-          p_min_similarity?: number
-        }
+        Args:
+          | {
+              p_user_id: string
+              p_query_embedding: string
+              p_match_count?: number
+              p_min_similarity?: number
+            }
+          | {
+              p_user_id: string
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+              filter?: Json
+            }
         Returns: {
           id: string
           content: string
