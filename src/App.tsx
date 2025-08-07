@@ -14,6 +14,7 @@ import { MobileOptimizedLayout, useMobileViewport } from "@/components/ui/mobile
 import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation } from "@/components/ui/accessibility";
 import { errorTracker } from "@/utils/productionErrorTracking";
 import { AutoNotificationSystem } from "@/components/Notifications/AutoNotificationSystem";
+import { ProgressiveOnboarding } from "@/components/Onboarding/ProgressiveOnboarding";
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/error/ErrorBoundary";
 import { Dashboard } from "./pages/Dashboard";
@@ -176,6 +177,7 @@ const App = () => {
                 <EnhancedStefanContextProvider>
                   <AnalyticsProvider>
                     <AppRoutes />
+                    <ProgressiveOnboarding />
                     <AutoNotificationSystem />
                     <Toaster />
                     <Sonner />
