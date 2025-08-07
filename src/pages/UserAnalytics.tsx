@@ -27,6 +27,7 @@ import { assessmentDataService, UnifiedAssessmentData } from '@/services/Assessm
 import { supabase } from '@/integrations/supabase/client';
 import { AIActionablesPipelineStatus } from '@/components/AI/AIActionablesPipelineStatus';
 import { ActionablePriorityDashboard } from '@/components/ActionablePriorityDashboard';
+import { consolidateAssessmentSystems } from '@/utils/assessmentConsolidation';
 
 export default function UserAnalytics() {
   const { userId } = useParams();
@@ -57,15 +58,52 @@ export default function UserAnalytics() {
       
       // Försök ladda via AssessmentDataService först
       try {
-        const [assessments, healthCheck] = await Promise.all([
+        // KRITISK KONSOLIDERING: Ladda ALLA assessments oavsett AI-status
+        const [assessments, healthCheck, allRounds] = await Promise.all([
           assessmentDataService.getAssessments(targetUserId),
-          assessmentDataService.performHealthCheck(targetUserId)
+          assessmentDataService.performHealthCheck(targetUserId),
+          // EMERGENCY FALLBACK: Ladda alla assessment_rounds direkt
+          supabase
+            .from('assessment_rounds')
+            .select('*')
+            .eq('user_id', targetUserId)
+            .order('created_at', { ascending: false })
         ]);
 
         console.log(`📊 Universal service loaded: ${assessments.length} assessments`);
+        console.log(`🔄 Direct rounds loaded: ${allRounds.data?.length || 0} rounds`);
         console.log(`🏥 Health status: ${healthCheck.status} (${healthCheck.issues.length} issues)`);
 
-        setAssessmentData(assessments);
+        // KONSOLIDERA: Merge assessments från service + direkta rounds
+        const consolidatedAssessments = [...assessments];
+        
+        // Lägg till assessment_rounds som saknar AI-analys men har data
+        (allRounds.data || []).forEach(round => {
+          const exists = assessments.find(a => a.id === round.id);
+          if (!exists && round.answers && Object.keys(round.answers).length > 0) {
+            const scores = round.scores as any || {};
+            const calculatedScore = scores?.overall || scores?.[round.pillar_type] || 0;
+            
+            consolidatedAssessments.push({
+              id: round.id,
+              user_id: round.user_id,
+              pillar_type: round.pillar_type,
+              assessment_data: round.answers || {},
+              ai_analysis: round.ai_analysis || `**BRAND ASSESSMENT GENOMFÖRD**\n\nPoäng: ${calculatedScore}\n\nAssessment genomförd ${new Date(round.created_at).toLocaleDateString('sv-SE')} men AI-analys väntar på regenerering.\n\n*Systemet konsoliderar nu alla assessments oavsett AI-status.*`,
+              calculated_score: typeof calculatedScore === 'number' ? calculatedScore : parseFloat(calculatedScore) || 0,
+              created_at: round.created_at,
+              updated_at: round.updated_at,
+              source: 'assessment_rounds' as const,
+              metadata: {
+                assessment_round_id: round.id,
+                consolidated_entry: true,
+                needs_ai_regeneration: !round.ai_analysis
+              }
+            });
+          }
+        });
+
+        setAssessmentData(consolidatedAssessments);
         setHealthStatus(healthCheck);
 
         // Trigga automatisk migration om det behövs
@@ -437,6 +475,51 @@ export default function UserAnalytics() {
               </CardContent>
             </Card>
           )}
+
+          {/* Konsoliderings Knapp */}
+          <Card className="border-orange-200 bg-orange-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Assessment Konsolidering
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Regenerera AI-analyser och actionables för assessments som missade pipeline.
+              </p>
+              <Button 
+                onClick={async () => {
+                  if (!targetUserId) return;
+                  
+                  toast({
+                    title: "🔄 Startar konsolidering...",
+                    description: "Regenererar AI-analyser för ofullständiga assessments",
+                  });
+                  
+                  const result = await consolidateAssessmentSystems(targetUserId);
+                  
+                  if (result.success) {
+                    toast({
+                      title: "✅ Konsolidering klar!",
+                      description: `${result.ai_analyses_generated} AI-analyser + ${result.actionables_created} actionables genererade`,
+                    });
+                    loadUserAnalytics(); // Refresh data
+                  } else {
+                    toast({
+                      title: "⚠️ Konsolidering delvis misslyckades",
+                      description: `${result.errors.length} fel inträffade. Kontrollera konsolen.`,
+                      variant: "destructive"
+                    });
+                  }
+                }}
+                className="w-full"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Kör Assessment Konsolidering
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* AI-till-Actionables Pipeline Status */}
           <AIActionablesPipelineStatus userId={targetUserId || ''} />
