@@ -48,6 +48,7 @@ import { CoachDashboardPage } from "./pages/CoachDashboard";
 import UserAnalytics from "./pages/UserAnalytics";
 import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
+import CoachMessagingAdmin from "./pages/Admin/CoachMessagingAdmin";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
 import { IntelligenceHubPage } from "./pages/IntelligenceHub";
 import { ClientIntelligencePage } from "./pages/ClientIntelligence";
@@ -153,7 +154,8 @@ const AppRoutes = () => {
                  <Route path={NAVIGATION_ROUTES.ANALYTICS} element={<AdminAnalyticsPage />} />
                  <Route path={NAVIGATION_ROUTES.DATA_COLLECTION} element={<DataCollectionPage />} />
                    <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-                   <Route path="/stefan/*" element={<StefanAICentralHub />} />
+                    <Route path="/stefan/*" element={<StefanAICentralHub />} />
+                    <Route path="/admin/coach-messaging" element={<CoachMessagingAdmin />} />
                    <Route path="/advanced-analytics" element={<AdvancedAnalyticsDashboard />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>

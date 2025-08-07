@@ -24,6 +24,7 @@ export const StefanAnalyticsWidget: React.FC = () => {
   
   const stats = getInterventionStats();
 
+  // Ta bort mockdata - använd bara riktiga interventions
   const recentInterventions = interventions
     .slice(0, 5)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

@@ -8,7 +8,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { useProactiveMessaging } from '@/hooks/useProactiveMessaging';
 import { useStefanInterventions } from '@/hooks/useStefanInterventions';
-import { useRoleCache } from '@/hooks/useRoleCache';
+import { useCoachMessagingPermissions } from '@/hooks/useCoachMessagingPermissions';
 import { ConversationPanel } from './ConversationPanel';
 import { StefanAnalyticsWidget } from './StefanAnalyticsWidget';
 import { QuickActionCenter } from './QuickActionCenter';
@@ -35,9 +35,10 @@ import {
 
 export const ImprovedMessagingHub: React.FC = () => {
   const { user } = useAuth();
-  const { conversations, totalUnreadCount, getOrCreateDirectConversation } = useMessagingV2();
+  const { conversations, totalUnreadCount, getOrCreateDirectConversation, fetchConversations } = useMessagingV2();
   const { getOrCreateStefanConversation } = useProactiveMessaging();
   const { interventions, getInterventionStats } = useStefanInterventions();
+  const { getMessagingEnabledCoaches } = useCoachMessagingPermissions();
   
   const [activeTab, setActiveTab] = useState('conversations');
   const [isInitialized, setIsInitialized] = useState(false);
@@ -51,21 +52,28 @@ export const ImprovedMessagingHub: React.FC = () => {
         // Auto-create Stefan conversation if none exists
         if (conversations.length === 0) {
           await getOrCreateStefanConversation();
+          // Refresh conversations after creating Stefan conversation
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await fetchConversations();
         }
       }
     };
     
     initializeMessaging();
-  }, [user, conversations.length, getOrCreateStefanConversation, isInitialized]);
+  }, [user, conversations.length, getOrCreateStefanConversation, fetchConversations, isInitialized]);
 
   const stefanStats = getInterventionStats();
   const hasActiveConversations = conversations.length > 0;
   const stefanConversation = conversations.find(conv => 
     conv.participant_ids?.includes('00000000-0000-0000-0000-000000000001')
   );
+  const messagingEnabledCoaches = getMessagingEnabledCoaches();
 
   const handleStartConversation = async () => {
     await getOrCreateStefanConversation();
+    // Refresh conversations and switch to conversations tab
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await fetchConversations();
     setActiveTab('conversations');
   };
 

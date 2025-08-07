@@ -185,6 +185,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin"]
       },
       {
+        title: "Coach Messaging",
+        url: "/admin/coach-messaging",
+        icon: MessageSquare,
+        roles: ["superadmin", "admin"]
+      },
+      {
         title: "Mobil",
         url: NAVIGATION_ROUTES.MOBILE,
         icon: Smartphone,
