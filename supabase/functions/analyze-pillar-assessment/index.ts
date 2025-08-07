@@ -119,12 +119,98 @@ Ge en konkret handlingsplan i 2-3 steg. Håll tonen varm, konkret och profession
 
     console.log(`AI analysis completed using ${aiResponse.model.toUpperCase()}`);
 
+    // UNIVERSELL SPARNING: Spara i båda assessment_rounds och path_entries för kompatibilitet
+    try {
+      // 1. Spara i assessment_rounds (primär källa)
+      const { data: assessmentRound, error: roundError } = await supabase
+        .from('assessment_rounds')
+        .insert({
+          user_id: userData.user_id,
+          created_by: userData.user_id,
+          pillar_type: assessmentData.pillar_type,
+          answers: {
+            ...assessmentData.scores,
+            analysis_metadata: {
+              ai_generated: true,
+              model_used: aiResponse.model,
+              generated_at: new Date().toISOString()
+            }
+          },
+          scores: {
+            [assessmentData.pillar_type]: Object.values(assessmentData.scores).reduce((a, b) => a + b, 0) / Object.values(assessmentData.scores).length,
+            overall: Object.values(assessmentData.scores).reduce((a, b) => a + b, 0) / Object.values(assessmentData.scores).length,
+            ...assessmentData.scores
+          },
+          comments: assessmentData.comments || 'AI-genererad analys via analyze-pillar-assessment',
+          ai_analysis: aiResponse.content,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+
+      if (roundError) {
+        console.error('Error saving to assessment_rounds:', roundError);
+      } else {
+        console.log(`✅ Saved to assessment_rounds with ID: ${assessmentRound.id}`);
+      }
+
+      // 2. Spara i path_entries för backward compatibility
+      const { error: entryError } = await supabase
+        .from('path_entries')
+        .insert({
+          user_id: userData.user_id,
+          created_by: userData.user_id,
+          timestamp: new Date().toISOString(),
+          type: 'recommendation',
+          title: `AI-analys: ${getPillarDisplayName(assessmentData.pillar_type)}`,
+          details: aiResponse.content,
+          status: 'completed',
+          ai_generated: true,
+          visible_to_client: true,
+          metadata: {
+            pillar_type: assessmentData.pillar_type,
+            assessment_score: Object.values(assessmentData.scores).reduce((a, b) => a + b, 0) / Object.values(assessmentData.scores).length,
+            assessment_data: assessmentData.scores,
+            assessment_round_id: assessmentRound?.id,
+            ai_model_used: aiResponse.model,
+            universal_service: true,
+            created_via: 'analyze-pillar-assessment'
+          }
+        });
+
+      if (entryError) {
+        console.warn('Warning: Failed to save to path_entries (non-critical):', entryError);
+      } else {
+        console.log('✅ Saved to path_entries for compatibility');
+      }
+
+    } catch (saveError) {
+      console.error('Error saving analysis results:', saveError);
+      // Fortsätt även om sparning misslyckas - returnera fortfarande analysen
+    }
+
+    // Hjälpfunktion för pillar-namn
+    function getPillarDisplayName(pillarType: string): string {
+      const displayNames: Record<string, string> = {
+        'talent': 'Talang',
+        'skills': 'Kompetenser', 
+        'brand': 'Varumärke',
+        'economy': 'Ekonomi',
+        'self_care': 'Självomvårdnad',
+        'open_track': 'Öppna spåret'
+      };
+      return displayNames[pillarType] || pillarType;
+    }
+
     return new Response(JSON.stringify({
       analysis: aiResponse.content,
       pillar_type: assessmentData.pillar_type,
       user_id: userData.user_id,
       client_id: userData.client_id, // Include both for compatibility
-      ai_model_used: aiResponse.model
+      ai_model_used: aiResponse.model,
+      saved_to_assessment_rounds: true,
+      saved_to_path_entries: true
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
