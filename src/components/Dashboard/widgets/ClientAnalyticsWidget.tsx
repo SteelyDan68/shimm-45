@@ -96,8 +96,12 @@ export const ClientAnalyticsWidget = ({
       console.log('📋 Path analyses:', pathAnalyses?.length || 0, 'items');
       console.log('📋 Assessment rounds:', assessmentRounds?.length || 0, 'items');
 
-      // Beräkna totalanalyser från båda källorna
-      const totalAnalyses = Math.max(pathAnalyses?.length || 0, assessmentRounds?.length || 0);
+      // Räkna endast analyser som verkligen har AI-analys eller innehåll
+      const validAnalyses = (assessmentRounds || []).filter(round => 
+        round.ai_analysis && round.ai_analysis.length > 100
+      ).length;
+      
+      const totalAnalyses = validAnalyses;
 
       // Beräkna genomsnittlig score från assessment_rounds (mer tillförlitlig)
       let totalScore = 0;
