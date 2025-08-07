@@ -3263,6 +3263,57 @@ export type Database = {
         }
         Relationships: []
       }
+      security_alerts: {
+        Row: {
+          alert_type: string
+          auto_resolved: boolean | null
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          target_user_id: string | null
+          title: string
+          triggered_at: string
+          triggered_by_user_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          auto_resolved?: boolean | null
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          target_user_id?: string | null
+          title: string
+          triggered_at?: string
+          triggered_by_user_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          auto_resolved?: boolean | null
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          target_user_id?: string | null
+          title?: string
+          triggered_at?: string
+          triggered_by_user_id?: string | null
+        }
+        Relationships: []
+      }
       stefan_ai_config: {
         Row: {
           confidence_threshold: number | null
@@ -4371,6 +4422,10 @@ export type Database = {
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_security_dashboard_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       get_user_attribute: {
         Args: { _user_id: string; _attribute_key: string }
