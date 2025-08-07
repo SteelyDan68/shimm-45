@@ -205,7 +205,7 @@ export const useOrganizations = () => {
     }
   }, [isAdmin, fetchOrganizations, fetchMembers, toast]);
 
-  const addMember = useCallback(async (organizationId: string, userId: string, role: OrganizationMember['role'] = 'client') => {
+  const addMember = useCallback(async (organizationId: string, userId: string, role: OrganizationMember['role'] = 'user') => {
     if (!isAdmin()) {
       toast({
         title: "Ingen behörighet",

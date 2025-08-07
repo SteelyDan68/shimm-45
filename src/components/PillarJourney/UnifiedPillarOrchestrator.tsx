@@ -170,7 +170,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
             <div className="text-right">
               <Badge variant="outline" className="bg-white">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                {completedPillars.length}/6 Pelare klara
+                {completedPillars.length}/6 Pillars klara
               </Badge>
             </div>
           </div>

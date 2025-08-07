@@ -14,7 +14,6 @@ import { MobileOptimizedLayout, useMobileViewport } from "@/components/ui/mobile
 import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation } from "@/components/ui/accessibility";
 import { errorTracker } from "@/utils/productionErrorTracking";
 import { AutoNotificationSystem } from "@/components/Notifications/AutoNotificationSystem";
-import { ProgressiveOnboarding } from "@/components/Onboarding/ProgressiveOnboarding";
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/error/ErrorBoundary";
 import { Dashboard } from "./pages/Dashboard";
@@ -48,7 +47,6 @@ import { CoachDashboardPage } from "./pages/CoachDashboard";
 import UserAnalytics from "./pages/UserAnalytics";
 import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
-import CoachMessagingAdmin from "./pages/Admin/CoachMessagingAdmin";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
 import { IntelligenceHubPage } from "./pages/IntelligenceHub";
 import { ClientIntelligencePage } from "./pages/ClientIntelligence";
@@ -57,7 +55,6 @@ import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChat";
 import { StefanAICentralHub } from "./components/Stefan/StefanAICentralHub";
 import { AIInsights } from "./pages/AIInsights";
-import AdvancedAnalyticsDashboard from "./pages/AdvancedAnalyticsDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -153,10 +150,8 @@ const AppRoutes = () => {
                  <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
                  <Route path={NAVIGATION_ROUTES.ANALYTICS} element={<AdminAnalyticsPage />} />
                  <Route path={NAVIGATION_ROUTES.DATA_COLLECTION} element={<DataCollectionPage />} />
-                   <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-                    <Route path="/stefan/*" element={<StefanAICentralHub />} />
-                    <Route path="/admin/coach-messaging" element={<CoachMessagingAdmin />} />
-                   <Route path="/advanced-analytics" element={<AdvancedAnalyticsDashboard />} />
+                  <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
+                  <Route path="/stefan/*" element={<StefanAICentralHub />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>
@@ -181,7 +176,6 @@ const App = () => {
                 <EnhancedStefanContextProvider>
                   <AnalyticsProvider>
                     <AppRoutes />
-                    <ProgressiveOnboarding />
                     <AutoNotificationSystem />
                     <Toaster />
                     <Sonner />

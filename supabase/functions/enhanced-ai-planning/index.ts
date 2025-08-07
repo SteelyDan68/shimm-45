@@ -3,145 +3,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { aiService } from '../_shared/ai-service.ts';
 
-// Import våra nya dynamiska coachingmodeller (simulera imports för edge function)
-interface CoachingModel {
-  id: string;
-  name: string;
-  approach: string;
-  triggers: string[];
-}
-
-// Stefan's förbättrade promptsystem
-class EnhancedStefanPrompts {
-  static buildPersonalizedActionablePrompt(
-    assessmentData: any,
-    preferences: any,
-    context: any
-  ) {
-    // Välj coachingmodell baserat på input
-    const selectedModel = this.selectCoachingModel(assessmentData, context);
-    
-    const systemPrompt = `🎭 DU ÄR STEFAN - EXPERT AI-COACH MED DJUP MÄNSKLIG FÖRSTÅELSE
-
-STEFANS PERSONLIGHET & KÄRNIDENTITET:
-• Varm, empatisk men tydlig approach
-• Praktisk visdom kombinerat med djup förståelse för mänsklig psykologi
-• Hög emotionell intelligens som läser mellan raderna
-• Använder personlig ton och bryr sig verkligen om varje klients resa
-
-STEFANS GRUNDLÄGGANDE PRINCIPER:
-• Varje människa har unik potential som kan utvecklas
-• Små, konsekventa steg skapar bestående förändring (neuroplasticitet)
-• Självkännedom är grunden för all personlig utveckling
-• Balans är nyckeln till hållbar tillväxt
-• Motstånd är ofta rädsla förklädd - bemöt det med empati
-• Fira framsteg, oavsett hur små de är
-• Autenticitet över perfektion alltid
-
-🎯 VALD COACHINGMODELL: ${selectedModel.name}
-APPROACH: ${selectedModel.approach}
-
-STEFANS ACTIONABLE-FILOSOFI (REVOLUTIONÄR FÖRÄNDRING):
-• FÄRRE men KRAFTFULLARE uppgifter (kvalitet över kvantitet)
-• PERSONLIGT anpassade till individens unika situation
-• EMPATISK, motiverande ton som inspirerar till handling
-• KONKRETA steg som känns naturliga och genomförbara
-• BYGGER på personens styrkor och befintliga resurser
-
-ACTIONABLE-SKAPANDE PRINCIPER:
-1. "En välvald uppgift är värd mer än tio generiska"
-2. "Möt personen där hen är, inte där du tror hen borde vara"
-3. "Varje uppgift ska kännas som nästa naturliga steg i resan"
-4. "Inkludera alltid VARFÖR - motivation är kraftfullare än disciplin"
-5. "Bygg in små segrar för att skapa momentum och självförtroende"
-
-STEFANS KVALITETSKRAV:
-✓ Personlig, varm ton (aldrig robotisk eller generisk)
-✓ Konkreta, mätbara steg som känns relevanta
-✓ Realistisk tidsestimering baserad på personens situation
-✓ Tydlig koppling till personens större mål och värderingar
-✓ Empati för potentiella hinder och utmaningar
-✓ Inspirerande språk som motiverar till handling`;
-
-    const userPrompt = `STEFANS UPPDRAG: Skapa PERSONLIGA, KRAFTFULLA actionables
-
-PERSONS UNIKA KONTEXT:
-${JSON.stringify(context, null, 2)}
-
-ASSESSMENT-DATA:
-${JSON.stringify(assessmentData, null, 2)}
-
-ANVÄNDARPREFERENSER:
-${JSON.stringify(preferences, null, 2)}
-
-STEFANS MISSION:
-Skapa ${Math.min(preferences.tasks_per_week * 2, 8)} djupt personliga, kraftfulla actionables som:
-
-1. Är SPECIFIKT anpassade till denna persons situation, utmaningar och mål
-2. Använder STEFANS EMPATISKA, inspirerande språk som känns personligt 
-3. Bygger GRADVIS komplexitet baserat på neuroplasticitetsprinciper
-4. Inkluderar VARFÖR varje uppgift är viktig för just denna person
-5. Ger KONKRETA, genomförbara steg som känns naturliga och relevanta
-6. Skapar MOMENTUM genom strategiskt ordnade uppgifter
-7. Bygger på personens STYRKOR och befintliga resurser
-
-KRITISKA KVALITETSKRAV:
-• Mindre är mer - varje uppgift ska vara genomtänkt och kraftfull
-• Stefans personliga, varma ton som känns som rådgivning från en erfaren coach
-• Konkret applicerbarhet på personens specifika livssituation
-• Motivation och inspiration integrerat i varje uppgift
-• Bygg momentum genom smart progression
-
-VIKTIGT: Stefan skapar inte generiska uppgifter. Varje actionable ska kännas som den är skapad specifikt för denna person baserat på deras unika resa, utmaningar och potential.`;
-
-    return { systemPrompt, userPrompt };
-  }
-
-  private static selectCoachingModel(assessmentData: any, context: any) {
-    // Förenklad modellselektor för edge function
-    const input = JSON.stringify(assessmentData).toLowerCase() + ' ' + JSON.stringify(context).toLowerCase();
-    
-    if (input.includes('vana') || input.includes('habit') || input.includes('sluta') || input.includes('routine')) {
-      return {
-        id: 'neuroplastic',
-        name: 'Neuroplastisk Metod',
-        approach: 'Fokuserar på hjärnans förmåga att förändras genom repetition och nya vanor'
-      };
-    }
-    
-    if (input.includes('balans') || input.includes('balance') || input.includes('liv') || input.includes('områden')) {
-      return {
-        id: 'wheel_of_life', 
-        name: 'Livets Hjul',
-        approach: 'Holistisk approach för att skapa balans mellan olika livsområden'
-      };
-    }
-    
-    if (input.includes('styrka') || input.includes('talang') || input.includes('begåvning')) {
-      return {
-        id: 'strengths_based',
-        name: 'Styrkebaserad Coaching', 
-        approach: 'Bygger på och utvecklar naturliga talanger och styrkor'
-      };
-    }
-    
-    if (input.includes('tankar') || input.includes('känslor') || input.includes('oro') || input.includes('stress')) {
-      return {
-        id: 'cognitive_behavioral',
-        name: 'Kognitiv Beteendeterapi',
-        approach: 'Fokuserar på sambandet mellan tankar, känslor och beteenden'
-      };
-    }
-    
-    // Default - Adaptiv AI coaching
-    return {
-      id: 'adaptive_ai',
-      name: 'Stefans Adaptiva Coaching',
-      approach: 'Stefan kombinerar flera coachingmetoder baserat på personens specifika behov'
-    };
-  }
-}
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -230,27 +91,49 @@ serve(async (req) => {
     const intensityParams = getIntensityParams(preferences.intensity);
     const totalTasks = intensityParams.tasks_per_week * preferences.duration;
 
-    // 🎯 STEFAN'S ENHANCED PERSONALIZED PROMPT SYSTEM
-    const enhancedContext = {
-      pillarType: context_data?.pillar_focus,
-      userHistory: latestAssessments?.map(a => a.ai_analysis?.substring(0, 100)) || [],
-      currentChallenges: context_data?.challenges || [],
-      userGoals: context_data?.goals || [],
-      assessmentData: assessment_data || context_data
-    };
+    // AI prompt for enhanced actionable generation
+    const systemPrompt = `Du är Stefan, en AI-coach som skapar SMART actionables baserat på neuroplasticitet och användarens kapacitet.
 
-    // Använd Stefan's förbättrade prompt-system
-    const { systemPrompt, userPrompt } = EnhancedStefanPrompts.buildPersonalizedActionablePrompt(
-      assessment_data || {},
-      {
-        ...preferences,
-        tasks_per_week: intensityParams.tasks_per_week,
-        min_duration: intensityParams.min_duration,
-        max_duration: intensityParams.max_duration,
-        total_tasks: Math.min(totalTasks, 8) // Färre men kraftfullare uppgifter
-      },
-      enhancedContext
-    );
+NEUROPLASTISKA PRINCIPER:
+- Progression: Börja enkelt, öka gradvis komplexitet
+- Repetition: Konsistenta små steg skapar varor
+- Variation: Undvik tristess genom olika typer av aktiviteter
+- Reward: Inkludera positiv förstärkning och belöning
+
+ANVÄNDARENS PREFERENSER:
+- Intensitet: ${preferences.intensity} (${intensityParams.tasks_per_week} uppgifter/vecka)
+- Tidsram: ${preferences.duration} veckor
+- Frekvens: ${preferences.frequency}
+- Tidsspann per uppgift: ${intensityParams.min_duration}-${intensityParams.max_duration} minuter`;
+
+    const userPrompt = `Skapa ${totalTasks} ACTIONABLE UPPGIFTER fördelade över ${preferences.duration} veckor.
+
+ANVÄNDARKONTEXT:
+${latestAssessments?.map(a => `- ${a.pillar_type}: ${a.ai_analysis?.substring(0, 200)}...`).join('\n') || 'Ingen assessmentdata tillgänglig'}
+
+RIKTLINJER FÖR UPPGIFTER:
+1. Varje uppgift ska vara KONKRET och MÄTBAR
+2. Tid: ${intensityParams.min_duration}-${intensityParams.max_duration} minuter
+3. Gradvis progression från vecka 1 till ${preferences.duration}
+4. Balansera alla utvecklingsområden
+5. Inkludera både reflektion och aktion
+6. Anpassa till ${preferences.intensity} intensitetsnivå
+
+Returnera ENDAST giltig JSON-array:
+[
+  {
+    "title": "Kortfattad, actionabel titel",
+    "description": "Detaljerad beskrivning av vad användaren ska göra steg för steg",
+    "event_date": "2025-01-07T09:00:00Z",
+    "pillar": "self_care",
+    "category": "daily_habit",
+    "estimated_minutes": 15,
+    "priority": "medium",
+    "difficulty": "easy"
+  }
+]
+
+VIKTIGT: Fördela uppgifterna jämnt över ${preferences.duration} veckor!`;
 
     const availability = await aiService.checkAvailability();
     if (!availability.openai && !availability.gemini) {

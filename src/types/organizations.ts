@@ -19,7 +19,7 @@ export interface OrganizationMember {
   id: string;
   organization_id?: string | null;
   user_id?: string | null;
-  role?: 'superadmin' | 'admin' | 'client' | 'manager' | 'editor' | 'organization' | null;
+  role?: 'superadmin' | 'admin' | 'client' | 'user' | 'manager' | 'editor' | 'organization' | null;
   permissions?: any;
   invited_by?: string | null;
   joined_at?: string | null;

@@ -154,7 +154,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* Pillar Progress */}
       <ResponsiveChart
-        title="Sex Pelare - Utveckling"
+        title="Fem Pelare - Utveckling"
         type="progress"
         data={analyticsData.pillarsProgress.map((pillar) => ({
           label: pillar.pillarKey.replace('_', ' '),

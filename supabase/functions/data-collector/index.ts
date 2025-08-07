@@ -1,111 +1,183 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
-Deno.serve(async (req) => {
+interface DataCollectionRequest {
+  jobId: string;
+  timestamp: string;
+  force_refresh?: boolean;
+}
+
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const requestBody = await req.json();
-    const { client_id } = requestBody;
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const { jobId, timestamp, force_refresh }: DataCollectionRequest = await req.json()
     
-    console.log(`🚀 Starting data collection for client: ${client_id}`);
-    
-    if (!client_id) {
-      throw new Error('Client ID is required');
+    console.log(`🔄 Starting data collection job: ${jobId} at ${timestamp}`)
+
+    // Get job configuration
+    let jobConfig: any = {};
+    switch (jobId) {
+      case '1':
+        jobConfig = {
+          name: 'Daily User Analytics Sync',
+          tables: ['analytics_events', 'profiles'],
+          type: 'analytics'
+        };
+        break;
+      case '2':
+        jobConfig = {
+          name: 'Assessment Backup',
+          tables: ['assessment_rounds', 'assessment_states'],
+          type: 'backup'
+        };
+        break;
+      case '3':
+        jobConfig = {
+          name: 'Real-time Event Processing',
+          tables: ['analytics_events'],
+          type: 'realtime'
+        };
+        break;
+      default:
+        throw new Error(`Unknown job ID: ${jobId}`);
     }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    let totalRecords = 0;
+    let processedRecords = 0;
+    const results = [];
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', client_id)
-      .single();
+    // Process each table in the job
+    for (const table of jobConfig.tables) {
+      console.log(`📊 Processing table: ${table}`)
+      
+      try {
+        // Get record count
+        const { count, error: countError } = await supabaseClient
+          .from(table)
+          .select('*', { count: 'exact', head: true })
 
-    if (profileError || !profile) {
-      throw new Error(`Profile not found: ${profileError?.message}`);
-    }
+        if (countError) throw countError;
+        
+        totalRecords += count || 0;
 
-    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-    
-    // Mock data collection for now
-    const mockNewsData = {
-      title: `Nyhetsartikel om ${fullName}`,
-      snippet: 'Detta är en simulerad nyhetsartikel för demonstration.',
-      link: 'https://example.com/news',
-      displayLink: 'example.com',
-      collected_at: new Date().toISOString(),
-      search_query: fullName
-    };
+        // Get actual data for processing
+        const { data, error } = await supabaseClient
+          .from(table)
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1000); // Process in batches
 
-    const mockSocialData = {
-      platform: 'instagram',
-      handle: profile.instagram_handle || 'exempel',
-      metrics: {
-        followers: Math.floor(Math.random() * 10000) + 1000,
-        following: Math.floor(Math.random() * 1000) + 100,
-        posts: Math.floor(Math.random() * 500) + 50,
-        engagement_rate: Math.random() * 10 + 1
-      },
-      collected_at: new Date().toISOString(),
-      data_source: 'api'
-    };
+        if (error) throw error;
 
-    // Store in database
-    await supabase.from('user_data_cache').insert([
-      {
-        user_id: client_id,
-        data_type: 'news',
-        data: mockNewsData,
-        source: 'mock_api'
-      },
-      {
-        user_id: client_id,
-        data_type: 'social_metrics',
-        data: mockSocialData,
-        source: 'mock_api'
+        processedRecords += data?.length || 0;
+
+        // Process the data based on job type
+        if (jobConfig.type === 'analytics') {
+          // Aggregate analytics data
+          const today = new Date().toISOString().split('T')[0];
+          
+          if (table === 'analytics_events' && data) {
+            // Aggregate events by type
+            const eventCounts = data.reduce((acc: any, event: any) => {
+              acc[event.event] = (acc[event.event] || 0) + 1;
+              return acc;
+            }, {});
+
+            // Store aggregated data
+            for (const [eventType, count] of Object.entries(eventCounts)) {
+              await supabaseClient
+                .from('analytics_aggregations')
+                .upsert({
+                  date: today,
+                  event_type: eventType,
+                  event_count: count,
+                  user_count: data.filter((e: any) => e.event === eventType && e.user_id).length
+                }, {
+                  onConflict: 'date,event_type'
+                });
+            }
+          }
+        }
+
+        results.push({
+          table,
+          records: data?.length || 0,
+          status: 'success'
+        });
+
+        console.log(`✅ Processed ${data?.length || 0} records from ${table}`);
+
+      } catch (tableError) {
+        console.error(`❌ Error processing table ${table}:`, tableError);
+        results.push({
+          table,
+          records: 0,
+          status: 'error',
+          error: tableError.message
+        });
       }
-    ]);
+    }
 
-    console.log(`✅ Data collection completed for ${fullName}`);
+    // Log the job execution
+    await supabaseClient
+      .from('admin_audit_log')
+      .insert({
+        action: 'data_collection_job',
+        details: {
+          job_id: jobId,
+          job_name: jobConfig.name,
+          total_records: totalRecords,
+          processed_records: processedRecords,
+          results,
+          timestamp,
+          force_refresh
+        }
+      });
 
-    return new Response(JSON.stringify({
-      success: true,
-      result: {
-        client_id,
-        collected_data: {
-          news: [mockNewsData],
-          social_metrics: [mockSocialData],
-          web_scraping: [],
-          ai_analysis: []
-        },
-        total_data_points: 2,
+    console.log(`🎯 Data collection job ${jobId} completed. Processed ${processedRecords}/${totalRecords} records`);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        jobId,
+        jobName: jobConfig.name,
+        totalRecords,
+        processedRecords,
+        results,
         timestamp: new Date().toISOString()
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
       }
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    )
 
-  } catch (error: any) {
-    console.error('❌ Data collection error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+  } catch (error) {
+    console.error('❌ Data collection failed:', error)
+    
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
   }
-});
+})

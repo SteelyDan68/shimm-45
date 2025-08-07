@@ -75,7 +75,6 @@ export const NAVIGATION_ROUTES = {
   COLLABORATION: "/collaboration",
   AI_COACHING: "/ai-coaching",
   MOBILE: "/mobile",
-  ADVANCED_ANALYTICS: "/advanced-analytics",
 } as const;
 
 export const MAIN_NAVIGATION: NavigationGroup[] = [
@@ -106,12 +105,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         exact: true
       },
       // CLIENT NAVIGATION
-      {
-        title: "Sex Pelare",
-        url: NAVIGATION_ROUTES.SIX_PILLARS,
-        icon: TrendingUp,
-        roles: ["client"]
-      },
       {
         title: "Min Utvecklingsanalys", 
         url: "/user-analytics", 
@@ -176,18 +169,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Data Collection",
         url: NAVIGATION_ROUTES.DATA_COLLECTION,
         icon: Database,
-        roles: ["superadmin", "admin"]
-      },
-      {
-        title: "Advanced Analytics",
-        url: "/advanced-analytics",
-        icon: Activity,
-        roles: ["superadmin", "admin"]
-      },
-      {
-        title: "Coach Messaging",
-        url: "/admin/coach-messaging",
-        icon: MessageSquare,
         roles: ["superadmin", "admin"]
       },
       {
@@ -262,13 +243,6 @@ export const QUICK_ACTIONS = {
       icon: Brain,
       url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
       variant: "outline" as const
-    },
-    {
-      title: "Advanced Analytics",
-      description: "Avancerad dataanalys",
-      icon: Activity,
-      url: NAVIGATION_ROUTES.ADVANCED_ANALYTICS,
-      variant: "outline" as const
     }
   ],
   admin: [
@@ -291,13 +265,6 @@ export const QUICK_ACTIONS = {
       description: "Användaranalys och insikter",
       icon: Brain,
       url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
-      variant: "outline" as const
-    },
-    {
-      title: "Advanced Analytics",
-      description: "Avancerad dataanalys",
-      icon: Activity,
-      url: NAVIGATION_ROUTES.ADVANCED_ANALYTICS,
       variant: "outline" as const
     }
   ],
@@ -326,8 +293,8 @@ export const QUICK_ACTIONS = {
   ],
   client: [
     {
-      title: "Sex Pelare",
-      description: "Starta din utvecklingsresa med alla sex pelare",
+      title: "Six Pillars",
+      description: "Starta din utvecklingsresa",
       icon: TrendingUp,
       url: NAVIGATION_ROUTES.SIX_PILLARS,
       variant: "default" as const

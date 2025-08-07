@@ -58,7 +58,7 @@ export const useUsers = () => {
       const usersWithRoles = profiles?.map(profile => {
         const userRoleData = userRoles?.filter(ur => ur.user_id === profile.id) || [];
         const roles = userRoleData.map(ur => ur.role);
-        const primaryRole = roles.length > 0 ? roles[0] : 'client';
+        const primaryRole = roles.length > 0 ? roles[0] : 'user';
 
         return {
           id: profile.id,

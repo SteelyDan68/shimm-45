@@ -82,7 +82,7 @@ export const useRoleBasedPillarAccess = (targetUserId?: string): RoleBasedPillar
     }
 
     return {
-      userRole: 'client',
+      userRole: 'user',
       accessLevel: 'view' as AccessLevel,
       contextInfo: 'Grundanvändare'
     };

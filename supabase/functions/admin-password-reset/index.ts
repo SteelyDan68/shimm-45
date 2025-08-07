@@ -63,29 +63,17 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Either newPassword or sendResetEmail must be provided');
     }
 
-    // Validate admin permissions using our enhanced database function
+    // Validate admin permissions using our database function
     const { data: validationResult, error: validationError } = await supabaseClient
       .rpc('validate_admin_action', {
-        _user_id: adminUser.id,
-        _action: sendResetEmail ? 'password_reset_email' : 'password_reset_direct'
+        _admin_id: adminUser.id,
+        _action_type: sendResetEmail ? 'password_reset_email' : 'password_reset_direct',
+        _target_user_id: targetUserId
       });
 
-    if (validationError || !validationResult?.is_admin) {
-      console.error('🚨 SECURITY: Admin validation failed:', {
-        adminUserId: adminUser.id,
-        targetUserId,
-        action: sendResetEmail ? 'password_reset_email' : 'password_reset_direct',
-        error: validationError?.message,
-        result: validationResult
-      });
-      throw new Error('SECURITY VIOLATION: Admin validation failed - ' + (validationError?.message || 'Insufficient privileges'));
+    if (validationError || !validationResult) {
+      throw new Error('Admin validation failed: ' + (validationError?.message || 'Unauthorized'));
     }
-
-    console.log('✅ SECURITY: Admin validation successful:', {
-      adminUserId: adminUser.id,
-      securityLevel: validationResult.security_level,
-      action: sendResetEmail ? 'password_reset_email' : 'password_reset_direct'
-    });
 
     let result;
 

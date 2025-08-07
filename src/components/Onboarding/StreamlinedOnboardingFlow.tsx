@@ -192,8 +192,8 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
               </div>
               <CardTitle className="text-2xl">Välkommen till din utvecklingsresa!</CardTitle>
               <CardDescription className="text-base">
-                Vi hjälper dig skapa en personlig utvecklingsplan baserad på våra sex pelare:
-                <span className="font-semibold"> Self Care, Skills, Talent, Brand, Economy & Öppet spår</span>
+                Vi hjälper dig skapa en personlig utvecklingsplan baserad på våra fem pelare:
+                <span className="font-semibold"> Self Care, Skills, Talent, Brand & Economy</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

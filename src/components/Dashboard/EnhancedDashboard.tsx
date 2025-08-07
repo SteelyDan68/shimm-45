@@ -207,7 +207,7 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
             onPillarClick={() => {}}
           />
           <div className="text-center">
-            <HelpTooltip content={helpTexts.sixPillars?.heatmap || "Sex Pelare visualisering"}>
+            <HelpTooltip content={helpTexts.sixPillars?.heatmap || "Sex Pillars visualisering"}>
               <Button variant="ghost" size="sm" className="text-muted-foreground">
                 Vad betyder färgerna? <span className="ml-1">💡</span>
               </Button>
