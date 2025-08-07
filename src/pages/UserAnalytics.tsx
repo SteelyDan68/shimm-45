@@ -24,6 +24,7 @@ import {
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { assessmentDataService, UnifiedAssessmentData } from '@/services/AssessmentDataService';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function UserAnalytics() {
   const { userId } = useParams();
@@ -52,51 +53,109 @@ export default function UserAnalytics() {
     try {
       console.log('🔄 Loading universal assessment data for:', targetUserId);
       
-      // Använd universal service för all assessment data
-      const [assessments, healthCheck] = await Promise.all([
-        assessmentDataService.getAssessments(targetUserId),
-        assessmentDataService.performHealthCheck(targetUserId)
-      ]);
+      // Försök ladda via AssessmentDataService först
+      try {
+        const [assessments, healthCheck] = await Promise.all([
+          assessmentDataService.getAssessments(targetUserId),
+          assessmentDataService.performHealthCheck(targetUserId)
+        ]);
 
-      console.log(`📊 Universal service loaded: ${assessments.length} assessments`);
-      console.log(`🏥 Health status: ${healthCheck.status} (${healthCheck.issues.length} issues)`);
+        console.log(`📊 Universal service loaded: ${assessments.length} assessments`);
+        console.log(`🏥 Health status: ${healthCheck.status} (${healthCheck.issues.length} issues)`);
 
-      setAssessmentData(assessments);
-      setHealthStatus(healthCheck);
+        setAssessmentData(assessments);
+        setHealthStatus(healthCheck);
 
-      // Trigga automatisk migration om det behövs
-      if (healthCheck.status === 'critical' && healthCheck.recommendations.includes('Run legacy data migration')) {
-        console.log('🔄 Triggering automatic legacy data migration...');
-        const migrationResult = await assessmentDataService.migrateLegacyData(targetUserId);
-        
-        if (migrationResult.migrated > 0) {
-          toast({
-            title: "🔄 Data migrerad automatiskt",
-            description: `${migrationResult.migrated} gamla assessments har uppdaterats till modern format`,
-          });
+        // Trigga automatisk migration om det behövs
+        if (healthCheck.status === 'critical' && healthCheck.recommendations.includes('Run legacy data migration')) {
+          console.log('🔄 Triggering automatic legacy data migration...');
+          const migrationResult = await assessmentDataService.migrateLegacyData(targetUserId);
           
-          // Ladda om data efter migration
-          const updatedAssessments = await assessmentDataService.getAssessments(targetUserId);
-          setAssessmentData(updatedAssessments);
+          if (migrationResult.migrated > 0) {
+            toast({
+              title: "🔄 Data migrerad automatiskt",
+              description: `${migrationResult.migrated} gamla assessments har uppdaterats till modern format`,
+            });
+            
+            // Ladda om data efter migration
+            const updatedAssessments = await assessmentDataService.getAssessments(targetUserId);
+            setAssessmentData(updatedAssessments);
+          }
+        }
+
+        // Visa framgångsmeddelande
+        if (assessments.length > 0) {
+          toast({
+            title: "✅ Analys laddad!",
+            description: `${assessments.length} analyser hittades via universal service`
+          });
+        } else {
+          toast({
+            title: "ℹ️ Ingen data ännu",
+            description: "Genomför dina första pillar-bedömningar för att få analyser",
+            variant: "default"
+          });
+        }
+
+      } catch (serviceError) {
+        console.error('⚠️ AssessmentDataService failed, falling back to direct queries:', serviceError);
+        
+        // FALLBACK: Direkta queries om service failar
+        const { data: assessmentRounds, error: roundsError } = await supabase
+          .from('assessment_rounds')
+          .select('*')
+          .eq('user_id', targetUserId)
+          .not('ai_analysis', 'is', null)
+          .order('created_at', { ascending: false });
+
+        if (roundsError) {
+          throw roundsError;
+        }
+
+        const fallbackAssessments = (assessmentRounds || []).map(round => {
+          const scores = round.scores as any || {};
+          const calculatedScore = scores[round.pillar_type] || scores.overall || 0;
+          
+          return {
+            id: round.id,
+            user_id: round.user_id,
+            pillar_type: round.pillar_type,
+            calculated_score: typeof calculatedScore === 'number' ? calculatedScore : parseFloat(calculatedScore) || 0,
+            ai_analysis: round.ai_analysis || 'AI-analys inte tillgänglig',
+            assessment_data: round.answers || {},
+            created_at: round.created_at,
+            updated_at: round.updated_at,
+            source: 'assessment_rounds' as const,
+            metadata: {
+              assessment_round_id: round.id,
+              fallback_mode: true
+            }
+          };
+        });
+
+        setAssessmentData(fallbackAssessments);
+        setHealthStatus({
+          status: 'warning',
+          issues: ['AssessmentDataService unavailable - using fallback'],
+          recommendations: ['Check service implementation']
+        });
+
+        if (fallbackAssessments.length > 0) {
+          toast({
+            title: "✅ Data laddad (fallback)",
+            description: `${fallbackAssessments.length} analyser hittades direkt från databasen`
+          });
+        } else {
+          toast({
+            title: "ℹ️ Ingen data ännu",
+            description: "Genomför dina första pillar-bedömningar för att få analyser",
+            variant: "default"
+          });
         }
       }
 
-      // Visa framgångsmeddelande
-      if (assessments.length > 0) {
-        toast({
-          title: "✅ Analys laddad!",
-          description: `${assessments.length} analyser hittades via universal service`
-        });
-      } else {
-        toast({
-          title: "ℹ️ Ingen data ännu",
-          description: "Genomför dina första pillar-bedömningar för att få analyser",
-          variant: "default"
-        });
-      }
-
     } catch (error: any) {
-      console.error('Critical error in universal loadUserAnalytics:', error);
+      console.error('Critical error in loadUserAnalytics:', error);
       toast({
         title: "Systemfel",
         description: "Ett oväntat fel inträffade vid laddning av data",
