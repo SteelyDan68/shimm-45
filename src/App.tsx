@@ -165,25 +165,29 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => (
-  <CriticalErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <UnifiedAuthProvider>
-            <EnhancedStefanContextProvider>
-              <AnalyticsProvider>
-                <AppRoutes />
-                <AutoNotificationSystem />
-              </AnalyticsProvider>
-            </EnhancedStefanContextProvider>
-           </UnifiedAuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </CriticalErrorBoundary>
-);
+const App = () => {
+  return (
+    <React.StrictMode>
+      <CriticalErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <TooltipProvider delayDuration={300} skipDelayDuration={100}>
+              <UnifiedAuthProvider>
+                <EnhancedStefanContextProvider>
+                  <AnalyticsProvider>
+                    <AppRoutes />
+                    <AutoNotificationSystem />
+                    <Toaster />
+                    <Sonner />
+                  </AnalyticsProvider>
+                </EnhancedStefanContextProvider>
+              </UnifiedAuthProvider>
+            </TooltipProvider>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </CriticalErrorBoundary>
+    </React.StrictMode>
+  );
+};
 
 export default App;
