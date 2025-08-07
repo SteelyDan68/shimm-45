@@ -27,7 +27,7 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
   const { allUsers } = useUnifiedUserData();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'admin' | 'user' | 'manager'>('user');
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'client' | 'manager'>('client');
   const [searchTerm, setSearchTerm] = useState('');
 
   const members = getOrganizationMembers(organizationId);
@@ -51,7 +51,7 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
     if (success) {
       setIsAddDialogOpen(false);
       setSelectedUserId('');
-      setSelectedRole('user');
+      setSelectedRole('client');
     }
   };
 
@@ -224,10 +224,10 @@ export function OrganizationMemberManager({ organizationId }: OrganizationMember
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">
+                  <SelectItem value="client">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Användare
+                      Klient
                     </div>
                   </SelectItem>
                   <SelectItem value="admin">

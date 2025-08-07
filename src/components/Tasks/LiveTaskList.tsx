@@ -284,7 +284,7 @@ export const LiveTaskList: React.FC<LiveTaskListProps> = ({ className }) => {
                             type: 'event',
                             priority: task.priority,
                             ai_generated: task.ai_generated,
-                            created_by_role: 'user'
+                            created_by_role: 'client'
                           });
                         }}
                       >

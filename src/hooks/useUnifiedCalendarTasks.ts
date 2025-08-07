@@ -149,7 +149,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
             created_from: 'unified_hook',
             pillar_type: data.pillar_type,
             visible_to_client: data.visible_to_client || false,
-            created_by_role: data.created_by_role || 'user'
+            created_by_role: data.created_by_role || 'client'
           }
         };
 
@@ -162,7 +162,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
             category: eventData.category || 'task',
             user_id: userId,
             created_by: user.id,
-            created_by_role: data.created_by_role || 'user',
+            created_by_role: data.created_by_role || 'client',
             visible_to_client: data.visible_to_client || false
           })
           .select()
@@ -198,7 +198,7 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
         details: `Unified skapande av ${data.type} - ${data.description || 'Ingen beskrivning'}`,
         status: 'completed',
         ai_generated: data.ai_generated || false,
-        created_by_role: data.created_by_role || 'user',
+        created_by_role: data.created_by_role || 'client',
         visible_to_client: data.visible_to_client || false,
         metadata: {
           creation_type: data.type,

@@ -72,7 +72,7 @@ export const useUserPath = (userId?: string) => {
         status: entryData.status || 'planned',
         ai_generated: entryData.ai_generated || false,
         visible_to_client: entryData.visible_to_client || false,
-        created_by_role: entryData.created_by_role || 'user'
+        created_by_role: entryData.created_by_role || 'client'
       };
 
       const { data, error } = await supabase

@@ -138,7 +138,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
   const stats: UserManagementStats = useMemo(() => {
     const totalUsers = extendedUsers.length;
     const usersByRole = extendedUsers.reduce((acc, user) => {
-      const role = user.primary_role || 'user';
+      const role = user.primary_role || 'client';
       acc[role] = (acc[role] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);

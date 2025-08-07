@@ -134,8 +134,7 @@ export const useRobustUserData = () => {
         const primary_role = roles.includes('superadmin') ? 'superadmin' :
                            roles.includes('admin') ? 'admin' :
                            roles.includes('coach') ? 'coach' :
-                           roles.includes('client') ? 'client' :
-                           roles.includes('user') ? 'user' : 'user';
+                            roles.includes('client') ? 'client' : 'client';
 
         // Safe coaching relationships
         const coach_relationships = coachAssignments
