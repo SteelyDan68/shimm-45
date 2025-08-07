@@ -5,6 +5,7 @@ import { AutoBreadcrumbs } from "@/components/Navigation/AutoBreadcrumbs";
 import { MobileContainer } from "@/components/ui/mobile-responsive";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import StefanAIChat from "@/components/StefanAIChat";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -37,6 +38,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             </MobileContainer>
           </main>
         </div>
+        
+        {/* Stefan AI Chat Widget - Right side */}
+        <StefanAIChat />
       </div>
     </SidebarProvider>
   );
