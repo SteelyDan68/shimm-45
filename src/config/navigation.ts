@@ -77,6 +77,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     title: "Huvudmeny",
     roles: ["superadmin", "admin", "coach", "client"],
     items: [
+      // SUPERADMIN & ADMIN DASHBOARDS
       {
         title: "Dashboard",
         url: NAVIGATION_ROUTES.DASHBOARD,
@@ -92,40 +93,95 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         exact: true
       },
       {
-        title: "Min Dashboard",
+        title: "Dashboard",
         url: NAVIGATION_ROUTES.CLIENT_DASHBOARD,
         icon: Home, 
         roles: ["client"],
         exact: true
-      }
-    ]
-  },
-  {
-    title: "Verktyg",
-    roles: ["superadmin", "admin", "coach", "client"],
-    items: [
+      },
+      // CLIENT NAVIGATION
       {
-        title: "Six Pillars",
-        url: NAVIGATION_ROUTES.SIX_PILLARS,
+        title: "Min Utvecklingsanalys", 
+        url: "/user-analytics", 
+        icon: BarChart3,
+        roles: ["client"]
+      },
+      {
+        title: "Sex Utvecklingspelare", 
+        url: NAVIGATION_ROUTES.SIX_PILLARS, 
         icon: TrendingUp,
         roles: ["client", "coach"]
       },
       {
-        title: "Mina Uppgifter",
-        url: NAVIGATION_ROUTES.TASKS,
+        title: "Uppgifter", 
+        url: NAVIGATION_ROUTES.TASKS, 
         icon: CheckSquare,
         roles: ["client"]
       },
       {
-        title: "Kalender",
+        title: "Kalender", 
         url: NAVIGATION_ROUTES.CALENDAR, 
         icon: Calendar,
         roles: ["client", "coach"]
       },
       {
+        title: "Min Profil", 
+        url: NAVIGATION_ROUTES.EDIT_PROFILE, 
+        icon: User,
+        roles: ["client"]
+      },
+      {
         title: "Meddelanden",
         url: NAVIGATION_ROUTES.MESSAGES,
         icon: MessageSquare,
+        roles: ["superadmin", "admin", "coach", "client"]
+      }
+    ]
+  },
+  {
+    title: "Administration",
+    roles: ["superadmin", "admin"],
+    items: [
+      {
+        title: "Unified User Center",
+        url: NAVIGATION_ROUTES.UNIFIED_USERS,
+        icon: Users,
+        roles: ["superadmin", "admin", "coach"]
+      },
+      {
+        title: "System Administration",
+        url: NAVIGATION_ROUTES.ADMINISTRATION,
+        icon: Settings,
+        roles: ["superadmin", "admin"]
+      },
+      {
+        title: "Intelligence Hub",
+        url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
+        icon: Brain,
+        roles: ["superadmin", "admin", "coach"]
+      },
+      {
+        title: "Analytics & Reports",
+        url: NAVIGATION_ROUTES.ANALYTICS,
+        icon: BarChart3,
+        roles: ["superadmin", "admin"]
+      },
+      {
+        title: "Data Collection",
+        url: NAVIGATION_ROUTES.DATA_COLLECTION,
+        icon: Database,
+        roles: ["superadmin", "admin"]
+      }
+    ]
+  },
+  {
+    title: "AI & Verktyg",
+    roles: ["superadmin", "admin", "coach", "client"],
+    items: [
+      {
+        title: "Stefan AI Hub",
+        url: NAVIGATION_ROUTES.STEFAN_CHAT,
+        icon: Brain,
         roles: ["superadmin", "admin", "coach", "client"]
       },
       {
@@ -135,10 +191,16 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["client"]
       },
       {
-        title: "Stefan AI Hub",
-        url: "/stefan",
+        title: "Collaboration",
+        url: NAVIGATION_ROUTES.COLLABORATION,
+        icon: Users2,
+        roles: ["superadmin", "admin", "coach"]
+      },
+      {
+        title: "AI Coaching",
+        url: NAVIGATION_ROUTES.AI_COACHING,
         icon: Brain,
-        roles: ["superadmin", "admin", "coach", "client"]
+        roles: ["superadmin", "admin", "coach"]
       },
       {
         title: "Mobil",
@@ -147,7 +209,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach", "client"]
       }
     ]
-  },
+  }
 ];
 
 export const QUICK_ACTIONS = {

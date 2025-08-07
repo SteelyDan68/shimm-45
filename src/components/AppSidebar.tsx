@@ -4,19 +4,9 @@
  */
 
 import { NavLink, useLocation } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  BarChart3,
-  Target,
-  CheckSquare,
-  Calendar,
-  User,
-  MessageSquare,
-  Users,
-  Shield
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/UnifiedAuthProvider";
+import { useNavigation } from "@/hooks/useNavigation";
 import {
   Sidebar,
   SidebarContent,
@@ -32,72 +22,9 @@ import {
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
-  const { hasRole } = useAuth();
+  const { navigation, isActive } = useNavigation();
   const currentPath = location.pathname;
 
-  // 🎯 CLEAN NAVIGATION - Client-focused items first
-  const clientNavigation = [
-    { 
-      title: "Dashboard", 
-      url: "/client-dashboard", 
-      icon: LayoutDashboard,
-      tooltip: "Huvudöversikt"
-    },
-    { 
-      title: "Min Utvecklingsanalys", 
-      url: "/user-analytics", 
-      icon: BarChart3,
-      tooltip: "Pillar-analyser och framsteg"
-    },
-    { 
-      title: "Sex Utvecklingspelare", 
-      url: "/six-pillars", 
-      icon: Target,
-      tooltip: "Bedömningar och utvecklingsresor"
-    },
-    { 
-      title: "Uppgifter", 
-      url: "/tasks", 
-      icon: CheckSquare,
-      tooltip: "Utvecklingsuppgifter"
-    },
-    { 
-      title: "Kalender", 
-      url: "/calendar", 
-      icon: Calendar,
-      tooltip: "Schemaläggning och aktiviteter"
-    },
-    { 
-      title: "Min Profil", 
-      url: "/edit-profile", 
-      icon: User,
-      tooltip: "Personlig information"
-    },
-    { 
-      title: "Meddelanden", 
-      url: "/messages", 
-      icon: MessageSquare,
-      tooltip: "Meddelanden och kommunikation"
-    }
-  ];
-
-  // 🎯 ADMIN NAVIGATION - Only for authorized users
-  const adminNavigation = [
-    { 
-      title: "Användarhantering", 
-      url: "/unified-users", 
-      icon: Users,
-      tooltip: "Hantera användare"
-    },
-    { 
-      title: "Administration", 
-      url: "/administration", 
-      icon: Shield,
-      tooltip: "Systemadministration"
-    }
-  ];
-
-  const isActive = (path: string) => currentPath === path;
   const getNavCls = (path: string) => 
     isActive(path) ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
 
@@ -110,44 +37,17 @@ export function AppSidebar() {
       )}
     >
       <SidebarContent className="overflow-y-auto">
-        {/* 🏠 HUVUDNAVIGATION */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-primary font-semibold">
-            🏠 Huvudmeny
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {clientNavigation.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={!open ? item.tooltip : undefined}>
-                    <NavLink 
-                      to={item.url} 
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
-                        getNavCls(item.url)
-                      )}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {open && <span className="font-medium">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* 🔐 ADMIN - Only for authorized users */}
-        {(hasRole('admin') || hasRole('superadmin')) && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-red-600 font-semibold">
-              🔐 Administration
+        {/* 🎯 ROLLBASERAD NAVIGATION */}
+        {navigation.map((group) => (
+          <SidebarGroup key={group.title}>
+            <SidebarGroupLabel className="text-primary font-semibold">
+              {group.title === "Huvudmeny" ? "🏠" : "🔧"} {group.title}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {adminNavigation.map((item) => (
+                {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={!open ? item.tooltip : undefined}>
+                    <SidebarMenuButton asChild tooltip={!open ? item.title : undefined}>
                       <NavLink 
                         to={item.url} 
                         className={cn(
@@ -164,7 +64,7 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
+        ))}
       </SidebarContent>
     </Sidebar>
   );
