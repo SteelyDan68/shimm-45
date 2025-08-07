@@ -219,8 +219,11 @@ export default function UserAnalytics() {
           <RefreshCw className="h-12 w-12 mx-auto mb-4 animate-spin text-blue-600" />
           <h3 className="text-lg font-semibold mb-2">Laddar din utvecklingsanalys...</h3>
           <p className="text-muted-foreground">
-            Hämtar dina pillar-analyser och framsteg
+            Hämtar dina pillar-analyser och framsteg via AssessmentDataService
           </p>
+          <div className="mt-4 text-xs text-muted-foreground">
+            {targetUserId ? `User ID: ${targetUserId}` : 'Ingen användare identifierad'}
+          </div>
         </div>
       </div>
     );

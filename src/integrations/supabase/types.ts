@@ -4311,6 +4311,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cleanup_pillar_assessments_on_retake: {
+        Args: { p_user_id: string; p_pillar_type: string }
+        Returns: {
+          cleaned_count: number
+          message: string
+        }[]
+      }
       cleanup_user_references: {
         Args: { target_email: string }
         Returns: string

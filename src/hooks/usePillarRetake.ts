@@ -22,10 +22,11 @@ export const usePillarRetake = (userId?: string) => {
     }
 
     setIsRetaking(true);
+    console.log(`🔄 Starting retake for pillar: ${pillarKey}`);
 
     try {
-      // Call the clear-pillar-dependencies edge function
-      const { error } = await supabase.functions.invoke('clear-pillar-dependencies', {
+      // Call the enhanced clear-pillar-dependencies edge function
+      const { data, error } = await supabase.functions.invoke('clear-pillar-dependencies', {
         body: { 
           userId, 
           pillarKey 
@@ -33,15 +34,20 @@ export const usePillarRetake = (userId?: string) => {
       });
 
       if (error) {
+        console.error('Edge function error:', error);
         throw error;
       }
+
+      console.log('✅ Retake cleanup completed:', data);
 
       // Refresh pillar data to trigger UI updates
       await refetch();
 
+      // Show success message with cleanup details
+      const cleanupSummary = data?.cleanup_summary?.[0];
       toast({
-        title: "✅ Pillar återställd",
-        description: `${pillarKey} har återställts och är redo för ny bedömning.`,
+        title: "✅ Pillar fullständigt återställd",
+        description: `${pillarKey} och alla relaterade data har rensats. ${cleanupSummary?.message || 'Systemintegritet säkerställd.'} Redo för ny bedömning.`,
         variant: "default",
       });
 
