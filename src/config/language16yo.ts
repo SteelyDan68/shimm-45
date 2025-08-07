@@ -48,6 +48,50 @@ export const LANGUAGE_16YO = {
     }
   },
 
+  // Actionables & Scheduling - New section
+  actionables: {
+    title: "Dina saker att göra 📝",
+    empty_state: "Inga saker att göra än! 🎉",
+    add_to_calendar: "Lägg in i kalendern 📅",
+    schedule_smart: "Stefan planerar åt dig ⚡",
+    time_picker: "Välj när du vill göra det ⏰",
+    duration: "Hur lång tid tar det?",
+    priority: {
+      low: "Chill 😌",
+      medium: "Viktigt 👍", 
+      high: "Viktigt nu! 🔥",
+      critical: "AKUT! 🚨"
+    },
+    status: {
+      pending: "Ska göras 📝",
+      in_progress: "Gör nu 🏃‍♂️",
+      completed: "Klart! ✅",
+      paused: "Pausad 😴"
+    },
+    schedule_options: {
+      now: "Nu direkt 🚀",
+      today: "Senare idag 📅",
+      tomorrow: "Imorgon 🌅",
+      this_week: "Denna vecka 📆",
+      custom: "Jag väljer själv 🎯"
+    }
+  },
+
+  // Calendar integration
+  calendar: {
+    title: "Din planering 📅",
+    today: "Idag",
+    tomorrow: "Imorgon", 
+    this_week: "Denna vecka",
+    month_view: "Månad",
+    week_view: "Vecka",
+    day_view: "Dag",
+    add_event: "Lägg till något 📝",
+    move_task: "Flytta till annan dag",
+    time_blocked: "Upptaget 🚫",
+    free_time: "Ledig tid ✨"
+  },
+
   // Status labels
   status: {
     ready: "Redo att börja",
@@ -64,7 +108,7 @@ export const LANGUAGE_16YO = {
   ui: {
     buttons: {
       start: "Börja",
-      continue: "Fortsätt",
+      continue: "Fortsätt", 
       complete: "Slutför",
       save: "Spara",
       cancel: "Avbryt",
@@ -76,7 +120,11 @@ export const LANGUAGE_16YO = {
       back: "Tillbaka",
       view_results: "Se mina resultat 👀",
       try_again: "Försök igen",
-      get_help: "Behöver hjälp? 🤔"
+      get_help: "Behöver hjälp? 🤔",
+      schedule: "Planera in 📅",
+      schedule_now: "Gör nu 🚀",
+      schedule_later: "Gör senare ⏰",
+      move_task: "Flytta 📦"
     },
     start_now: "Börja nu - det går snabbt! 🚀",
     continue: "Fortsätt testet 🎯",
@@ -86,18 +134,22 @@ export const LANGUAGE_16YO = {
       analyzing: "Stefan kollar dina svar...",
       creating: "Skapar dina uppgifter...",
       saving: "Sparar...",
-      loading: "Laddar..."
+      loading: "Laddar...",
+      scheduling: "Planerar in i kalendern..."
     },
     success: {
       assessment_done: "Bra jobbat! 🎉",
       tasks_created: "Dina uppgifter är redo! ✨",
       progress_saved: "Framsteg sparat! 💾",
-      milestone_reached: "Du nådde ett mål! 🏆"
+      milestone_reached: "Du nådde ett mål! 🏆",
+      scheduled: "Inplanerat! 📅",
+      moved: "Flyttat! 📦"
     },
     errors: {
       something_wrong: "Något gick snett 😅",
       try_again: "Försök igen, det brukar funka",
-      contact_help: "Om det inte funkar, fråga oss!"
+      contact_help: "Om det inte funkar, fråga oss!",
+      scheduling_failed: "Kunde inte planera in 😕"
     }
   },
 

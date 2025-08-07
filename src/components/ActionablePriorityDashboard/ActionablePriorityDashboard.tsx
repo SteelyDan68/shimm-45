@@ -41,6 +41,9 @@ import {
   EyeOff,
   Sparkles
 } from 'lucide-react';
+import { CalendarScheduler } from './CalendarScheduler';
+import { ActionableCalendarView } from '../Calendar/ActionableCalendarView';
+import { LANGUAGE_16YO } from '@/config/language16yo';
 
 interface ActionableItem {
   id: string;
@@ -98,6 +101,14 @@ const SortableActionableCard = ({ actionable, onToggleStatus, onToggleVisibility
     }
   };
 
+  const getPriorityLabel = (priority: string) => {
+    return LANGUAGE_16YO.actionables.priority[priority as keyof typeof LANGUAGE_16YO.actionables.priority] || priority;
+  };
+
+  const getStatusLabel = (status: string) => {
+    return LANGUAGE_16YO.actionables.status[status as keyof typeof LANGUAGE_16YO.actionables.status] || status;
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -151,7 +162,7 @@ const SortableActionableCard = ({ actionable, onToggleStatus, onToggleVisibility
                 variant={actionable.completion_status === 'completed' ? 'default' : 'outline'}
                 className={actionable.completion_status === 'completed' ? 'bg-green-100 text-green-700' : ''}
               >
-                {actionable.completion_status}
+                {getStatusLabel(actionable.completion_status)}
               </Badge>
               {actionable.neuroplasticity_day && (
                 <Badge variant="outline" className="bg-brain-gradient text-white">
@@ -206,7 +217,7 @@ export const ActionablePriorityDashboard = ({ userId }: SmartPriorityDashboardPr
   const [activeActionables, setActiveActionables] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [neuroplasticityLimit, setNeuroplasticityLimit] = useState(5);
-  const [currentView, setCurrentView] = useState<'pillars' | 'priority' | 'timeline'>('pillars');
+  const [currentView, setCurrentView] = useState<'pillars' | 'priority' | 'timeline' | 'calendar'>('pillars');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -451,10 +462,10 @@ export const ActionablePriorityDashboard = ({ userId }: SmartPriorityDashboardPr
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="h-6 w-6 text-primary" />
-            Smart Prioritets Dashboard
+            {LANGUAGE_16YO.actionables.title}
           </h2>
           <p className="text-muted-foreground">
-            Hantera dina AI-genererade actionables med neuroplastisk precision
+            Stefan hjälper dig hålla koll på vad som behöver göras 🧠✨
           </p>
         </div>
         
@@ -479,13 +490,13 @@ export const ActionablePriorityDashboard = ({ userId }: SmartPriorityDashboardPr
         </div>
       </div>
 
-      {/* Neuroplasticity Timeline Alert */}
+      {/* Smart Timeline Alert */}
       {activeCount > neuroplasticityLimit && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Du har {activeCount} aktiva actionables, men neuroplastisk forskning visar att max {neuroplasticityLimit} 
-            samtidiga förändringar ger bäst resultat. Överväg att pausa eller dölja några för optimal hjärnplasticitet.
+            Du har {activeCount} aktiva saker, men Stefan vet att max {neuroplasticityLimit} saker samtidigt 
+            fungerar bäst för din hjärna! 🧠 Pausa några för att få bättre resultat ✨
           </AlertDescription>
         </Alert>
       )}
@@ -493,9 +504,10 @@ export const ActionablePriorityDashboard = ({ userId }: SmartPriorityDashboardPr
       {/* Tabs för olika vyer */}
       <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as any)}>
         <TabsList>
-          <TabsTrigger value="pillars">Per Pelare</TabsTrigger>
-          <TabsTrigger value="priority">Prioritetsordning</TabsTrigger>
-          <TabsTrigger value="timeline">Neuroplasticity Timeline</TabsTrigger>
+          <TabsTrigger value="pillars">📂 Mina områden</TabsTrigger>
+          <TabsTrigger value="priority">🎯 Viktighet</TabsTrigger>
+          <TabsTrigger value="calendar">📅 Planera in</TabsTrigger>
+          <TabsTrigger value="timeline">🧠 Smart ordning</TabsTrigger>
         </TabsList>
 
         {/* Pillar View */}
@@ -583,16 +595,34 @@ export const ActionablePriorityDashboard = ({ userId }: SmartPriorityDashboardPr
           </Card>
         </TabsContent>
 
+        {/* Calendar Scheduling View */}
+        <TabsContent value="calendar" className="space-y-6">
+          <CalendarScheduler
+            actionables={actionableItems}
+            userId={userId}
+            onScheduled={loadDashboardData}
+          />
+          
+          {/* Show scheduled actionables in calendar */}
+          <div className="pt-6 border-t">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Inplanerade saker
+            </h3>
+            <ActionableCalendarView userId={userId} />
+          </div>
+        </TabsContent>
+
         {/* Timeline View */}
         <TabsContent value="timeline">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
-                Neuroplasticity Timeline
+                Smart planering för din hjärna
               </CardTitle>
               <p className="text-muted-foreground">
-                Optimerad ordning för bästa hjärnplasticitet - max {neuroplasticityLimit} aktiva samtidigt.
+                Stefan vet hur din hjärna fungerar bäst - max {neuroplasticityLimit} saker samtidigt ger bästa resultat! 🧠✨
               </p>
             </CardHeader>
             <CardContent>
