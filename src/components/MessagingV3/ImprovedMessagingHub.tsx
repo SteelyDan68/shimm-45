@@ -8,6 +8,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { useProactiveMessaging } from '@/hooks/useProactiveMessaging';
 import { useStefanInterventions } from '@/hooks/useStefanInterventions';
+import { useRoleCache } from '@/hooks/useRoleCache';
 import { ConversationPanel } from './ConversationPanel';
 import { StefanAnalyticsWidget } from './StefanAnalyticsWidget';
 import { QuickActionCenter } from './QuickActionCenter';
