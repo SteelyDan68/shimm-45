@@ -104,21 +104,44 @@ Var empatisk, motiverande och specifik. Undvik generiska råd. Svara på svenska
       pillar_priorities: extractSection(analysisText, 'PRIORITERAD PELARE')
     };
 
-    // Create path entry for this assessment
+    // 🎯 CRITICAL FIX: Save to assessment_rounds for proper data flow
+    const { data: assessmentRound, error: assessmentRoundError } = await supabase
+      .from('assessment_rounds')
+      .insert({
+        user_id: client_id,
+        created_by: client_id,
+        pillar_type: context.toLowerCase().replace(/\s+/g, '_'),
+        answers: answers,
+        scores: calculated_scores,
+        comments: '',
+        ai_analysis: analysisText
+      })
+      .select()
+      .single();
+
+    if (assessmentRoundError) {
+      console.error('Failed to save assessment round:', assessmentRoundError);
+      throw assessmentRoundError;
+    }
+
+    console.log('✅ Assessment round saved with AI analysis:', assessmentRound.id);
+
+    // Also create path entry for legacy compatibility
     const pathEntryData = {
-      client_id,
+      user_id: client_id, // FIXED: use user_id instead of client_id
       type: 'assessment',
       title: `Självskattning genomförd - ${new Date().toLocaleDateString('sv-SE')}`,
       details: `Övergripande poäng: ${calculated_scores.overall.toFixed(1)}/10`,
       content: analysisText,
       status: 'completed',
       ai_generated: true,
-      created_by: supabaseKey,
+      created_by: client_id,
       visible_to_client: true,
       metadata: {
         assessment_type: context,
         pillar_scores: calculated_scores.pillar_scores,
-        template_id
+        template_id,
+        assessment_round_id: assessmentRound.id
       }
     };
 

@@ -78,55 +78,96 @@ export default function UserAnalytics() {
     try {
       console.log('🔄 Loading user analytics for:', targetUserId);
       
-      // 🔍 FIXED: Load ALL analysis data from path_entries with correct filters
-      const { data: analysisEntries, error: analysesError } = await supabase
-        .from('path_entries')
-        .select('*')
-        .eq('user_id', targetUserId)
-        .in('type', ['assessment', 'recommendation', 'analysis']) // Include all relevant types
-        .order('created_at', { ascending: false });
+      // 🎯 LOAD FROM BOTH SOURCES: assessment_rounds (primary) + path_entries (supplementary)
+      const [assessmentRoundsResponse, pathEntriesResponse] = await Promise.all([
+        // Primary source: assessment_rounds with AI analysis
+        supabase
+          .from('assessment_rounds')
+          .select('*')
+          .eq('user_id', targetUserId)
+          .not('ai_analysis', 'is', null)
+          .order('created_at', { ascending: false }),
+        
+        // Supplementary: path_entries for additional context
+        supabase
+          .from('path_entries')
+          .select('*')
+          .eq('user_id', targetUserId)
+          .in('type', ['assessment', 'recommendation', 'analysis'])
+          .order('created_at', { ascending: false })
+      ]);
 
-      if (analysesError) {
-        console.error('Error loading analyses:', analysesError);
+      const { data: assessmentRounds, error: assessmentError } = assessmentRoundsResponse;
+      const { data: pathEntries, error: pathError } = pathEntriesResponse;
+
+      if (assessmentError) {
+        console.error('Error loading assessment rounds:', assessmentError);
         toast({
           title: "Fel",
-          description: "Kunde inte ladda utvecklingsdata",
+          description: "Kunde inte ladda bedömningsdata",
           variant: "destructive",
         });
         return;
       }
 
-      console.log('📊 Found path entries:', analysisEntries?.length || 0, analysisEntries);
+      console.log('📊 Found assessment rounds:', assessmentRounds?.length || 0);
+      console.log('📊 Found path entries:', pathEntries?.length || 0);
 
-      // 🔄 FIXED: Transform path_entries to pillar analyses with correct mapping
-      const transformedAnalyses: PillarAnalysis[] = (analysisEntries || [])
-        .filter(entry => entry.ai_generated && entry.details) // Only AI-generated analysis entries
-        .map(entry => {
-          // Extract pillar info from metadata or title - FIXED TYPE CASTING
-          const metadata = entry.metadata as any || {};
-          const pillarType = metadata.pillar_type || 
-                           entry.title?.toLowerCase().includes('talent') ? 'talent' :
-                           entry.title?.toLowerCase().includes('skills') ? 'skills' :
-                           entry.title?.toLowerCase().includes('brand') ? 'brand' :
-                           entry.title?.toLowerCase().includes('economy') ? 'economy' :
-                           entry.title?.toLowerCase().includes('self_care') ? 'self_care' :
-                           entry.title?.toLowerCase().includes('open_track') ? 'open_track' : 'unknown';
+      // 🔄 PRIMARY: Transform assessment_rounds to pillar analyses
+      let transformedAnalyses: PillarAnalysis[] = [];
 
-          const assessmentScore = metadata.assessment_score || 0;
-
+      if (assessmentRounds && assessmentRounds.length > 0) {
+        transformedAnalyses = assessmentRounds.map(round => {
+          // Type-safe score extraction
+          const scores = round.scores as any || {};
+          const calculatedScore = scores[round.pillar_type] || scores.overall || 0;
+          
           return {
-            id: entry.id,
-            pillar_type: pillarType,
-            calculated_score: typeof assessmentScore === 'number' ? assessmentScore : parseFloat(assessmentScore) || 0,
-            ai_analysis: entry.details || 'Analys inte tillgänglig än',
-            assessment_data: entry.metadata || {},
-            created_at: entry.created_at,
-            metadata: entry.metadata || {}
+            id: round.id,
+            pillar_type: round.pillar_type,
+            calculated_score: typeof calculatedScore === 'number' ? calculatedScore : parseFloat(calculatedScore) || 0,
+            ai_analysis: round.ai_analysis || 'AI-analys inte tillgänglig',
+            assessment_data: round.answers || {},
+            created_at: round.created_at,
+            metadata: {
+              assessment_round_id: round.id,
+              source: 'assessment_rounds'
+            }
           };
         });
+      } else if (pathEntries && pathEntries.length > 0) {
+        // FALLBACK: Use path_entries if no assessment_rounds
+        transformedAnalyses = (pathEntries || [])
+          .filter(entry => entry.ai_generated && entry.details)
+          .map(entry => {
+            const metadata = entry.metadata as any || {};
+            const pillarType = metadata.pillar_type || 
+                             entry.title?.toLowerCase().includes('talent') ? 'talent' :
+                             entry.title?.toLowerCase().includes('skills') ? 'skills' :
+                             entry.title?.toLowerCase().includes('brand') ? 'brand' :
+                             entry.title?.toLowerCase().includes('economy') ? 'economy' :
+                             entry.title?.toLowerCase().includes('self_care') ? 'self_care' :
+                             entry.title?.toLowerCase().includes('open_track') ? 'open_track' : 'unknown';
+
+            const assessmentScore = metadata.assessment_score || 0;
+
+            return {
+              id: entry.id,
+              pillar_type: pillarType,
+              calculated_score: typeof assessmentScore === 'number' ? assessmentScore : parseFloat(assessmentScore) || 0,
+              ai_analysis: entry.details || 'Analys inte tillgänglig än',
+              assessment_data: entry.metadata || {},
+              created_at: entry.created_at,
+              metadata: {
+                ...(entry.metadata as object || {}),
+                source: 'path_entries'
+              }
+            };
+          });
+      }
 
       setPillarAnalyses(transformedAnalyses);
-      console.log('✅ Pillar analyses loaded and transformed:', transformedAnalyses.length, transformedAnalyses);
+      console.log('✅ Pillar analyses loaded:', transformedAnalyses.length, transformedAnalyses);
 
       // Load timeline events from path_entries
       const { data: timeline, error: timelineError } = await supabase

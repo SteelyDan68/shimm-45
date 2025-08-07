@@ -133,10 +133,36 @@ export const useSixPillarsModular = (clientId?: string) => {
     try {
       setLoading(true);
       
-      // Save assessment using new attribute system
+      console.log('🎯 Starting pillar assessment submission:', { pillarKey, clientId, calculatedScore });
+      
+      // 1. CRITICAL: Save to assessment_rounds for data consistency
+      const { data: assessmentRound, error: assessmentError } = await supabase
+        .from('assessment_rounds')
+        .insert({
+          user_id: clientId,
+          created_by: user.id,
+          pillar_type: pillarKey,
+          answers: assessmentData,
+          scores: { 
+            [pillarKey]: calculatedScore,
+            overall: calculatedScore 
+          },
+          comments: assessmentData.comments || ''
+        })
+        .select()
+        .single();
+
+      if (assessmentError) {
+        console.error('Failed to save assessment round:', assessmentError);
+        throw assessmentError;
+      }
+
+      console.log('✅ Assessment round saved:', assessmentRound.id);
+
+      // 2. Save assessment using attribute system (for compatibility)
       await savePillarAssessment(pillarKey, assessmentData, calculatedScore);
 
-      // Call AI analysis function - this can still use edge functions
+      // 3. Call AI analysis function with enhanced prompt
       try {
         const { data: aiResponse, error: aiError } = await supabase.functions.invoke(
           'analyze-pillar-module',
@@ -145,13 +171,20 @@ export const useSixPillarsModular = (clientId?: string) => {
               pillar_key: pillarKey,
               assessment_data: assessmentData,
               calculated_score: calculatedScore,
-              user_id: clientId
+              user_id: clientId,
+              assessment_round_id: assessmentRound.id
             }
           }
         );
 
         if (!aiError && aiResponse?.analysis) {
-          // Save AI analysis to path entries
+          // 4. Update assessment_rounds with AI analysis
+          await supabase
+            .from('assessment_rounds')
+            .update({ ai_analysis: aiResponse.analysis })
+            .eq('id', assessmentRound.id);
+
+          // 5. Create path entry for comprehensive tracking
           await supabase
             .from('path_entries')
             .insert({
@@ -165,20 +198,53 @@ export const useSixPillarsModular = (clientId?: string) => {
               metadata: {
                 pillar_type: pillarKey,
                 pillar_name: pillarKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                assessment_score: calculatedScore
+                assessment_score: calculatedScore,
+                assessment_round_id: assessmentRound.id
               }
             });
+
+          console.log('✅ AI Analysis completed and saved');
+
+          // 6. GENERATE ACTIONABLES: Convert analysis to actionable recommendations
+          const { error: actionableError } = await supabase.functions.invoke(
+            'enhanced-ai-planning',
+            {
+              body: {
+                user_id: clientId,
+                preferences: {
+                  intensity: 'moderate',
+                  duration: 4, // 4 weeks
+                  frequency: 'few-times-week'
+                },
+                assessment_data: assessmentData,
+                context_data: {
+                  pillar_focus: pillarKey,
+                  assessment_score: calculatedScore,
+                  ai_analysis: aiResponse.analysis
+                }
+              }
+            }
+          );
+
+          if (!actionableError) {
+            console.log('✅ Actionables generated successfully');
+          } else {
+            console.warn('Actionables generation failed:', actionableError);
+          }
         }
       } catch (aiError) {
         console.warn('AI analysis failed but assessment was saved:', aiError);
       }
       
       toast({
-        title: "Assessment genomförd",
-        description: `Din ${pillarKey} bedömning har sparats.`,
+        title: "✅ Assessment genomförd!",
+        description: `Din ${pillarKey} bedömning har sparats och AI-analys skapas.`,
       });
 
-      return { id: `assessment_${pillarKey}_${Date.now()}` }; // Mock return for compatibility
+      return { 
+        id: assessmentRound.id,
+        assessment_round_id: assessmentRound.id
+      };
     } catch (error) {
       console.error('Error submitting assessment:', error);
       toast({
