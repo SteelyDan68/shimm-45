@@ -55,7 +55,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
 
     try {
       // Check for existing Stefan conversation
-      const { data: existingConv, error: convError } = await (supabase as any)
+      const { data: existingConv, error: convError } = await supabase
         .from('conversations')
         .select('*')
         .eq('created_by', user.id)
@@ -72,14 +72,14 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
 
       if (!existingConv) {
         // Create new Stefan conversation
-        const { data: newConv, error: createError } = await (supabase as any)
+        const { data: newConv, error: createError } = await supabase
           .from('conversations')
           .insert({
             created_by: user.id,
             conversation_type: 'stefan_ai',
             title: 'Chat med Stefan AI',
             is_active: true,
-            participant_ids: [user.id, 'stefan_ai']
+            participant_ids: [user.id]
           })
           .select()
           .single();
@@ -106,8 +106,8 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
 
   const loadMessages = async (convId: string) => {
     try {
-      const { data: messagesData, error } = await (supabase as any)
-        .from('messages')
+      const { data: messagesData, error } = await supabase
+        .from('messages_v2')
         .select('*')
         .eq('conversation_id', convId)
         .order('created_at', { ascending: true });
@@ -120,7 +120,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
       const formattedMessages: ChatMessage[] = (messagesData as any[]).map((msg: any) => ({
         id: msg.id,
         content: msg.content,
-        role: msg.sender_id === 'stefan_ai' ? 'assistant' : 'user',
+        role: msg.metadata?.role === 'assistant' ? 'assistant' : 'user',
         timestamp: msg.created_at,
         confidence: msg.metadata?.confidence
       }));
@@ -152,13 +152,14 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
       setMessages(prev => [...prev, newUserMessage]);
 
       // Save user message to database
-      const { error: userMsgError } = await (supabase as any)
-        .from('messages')
+      const { error: userMsgError } = await supabase
+        .from('messages_v2')
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
           content: userMessage,
-          message_type: 'text'
+          message_type: 'text',
+          metadata: { role: 'user' }
         });
 
       if (userMsgError) {
@@ -191,14 +192,15 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
         setMessages(prev => [...prev, assistantMessage]);
 
         // Save AI response to database
-        await (supabase as any)
-          .from('messages')
+        await supabase
+          .from('messages_v2')
           .insert({
             conversation_id: conversationId,
-            sender_id: 'stefan_ai',
+            sender_id: user.id,
             content: aiResponse.response,
             message_type: 'text',
             metadata: {
+              role: 'assistant',
               confidence: aiResponse.confidence,
               model_used: aiResponse.model_used
             }
