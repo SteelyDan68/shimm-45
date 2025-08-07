@@ -26,6 +26,14 @@ export function Messages() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl space-y-6">
+      {/* Header - förtydligar funktionaliteten */}
+      <div className="text-center space-y-2 mb-6">
+        <h1 className="text-2xl font-bold">Meddelanden & AI Chat</h1>
+        <p className="text-muted-foreground">
+          Kommunicera med ditt team och få hjälp från Stefan AI - allt på ett ställe
+        </p>
+      </div>
+      
       {/* Autonomous Messaging Interface - Stefan's proactive messaging */}
       <AutonomousMessagingInterface />
       

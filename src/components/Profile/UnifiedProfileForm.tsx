@@ -556,44 +556,7 @@ export const UnifiedProfileForm: React.FC<UnifiedProfileFormProps> = ({
                 </Select>
               </div>
 
-              {/* Emergency Contact */}
-              <Separator />
-              <h4 className="font-medium">Nödkontakt</h4>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="emergency_name">Namn</Label>
-                  <Input
-                    id="emergency_name"
-                    value={formData.extended?.emergency_contact?.name || ''}
-                    onChange={(e) => handleExtendedChange('emergency_contact', 'name', e.target.value)}
-                    disabled={!canEdit}
-                    placeholder="Kontaktperson"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="emergency_phone">Telefon</Label>
-                  <Input
-                    id="emergency_phone"
-                    type="tel"
-                    value={formData.extended?.emergency_contact?.phone || ''}
-                    onChange={(e) => handleExtendedChange('emergency_contact', 'phone', e.target.value)}
-                    disabled={!canEdit}
-                    placeholder="+46 70 123 45 67"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="emergency_relationship">Relation</Label>
-                <Input
-                  id="emergency_relationship"
-                  value={formData.extended?.emergency_contact?.relationship || ''}
-                  onChange={(e) => handleExtendedChange('emergency_contact', 'relationship', e.target.value)}
-                  disabled={!canEdit}
-                  placeholder="Familjemedlem, vän, etc."
-                />
-              </div>
+              {/* Emergency Contact Section Removed per user request */}
             </CardContent>
           </Card>
         </TabsContent>

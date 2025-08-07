@@ -158,12 +158,14 @@ export const SixPillars = () => {
                     </ul>
                   </div>
                   <Button 
-                    className="w-full mt-4"
+                    className="w-full mt-4 text-sm sm:text-base px-2 sm:px-4 py-2"
                     style={{ backgroundColor: pillar.color }}
                     onClick={() => navigate('/client-dashboard?tab=pillars', { state: { activatePillar: pillar.key } })}
                   >
-                    Aktivera denna pelare
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    <span className="whitespace-normal text-center leading-tight">
+                      Aktivera denna pelare
+                    </span>
+                    <ArrowRight className="h-4 w-4 ml-2 flex-shrink-0" />
                   </Button>
                 </div>
               </CardContent>

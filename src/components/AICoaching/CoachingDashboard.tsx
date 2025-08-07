@@ -111,11 +111,22 @@ export function CoachingDashboard() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Brain className="h-8 w-8 text-primary" />
-            AI Coaching
+            AI Coaching med Stefan
           </h1>
-          <p className="text-muted-foreground">
-            Personlig AI-coach för din utvecklingsresa
-          </p>
+          <div className="space-y-2">
+            <p className="text-muted-foreground">
+              Din personliga AI-coach för målbaserad utveckling och reflektion
+            </p>
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Så här fungerar Stefan AI Coaching:</h3>
+              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <li>• <strong>Välj område:</strong> Bestäm vad du vill utveckla (mål, reflektion, planering)</li>
+                <li>• <strong>Berätta din situation:</strong> Stefan lyssnar och ställer följdfrågor</li>
+                <li>• <strong>Få skräddarsydda råd:</strong> Baserat på neuroplasticitetsforskning och dina behov</li>
+                <li>• <strong>Implementera steg för steg:</strong> Konkreta handlingar med uppföljning</li>
+              </ul>
+            </div>
+          </div>
         </div>
         
         <div className="flex items-center gap-4">

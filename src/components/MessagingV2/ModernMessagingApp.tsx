@@ -246,7 +246,7 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
                 </div>
                 <div>
                   <p className="text-sm font-medium">Inga konversationer än</p>
-                  <p className="text-xs text-muted-foreground">Starta en ny konversation</p>
+                  <p className="text-xs text-muted-foreground">Klicka på + ovan för att börja</p>
                 </div>
                 <Button 
                   onClick={() => setShowCompose(true)} 
@@ -254,7 +254,7 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
                   className="flex items-center gap-2"
                 >
                   <Plus className="h-4 w-4" />
-                  Ny konversation
+                  Börja chatta
                 </Button>
               </div>
             ) : (
@@ -510,7 +510,7 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
             </div>
             <Button onClick={() => setShowCompose(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Starta ny konversation
+              Börja chatta
             </Button>
           </div>
         </div>

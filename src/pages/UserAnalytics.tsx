@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -359,8 +359,41 @@ export default function UserAnalytics() {
           />
         </TabsContent>
 
-        {/* 🎯 ACTIONABLES TAB */}
-        <TabsContent value="actionables">
+        {/* 🎯 ACTIONABLES TAB - Enhanced Development Plan */}
+        <TabsContent value="actionables" className="space-y-6">
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Din Personliga Utvecklingsplan
+              </CardTitle>
+              <CardDescription>
+                Baserad på dina pillar-assessments och AI-analys av dina utvecklingsområden
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {pillarAnalyses.length === 0 
+                    ? "Genomför dina första pillar-bedömningar för att få en personlig utvecklingsplan"
+                    : "Din utvecklingsplan genereras automatiskt efter varje ny assessment"
+                  }
+                </p>
+                {pillarAnalyses.length === 0 ? (
+                  <Button onClick={() => navigate('/six-pillars')}>
+                    <Brain className="h-4 w-4 mr-2" />
+                    Starta bedömning för att få utvecklingsplan
+                  </Button>
+                ) : (
+                  <Button onClick={() => navigate('/ai-coaching')}>
+                    <Brain className="h-4 w-4 mr-2" />
+                    Förbättra planen med AI-coaching
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           <CalendarActionableManager 
             userId={targetUserId}
             timelineData={actionableData}

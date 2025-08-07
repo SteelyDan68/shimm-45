@@ -111,8 +111,8 @@ export const PedagogicalCoachInterface: React.FC = () => {
               <Brain className="h-4 w-4 text-white animate-pulse" />
             </div>
             <div>
-              <p className="font-medium">Stefan analyserar din lärstil...</p>
-              <p className="text-sm text-muted-foreground">Förbereder personaliserad coaching</p>
+              <p className="font-medium">Stefan bygger din lärarprofil...</p>
+              <p className="text-sm text-muted-foreground">Analyserar dina svar för att skapa personaliserad coaching baserad på dina unika lärpreferenser och behov</p>
             </div>
           </div>
         </CardContent>

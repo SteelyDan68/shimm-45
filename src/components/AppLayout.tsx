@@ -27,10 +27,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top Navigation Bar */}
-          <TopNavigation />
-          
-          {/* Main Content */}
+          {/* Main Content - Removed TopNavigation to eliminate menu duplication */}
           <main className="flex-1 overflow-auto">
             <MobileContainer className="py-4 min-h-full">
               <AutoBreadcrumbs />

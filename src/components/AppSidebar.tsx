@@ -85,25 +85,19 @@ export function AppSidebar() {
     }
   ];
 
-  // 🎯 TOOLS & COMMUNICATION
+  // 🎯 TOOLS & COMMUNICATION - Konsoliderat för mindre crowding
   const toolsNavigation = [
     { 
-      title: "Meddelanden", 
+      title: "Meddelanden & AI", 
       url: "/messages", 
       icon: MessageSquare,
-      tooltip: "Kommunikation"
+      tooltip: "Alla meddelanden och Stefan AI Chat på en plats"
     },
     { 
-      title: "Globalsökning", 
-      url: "/search", 
-      icon: Search,
-      tooltip: "Sök i systemet"
-    },
-    { 
-      title: "Stefan AI Chat", 
-      url: "/stefan-chat", 
-      icon: Lightbulb,
-      tooltip: "AI-assistent"
+      title: "Utvecklingsresan", 
+      url: "/user-analytics", 
+      icon: BarChart3,
+      tooltip: "Din personliga utvecklingsresa och framsteg"
     }
   ];
 
