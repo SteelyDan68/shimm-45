@@ -4525,8 +4525,10 @@ export type Database = {
         Returns: boolean
       }
       validate_admin_action: {
-        Args: { action_type: string; admin_id: string }
-        Returns: boolean
+        Args:
+          | { _user_id: string; _action: string }
+          | { action_type: string; admin_id: string }
+        Returns: Json
       }
       validate_invitation_security: {
         Args: { email_param: string; token_param: string }
