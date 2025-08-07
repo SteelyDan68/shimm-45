@@ -17,42 +17,13 @@ import {
   Heart,
   Palette,
   DollarSign,
-  Route
+  Route,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
-// Removed problematic imports - implemented inline instead
-
-// 🎯 FIXED INTERFACES FOR CORRECT DATA MAPPING
-interface PillarAnalysis {
-  id: string;
-  pillar_type: string;
-  calculated_score: number;
-  ai_analysis: string;
-  assessment_data: any;
-  created_at: string;
-  metadata: any;
-}
-
-interface TimelineEvent {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  timestamp: string;
-  pillar?: string;
-  metadata: any;
-}
-
-// Simple actionable data interface
-interface ActionableData {
-  ai_recommendations: any[];
-  milestone_checkpoints: any[];
-  timeline_duration?: number;
-  weekly_goals?: any[];
-  daily_micro_actions?: any[];
-}
+import { assessmentDataService, UnifiedAssessmentData } from '@/services/AssessmentDataService';
 
 export default function UserAnalytics() {
   const { userId } = useParams();
@@ -61,162 +32,78 @@ export default function UserAnalytics() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  const [pillarAnalyses, setPillarAnalyses] = useState<PillarAnalysis[]>([]);
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-  const [actionableData, setActionableData] = useState<ActionableData | null>(null);
+  const [assessmentData, setAssessmentData] = useState<UnifiedAssessmentData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedAnalysis, setSelectedAnalysis] = useState<PillarAnalysis | null>(null);
+  const [selectedAnalysis, setSelectedAnalysis] = useState<UnifiedAssessmentData | null>(null);
+  const [healthStatus, setHealthStatus] = useState<{
+    status: 'healthy' | 'warning' | 'critical';
+    issues: string[];
+    recommendations: string[];
+  } | null>(null);
 
   const targetUserId = userId || user?.id;
   const activeTab = searchParams.get('tab') || 'analyses';
 
-  // 📊 FIXED: LOAD COMPLETE USER ANALYTICS WITH CORRECT DATA MAPPING
+  // 🚀 UNIVERSELL DATAHÄMTNING via AssessmentDataService
   const loadUserAnalytics = async () => {
     if (!targetUserId) return;
 
     setIsLoading(true);
     try {
-      console.log('🔄 Loading user analytics for:', targetUserId);
+      console.log('🔄 Loading universal assessment data for:', targetUserId);
       
-      // 🎯 LOAD FROM BOTH SOURCES: assessment_rounds (primary) + path_entries (supplementary)
-      const [assessmentRoundsResponse, pathEntriesResponse] = await Promise.all([
-        // Primary source: assessment_rounds with AI analysis
-        supabase
-          .from('assessment_rounds')
-          .select('*')
-          .eq('user_id', targetUserId)
-          .not('ai_analysis', 'is', null)
-          .order('created_at', { ascending: false }),
-        
-        // Supplementary: path_entries for additional context
-        supabase
-          .from('path_entries')
-          .select('*')
-          .eq('user_id', targetUserId)
-          .in('type', ['assessment', 'recommendation', 'analysis'])
-          .order('created_at', { ascending: false })
+      // Använd universal service för all assessment data
+      const [assessments, healthCheck] = await Promise.all([
+        assessmentDataService.getAssessments(targetUserId),
+        assessmentDataService.performHealthCheck(targetUserId)
       ]);
 
-      const { data: assessmentRounds, error: assessmentError } = assessmentRoundsResponse;
-      const { data: pathEntries, error: pathError } = pathEntriesResponse;
+      console.log(`📊 Universal service loaded: ${assessments.length} assessments`);
+      console.log(`🏥 Health status: ${healthCheck.status} (${healthCheck.issues.length} issues)`);
 
-      if (assessmentError) {
-        console.error('Error loading assessment rounds:', assessmentError);
-        toast({
-          title: "Fel",
-          description: "Kunde inte ladda bedömningsdata",
-          variant: "destructive",
-        });
-        return;
-      }
+      setAssessmentData(assessments);
+      setHealthStatus(healthCheck);
 
-      console.log('📊 Found assessment rounds:', assessmentRounds?.length || 0);
-      console.log('📊 Found path entries:', pathEntries?.length || 0);
-
-      // 🔄 PRIMARY: Transform assessment_rounds to pillar analyses
-      let transformedAnalyses: PillarAnalysis[] = [];
-
-      if (assessmentRounds && assessmentRounds.length > 0) {
-        transformedAnalyses = assessmentRounds.map(round => {
-          // Type-safe score extraction
-          const scores = round.scores as any || {};
-          const calculatedScore = scores[round.pillar_type] || scores.overall || 0;
-          
-          return {
-            id: round.id,
-            pillar_type: round.pillar_type,
-            calculated_score: typeof calculatedScore === 'number' ? calculatedScore : parseFloat(calculatedScore) || 0,
-            ai_analysis: round.ai_analysis || 'AI-analys inte tillgänglig',
-            assessment_data: round.answers || {},
-            created_at: round.created_at,
-            metadata: {
-              assessment_round_id: round.id,
-              source: 'assessment_rounds'
-            }
-          };
-        });
-      } else if (pathEntries && pathEntries.length > 0) {
-        // FALLBACK: Use path_entries if no assessment_rounds
-        transformedAnalyses = (pathEntries || [])
-          .filter(entry => entry.ai_generated && entry.details)
-          .map(entry => {
-            const metadata = entry.metadata as any || {};
-            const pillarType = metadata.pillar_type || 
-                             entry.title?.toLowerCase().includes('talent') ? 'talent' :
-                             entry.title?.toLowerCase().includes('skills') ? 'skills' :
-                             entry.title?.toLowerCase().includes('brand') ? 'brand' :
-                             entry.title?.toLowerCase().includes('economy') ? 'economy' :
-                             entry.title?.toLowerCase().includes('self_care') ? 'self_care' :
-                             entry.title?.toLowerCase().includes('open_track') ? 'open_track' : 'unknown';
-
-            const assessmentScore = metadata.assessment_score || 0;
-
-            return {
-              id: entry.id,
-              pillar_type: pillarType,
-              calculated_score: typeof assessmentScore === 'number' ? assessmentScore : parseFloat(assessmentScore) || 0,
-              ai_analysis: entry.details || 'Analys inte tillgänglig än',
-              assessment_data: entry.metadata || {},
-              created_at: entry.created_at,
-              metadata: {
-                ...(entry.metadata as object || {}),
-                source: 'path_entries'
-              }
-            };
+      // Trigga automatisk migration om det behövs
+      if (healthCheck.status === 'critical' && healthCheck.recommendations.includes('Run legacy data migration')) {
+        console.log('🔄 Triggering automatic legacy data migration...');
+        const migrationResult = await assessmentDataService.migrateLegacyData(targetUserId);
+        
+        if (migrationResult.migrated > 0) {
+          toast({
+            title: "🔄 Data migrerad automatiskt",
+            description: `${migrationResult.migrated} gamla assessments har uppdaterats till modern format`,
           });
+          
+          // Ladda om data efter migration
+          const updatedAssessments = await assessmentDataService.getAssessments(targetUserId);
+          setAssessmentData(updatedAssessments);
+        }
       }
 
-      setPillarAnalyses(transformedAnalyses);
-      console.log('✅ Pillar analyses loaded:', transformedAnalyses.length, transformedAnalyses);
-
-      // Load timeline events from path_entries
-      const { data: timeline, error: timelineError } = await supabase
-        .from('path_entries')
-        .select('*')
-        .eq('user_id', targetUserId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (!timelineError && timeline) {
-        const transformedTimeline: TimelineEvent[] = timeline.map(entry => {
-          const metadata = entry.metadata as any || {};
-          return {
-            id: entry.id,
-            type: entry.type,
-            title: entry.title || 'Utvecklingsaktivitet',
-            description: entry.details || '',
-            timestamp: entry.created_at,
-            pillar: metadata.pillar_type,
-            metadata: entry.metadata || {}
-          };
-        });
-        setTimelineEvents(transformedTimeline);
-        console.log('✅ Timeline events loaded:', transformedTimeline.length);
-      }
-
-      // Set actionable data
-      setActionableData({
-        ai_recommendations: transformedAnalyses.filter(a => a.pillar_type !== 'unknown'),
-        milestone_checkpoints: []
-      });
-
-      // Show success message
-      if (transformedAnalyses.length > 0) {
+      // Visa framgångsmeddelande
+      if (assessments.length > 0) {
         toast({
           title: "✅ Analys laddad!",
-          description: `${transformedAnalyses.length} analyser hittades och visas nu`
+          description: `${assessments.length} analyser hittades via universal service`
+        });
+      } else {
+        toast({
+          title: "ℹ️ Ingen data ännu",
+          description: "Genomför dina första pillar-bedömningar för att få analyser",
+          variant: "default"
         });
       }
 
     } catch (error: any) {
-      console.error('Critical error in loadUserAnalytics:', error);
+      console.error('Critical error in universal loadUserAnalytics:', error);
       toast({
         title: "Systemfel",
-        description: "Ett oväntat fel inträffade",
+        description: "Ett oväntat fel inträffade vid laddning av data",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false); // CRITICAL: Always set loading to false
+      setIsLoading(false);
     }
   };
 
@@ -293,13 +180,43 @@ export default function UserAnalytics() {
         </p>
       </div>
 
+      {/* Health Status Banner */}
+      {healthStatus && healthStatus.status !== 'healthy' && (
+        <Card className={`border-2 ${
+          healthStatus.status === 'critical' ? 'border-red-500 bg-red-50' : 'border-yellow-500 bg-yellow-50'
+        }`}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              {healthStatus.status === 'critical' ? (
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              ) : (
+                <AlertTriangle className="h-6 w-6 text-yellow-600" />
+              )}
+              <div className="flex-1">
+                <h3 className={`font-semibold ${
+                  healthStatus.status === 'critical' ? 'text-red-900' : 'text-yellow-900'
+                }`}>
+                  Systemstatus: {healthStatus.status === 'critical' ? 'Kritisk' : 'Varning'}
+                </h3>
+                <p className={`text-sm ${
+                  healthStatus.status === 'critical' ? 'text-red-700' : 'text-yellow-700'
+                }`}>
+                  {healthStatus.issues.join(', ')}
+                </p>
+              </div>
+              <CheckCircle className="h-5 w-5 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quick Stats */}
-      {pillarAnalyses.length > 0 && (
+      {assessmentData.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="p-6 text-center">
               <Brain className="h-12 w-12 mx-auto mb-3 text-blue-600" />
-              <div className="text-3xl font-bold text-blue-900">{pillarAnalyses.length}</div>
+              <div className="text-3xl font-bold text-blue-900">{assessmentData.length}</div>
               <div className="text-sm text-blue-700">Genomförda analyser</div>
             </CardContent>
           </Card>
@@ -308,7 +225,10 @@ export default function UserAnalytics() {
             <CardContent className="p-6 text-center">
               <Trophy className="h-12 w-12 mx-auto mb-3 text-green-600" />
               <div className="text-3xl font-bold text-green-900">
-                {(pillarAnalyses.reduce((sum, a) => sum + a.calculated_score, 0) / pillarAnalyses.length).toFixed(1)}
+                {assessmentData.length > 0 
+                  ? (assessmentData.reduce((sum, a) => sum + a.calculated_score, 0) / assessmentData.length).toFixed(1)
+                  : '0.0'
+                }
               </div>
               <div className="text-sm text-green-700">Genomsnittlig poäng</div>
             </CardContent>
@@ -317,8 +237,10 @@ export default function UserAnalytics() {
           <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
             <CardContent className="p-6 text-center">
               <Activity className="h-12 w-12 mx-auto mb-3 text-purple-600" />
-              <div className="text-3xl font-bold text-purple-900">{timelineEvents.length}</div>
-              <div className="text-sm text-purple-700">Utvecklingsaktiviteter</div>
+              <div className="text-3xl font-bold text-purple-900">
+                {assessmentData.filter(a => a.source === 'assessment_rounds').length}
+              </div>
+              <div className="text-sm text-purple-700">Moderna assessments</div>
             </CardContent>
           </Card>
         </div>
@@ -351,7 +273,7 @@ export default function UserAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {pillarAnalyses.length === 0 ? (
+              {assessmentData.length === 0 ? (
                 <div className="text-center py-12">
                   <Brain className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                   <h3 className="text-lg font-semibold mb-2">Inga analyser än</h3>
@@ -364,7 +286,7 @@ export default function UserAnalytics() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {pillarAnalyses.map((analysis) => (
+                  {assessmentData.map((analysis) => (
                     <Card 
                       key={analysis.id} 
                       className="cursor-pointer hover:shadow-md transition-shadow border"
@@ -379,6 +301,9 @@ export default function UserAnalytics() {
                             {getPillarIcon(analysis.pillar_type)}
                             <Badge variant="outline" className="text-xs">
                               {analysis.calculated_score}/10
+                            </Badge>
+                            <Badge variant={analysis.source === 'assessment_rounds' ? 'default' : 'secondary'} className="text-xs">
+                              {analysis.source === 'assessment_rounds' ? 'Ny' : 'Legacy'}
                             </Badge>
                           </div>
                         </div>
@@ -440,11 +365,11 @@ export default function UserAnalytics() {
         {/* 📈 TIMELINE TAB */}
         <TabsContent value="timeline">
           <div className="space-y-4">
-            {timelineEvents.length === 0 ? (
+            {assessmentData.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
                   <Activity className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold mb-2">Ingen aktivitetshistorik än</h3>
+                  <h3 className="text-lg font-semibold mb-2">Ingen utvecklingshistorik än</h3>
                   <p className="text-muted-foreground">
                     Din utvecklingsresa kommer att visas här när du börjar använda systemet
                   </p>
@@ -452,17 +377,26 @@ export default function UserAnalytics() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {timelineEvents.map((event) => (
-                  <Card key={event.id}>
+                {assessmentData.map((assessment) => (
+                  <Card key={assessment.id}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
                         <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                         <div className="flex-1">
-                          <h4 className="font-semibold">{event.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                          <h4 className="font-semibold flex items-center gap-2">
+                            {getPillarName(assessment.pillar_type)} - Analys
+                            <Badge variant={assessment.source === 'assessment_rounds' ? 'default' : 'secondary'} className="text-xs">
+                              {assessment.source === 'assessment_rounds' ? 'Modern' : 'Legacy'}
+                            </Badge>
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                            {assessment.ai_analysis.substring(0, 150)}...
+                          </p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>{new Date(event.timestamp).toLocaleDateString('sv-SE')}</span>
-                            {event.pillar && <Badge variant="outline" className="text-xs">{event.pillar}</Badge>}
+                            <span>{new Date(assessment.created_at).toLocaleDateString('sv-SE')}</span>
+                            <Badge variant="outline" className="text-xs">
+                              Poäng: {assessment.calculated_score}/10
+                            </Badge>
                           </div>
                         </div>
                       </div>
@@ -489,12 +423,12 @@ export default function UserAnalytics() {
             <CardContent className="space-y-4">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-4">
-                  {pillarAnalyses.length === 0 
+                  {assessmentData.length === 0 
                     ? "Genomför dina första pillar-bedömningar för att få en personlig utvecklingsplan"
                     : "Din utvecklingsplan genereras automatiskt efter varje ny assessment"
                   }
                 </p>
-                {pillarAnalyses.length === 0 ? (
+                {assessmentData.length === 0 ? (
                   <Button onClick={() => navigate('/six-pillars')}>
                     <Brain className="h-4 w-4 mr-2" />
                     Starta bedömning för att få utvecklingsplan

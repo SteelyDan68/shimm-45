@@ -4455,6 +4455,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      migrate_all_legacy_assessments: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          pillar_type: string
+          migration_status: string
+          details: string
+        }[]
+      }
       reactivate_user: {
         Args: { user_uuid: string }
         Returns: string

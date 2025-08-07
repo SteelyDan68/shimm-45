@@ -3,6 +3,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PillarKey } from '@/types/sixPillarsModular';
+import { assessmentDataService } from '@/services/AssessmentDataService';
 
 export interface PillarProgress {
   pillarKey: PillarKey;
@@ -36,49 +37,41 @@ export const usePillarOrchestration = () => {
     if (!user?.id) return;
 
     try {
-      // CRITICAL FIX: Use path_entries instead of broken user_attributes
-      const { data: assessmentData, error: assessmentsError } = await supabase
-        .from('path_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('type', 'assessment')
-        .order('created_at', { ascending: false });
+      // 🚀 ANVÄND UNIVERSAL SERVICE FÖR ASSESSMENT DATA
+      console.log('🔄 Loading pillar progress via universal service...');
+      
+      const [assessments, tasksData] = await Promise.all([
+        // Använd AssessmentDataService för konsistent data
+        assessmentDataService.getAssessments(user.id),
+        
+        // Behåll befintlig task-logik
+        supabase
+          .from('tasks')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+      ]);
 
-      if (assessmentsError) throw assessmentsError;
-
-      // Convert path_entries to expected assessment format
-      const assessments = (assessmentData || []).map(entry => ({
-        id: entry.id,
-        user_id: entry.user_id,
-        pillar_key: (entry.metadata as any)?.pillar_key,
-        assessment_data: (entry.metadata as any)?.assessment_data || {},
-        calculated_score: (entry.metadata as any)?.assessment_score,
-        created_at: entry.created_at,
-        updated_at: entry.updated_at
-      })).filter(assessment => assessment.pillar_key);
-
-      // Fetch task progress for development plans  
-      const { data: tasks, error: tasksError } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
+      const { data: tasks, error: tasksError } = tasksData;
+      
       if (tasksError) throw tasksError;
+
+      console.log(`📊 Universal service: ${assessments.length} assessments, ${tasks?.length || 0} tasks`);
 
       // Process data to create pillar progress
       const allPillars: PillarKey[] = ['self_care', 'skills', 'talent', 'brand', 'economy', 'open_track'];
       
       const progressData: PillarProgress[] = allPillars.map(pillarKey => {
-        const latestAssessment = assessments?.find(a => a.pillar_key === pillarKey);
+        // Hitta senaste assessment för denna pillar från universal service
+        const latestAssessment = assessments?.find(a => a.pillar_type === pillarKey);
         const pillarTasks = tasks?.filter(t => detectPillarFromTask(t) === pillarKey) || [];
         
         const completedTasks = pillarTasks.filter(t => t.status === 'completed').length;
         const totalTasks = pillarTasks.length;
         
-        // CRITICAL FIX: Proper completion detection
+        // FÖRBÄTTRAD: Bedömning via universal service
         const hasValidScore = latestAssessment?.calculated_score !== null && latestAssessment?.calculated_score !== undefined;
-        const isCompleted = !!latestAssessment && hasValidScore;
+        const isCompleted = !!latestAssessment && hasValidScore && latestAssessment.calculated_score > 0;
         
         return {
           pillarKey,
@@ -105,8 +98,10 @@ export const usePillarOrchestration = () => {
       const plans = await processDevelopmentPlans(tasks || []);
       setActiveDevelopmentPlans(plans);
 
+      console.log(`✅ Pillar progress loaded: ${completedPillars}/${allPillars.length} completed`);
+
     } catch (error) {
-      console.error('Error loading pillar progress:', error);
+      console.error('Error loading pillar progress via universal service:', error);
       toast({
         title: "Fel vid laddning",
         description: "Kunde inte ladda pillar-progress. Försök igen.",
@@ -252,53 +247,55 @@ export const usePillarOrchestration = () => {
       // Calculate score from assessment data
       const calculatedScore = calculatePillarScore(assessmentData);
       
-      // CRITICAL FIX: Store in path_entries for consistency
-      const { error } = await supabase
-        .from('path_entries')
-        .insert({
-          user_id: user.id,
-          created_by: user.id,
-          timestamp: new Date().toISOString(),
-          type: 'assessment',
-          title: `Bedömning: ${pillarKey}`,
-          details: `Slutförd bedömning för pelare ${pillarKey}`,
-          status: 'completed',
-          ai_generated: false,
-          visible_to_client: true,
-          metadata: {
-            pillar_key: pillarKey,
-            assessment_score: calculatedScore,
-            assessment_data: assessmentData,
-            insights: {},
-            completed: true
-          }
-        });
-
-      if (error) throw error;
-
-      // Trigger AI analysis
-      const { error: analysisError } = await supabase.functions.invoke('analyze-pillar-assessment', {
-        body: {
-          userId: user.id,
-          pillarKey,
-          assessmentData
-        }
+      // 🚀 ANVÄND UNIVERSAL SERVICE FÖR SPARNING
+      console.log('💾 Saving pillar assessment via universal service:', { pillarKey, calculatedScore });
+      
+      const saveResult = await assessmentDataService.saveAssessment({
+        user_id: user.id,
+        pillar_type: pillarKey,
+        assessment_data: assessmentData,
+        calculated_score: calculatedScore,
+        comments: 'Genomförd via usePillarOrchestration hook'
       });
 
-      if (analysisError) {
-        console.warn('AI analysis failed but assessment saved:', analysisError);
+      if (!saveResult.success) {
+        throw new Error(saveResult.error || 'Failed to save assessment');
+      }
+
+      console.log(`✅ Assessment saved via universal service: ${saveResult.assessment_round_id}`);
+
+      // Trigger AI analysis om assessment_round_id finns
+      if (saveResult.assessment_round_id) {
+        try {
+          const { error: analysisError } = await supabase.functions.invoke('analyze-pillar-assessment', {
+            body: {
+              user_id: user.id,
+              pillar_type: pillarKey,
+              scores: assessmentData,
+              comments: 'Assessment via universal service'
+            }
+          });
+
+          if (analysisError) {
+            console.warn('AI analysis failed but assessment saved:', analysisError);
+          } else {
+            console.log('✅ AI analysis triggered successfully');
+          }
+        } catch (aiError) {
+          console.warn('AI analysis request failed:', aiError);
+        }
       }
 
       await loadPillarProgress();
       
       toast({
-        title: "Assessment sparat",
-        description: `Din ${pillarKey} assessment är genomförd!`,
+        title: "Assessment sparat ✅",
+        description: `Din ${pillarKey} assessment är genomförd via universal service!`,
       });
 
       return true;
     } catch (error) {
-      console.error('Error completing assessment:', error);
+      console.error('Error completing assessment via universal service:', error);
       toast({
         title: "Fel vid sparande",
         description: "Kunde inte spara assessment. Försök igen.",
