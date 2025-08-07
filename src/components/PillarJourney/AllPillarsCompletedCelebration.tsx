@@ -47,7 +47,7 @@ export const AllPillarsCompletedCelebration: React.FC<AllPillarsCompletedCelebra
 
   // Automatically trigger AI planning when component mounts
   useEffect(() => {
-    if (user?.id && completedPillars.length === 6 && !planGenerated) {
+     if (user?.id && completedPillars.length === 6 && !planGenerated) {
       
       generateComprehensivePlan();
     }
@@ -207,7 +207,7 @@ Fokusera på hållbarhet, momentum och exponentiell utveckling!`,
           </div>
           
           <CardTitle className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            🎉 FANTASTISKT! Du har genomfört alla 6 pillars! 🎉
+            🎉 FANTASTISKT! Du har genomfört alla 6 pelare! 🎉
           </CardTitle>
           
           <div className="space-y-3">
@@ -218,7 +218,7 @@ Fokusera på hållbarhet, momentum och exponentiell utveckling!`,
             <div className="flex items-center justify-center gap-2">
               <Progress value={100} className="w-64 h-3" />
               <Badge variant="default" className="bg-green-500 text-white px-3 py-1">
-                6/6 Pillars ✨
+                6/6 Pelare ✨
               </Badge>
             </div>
           </div>
@@ -341,7 +341,7 @@ Fokusera på hållbarhet, momentum och exponentiell utveckling!`,
                 <h4 className="font-semibold mb-2">🎯 Dina Starkaste Områden</h4>
                 <p className="text-sm text-gray-700">
                   Baserat på dina assessments visar du särskild styrka inom strategiskt tänkande 
-                  och personlig utveckling. Din vilja att genomföra alla sex pillars visar på 
+                  och personlig utveckling. Din vilja att genomföra alla sex pelare visar på 
                   exceptionell disciplin och självkännedom.
                 </p>
               </div>
@@ -423,7 +423,7 @@ Fokusera på hållbarhet, momentum och exponentiell utveckling!`,
 
               <p className="text-gray-700">
                 Nu börjar den riktiga magin! Istället för att utveckla områden isolerat, 
-                arbetar vi nu med <strong>synergieffekter</strong> mellan dina sex pillars.
+                arbetar vi nu med <strong>synergieffekter</strong> mellan dina sex pelare.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

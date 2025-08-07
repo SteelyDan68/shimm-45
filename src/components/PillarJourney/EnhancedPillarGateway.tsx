@@ -151,7 +151,7 @@ const EnhancedPillarGateway: React.FC<EnhancedPillarGatewayProps> = ({
               Din Pillar-Resa
             </span>
             <Badge variant="outline">
-              {completedPillars.length}/6 Completed
+              {completedPillars.length}/6 Slutförda
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -247,7 +247,7 @@ const EnhancedPillarGateway: React.FC<EnhancedPillarGatewayProps> = ({
         <CardContent className="pt-6">
           <div className="text-center space-y-3">
             <h3 className="text-lg font-semibold text-blue-900">
-              🎯 Varför genomföra alla sex pillars?
+              🎯 Varför genomföra alla sex pelare?
             </h3>
             <p className="text-blue-700">
               Ju fler pillars du genomför, desto mer personlig och träffsäker blir din AI-coach. 

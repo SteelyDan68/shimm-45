@@ -46,14 +46,25 @@ const onboardingSteps: OnboardingStep[] = [
     estimatedTime: '2 min'
   },
   {
+    id: 'six-pillars-introduction',
+    title: 'Upptäck dina sex utvecklingspelare',
+    description: 'Lär dig om alla sex pelare: Self Care, Kompetenser, Talang, Varumärke, Ekonomi och Öppet Spår.',
+    action: 'Utforska Sex Pelare',
+    icon: Target,
+    targetElement: '[data-onboarding="six-pillars"]',
+    roles: ['client'],
+    priority: 2,
+    estimatedTime: '5 min'
+  },
+  {
     id: 'first-assessment',
     title: 'Genomför din första utvärdering',
-    description: 'Skapa din baslinjevärdering för att få personliga rekommendationer och insikter.',
+    description: 'Välj en av de sex pelarna och skapa din baslinjevärdering för personliga rekommendationer.',
     action: 'Starta Utvärdering',
     icon: CheckCircle,
     targetElement: '[data-onboarding="assessments"]',
     roles: ['client'],
-    priority: 2,
+    priority: 3,
     estimatedTime: '15 min'
   },
   {
@@ -64,7 +75,7 @@ const onboardingSteps: OnboardingStep[] = [
     icon: Brain,
     targetElement: '[data-onboarding="stefan-chat"]',
     roles: ['client'],
-    priority: 3,
+    priority: 4,
     estimatedTime: '5 min'
   },
   

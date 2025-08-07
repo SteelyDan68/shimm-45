@@ -209,13 +209,13 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
-                Om Six Pillars systemet
+                Om Sex Pelare systemet
                 <HelpTooltip content="Six Pillars är ett beprövat system för hållbar utveckling inom sex kritiska livsområden." />
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Six Pillars är vårt holistiska utvecklingssystem som balanserar sex grundpelare: 
+                Sex Pelare är vårt holistiska utvecklingssystem som balanserar sex grundpelare: 
                 <strong> Självomvårdnad, Kompetenser, Talang, Varumärke, Ekonomi och Öppna Spåret</strong>. 
                 Varje pelare representerar ett kritiskt område för din personliga och professionella utveckling.
               </p>
@@ -224,7 +224,7 @@ export const PillarJourneyOrchestrator = ({ userId, userName }: PillarJourneyOrc
                 <div className="space-y-2">
                   <h4 className="font-semibold">Redo att börja?</h4>
                   <p className="text-sm text-muted-foreground">
-                    Gå till Six Pillars Dashboard för att läsa mer om systemet, 
+                    Gå till Sex Pelare Dashboard för att läsa mer om systemet, 
                     göra dina första bedömningar och aktivera dina utvecklingsområden.
                   </p>
                 </div>

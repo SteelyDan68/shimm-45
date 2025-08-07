@@ -293,8 +293,8 @@ export const QUICK_ACTIONS = {
   ],
   client: [
     {
-      title: "Six Pillars",
-      description: "Starta din utvecklingsresa",
+      title: "Sex Pelare",
+      description: "Starta din utvecklingsresa med alla sex pelare",
       icon: TrendingUp,
       url: NAVIGATION_ROUTES.SIX_PILLARS,
       variant: "default" as const

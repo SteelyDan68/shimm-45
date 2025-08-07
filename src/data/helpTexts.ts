@@ -86,7 +86,7 @@ export const helpTexts = {
     recommendedAssessments: "AI föreslår vilka bedömningar du bör göra härnäst baserat på din utvecklingsfas och tidigare resultat.",
     smartGuide: "Intelligent guide som visar din nuvarande position och ger förslag på nästa steg i utvecklingsresan.",
     nextSteps: "Dina rekommenderade nästa steg i utvecklingsresan baserat på dina genomförda bedömningar.",
-    pillarSelection: "Efter välkomstbedömningen väljer du vilka av de sex Pillars (utvecklingsområden) du vill fokusera på."
+    pillarSelection: "Efter välkomstbedömningen väljer du vilka av de sex Pelare (utvecklingsområden) du vill fokusera på."
   },
 
   // Welcome Assessment

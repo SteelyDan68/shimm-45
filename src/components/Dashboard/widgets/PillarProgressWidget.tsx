@@ -106,7 +106,7 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
         
         <div className="space-y-1">
           <div className="text-2xl font-bold text-purple-600">
-            {completedCount}/6 Pillars
+            {completedCount}/6 Pelare
           </div>
           <Progress value={totalProgress} className="h-2" />
           <p className="text-xs text-muted-foreground">
