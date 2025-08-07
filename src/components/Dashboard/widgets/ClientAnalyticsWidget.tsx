@@ -83,7 +83,7 @@ export const ClientAnalyticsWidget = ({
       console.log('📊 loadQuickStats: Fetching assessment rounds...');
       const { data: assessmentRounds, error: roundsError } = await supabase
         .from('assessment_rounds')
-        .select('id, pillar_type, scores, created_at')
+        .select('id, pillar_type, scores, ai_analysis, created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
