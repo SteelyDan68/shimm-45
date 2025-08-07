@@ -48,11 +48,7 @@ export function CalendarPage() {
     title: '',
     description: '',
     event_date: undefined as Date | undefined,
-    time: '10:00',
-    duration: '60',
-    category: 'coaching' as string,
-    user_id: '',
-    visible_to_client: true
+    time: '10:00'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,18 +76,18 @@ export function CalendarPage() {
           title: formData.title,
           description: formData.description,
           event_date: eventDateTime.toISOString(),
-          category: formData.category,
-          user_id: formData.user_id || user?.id,
+          category: 'personal',
+          user_id: user?.id,
           created_by: user?.id,
-          created_by_role: 'coach',
-          visible_to_client: formData.visible_to_client
+          created_by_role: 'client',
+          visible_to_client: true
         });
 
       if (error) throw error;
 
       toast({
-        title: "Möte schemalagt",
-        description: "Mötet har schemalagts framgångsrikt",
+        title: "Händelse skapad",
+        description: "Händelsen har lagts till i din kalender",
       });
 
       // Trigger Stefan acknowledgment for event creation
@@ -100,12 +96,12 @@ export function CalendarPage() {
         event_date: eventDateTime.toISOString()
       });
 
-      navigate('/coach');
+      navigate('/calendar');
     } catch (error) {
       console.error('Error creating calendar event:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte schemalägga mötet",
+        description: "Kunde inte skapa händelsen",
         variant: "destructive"
       });
     } finally {
@@ -120,14 +116,14 @@ export function CalendarPage() {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => navigate('/coach')}
+            onClick={() => navigate('/calendar')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Tillbaka till Coach
+            Tillbaka till Kalender
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Schemalägg möte</h1>
-            <p className="text-muted-foreground">Boka tid med klient eller för egen planering</p>
+            <h1 className="text-2xl font-bold">Skapa händelse</h1>
+            <p className="text-muted-foreground">Lägg till en ny händelse i din kalender</p>
           </div>
         </div>
 
@@ -135,18 +131,18 @@ export function CalendarPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CalendarIcon className="h-5 w-5" />
-              Nytt möte
+              Ny händelse
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Mötestitel *</Label>
+                <Label htmlFor="title">Titel *</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="T.ex. Coaching-session med..."
+                  placeholder="Ange händelsetitel..."
                   required
                 />
               </div>
@@ -157,12 +153,12 @@ export function CalendarPage() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Agenda, förberedelser eller andra detaljer..."
+                  placeholder="Valfri beskrivning av händelsen..."
                   className="min-h-[80px]"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Datum *</Label>
                   <Popover>
@@ -185,7 +181,7 @@ export function CalendarPage() {
                         selected={formData.event_date}
                         onSelect={(date) => setFormData(prev => ({ ...prev, event_date: date }))}
                         initialFocus
-                        disabled={(date) => date < new Date()}
+                        className="p-3 pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
@@ -200,100 +196,17 @@ export function CalendarPage() {
                     onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Varaktighet (min)</Label>
-                  <Select 
-                    value={formData.duration} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, duration: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="30">30 minuter</SelectItem>
-                      <SelectItem value="45">45 minuter</SelectItem>
-                      <SelectItem value="60">60 minuter</SelectItem>
-                      <SelectItem value="90">90 minuter</SelectItem>
-                      <SelectItem value="120">2 timmar</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Mötestyp</Label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="coaching">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Coaching-session
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="video_call">
-                      <div className="flex items-center gap-2">
-                        <Video className="h-4 w-4" />
-                        Videosamtal
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="phone_call">
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        Telefonsamtal
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="coffee_meeting">
-                      <div className="flex items-center gap-2">
-                        <Coffee className="h-4 w-4" />
-                        Fika/möte
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="user_id">Klient (valfritt)</Label>
-                  <Input
-                    id="user_id"
-                    value={formData.user_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, user_id: e.target.value }))}
-                    placeholder="Användar-ID eller e-post"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Lämna tomt för personlig planering
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="visible_to_client"
-                  checked={formData.visible_to_client}
-                  onChange={(e) => setFormData(prev => ({ ...prev, visible_to_client: e.target.checked }))}
-                  className="rounded"
-                />
-                <Label htmlFor="visible_to_client" className="text-sm">
-                  Synlig för klient (om klient anges)
-                </Label>
               </div>
 
               <div className="flex gap-3 pt-4">
                 <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? 'Schemalägger...' : 'Schemalägg möte'}
+                  {loading ? 'Skapar händelse...' : 'Skapa händelse'}
                   <CalendarIcon className="ml-2 h-4 w-4" />
                 </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => navigate('/coach')}
+                  onClick={() => navigate('/calendar')}
                 >
                   Avbryt
                 </Button>
@@ -416,11 +329,7 @@ export function CalendarPage() {
                       title: selectedEvent.title,
                       description: selectedEvent.description || '',
                       event_date: eventDate,
-                      time: format(eventDate, 'HH:mm'),
-                      duration: '60', // Default, could be stored in DB
-                      category: selectedEvent.category,
-                      user_id: selectedEvent.user_id || '',
-                      visible_to_client: selectedEvent.visible_to_client
+                      time: format(eventDate, 'HH:mm')
                     });
                     setShowEventDialog(false);
                     setSearchParams({ action: 'schedule', edit: selectedEvent.id });
