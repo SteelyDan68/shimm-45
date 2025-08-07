@@ -129,6 +129,30 @@ export const DynamicWidget: React.FC<WidgetProps> = (props) => {
     );
   }
 
+  // 🎯 SPECIAL PROPS MAPPING för widgets som behöver specifika props
+  const getWidgetSpecificProps = () => {
+    const baseProps = {
+      stats,
+      actions,
+      onAction,
+      onConfigChange,
+      widget
+    };
+
+    // ClientAnalyticsWidget behöver userId istället för stats
+    if (widget.type === 'client-analytics') {
+      return {
+        ...baseProps,
+        userId: stats?.userId || '',
+        compact: widget.config?.compact || false
+      };
+    }
+
+    return baseProps;
+  };
+
+  const widgetProps = getWidgetSpecificProps();
+
   // Widget control handlers
   const handleToggleVisibility = () => {
     if (onConfigChange) {
@@ -200,7 +224,7 @@ export const DynamicWidget: React.FC<WidgetProps> = (props) => {
         {/* Widget Content */}
         <CardContent className="pt-0">
           <Suspense fallback={<WidgetSkeleton widget={widget} />}>
-            <WidgetComponent {...props} />
+            <WidgetComponent {...widgetProps} />
           </Suspense>
         </CardContent>
       </Card>

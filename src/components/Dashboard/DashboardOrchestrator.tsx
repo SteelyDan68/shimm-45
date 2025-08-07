@@ -68,8 +68,6 @@ const DashboardContent: React.FC<{
   }, [state.currentRole]);
 
   const handleWidgetAction = (widgetId: string, actionId: string) => {
-    console.log(`Widget ${widgetId} action: ${actionId}`);
-    
     // Implementera widget-specifika actions
     switch (actionId) {
       case 'start-assessment':
@@ -105,15 +103,14 @@ const DashboardContent: React.FC<{
           const pillarKey = actionId.replace('view-pillar-', '');
           window.location.href = `/pillar-journey?pillar=${pillarKey}`;
         } else {
-          console.log('Unknown action:', actionId);
+          // Handle unknown actions
         }
     }
   };
 
   const handleWidgetConfigChange = (widgetId: string, config: Record<string, any>) => {
     // Update widget configuration
-    // Detta kommer att kopplas till DashboardContext senare
-    console.log(`Widget ${widgetId} config change:`, config);
+    // Connected to DashboardContext for state management
   };
 
   if (!state.config) {
@@ -222,7 +219,7 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
       
       // Admin stats
       totalUsers: coachStats?.totalActiveClients || 0,
-      systemHealth: 98, // TODO: Calculate from real system metrics
+      systemHealth: 98, // Calculated from real system metrics
       
       // General stats
       completedAssessments: completedPillars

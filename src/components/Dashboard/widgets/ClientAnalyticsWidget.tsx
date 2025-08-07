@@ -58,17 +58,12 @@ export const ClientAnalyticsWidget = ({
 
   // 📊 LOAD QUICK ANALYTICS DATA
   const loadQuickStats = async () => {
-    if (!userId) {
-      console.log('❌ loadQuickStats: No userId provided');
-      return;
-    }
+    if (!userId) return;
 
     try {
-      console.log('🔄 loadQuickStats: Starting to load data for userId:', userId);
       setIsLoading(true);
 
       // Hämta analyser från path_entries OCH assessment_rounds för komplett data
-      console.log('📊 loadQuickStats: Fetching analyses from path_entries...');
       const { data: pathAnalyses, error: pathError } = await supabase
         .from('path_entries')
         .select('id, content, metadata, created_at')
@@ -76,26 +71,15 @@ export const ClientAnalyticsWidget = ({
         .eq('type', 'assessment')
         .order('created_at', { ascending: false });
 
-      if (pathError) {
-        console.error('❌ Error fetching path analyses:', pathError);
-        throw pathError;
-      }
+      if (pathError) throw pathError;
 
-      console.log('📊 loadQuickStats: Fetching assessment rounds...');
       const { data: assessmentRounds, error: roundsError } = await supabase
         .from('assessment_rounds')
         .select('id, pillar_type, scores, ai_analysis, created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (roundsError) {
-        console.error('❌ Error fetching assessment rounds:', roundsError);
-        throw roundsError;
-      }
-
-      console.log('✅ Data fetched successfully:');
-      console.log('📋 Path analyses:', pathAnalyses?.length || 0, 'items');
-      console.log('📋 Assessment rounds:', assessmentRounds?.length || 0, 'items');
+      if (roundsError) throw roundsError;
 
       // Räkna alla assessment rounds oavsett AI-analys (mer inkluderande)
       const totalAnalyses = assessmentRounds?.length || 0;
@@ -145,7 +129,6 @@ export const ClientAnalyticsWidget = ({
       ).length || 0;
 
       // Hämta uppgifter från ai_coaching_recommendations som är completed
-      console.log('📊 loadQuickStats: Fetching completed recommendations...');
       const { data: completedRecs, error: recsError } = await supabase
         .from('ai_coaching_recommendations')
         .select('id, status')
@@ -163,12 +146,10 @@ export const ClientAnalyticsWidget = ({
         avgScore: Math.round(avgScore * 10) / 10 // Avrunda till 1 decimal
       };
 
-      console.log('✅ Final stats calculated:', finalStats);
       setQuickStats(finalStats);
       setValidAnalyses(validAnalyses);
 
     } catch (error: any) {
-      console.error('Error loading quick stats:', error);
       toast({
         title: "Fel",
         description: "Kunde inte ladda utvecklingsstatistik",
@@ -180,12 +161,9 @@ export const ClientAnalyticsWidget = ({
   };
 
   useEffect(() => {
-    console.log('🔍 ClientAnalyticsWidget useEffect triggered, userId:', userId);
     if (userId) {
-      console.log('✅ Calling loadQuickStats for ClientAnalytics widget');
       loadQuickStats();
     } else {
-      console.log('❌ No userId provided to ClientAnalyticsWidget');
       setIsLoading(false);
     }
   }, [userId]);
@@ -278,7 +256,6 @@ export const ClientAnalyticsWidget = ({
                   // Uppdatera data efter 3 sekunder
                   setTimeout(() => loadQuickStats(), 3000);
                 } catch (error) {
-                  console.error('Consolidation error:', error);
                   toast({
                     title: "Fel",
                     description: "Kunde inte starta konsolidering",
