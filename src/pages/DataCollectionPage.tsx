@@ -34,6 +34,14 @@ import { format, subDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  EnhancedTooltip, 
+  InfoTooltip, 
+  WarningTooltip, 
+  SuccessTooltip, 
+  ActionTooltip,
+  TipTooltip
+} from '@/components/ui/enhanced-tooltip';
 
 interface DataCollectionJob {
   id: string;

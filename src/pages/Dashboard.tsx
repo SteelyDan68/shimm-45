@@ -10,16 +10,22 @@ import {
   Database,
   Plus,
   Eye,
-  Activity
+  Activity,
+  Settings,
+  BarChart3
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useUnifiedClients } from '@/hooks/useUnifiedClients';
 
-
-import { HelpTooltip } from '@/components/HelpTooltip';
-import { helpTexts } from '@/data/helpTexts';
+import { 
+  EnhancedTooltip, 
+  InfoTooltip, 
+  HelpTooltip, 
+  ActionTooltip,
+  FeatureTooltip 
+} from '@/components/ui/enhanced-tooltip';
 
 interface Client {
   id: string;
@@ -201,7 +207,9 @@ export const Dashboard = () => {
             <h1 className="text-3xl font-bold">
               Välkommen tillbaka, {profile?.first_name || 'Admin'}!
             </h1>
-            <HelpTooltip content={helpTexts.dashboard.welcomeMessage} />
+            <InfoTooltip 
+              content="Huvuddashboard för administratörer med systemöversikt och användarstatistik"
+            />
           </div>
           <p className="text-muted-foreground">
             Administrativ översikt av systemet och alla användare
@@ -209,20 +217,30 @@ export const Dashboard = () => {
             {hasRole('admin') && !hasRole('superadmin') && ' - Admin behörigheter'}
           </p>
         </div>
-        <Button onClick={() => navigate('/administration')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Hantera användare
-        </Button>
+        <ActionTooltip
+          content="Öppna administrationsverktyg för att hantera användare och systeminställningar"
+          action="Klicka"
+          variant="feature"
+        >
+          <Button onClick={() => navigate('/administration')} className="hover-scale">
+            <Plus className="h-4 w-4 mr-2" />
+            Hantera användare
+          </Button>
+        </ActionTooltip>
       </div>
 
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <CardTitle className="text-sm font-medium">Totalt Klienter</CardTitle>
-              <HelpTooltip content={helpTexts.dashboard.clientCount} />
+              <EnhancedTooltip 
+                content="Visar det totala antalet registrerade klienter i systemet"
+                variant="info"
+                size="sm"
+              />
             </div>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -232,11 +250,15 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <CardTitle className="text-sm font-medium">Aktiva Klienter</CardTitle>
-              <HelpTooltip content="Antal klienter med aktiv status som arbetar tillsammans med dig" />
+              <EnhancedTooltip 
+                content="Antal klienter med aktiv status som arbetar tillsammans med dig"
+                variant="success"
+                size="sm"
+              />
             </div>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -246,11 +268,15 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <CardTitle className="text-sm font-medium">AI Analyser</CardTitle>
-              <HelpTooltip content="Antal genomförda AI-analyser och rekommendationer för dina klienter" />
+              <EnhancedTooltip 
+                content="Antal genomförda AI-analyser och rekommendationer för dina klienter"
+                variant="feature"
+                size="sm"
+              />
             </div>
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -260,11 +286,15 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <CardTitle className="text-sm font-medium">Datapunkter</CardTitle>
-              <HelpTooltip content="Totalt antal insamlade datapunkter från alla källor för alla dina klienter" />
+              <EnhancedTooltip 
+                content="Totalt antal insamlade datapunkter från alla källor för alla dina klienter"
+                variant="info"
+                size="sm"
+              />
             </div>
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -277,12 +307,15 @@ export const Dashboard = () => {
 
 
       {/* Recent Clients */}
-      <Card>
+      <Card className="hover:shadow-md transition-shadow duration-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Senaste Klienter
-            <HelpTooltip content={helpTexts.dashboard.recentActivity} />
+            <EnhancedTooltip 
+              content="Visar de 6 senast registrerade klienterna med grundläggande information och snabbåtgärder"
+              variant="info"
+            />
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -295,18 +328,26 @@ export const Dashboard = () => {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {clients.slice(0, 6).map((client) => (
-                <Card key={client.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card key={client.id} className="hover:shadow-md transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg">{client.name}</CardTitle>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => navigate(`/user/${client.id}?context=client`)}
-                        title="Öppna användarprofil"
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                        {client.name}
+                      </CardTitle>
+                      <ActionTooltip
+                        content="Öppna användarens fullständiga profil med all information och verktyg"
+                        action="Klicka"
+                        variant="info"
                       >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate(`/user/${client.id}?context=client`)}
+                          className="hover-scale opacity-0 group-hover:opacity-100 transition-all duration-200"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </ActionTooltip>
                     </div>
                     <div className="flex gap-2">
                       <Badge className={getCategoryColor(client.category)}>

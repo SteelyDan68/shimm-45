@@ -31,6 +31,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { 
+  EnhancedTooltip, 
+  InfoTooltip, 
+  WarningTooltip, 
+  SuccessTooltip, 
+  ActionTooltip 
+} from '@/components/ui/enhanced-tooltip';
 
 interface SystemMetrics {
   totalUsers: number;
