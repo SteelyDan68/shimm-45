@@ -66,82 +66,99 @@ export const ClientAnalyticsWidget = ({
       console.log('🔄 loadQuickStats: Starting to load data for userId:', userId);
       setIsLoading(true);
 
-      // Hämta analyser från path_entries (korrekt datakälla)
+      // Hämta analyser från path_entries OCH assessment_rounds för komplett data
       console.log('📊 loadQuickStats: Fetching analyses from path_entries...');
-      const { data: analyses, error: analysesError } = await supabase
+      const { data: pathAnalyses, error: pathError } = await supabase
         .from('path_entries')
         .select('id, content, metadata, created_at')
         .eq('user_id', userId)
         .eq('type', 'assessment')
-        .not('content', 'is', null);
+        .order('created_at', { ascending: false });
 
-      if (analysesError) {
-        console.error('❌ Error fetching analyses:', analysesError);
-        throw analysesError;
+      if (pathError) {
+        console.error('❌ Error fetching path analyses:', pathError);
+        throw pathError;
       }
 
-      console.log('✅ Analyses fetched successfully:', analyses?.length || 0, 'items');
-      console.log('📋 Analyses data:', analyses);
-
-      // Slutför loading direkt för nu - vi kör med enkel mock-data
-      console.log('⚡ loadQuickStats: Setting final data and completing load');
-      setQuickStats({
-        totalAnalyses: analyses?.length || 0,
-        recentActivities: analyses?.length || 0,
-        completedTasks: 0,
-        avgScore: 0
-      });
-      
-      console.log('✅ loadQuickStats: COMPLETED successfully');
-      return;
-
-      // Hämta senaste aktiviteter (path_entries)
-      console.log('📊 loadQuickStats: Fetching activities from path_entries...');
-      const { data: activities, error: activitiesError } = await supabase
-        .from('path_entries')
-        .select('id, created_at')
+      console.log('📊 loadQuickStats: Fetching assessment rounds...');
+      const { data: assessmentRounds, error: roundsError } = await supabase
+        .from('assessment_rounds')
+        .select('id, pillar_type, scores, created_at')
         .eq('user_id', userId)
-        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()); // Senaste veckan
+        .order('created_at', { ascending: false });
 
-      if (activitiesError) throw activitiesError;
+      if (roundsError) {
+        console.error('❌ Error fetching assessment rounds:', roundsError);
+        throw roundsError;
+      }
 
-      // Process assessment data från path_entries
-      const totalAnalyses = analyses?.length || 0;
+      console.log('✅ Data fetched successfully:');
+      console.log('📋 Path analyses:', pathAnalyses?.length || 0, 'items');
+      console.log('📋 Assessment rounds:', assessmentRounds?.length || 0, 'items');
+
+      // Beräkna totalanalyser från båda källorna
+      const totalAnalyses = Math.max(pathAnalyses?.length || 0, assessmentRounds?.length || 0);
+
+      // Beräkna genomsnittlig score från assessment_rounds (mer tillförlitlig)
       let totalScore = 0;
       let scoreCount = 0;
 
-      analyses?.forEach(analysis => {
-        const metadata = analysis.metadata as any;
-        if (metadata?.assessment_score) {
-          totalScore += metadata.assessment_score;
+      assessmentRounds?.forEach(round => {
+        const scores = round.scores as any;
+        if (scores?.overall) {
+          totalScore += scores.overall;
           scoreCount++;
+        } else if (scores && typeof scores === 'object') {
+          // Hitta första numeriska score om overall saknas
+          const firstScore = Object.values(scores).find(score => typeof score === 'number');
+          if (firstScore) {
+            totalScore += firstScore as number;
+            scoreCount++;
+          }
         }
       });
 
+      // Fallback till path_entries scores om assessment_rounds saknas
+      if (scoreCount === 0) {
+        pathAnalyses?.forEach(analysis => {
+          const metadata = analysis.metadata as any;
+          if (metadata?.assessment_score && typeof metadata.assessment_score === 'number') {
+            totalScore += metadata.assessment_score;
+            scoreCount++;
+          }
+        });
+      }
+
       const avgScore = scoreCount > 0 ? totalScore / scoreCount : 0;
 
-      // Räkna senaste veckans analyser
+      // Räkna senaste veckans aktiviteter
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      const recentActivities = analyses?.filter(analysis => 
-        new Date(analysis.created_at) > oneWeekAgo
+      const recentActivities = (assessmentRounds || pathAnalyses)?.filter(item => 
+        new Date(item.created_at) > oneWeekAgo
       ).length || 0;
 
-      // Hämta uppgifter
-      const { data: tasks, error: tasksError } = await supabase
-        .from('tasks')
+      // Hämta uppgifter från ai_coaching_recommendations som är completed
+      console.log('📊 loadQuickStats: Fetching completed recommendations...');
+      const { data: completedRecs, error: recsError } = await supabase
+        .from('ai_coaching_recommendations')
         .select('id, status')
         .eq('user_id', userId)
         .eq('status', 'completed');
 
-      if (tasksError) throw tasksError;
+      if (recsError) {
+        console.warn('⚠️ Error fetching recommendations:', recsError);
+      }
 
-      setQuickStats({
+      const finalStats = {
         totalAnalyses,
         recentActivities,
-        completedTasks: tasks?.length || 0,
-        avgScore
-      });
+        completedTasks: completedRecs?.length || 0,
+        avgScore: Math.round(avgScore * 10) / 10 // Avrunda till 1 decimal
+      };
+
+      console.log('✅ Final stats calculated:', finalStats);
+      setQuickStats(finalStats);
 
     } catch (error: any) {
       console.error('Error loading quick stats:', error);
