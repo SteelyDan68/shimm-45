@@ -300,13 +300,6 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                 <p className="text-sm text-muted-foreground">
                   Genomför en pillar-assessment för att få personliga aktiviteter!
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate('/six-pillars?startAssessment=true')}
-                >
-                  Starta assessment
-                </Button>
               </div>
             )}
           </CardContent>
@@ -398,7 +391,6 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
               <FileText className="w-8 h-8 text-orange-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-orange-600">{Math.round(overallProgress)}%</div>
               <p className="text-sm text-muted-foreground">Utvecklingsstatus</p>
-              <Button variant="ghost" size="sm" className="mt-2">Se framsteg</Button>
             </CardContent>
           </Card>
         </div>

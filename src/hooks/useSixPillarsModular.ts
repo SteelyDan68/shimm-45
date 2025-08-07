@@ -236,6 +236,27 @@ export const useSixPillarsModular = (clientId?: string) => {
         console.warn('AI analysis failed but assessment was saved:', aiError);
       }
       
+      // 7. CRITICAL: Mark pillar as completed by creating a path entry
+      await supabase
+        .from('path_entries')
+        .insert({
+          user_id: clientId,
+          created_by: user.id,
+          type: 'assessment',
+          title: `${pillarKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} - Bedömning slutförd`,
+          details: `Pillar ${pillarKey} har genomförts framgångsrikt med score: ${calculatedScore}`,
+          ai_generated: false,
+          timestamp: new Date().toISOString(),
+          metadata: {
+            pillar_type: pillarKey,
+            calculated_score: calculatedScore,
+            assessment_round_id: assessmentRound.id,
+            completion_status: 'completed'
+          }
+        });
+
+      console.log('✅ Pillar completion marker created');
+      
       toast({
         title: "✅ Assessment genomförd!",
         description: `Din ${pillarKey} bedömning har sparats och AI-analys skapas.`,

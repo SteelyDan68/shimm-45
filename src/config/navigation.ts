@@ -14,7 +14,10 @@ import {
   MessageSquare,
   Building2,
   Users2,
-  Smartphone
+  Smartphone,
+  RefreshCw,
+  Zap,
+  Activity
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -24,12 +27,14 @@ export interface NavigationItem {
   roles: string[];
   exact?: boolean;
   children?: NavigationItem[];
+  betaOnly?: boolean; // Add beta flag
 }
 
 export interface NavigationGroup {
   title: string;
   items: NavigationItem[];
   roles: string[];
+  betaOnly?: boolean; // Add beta flag for groups
 }
 
 export const NAVIGATION_ROUTES = {
@@ -185,6 +190,34 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["client"]
       }
     ]
+  },
+  {
+    title: "Beta Testing (Anna)",
+    roles: ["client"],
+    betaOnly: true, // Special flag for Anna Andersson only
+    items: [
+      {
+        title: "Assessment Konsolidering",
+        url: "/user-analytics?tab=consolidation",
+        icon: RefreshCw,
+        roles: ["client"],
+        betaOnly: true
+      },
+      {
+        title: "AI-till-Actionables",
+        url: "/user-analytics?tab=consolidation",
+        icon: Zap,
+        roles: ["client"], 
+        betaOnly: true
+      },
+      {
+        title: "Pipeline Status",
+        url: "/user-analytics?tab=consolidation",
+        icon: Activity,
+        roles: ["client"],
+        betaOnly: true
+      }
+    ]
   }
 ];
 
@@ -298,14 +331,20 @@ export const QUICK_ACTIONS = {
 };
 
 // Utility functions
-export const getNavigationForRole = (roles: string[]): NavigationGroup[] => {
-  return MAIN_NAVIGATION.filter(group => 
-    group.roles.some(role => roles.includes(role))
-  ).map(group => ({
+export const getNavigationForRole = (roles: string[], isAnnaAndersson = false): NavigationGroup[] => {
+  return MAIN_NAVIGATION.filter(group => {
+    // Filter out beta groups if not Anna Andersson
+    if (group.betaOnly && !isAnnaAndersson) return false;
+    
+    return group.roles.some(role => roles.includes(role));
+  }).map(group => ({
     ...group,
-    items: group.items.filter(item => 
-      item.roles.some(role => roles.includes(role))
-    )
+    items: group.items.filter(item => {
+      // Filter out beta items if not Anna Andersson
+      if (item.betaOnly && !isAnnaAndersson) return false;
+      
+      return item.roles.some(role => roles.includes(role));
+    })
   }));
 };
 

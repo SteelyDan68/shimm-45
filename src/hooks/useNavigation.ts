@@ -8,6 +8,7 @@ import {
   NavigationItem,
   NavigationGroup
 } from '@/config/navigation';
+import { shouldShowBetaFeatures } from '@/utils/userHelpers';
 
 export const useNavigation = () => {
   const navigate = useNavigate();
@@ -15,7 +16,8 @@ export const useNavigation = () => {
   const { user, hasRole, roles } = useAuth();
 
   const userRoles = user ? roles : [];
-  const navigation = getNavigationForRole(userRoles);
+  const isBetaUser = shouldShowBetaFeatures(user);
+  const navigation = getNavigationForRole(userRoles, isBetaUser);
   const quickActions = getQuickActionsForRole(userRoles);
   const defaultRoute = getDefaultRouteForRole(userRoles);
 

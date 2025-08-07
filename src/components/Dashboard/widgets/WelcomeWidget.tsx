@@ -9,9 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, ArrowRight, Trophy, Target } from 'lucide-react';
 import { WidgetProps } from '../types/dashboard-types';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   
   const displayName = profile?.first_name 
     ? `${profile.first_name} ${profile.last_name || ''}`.trim()
@@ -83,25 +85,15 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
         </div>
       )}
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Removed for all users */}
       <div className="flex gap-2 justify-center">
         <Button 
           size="sm"
-          onClick={() => onAction?.('start-assessment')}
+          onClick={() => navigate('/six-pillars')}
           className="flex items-center gap-1"
         >
           <Target className="w-4 h-4" />
-          Starta Assessment
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onAction?.('view-progress')}
-          className="flex items-center gap-1"
-        >
-          <Trophy className="w-4 h-4" />
-          Se Framsteg
+          Visa pillars
         </Button>
       </div>
     </div>

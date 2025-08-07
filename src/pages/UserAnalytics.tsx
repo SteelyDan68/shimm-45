@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { DetailedAnalysisView } from '@/components/UserAnalytics/DetailedAnalysisView';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { 
   Brain, 
@@ -39,6 +40,7 @@ export default function UserAnalytics() {
   const [assessmentData, setAssessmentData] = useState<UnifiedAssessmentData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAnalysis, setSelectedAnalysis] = useState<UnifiedAssessmentData | null>(null);
+  const [showDetailedView, setShowDetailedView] = useState<string | null>(null);
   const [healthStatus, setHealthStatus] = useState<{
     status: 'healthy' | 'warning' | 'critical';
     issues: string[];
@@ -274,6 +276,17 @@ export default function UserAnalytics() {
     );
   }
 
+  // Show detailed analysis view if requested
+  if (showDetailedView && targetUserId) {
+    return (
+      <DetailedAnalysisView 
+        pillarKey={showDetailedView}
+        userId={targetUserId}
+        onBack={() => setShowDetailedView(null)}
+      />
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -405,7 +418,6 @@ export default function UserAnalytics() {
                     <Card 
                       key={analysis.id} 
                       className="cursor-pointer hover:shadow-md transition-shadow border"
-                      onClick={() => setSelectedAnalysis(analysis)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
@@ -431,9 +443,14 @@ export default function UserAnalytics() {
                           <span>
                             {new Date(analysis.created_at).toLocaleDateString('sv-SE')}
                           </span>
-                          <span className="text-blue-600 hover:underline">
-                            Läs mer →
-                          </span>
+                          <div className="flex gap-2">
+                            <span className="text-blue-600 hover:underline" onClick={() => setSelectedAnalysis(analysis)}>
+                              Snabbvy →
+                            </span>
+                            <span className="text-purple-600 hover:underline" onClick={() => setShowDetailedView(analysis.pillar_type)}>
+                              Detaljvy →
+                            </span>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
