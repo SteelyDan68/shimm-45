@@ -4,6 +4,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useAIServiceCircuitBreaker } from '@/hooks/useCircuitBreaker';
 import { useAnalytics } from '@/components/Analytics/AnalyticsProvider';
+import { ensureStefanConversation, insertStefanMessage } from '@/hooks/useStefanChatPersistence';
 
 // Unified AI request types
 export type AIAction = 
@@ -33,6 +34,7 @@ export interface AIResponse {
 export interface StefanChatData {
   message: string;
   conversationHistory?: Array<{ role: string; content: string }>;
+  conversationId?: string;
 }
 
 export interface StefanChatResponse {
@@ -242,14 +244,39 @@ export const useUnifiedAI = () => {
 
   // ============= STEFAN CHAT =============
   const stefanChat = useCallback(async (data: StefanChatData): Promise<StefanChatResponse | null> => {
+    if (!user?.id) {
+      setError('Ingen användare inloggad');
+      return null;
+    }
+
+    // Ensure conversation and persist user message before AI call
+    const conversationId = data.conversationId || (await ensureStefanConversation(user.id)).id;
+    await insertStefanMessage({
+      conversation_id: conversationId,
+      sender_id: user.id,
+      role: 'user',
+      content: data.message,
+    });
+
     const response = await executeAIRequest({
       action: 'stefan_chat',
       data,
       priority: 'high'
     });
 
+    // Persist assistant reply if available
+    if (response.success && response.data?.message) {
+      await insertStefanMessage({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        role: 'assistant',
+        content: response.data.message,
+        ai_model: response.data.ai_model || response.aiModel,
+      });
+    }
+
     return response.success ? response.data : null;
-  }, [executeAIRequest]);
+  }, [executeAIRequest, user?.id]);
 
   // ============= COACHING ANALYSIS =============
   const coachingAnalysis = useCallback(async (data: CoachingAnalysisData): Promise<CoachingAnalysisResponse | null> => {
