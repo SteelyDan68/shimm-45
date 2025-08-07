@@ -1,5 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { 
+  validateRequestSecurity, 
+  SECURE_CORS_HEADERS, 
+  sanitizeInput,
+  createSecureErrorResponse,
+  createSecureSuccessResponse 
+} from '../_shared/security-utils.ts'
 
 interface InterventionRequest {
   trigger: any;
@@ -28,15 +35,36 @@ interface InterventionResponse {
   expires_at?: string;
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+// Använd säkra CORS headers från security utils
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: SECURE_CORS_HEADERS });
   }
+
+  // 🔒 SÄKERHETSVALIDERING - Kräv admin eller system-nivå åtkomst
+  const securityValidation = await validateRequestSecurity(req, {
+    functionName: 'autonomous-coach-intervention',
+    requiredRole: 'admin', // Endast admins kan trigga AI interventions
+    requireAuthentication: true
+  });
+
+  if (!securityValidation.authorized) {
+    console.error('🚨 SECURITY: Unauthorized access to autonomous intervention:', {
+      errorMessage: securityValidation.errorMessage,
+      securityLevel: securityValidation.securityLevel
+    });
+    
+    return createSecureErrorResponse(
+      'SECURITY VIOLATION: Insufficient privileges for autonomous interventions',
+      403
+    );
+  }
+
+  console.log('✅ SECURITY: Authorized autonomous intervention request:', {
+    userId: securityValidation.user?.id,
+    securityLevel: securityValidation.securityLevel
+  });
 
   try {
     const supabaseClient = createClient(
@@ -44,7 +72,33 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { trigger, user_id }: InterventionRequest = await req.json();
+    const rawRequestData = await req.json();
+    const { trigger, user_id }: InterventionRequest = sanitizeInput(rawRequestData);
+
+    // 🔒 VALIDERA INPUT
+    if (!trigger || !user_id) {
+      return createSecureErrorResponse(
+        'Missing required parameters: trigger and user_id',
+        400
+      );
+    }
+
+    // 🔒 KONTROLLERA ATT ADMIN HAR RÄTT ATT HANTERA DENNA ANVÄNDARE
+    if (securityValidation.securityLevel !== 'superadmin') {
+      // Kontrollera coach-client relationships för vanliga admins
+      const { data: hasAccess } = await supabaseClient
+        .rpc('is_coach_of_client', {
+          _coach_id: securityValidation.user.id,
+          _client_id: user_id
+        });
+
+      if (!hasAccess && securityValidation.securityLevel !== 'admin') {
+        return createSecureErrorResponse(
+          'SECURITY VIOLATION: No access to specified user',
+          403
+        );
+      }
+    }
 
     // Hämta användarens kontext och historik
     const { data: userData } = await supabaseClient
@@ -77,7 +131,7 @@ Deno.serve(async (req) => {
         intervention = await generateGenericIntervention(trigger, userData, recentAssessments);
     }
 
-    // Logga intervention i GDPR-kompatibel audit trail
+    // Logga intervention i GDPR-kompatibel audit trail MED SÄKERHETSINFO
     await supabaseClient.from('gdpr_audit_log').insert({
       user_id: user_id,
       action: 'ai_intervention_generated',
@@ -85,28 +139,28 @@ Deno.serve(async (req) => {
         trigger_type: trigger.trigger_type,
         intervention_type: intervention.intervention.type,
         priority: intervention.intervention.priority,
-        requires_human: intervention.requires_human_intervention
+        requires_human: intervention.requires_human_intervention,
+        admin_user_id: securityValidation.user.id,
+        admin_security_level: securityValidation.securityLevel,
+        security_validation_timestamp: new Date().toISOString()
       },
       ip_address: req.headers.get('x-forwarded-for'),
       user_agent: req.headers.get('user-agent')
     });
 
-    return new Response(
-      JSON.stringify(intervention),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    );
+    return createSecureSuccessResponse(intervention);
 
-  } catch (error) {
-    console.error('Error in autonomous coach intervention:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
+  } catch (error: any) {
+    console.error('🚨 CRITICAL ERROR in autonomous coach intervention:', {
+      error: error.message,
+      userId: securityValidation.user?.id,
+      functionName: 'autonomous-coach-intervention'
+    });
+    
+    return createSecureErrorResponse(
+      `Intervention generation failed: ${error.message}`,
+      500,
+      securityValidation.securityLevel === 'superadmin' // Endast superadmin får detaljerade fel
     );
   }
 });

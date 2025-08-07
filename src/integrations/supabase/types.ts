@@ -1679,6 +1679,48 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_function_security_logs: {
+        Row: {
+          authentication_method: string | null
+          authorization_success: boolean
+          created_at: string
+          function_name: string
+          id: string
+          request_data: Json | null
+          request_ip: unknown | null
+          security_violation_type: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          authentication_method?: string | null
+          authorization_success?: boolean
+          created_at?: string
+          function_name: string
+          id?: string
+          request_data?: Json | null
+          request_ip?: unknown | null
+          security_violation_type?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          authentication_method?: string | null
+          authorization_success?: boolean
+          created_at?: string
+          function_name?: string
+          id?: string
+          request_data?: Json | null
+          request_ip?: unknown | null
+          security_violation_type?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string
@@ -4528,6 +4570,16 @@ export type Database = {
         Args:
           | { _user_id: string; _action: string }
           | { action_type: string; admin_id: string }
+        Returns: Json
+      }
+      validate_edge_function_auth: {
+        Args: {
+          _function_name: string
+          _user_id?: string
+          _required_role?: Database["public"]["Enums"]["app_role"]
+          _request_ip?: unknown
+          _user_agent?: string
+        }
         Returns: Json
       }
       validate_invitation_security: {
