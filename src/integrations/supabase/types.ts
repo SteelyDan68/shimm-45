@@ -269,6 +269,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_memories: {
+        Row: {
+          content: string
+          created_at: string
+          embedding: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          score: number | null
+          source: string
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          embedding: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          score?: number | null
+          source?: string
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          embedding?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          score?: number | null
+          source?: string
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_recommendations: {
         Row: {
           category: string
@@ -2206,6 +2245,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          attachments: Json | null
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          role: Database["public"]["Enums"]["message_role"]
+          sender_id: string
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json | null
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          role?: Database["public"]["Enums"]["message_role"]
+          sender_id: string
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json | null
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          role?: Database["public"]["Enums"]["message_role"]
+          sender_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -4620,6 +4703,23 @@ export type Database = {
         }
         Returns: undefined
       }
+      match_ai_memories: {
+        Args: {
+          p_user_id: string
+          p_query_embedding: string
+          p_match_count?: number
+          p_min_similarity?: number
+        }
+        Returns: {
+          id: string
+          content: string
+          source: string
+          tags: string[]
+          metadata: Json
+          created_at: string
+          similarity: number
+        }[]
+      }
       migrate_all_legacy_assessments: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4759,6 +4859,7 @@ export type Database = {
         | "client"
         | "user"
         | "coach"
+      message_role: "user" | "assistant" | "coach" | "system"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4896,6 +4997,7 @@ export const Constants = {
         "user",
         "coach",
       ],
+      message_role: ["user", "assistant", "coach", "system"],
     },
   },
 } as const
