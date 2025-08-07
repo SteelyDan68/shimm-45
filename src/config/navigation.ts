@@ -107,6 +107,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
       },
       // CLIENT NAVIGATION
       {
+        title: "Sex Pelare",
+        url: NAVIGATION_ROUTES.SIX_PILLARS,
+        icon: TrendingUp,
+        roles: ["client"]
+      },
+      {
         title: "Min Utvecklingsanalys", 
         url: "/user-analytics", 
         icon: BarChart3,
