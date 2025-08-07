@@ -205,10 +205,15 @@ export default function UserAnalytics() {
     }
   };
 
-  // Initialize data loading
+  // Initialize data loading - FORCE EXECUTION
   useEffect(() => {
+    console.log('🚀 UserAnalytics useEffect triggered, targetUserId:', targetUserId);
     if (targetUserId) {
+      console.log('✅ Calling loadUserAnalytics for user:', targetUserId);
       loadUserAnalytics();
+    } else {
+      console.log('❌ No targetUserId found - cannot load analytics');
+      setIsLoading(false);
     }
   }, [targetUserId]);
 
