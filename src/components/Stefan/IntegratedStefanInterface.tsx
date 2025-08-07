@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUnifiedAI } from '@/hooks/useUnifiedAI';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { ensureStefanConversation, subscribeToStefanMessages } from '@/hooks/useStefanChatPersistence';
 import { 
   Brain, 
   Send, 
@@ -60,11 +62,13 @@ export function IntegratedStefanInterface({
   const [isMinimized, setIsMinimized] = useState(false);
   const [selectedTab, setSelectedTab] = useState('chat');
   const [quickActions, setQuickActions] = useState<string[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   
   const { stefanChat, loading } = useUnifiedAI();
   const { user } = useAuth();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
 
   function getWelcomeMessage(context: string): string {
     switch (context) {
@@ -87,60 +91,95 @@ export function IntegratedStefanInterface({
     scrollToBottom();
   }, [messages]);
 
+  // Initialize conversation, load history, and subscribe to realtime
+  useEffect(() => {
+    if (!user?.id || initializedRef.current) return;
+
+    let unsubscribe: (() => void) | null = null;
+
+    (async () => {
+      try {
+        const conv = await ensureStefanConversation(user.id);
+        setConversationId(conv.id);
+
+        const { data, error } = await supabase
+          .from('messages')
+          .select('id, content, role, sender_id, created_at')
+          .eq('conversation_id', conv.id)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        setMessages(prev => {
+          const head = prev.length ? [prev[0]] : [];
+          const mapped = (data || []).map((row: any) => ({
+            id: row.id,
+            content: row.content,
+            isUser: row.role === 'user' && row.sender_id === user.id,
+            timestamp: new Date(row.created_at)
+          }));
+          return [...head, ...mapped];
+        });
+
+        unsubscribe = subscribeToStefanMessages(conv.id, (payload) => {
+          const row = (payload as any).new as any;
+          setMessages(prev => ([
+            ...prev,
+            {
+              id: row.id,
+              content: row.content,
+              isUser: row.role === 'user' && row.sender_id === user.id,
+              timestamp: new Date(row.created_at)
+            }
+          ]));
+        });
+      } catch (e) {
+        console.error(e);
+        toast({ title: 'Fel', description: 'Kunde inte ladda chatthistorik', variant: 'destructive' });
+      } finally {
+        initializedRef.current = true;
+      }
+    })();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [user?.id]);
+
   const sendMessage = async (message?: string) => {
     const messageToSend = message || inputMessage.trim();
     if (!messageToSend || loading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: messageToSend,
-      isUser: true,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
 
     try {
-      const contextData = {
-        context: context,
-        clientId: clientId,
-        userRole: user?.email?.includes('coach') ? 'coach' : 'client',
-        previousMessages: messages.slice(-3).map(m => ({ role: m.isUser ? 'user' : 'assistant', content: m.content }))
-      };
+      // Ensure conversation exists
+      let convId = conversationId;
+      if (!convId && user?.id) {
+        const conv = await ensureStefanConversation(user.id);
+        convId = conv.id;
+        setConversationId(conv.id);
+      }
+      if (!convId) throw new Error('Ingen konversation kunde initieras');
 
-      const response = await stefanChat({
+      // Build short history excluding welcome message
+      const recent = messages
+        .slice(1)
+        .slice(-3)
+        .map(m => ({ role: m.isUser ? 'user' : 'assistant', content: m.content }));
+
+      await stefanChat({
         message: messageToSend,
-        conversationHistory: messages.slice(-3).map(m => ({ 
-          role: m.isUser ? 'user' : 'assistant', 
-          content: m.content 
-        }))
+        conversationHistory: recent,
+        conversationId: convId
       });
 
-      if (!response) {
-        throw new Error('Stefan AI svarade inte');
-      }
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response.message || 'Stefan AI svarade men svaret kunde inte visas.',
-        isUser: false,
-        timestamp: new Date(),
-        memoryFragmentsUsed: 0,
-        coachingContext: context,
-        actionItems: []
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-
-      // Note: Quick actions can be added in future versions
-
+      // Replies and user message persist via backend + realtime
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: "Fel",
-        description: "Kunde inte skicka meddelandet. Försök igen.",
-        variant: "destructive",
+        title: 'Fel',
+        description: 'Kunde inte skicka meddelandet. Försök igen.',
+        variant: 'destructive',
       });
     }
   };
