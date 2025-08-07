@@ -25,6 +25,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { assessmentDataService, UnifiedAssessmentData } from '@/services/AssessmentDataService';
 import { supabase } from '@/integrations/supabase/client';
+import { AIActionablesPipelineStatus } from '@/components/AI/AIActionablesPipelineStatus';
 
 export default function UserAnalytics() {
   const { userId } = useParams();
@@ -427,6 +428,9 @@ export default function UserAnalytics() {
               </CardContent>
             </Card>
           )}
+
+          {/* AI-till-Actionables Pipeline Status */}
+          <AIActionablesPipelineStatus userId={targetUserId || ''} />
         </TabsContent>
 
         {/* 📈 TIMELINE TAB */}
