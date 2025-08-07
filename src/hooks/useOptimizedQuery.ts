@@ -143,4 +143,4 @@ export const useQueryInvalidation = () => {
   return { invalidateUserData, invalidateAllUserData };
 };
 
-export default useOptimizedQuery;
+export default { useOptimizedUserRoles, useOptimizedUserData, usePrefetchOptimization, useQueryInvalidation };

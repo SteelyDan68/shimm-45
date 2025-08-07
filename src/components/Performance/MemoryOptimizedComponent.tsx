@@ -48,7 +48,7 @@ export const useSafeAsync = () => {
   }, []);
 
   const safeSetState = useCallback(
-    <T>(setState: React.Dispatch<React.SetStateAction<T>>, value: T | ((prevValue: T) => T)) => {
+    (setState: React.Dispatch<React.SetStateAction<any>>, value: any) => {
       if (isMountedRef.current) {
         setState(value);
       }
@@ -65,7 +65,7 @@ export const useSafeAsync = () => {
  * 🎯 DEBOUNCED STATE HOOK
  * Optimerar state updates för bättre performance
  */
-export const useDebouncedState = <T>(
+export const useDebouncedState = <T,>(
   initialValue: T,
   delay: number = 300
 ): [T, T, React.Dispatch<React.SetStateAction<T>>] => {

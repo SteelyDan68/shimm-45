@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useMemo, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
-import { AppRole } from '@/providers/UnifiedAuthProvider';
+type AppRole = 'superadmin' | 'admin' | 'coach' | 'client';
 import { useOptimizedUserData, useQueryInvalidation } from '@/hooks/useOptimizedQuery';
 
 interface OptimizedAuthContextType {
@@ -49,7 +49,11 @@ export const OptimizedAuthProvider: React.FC<OptimizedAuthProviderProps> = ({
 
   // Memoized role checks för att undvika re-computation
   const roles = useMemo(() => {
-    return userData?.roles || [];
+    const userRoles = userData?.roles || [];
+    // Filter to only include valid AppRoles
+    return userRoles.filter((role: any): role is AppRole => 
+      ['superadmin', 'admin', 'coach', 'client'].includes(role)
+    );
   }, [userData?.roles]);
 
   const hasRole = useCallback((role: AppRole): boolean => {

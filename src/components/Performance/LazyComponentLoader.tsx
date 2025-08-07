@@ -160,34 +160,6 @@ export const SmartSuspense: React.FC<SmartSuspenseProps> = ({
  * 🎯 PRECOMPUTED LAZY COMPONENTS
  * Pre-konfigurerade lazy components för vanliga sidor
  */
-export const LazyDashboard = createLazyComponent(
-  () => import('@/pages/Dashboard'),
-  { fallback: DashboardSkeleton, preload: true }
-);
-
-export const LazyClientDashboard = createLazyComponent(
-  () => import('@/pages/ClientDashboard'),
-  { fallback: DashboardSkeleton }
-);
-
-export const LazyAdministration = createLazyComponent(
-  () => import('@/pages/Administration'),
-  { fallback: UserListSkeleton }
-);
-
-export const LazyIntelligence = createLazyComponent(
-  () => import('@/pages/Intelligence'),
-  { fallback: DashboardSkeleton }
-);
-
-export const LazyUserAnalytics = createLazyComponent(
-  () => import('@/pages/UserAnalytics'),
-  { fallback: DashboardSkeleton }
-);
-
-export const LazyStefanChat = createLazyComponent(
-  () => import('@/pages/StefanChat'),
-  { fallback: FormSkeleton }
-);
+// Note: These lazy components are available for future use when pages have default exports
 
 export default { createLazyComponent, SmartSuspense };
