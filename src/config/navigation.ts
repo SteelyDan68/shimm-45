@@ -75,6 +75,7 @@ export const NAVIGATION_ROUTES = {
   COLLABORATION: "/collaboration",
   AI_COACHING: "/ai-coaching",
   MOBILE: "/mobile",
+  ADVANCED_ANALYTICS: "/advanced-analytics",
 } as const;
 
 export const MAIN_NAVIGATION: NavigationGroup[] = [
@@ -172,6 +173,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin"]
       },
       {
+        title: "Advanced Analytics",
+        url: "/advanced-analytics",
+        icon: Activity,
+        roles: ["superadmin", "admin"]
+      },
+      {
         title: "Mobil",
         url: NAVIGATION_ROUTES.MOBILE,
         icon: Smartphone,
@@ -243,6 +250,13 @@ export const QUICK_ACTIONS = {
       icon: Brain,
       url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
       variant: "outline" as const
+    },
+    {
+      title: "Advanced Analytics",
+      description: "Avancerad dataanalys",
+      icon: Activity,
+      url: NAVIGATION_ROUTES.ADVANCED_ANALYTICS,
+      variant: "outline" as const
     }
   ],
   admin: [
@@ -265,6 +279,13 @@ export const QUICK_ACTIONS = {
       description: "Användaranalys och insikter",
       icon: Brain,
       url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
+      variant: "outline" as const
+    },
+    {
+      title: "Advanced Analytics",
+      description: "Avancerad dataanalys",
+      icon: Activity,
+      url: NAVIGATION_ROUTES.ADVANCED_ANALYTICS,
       variant: "outline" as const
     }
   ],
