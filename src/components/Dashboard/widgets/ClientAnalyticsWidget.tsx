@@ -54,6 +54,7 @@ export const ClientAnalyticsWidget = ({
     avgScore: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [validAnalyses, setValidAnalyses] = useState(0);
 
   // 📊 LOAD QUICK ANALYTICS DATA
   const loadQuickStats = async () => {
@@ -96,12 +97,13 @@ export const ClientAnalyticsWidget = ({
       console.log('📋 Path analyses:', pathAnalyses?.length || 0, 'items');
       console.log('📋 Assessment rounds:', assessmentRounds?.length || 0, 'items');
 
-      // Räkna endast analyser som verkligen har AI-analys eller innehåll
+      // Räkna alla assessment rounds oavsett AI-analys (mer inkluderande)
+      const totalAnalyses = assessmentRounds?.length || 0;
+
+      // Men visa även hur många som har AI-analys
       const validAnalyses = (assessmentRounds || []).filter(round => 
-        round.ai_analysis && round.ai_analysis.length > 100
+        (round as any).ai_analysis && (round as any).ai_analysis.length > 50
       ).length;
-      
-      const totalAnalyses = validAnalyses;
 
       // Beräkna genomsnittlig score från assessment_rounds (mer tillförlitlig)
       let totalScore = 0;
@@ -163,6 +165,7 @@ export const ClientAnalyticsWidget = ({
 
       console.log('✅ Final stats calculated:', finalStats);
       setQuickStats(finalStats);
+      setValidAnalyses(validAnalyses);
 
     } catch (error: any) {
       console.error('Error loading quick stats:', error);
@@ -225,7 +228,7 @@ export const ClientAnalyticsWidget = ({
             <div className="text-xl font-bold text-purple-600">
               {quickStats.totalAnalyses}
             </div>
-            <div className="text-xs text-purple-600">AI-Analyser</div>
+            <div className="text-xs text-purple-600">Bedömningar</div>
           </div>
           
           <div className="text-center p-3 rounded-lg bg-blue-50 border border-blue-200">
@@ -249,6 +252,45 @@ export const ClientAnalyticsWidget = ({
             <div className="text-xs text-orange-600">Slutförda</div>
           </div>
         </div>
+
+        {/* 🔧 CONSOLIDATION BUTTON - Visa om AI-analyser saknas */}
+        {quickStats.totalAnalyses > 0 && validAnalyses < quickStats.totalAnalyses && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="text-sm text-amber-800 mb-2">
+              {validAnalyses} av {quickStats.totalAnalyses} bedömningar har AI-analys
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full border-amber-300 text-amber-700 hover:bg-amber-100"
+              onClick={async () => {
+                try {
+                  const { error } = await supabase.functions.invoke('consolidate-assessment-system', {
+                    body: { userId }
+                  });
+                  if (error) throw error;
+                  
+                  toast({
+                    title: "Konsolidering startad",
+                    description: "AI-analyser genereras för ofullständiga bedömningar"
+                  });
+                  
+                  // Uppdatera data efter 3 sekunder
+                  setTimeout(() => loadQuickStats(), 3000);
+                } catch (error) {
+                  console.error('Consolidation error:', error);
+                  toast({
+                    title: "Fel",
+                    description: "Kunde inte starta konsolidering",
+                    variant: "destructive"
+                  });
+                }
+              }}
+            >
+              🤖 Komplettera AI-analyser
+            </Button>
+          </div>
+        )}
 
         {/* 🎯 QUICK ACTIONS */}
         <div className="space-y-2 pt-2 border-t">
