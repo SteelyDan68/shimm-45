@@ -1207,6 +1207,67 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_messaging_permissions: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          disabled_at: string | null
+          enabled_at: string | null
+          enabled_by: string | null
+          id: string
+          is_enabled: boolean
+          metadata: Json | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          disabled_at?: string | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          metadata?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          disabled_at?: string | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          metadata?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_messaging_permissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_messaging_permissions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_messaging_permissions_enabled_by_fkey"
+            columns: ["enabled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coaching_analytics: {
         Row: {
           created_at: string
@@ -1675,6 +1736,48 @@ export type Database = {
           request_date?: string | null
           status?: string
           updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      edge_function_security_logs: {
+        Row: {
+          authentication_method: string | null
+          authorization_success: boolean
+          created_at: string
+          function_name: string
+          id: string
+          request_data: Json | null
+          request_ip: unknown | null
+          security_violation_type: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          authentication_method?: string | null
+          authorization_success?: boolean
+          created_at?: string
+          function_name: string
+          id?: string
+          request_data?: Json | null
+          request_ip?: unknown | null
+          security_violation_type?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          authentication_method?: string | null
+          authorization_success?: boolean
+          created_at?: string
+          function_name?: string
+          id?: string
+          request_data?: Json | null
+          request_ip?: unknown | null
+          security_violation_type?: string | null
+          timestamp?: string
+          user_agent?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -3221,6 +3324,57 @@ export type Database = {
         }
         Relationships: []
       }
+      security_alerts: {
+        Row: {
+          alert_type: string
+          auto_resolved: boolean | null
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          target_user_id: string | null
+          title: string
+          triggered_at: string
+          triggered_by_user_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          auto_resolved?: boolean | null
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          target_user_id?: string | null
+          title: string
+          triggered_at?: string
+          triggered_by_user_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          auto_resolved?: boolean | null
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          target_user_id?: string | null
+          title?: string
+          triggered_at?: string
+          triggered_by_user_id?: string | null
+        }
+        Relationships: []
+      }
       stefan_ai_config: {
         Row: {
           confidence_threshold: number | null
@@ -4330,6 +4484,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_security_dashboard_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_user_attribute: {
         Args: { _user_id: string; _attribute_key: string }
         Returns: Json
@@ -4525,8 +4683,20 @@ export type Database = {
         Returns: boolean
       }
       validate_admin_action: {
-        Args: { action_type: string; admin_id: string }
-        Returns: boolean
+        Args:
+          | { _user_id: string; _action: string }
+          | { action_type: string; admin_id: string }
+        Returns: Json
+      }
+      validate_edge_function_auth: {
+        Args: {
+          _function_name: string
+          _user_id?: string
+          _required_role?: Database["public"]["Enums"]["app_role"]
+          _request_ip?: unknown
+          _user_agent?: string
+        }
+        Returns: Json
       }
       validate_invitation_security: {
         Args: { email_param: string; token_param: string }
