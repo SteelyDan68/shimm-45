@@ -15,19 +15,31 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not found');
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: req.headers.get('Authorization') || '' } },
+    });
 
-    const { content, tags, category, version, source } = await req.json();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError) throw authError;
+    const user = authData?.user;
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    if (!content || !category || !source) {
-      throw new Error('Content, category, and source are required');
+    const { content, tags, source = 'stefan_ai', metadata = {}, expires_at = null } = await req.json();
+
+    if (!content || !source) {
+      throw new Error('Content and source are required');
     }
 
     console.log('Generating embedding for content:', content.substring(0, 100) + '...');
@@ -57,18 +69,19 @@ serve(async (req) => {
 
     console.log('Generated embedding with dimensions:', embedding.length);
 
-    // Store in stefan_memory table
+    // Store in ai_memories table
     const { data, error } = await supabase
-      .from('stefan_memory')
+      .from('ai_memories')
       .insert({
+        user_id: user.id,
         content,
-        embedding: `[${embedding.join(',')}]`, // PostgreSQL vector format
+        embedding, // pass array directly
         tags: tags || [],
-        category,
-        version: version || '1.0',
         source,
+        metadata: metadata || {},
+        expires_at,
       })
-      .select()
+      .select('id')
       .single();
 
     if (error) {

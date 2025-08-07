@@ -36,3 +36,9 @@ verify_jwt = true
 
 [functions.import-data]
 verify_jwt = true
+
+[functions.store-stefan-memory]
+verify_jwt = true
+
+[functions.get-stefan-memories]
+verify_jwt = true

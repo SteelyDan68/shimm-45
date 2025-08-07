@@ -14,34 +14,77 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Supabase configuration missing');
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY is not set');
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: req.headers.get('Authorization') || '' } },
+    });
 
-    console.log('Fetching Stefan memory fragments...');
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError) throw authError;
+    const user = authData?.user;
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    // Fetch all memory fragments from stefan_memory table
-    const { data: memories, error } = await supabase
-      .from('stefan_memory')
-      .select('id, content, tags, category, version, source, created_at')
-      .order('created_at', { ascending: false });
+    const body = await req.json();
+    const query: string = body?.query;
+    const match_count: number = Math.max(1, Math.min(50, Number(body?.match_count ?? 5)));
+    const min_similarity: number = Math.max(0, Math.min(1, Number(body?.min_similarity ?? 0.75)));
+
+    if (!query || typeof query !== 'string' || query.trim().length === 0) {
+      return new Response(JSON.stringify({ error: 'query is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Create embedding for the query
+    const embedResp = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'text-embedding-3-small',
+        input: query,
+      }),
+    });
+
+    if (!embedResp.ok) {
+      const txt = await embedResp.text();
+      throw new Error(`OpenAI embeddings failed: ${embedResp.status} ${txt}`);
+    }
+
+    const embedJson = await embedResp.json();
+    const embedding = embedJson?.data?.[0]?.embedding;
+    if (!embedding || !Array.isArray(embedding)) {
+      throw new Error('Invalid embedding response');
+    }
+
+    const { data, error } = await supabase.rpc('match_ai_memories', {
+      p_user_id: user.id,
+      p_query_embedding: embedding,
+      p_match_count: match_count,
+      p_min_similarity: min_similarity,
+    });
 
     if (error) {
       console.error('Database error:', error);
       throw error;
     }
 
-    console.log(`Successfully fetched ${memories?.length || 0} memory fragments`);
-
-    return new Response(JSON.stringify({ 
-      memories: memories || [],
-      count: memories?.length || 0
-    }), {
+    return new Response(JSON.stringify({ success: true, results: data || [] }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
