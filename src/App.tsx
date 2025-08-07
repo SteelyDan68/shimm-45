@@ -20,7 +20,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { Collaboration } from "@/pages/Collaboration";
-import { AICoaching } from "@/pages/AICoaching";
+
 import { TestingPage } from "@/pages/TestingPage";
 import { SixPillars } from "@/pages/SixPillars";
 import { MobileOptimization } from "@/pages/MobileOptimization";
@@ -125,7 +125,7 @@ const AppRoutes = () => {
                <Route path="/client/:clientId" element={<ClientProfile />} />
               <Route path="/search" element={<GlobalSearchPage />} />
                <Route path="/collaboration" element={<Collaboration />} />
-                <Route path="/ai-coaching" element={<AICoaching />} />
+                
                 <Route path="/testing" element={<TestingPage />} />
                <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
                <Route path="/six-pillars/:pillarKey" element={<SixPillars />} />

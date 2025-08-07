@@ -72,12 +72,6 @@ export function AppSidebar() {
       tooltip: "Schemaläggning och aktiviteter"
     },
     { 
-      title: "AI-Coachning", 
-      url: "/ai-coaching", 
-      icon: Brain,
-      tooltip: "Personlig AI-utveckling"
-    },
-    { 
       title: "Min Profil", 
       url: "/edit-profile", 
       icon: User,
@@ -85,19 +79,19 @@ export function AppSidebar() {
     }
   ];
 
-  // 🎯 TOOLS & COMMUNICATION - Konsoliderat för mindre crowding
+  // 🎯 TOOLS & COMMUNICATION - Separata verktyg
   const toolsNavigation = [
     { 
-      title: "Meddelanden & AI", 
+      title: "Meddelanden", 
       url: "/messages", 
       icon: MessageSquare,
-      tooltip: "Alla meddelanden och Stefan AI Chat på en plats"
+      tooltip: "Meddelanden och kommunikation"
     },
     { 
-      title: "Utvecklingsresan", 
-      url: "/user-analytics", 
-      icon: BarChart3,
-      tooltip: "Din personliga utvecklingsresa och framsteg"
+      title: "Stefan AI", 
+      url: "/stefan-chat", 
+      icon: Brain,
+      tooltip: "AI-assistent och coaching"
     }
   ];
 
