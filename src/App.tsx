@@ -19,6 +19,8 @@ import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/error/Err
 import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { AdminAnalyticsPage } from "./pages/AdminAnalyticsPage";
+import { DataCollectionPage } from "./pages/DataCollectionPage";
 import { Collaboration } from "@/pages/Collaboration";
 
 import { TestingPage } from "@/pages/TestingPage";
@@ -135,19 +137,21 @@ const AppRoutes = () => {
                 <Route path="/intelligence/:userId" element={<Intelligence />} />
                 <Route path="/client-intelligence" element={<ClientIntelligencePage />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
-               
-             <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
-             <Route path="/gdpr-management" element={<GDPRManagement />} />
-             <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
-                <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
-              <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
-              <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
-                <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
-                <Route path="/ai-insights" element={<AIInsights />} />
-                <Route path="/user-analytics" element={<UserAnalytics />} />
-                <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
-                 <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-                 <Route path="/stefan/*" element={<StefanAICentralHub />} />
+                
+              <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
+              <Route path="/gdpr-management" element={<GDPRManagement />} />
+              <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
+                 <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
+               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
+               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
+                 <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
+                 <Route path="/ai-insights" element={<AIInsights />} />
+                 <Route path="/user-analytics" element={<UserAnalytics />} />
+                 <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
+                 <Route path={NAVIGATION_ROUTES.ANALYTICS} element={<AdminAnalyticsPage />} />
+                 <Route path={NAVIGATION_ROUTES.DATA_COLLECTION} element={<DataCollectionPage />} />
+                  <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
+                  <Route path="/stefan/*" element={<StefanAICentralHub />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>
