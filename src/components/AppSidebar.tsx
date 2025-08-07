@@ -11,13 +11,9 @@ import {
   CheckSquare,
   Calendar,
   User,
-  Brain,
   MessageSquare,
-  Lightbulb,
   Users,
-  Shield,
-  Search,
-  Settings
+  Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/UnifiedAuthProvider";
@@ -76,22 +72,12 @@ export function AppSidebar() {
       url: "/edit-profile", 
       icon: User,
       tooltip: "Personlig information"
-    }
-  ];
-
-  // 🎯 TOOLS & COMMUNICATION - Separata verktyg
-  const toolsNavigation = [
+    },
     { 
       title: "Meddelanden", 
       url: "/messages", 
       icon: MessageSquare,
       tooltip: "Meddelanden och kommunikation"
-    },
-    { 
-      title: "Stefan AI", 
-      url: "/stefan-chat", 
-      icon: Brain,
-      tooltip: "AI-assistent och coaching"
     }
   ];
 
@@ -132,33 +118,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {clientNavigation.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={!open ? item.tooltip : undefined}>
-                    <NavLink 
-                      to={item.url} 
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
-                        getNavCls(item.url)
-                      )}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {open && <span className="font-medium">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* 🛠️ VERKTYG & KOMMUNIKATION */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-blue-600 font-semibold">
-            🛠️ Verktyg
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {toolsNavigation.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={!open ? item.tooltip : undefined}>
                     <NavLink 
