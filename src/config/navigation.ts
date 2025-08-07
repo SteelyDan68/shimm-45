@@ -171,42 +171,24 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         url: NAVIGATION_ROUTES.DATA_COLLECTION,
         icon: Database,
         roles: ["superadmin", "admin"]
-      }
-    ]
-  },
-  {
-    title: "AI & Verktyg",
-    roles: ["superadmin", "admin", "coach", "client"],
-    items: [
-      {
-        title: "Stefan AI Hub",
-        url: NAVIGATION_ROUTES.STEFAN_CHAT,
-        icon: Brain,
-        roles: ["superadmin", "admin", "coach", "client"]
-      },
-      {
-        title: "Min Intelligence",
-        url: "/client-intelligence",
-        icon: Brain,
-        roles: ["client"]
-      },
-      {
-        title: "Collaboration",
-        url: NAVIGATION_ROUTES.COLLABORATION,
-        icon: Users2,
-        roles: ["superadmin", "admin", "coach"]
-      },
-      {
-        title: "AI Coaching",
-        url: NAVIGATION_ROUTES.AI_COACHING,
-        icon: Brain,
-        roles: ["superadmin", "admin", "coach"]
       },
       {
         title: "Mobil",
         url: NAVIGATION_ROUTES.MOBILE,
         icon: Smartphone,
-        roles: ["superadmin", "admin", "coach", "client"]
+        roles: ["superadmin", "admin"]
+      }
+    ]
+  },
+  {
+    title: "AI & Verktyg",
+    roles: ["client"],
+    items: [
+      {
+        title: "Min Intelligence",
+        url: "/client-intelligence",
+        icon: Brain,
+        roles: ["client"]
       }
     ]
   }
