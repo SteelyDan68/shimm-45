@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { assessmentDataService, UnifiedAssessmentData } from '@/services/AssessmentDataService';
 import { supabase } from '@/integrations/supabase/client';
 import { AIActionablesPipelineStatus } from '@/components/AI/AIActionablesPipelineStatus';
+import { ActionablePriorityDashboard } from '@/components/ActionablePriorityDashboard';
 
 export default function UserAnalytics() {
   const { userId } = useParams();
@@ -316,18 +317,26 @@ export default function UserAnalytics() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setSearchParams({ tab: value })}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="analyses" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
-            Pillar-Analyser
+            Analyser
           </TabsTrigger>
           <TabsTrigger value="timeline" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
-            Aktivitetslinje
+            Timeline
           </TabsTrigger>
           <TabsTrigger value="actionables" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
-            Utvecklingsplan
+            Actionables
+          </TabsTrigger>
+          <TabsTrigger value="priority" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            Prioritering
+          </TabsTrigger>
+          <TabsTrigger value="ai-pipeline" className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            AI Pipeline
           </TabsTrigger>
         </TabsList>
 
@@ -523,6 +532,16 @@ export default function UserAnalytics() {
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* 🧠 PRIORITY DASHBOARD TAB */}
+        <TabsContent value="priority">
+          <ActionablePriorityDashboard userId={targetUserId || ''} />
+        </TabsContent>
+
+        {/* 🔄 AI PIPELINE TAB */}
+        <TabsContent value="ai-pipeline">
+          <AIActionablesPipelineStatus userId={targetUserId || ''} />
         </TabsContent>
       </Tabs>
     </div>
