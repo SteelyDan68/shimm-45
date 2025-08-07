@@ -55,7 +55,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
 
     try {
       // Check for existing Stefan conversation
-      const { data: existingConv, error: convError } = await supabase
+      const { data: existingConv, error: convError } = await (supabase as any)
         .from('conversations')
         .select('*')
         .eq('created_by', user.id)
@@ -72,7 +72,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
 
       if (!existingConv) {
         // Create new Stefan conversation
-        const { data: newConv, error: createError } = await supabase
+        const { data: newConv, error: createError } = await (supabase as any)
           .from('conversations')
           .insert({
             created_by: user.id,
@@ -106,7 +106,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
 
   const loadMessages = async (convId: string) => {
     try {
-      const { data: messagesData, error } = await supabase
+      const { data: messagesData, error } = await (supabase as any)
         .from('messages')
         .select('*')
         .eq('conversation_id', convId)
@@ -117,7 +117,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
         return;
       }
 
-      const formattedMessages: ChatMessage[] = messagesData.map(msg => ({
+      const formattedMessages: ChatMessage[] = (messagesData as any[]).map((msg: any) => ({
         id: msg.id,
         content: msg.content,
         role: msg.sender_id === 'stefan_ai' ? 'assistant' : 'user',
@@ -138,11 +138,12 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
     setInputMessage('');
     setIsLoading(true);
 
+    let userMsgId: string | null = null;
     try {
       // Add user message to UI immediately
-      const userMsgId = `user-${Date.now()}`;
+      userMsgId = `user-${Date.now()}`;
       const newUserMessage: ChatMessage = {
-        id: userMsgId,
+        id: userMsgId!,
         content: userMessage,
         role: 'user',
         timestamp: new Date().toISOString()
@@ -151,7 +152,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
       setMessages(prev => [...prev, newUserMessage]);
 
       // Save user message to database
-      const { error: userMsgError } = await supabase
+      const { error: userMsgError } = await (supabase as any)
         .from('messages')
         .insert({
           conversation_id: conversationId,
@@ -190,7 +191,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
         setMessages(prev => [...prev, assistantMessage]);
 
         // Save AI response to database
-        await supabase
+        await (supabase as any)
           .from('messages')
           .insert({
             conversation_id: conversationId,
@@ -217,7 +218,7 @@ export const LiveStefanChat: React.FC<LiveStefanChatProps> = ({ onMessageSent })
       });
 
       // Remove the user message if AI failed
-      setMessages(prev => prev.filter(msg => msg.id !== userMsgId));
+      setMessages(prev => (userMsgId ? prev.filter(msg => msg.id !== userMsgId) : prev));
     } finally {
       setIsLoading(false);
     }
