@@ -107,12 +107,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["client"]
       },
       {
-        title: "Sex Utvecklingspelare", 
-        url: NAVIGATION_ROUTES.SIX_PILLARS, 
-        icon: TrendingUp,
-        roles: ["client", "coach"]
-      },
-      {
         title: "Uppgifter", 
         url: NAVIGATION_ROUTES.TASKS, 
         icon: CheckSquare,
