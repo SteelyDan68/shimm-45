@@ -65,10 +65,10 @@ export const useSafeAsync = () => {
  * 🎯 DEBOUNCED STATE HOOK
  * Optimerar state updates för bättre performance
  */
-export const useDebouncedState = <T,>(
+export function useDebouncedState<T>(
   initialValue: T,
   delay: number = 300
-): [T, T, React.Dispatch<React.SetStateAction<T>>] => {
+): [T, T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = React.useState<T>(initialValue);
   const [debouncedValue, setDebouncedValue] = React.useState<T>(initialValue);
   const { addCleanup } = useCleanup();
@@ -84,7 +84,7 @@ export const useDebouncedState = <T,>(
   }, [value, delay, addCleanup]);
 
   return [value, debouncedValue, setValue];
-};
+}
 
 /**
  * 🎯 OPTIMIZED EVENT LISTENER HOOK
