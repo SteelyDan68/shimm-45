@@ -178,7 +178,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <ScrollArea className="h-[calc(100vh-200px)]">
+                <ScrollArea className="h-[calc(100vh-220px)]">
                   {conversations.length === 0 ? (
                     <div className="text-center py-12 px-4 space-y-4">
                       <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
@@ -261,7 +261,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                   {conversation?.title || 'Välj en konversation'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col h-[calc(100vh-240px)] p-0">
+              <CardContent className="flex flex-col h-[calc(100vh-260px)] p-0">
                 
                 {activeConversation ? (
                   <>
