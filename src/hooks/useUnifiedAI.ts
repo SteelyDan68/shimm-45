@@ -157,9 +157,9 @@ export const useUnifiedAI = () => {
     try {
       
       
-      // Use circuit breaker for resilience
+      // Use circuit breaker for resilience - direct call to stefan-ai-chat
       const result = await circuitBreaker.unifiedAI.executeWithCircuitBreaker(async () => {
-        const { data, error: functionError } = await supabase.functions.invoke('unified-ai-orchestrator', {
+        const { data, error: functionError } = await supabase.functions.invoke('stefan-ai-chat', {
           body: {
             action: request.action,
             data: request.data,
@@ -172,11 +172,11 @@ export const useUnifiedAI = () => {
         });
 
         if (functionError) {
-          throw new Error(functionError.message || 'AI-tjänst misslyckades');
+          throw new Error(functionError.message || 'Stefan AI-tjänst misslyckades');
         }
 
         if (!data.success) {
-          throw new Error(data.error || 'AI-analys misslyckades');
+          throw new Error(data.error || 'Stefan AI-analys misslyckades');
         }
 
         return data as AIResponse;

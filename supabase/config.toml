@@ -1,44 +1,22 @@
-project_id = "hxnkgslrpkkdtddhckxp"
+project_id = "gcoorbcglxczmukzcmqs"
 
-[auth]
+[api]
 enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://hxnkgslrpkkdtddhckxp.supabase.co/auth/v1/callback"]
-jwt_expiry = 3600
-enable_signup = true
-
-[auth.email]
-enable_signup = true
-double_confirm_changes = true
-enable_confirmations = false
+port = 54321
 
 [db]
 port = 54322
-major_version = 15
 
 [studio]
+enabled = true
 port = 54323
 
 [inbucket]
+enabled = true
 port = 54324
 
-[storage]
-file_size_limit = "50MiB"
+[functions.stefan-ai-chat]
+verify_jwt = false
 
-[edge-runtime]
-policy = "per_worker"
-
-[functions.data-collector]
-verify_jwt = true
-
-[functions.export-data]
-verify_jwt = true
-
-[functions.import-data]
-verify_jwt = true
-
-[functions.store-stefan-memory]
-verify_jwt = true
-
-[functions.get-stefan-memories]
-verify_jwt = true
+[auth]
+enabled = true

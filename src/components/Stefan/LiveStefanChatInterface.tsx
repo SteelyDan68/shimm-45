@@ -142,7 +142,7 @@ export function LiveStefanChatInterface({
     setInputMessage('');
 
     try {
-      // Send message through Stefan AI
+      // Send message through Stefan AI with full conversation context
       const response = await chat({
         message: userMessage,
         conversationId,
@@ -152,18 +152,20 @@ export function LiveStefanChatInterface({
         }))
       });
 
-      if (response) {
+      if (response?.message) {
         toast({
-          title: "Meddelande skickat",
-          description: "Stefan AI har svarat på ditt meddelande.",
+          title: "Stefan AI har svarat",
+          description: "Din coaching-session fortsätter...",
         });
+      } else {
+        throw new Error('Inget svar från Stefan AI');
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to send message:', err);
       toast({
-        title: "Fel",
-        description: "Kunde inte skicka meddelande. Försök igen.",
+        title: "Anslutningsfel",
+        description: err.message || "Kunde inte nå Stefan AI. Kontrollera anslutningen.",
         variant: "destructive"
       });
     }
