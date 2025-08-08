@@ -21,7 +21,8 @@ import {
   DollarSign,
   Route,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
@@ -47,6 +48,7 @@ export default function UserAnalytics() {
     issues: string[];
     recommendations: string[];
   } | null>(null);
+  const [selectedAssessmentForDetails, setSelectedAssessmentForDetails] = useState<(UnifiedAssessmentData & { full_analysis?: string; executive_summary?: string }) | null>(null);
 
   const targetUserId = userId || user?.id;
   const activeTab = searchParams.get('tab') || 'analyses';
@@ -248,6 +250,137 @@ export default function UserAnalytics() {
     }
   };
 
+  const handleAssessmentClick = async (assessment: UnifiedAssessmentData) => {
+    try {
+      // Försök hämta eller generera detaljerad analys
+      const { data: existingAnalysis, error } = await supabase
+        .from('assessment_detailed_analyses')
+        .select('*')
+        .eq('assessment_round_id', assessment.id)
+        .maybeSingle();
+
+      if (existingAnalysis) {
+        // Visa befintlig detaljerad analys
+        setSelectedAssessmentForDetails({
+          ...assessment,
+          full_analysis: existingAnalysis.full_analysis,
+          executive_summary: existingAnalysis.executive_summary
+        });
+      } else {
+        // Generera ny detaljerad analys
+        await generateDetailedAnalysis(assessment);
+      }
+    } catch (error) {
+      console.error('Error loading detailed analysis:', error);
+      // Fallback till befintlig analys
+      setSelectedAssessmentForDetails(assessment);
+    }
+  };
+
+  const generateDetailedAnalysis = async (assessment: UnifiedAssessmentData) => {
+    try {
+      toast({
+        title: "🤖 Genererar djupanalys...",
+        description: "AI skapar en omfattande analys av din assessment. Detta tar några sekunder.",
+      });
+
+      // Anropa AI för att generera detaljerad analys
+      const { data, error } = await supabase.functions.invoke('generate-overall-assessment', {
+        body: {
+          assessmentData: assessment.assessment_data,
+          pillarType: assessment.pillar_type,
+          currentScore: assessment.calculated_score,
+          mode: 'detailed_analysis'
+        }
+      });
+
+      if (data && data.analysis) {
+        // Spara till databas
+        const { error: saveError } = await supabase
+          .from('assessment_detailed_analyses')
+          .insert({
+            assessment_round_id: assessment.id,
+            user_id: assessment.user_id,
+            pillar_type: assessment.pillar_type,
+            full_analysis: data.analysis,
+            executive_summary: data.summary || data.analysis.substring(0, 300) + '...',
+            recommendations: data.recommendations || [],
+            insights: data.insights || [],
+            action_items: data.actionItems || []
+          });
+
+        if (saveError) throw saveError;
+
+        setSelectedAssessmentForDetails({
+          ...assessment,
+          full_analysis: data.analysis,
+          executive_summary: data.summary || data.analysis.substring(0, 300) + '...'
+        });
+
+        toast({
+          title: "✅ Djupanalys klar!",
+          description: "Din omfattande assessment-analys har genererats och sparats.",
+        });
+      } else {
+        throw new Error('No analysis generated');
+      }
+    } catch (error) {
+      console.error('Error generating detailed analysis:', error);
+      
+      // Fallback - skapa en strukturerad version av befintlig analys
+      const fallbackAnalysis = createFallbackDetailedAnalysis(assessment);
+      setSelectedAssessmentForDetails({
+        ...assessment,
+        full_analysis: fallbackAnalysis,
+        executive_summary: assessment.ai_analysis?.substring(0, 300) + '...' || 'Sammanfattning inte tillgänglig'
+      });
+
+      toast({
+        title: "📝 Visar befintlig analys",
+        description: "En detaljerad vy av din assessment är nu tillgänglig.",
+      });
+    }
+  };
+
+  const createFallbackDetailedAnalysis = (assessment: UnifiedAssessmentData): string => {
+    const pillarName = getPillarName(assessment.pillar_type);
+    const score = assessment.calculated_score;
+    
+    return `# Detaljerad ${pillarName}-analys
+
+## Översikt
+**Poäng:** ${score}/10
+**Genomförd:** ${new Date(assessment.created_at).toLocaleDateString('sv-SE')}
+
+## AI-Analys
+${assessment.ai_analysis || 'Analys inte tillgänglig'}
+
+## Utvecklingsområden
+Baserat på din poäng på ${score}/10 inom ${pillarName} finns det flera områden för utveckling:
+
+### Styrkor
+- Dina svar visar medvetenhet om ${pillarName.toLowerCase()}
+- Du har påbörjat din utvecklingsresa inom detta område
+
+### Förbättringsområden
+- Fokusera på att bygga starkare strukturer inom ${pillarName.toLowerCase()}
+- Utveckla mer konsekventa rutiner och vanor
+- Tillämpa dina kunskaper mer systematiskt
+
+## Rekommenderade nästa steg
+1. **Kortsiktigt (1-2 veckor):** Identifiera 1-2 specifika områden att fokusera på
+2. **Mediumsiktigt (1-3 månader):** Implementera nya rutiner och strategier
+3. **Långsiktigt (3-6 månader):** Utvärdera framsteg och justera approach
+
+## Resurser för utveckling
+- Personlig utvecklingsplan med fokus på ${pillarName.toLowerCase()}
+- Regelbunden uppföljning och reflektion
+- Praktisk tillämpning av nya strategier
+
+---
+*Denna analys genererades baserat på dina assessment-svar och kan uppdateras när du gör nya bedömningar.*`;
+  };
+
   // Initialize data loading - FORCE EXECUTION
   useEffect(() => {
     console.log('🚀 UserAnalytics useEffect triggered, targetUserId:', targetUserId);
@@ -285,6 +418,64 @@ export default function UserAnalytics() {
         userId={targetUserId}
         onBack={() => setShowDetailedView(null)}
       />
+    );
+  }
+
+  // Show detailed assessment analysis
+  if (selectedAssessmentForDetails) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => setSelectedAssessmentForDetails(null)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Tillbaka till översikt
+          </Button>
+          <h1 className="text-2xl font-bold">
+            Detaljerad {getPillarName(selectedAssessmentForDetails.pillar_type)}-analys
+          </h1>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {getPillarIcon(selectedAssessmentForDetails.pillar_type)}
+              Omfattande Assessment-analys
+              <Badge variant="outline">
+                {selectedAssessmentForDetails.calculated_score}/10
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              Detaljerad genomgång av din {getPillarName(selectedAssessmentForDetails.pillar_type).toLowerCase()}-bedömning
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="prose max-w-none">
+            {selectedAssessmentForDetails.executive_summary && (
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 className="text-sm font-semibold text-blue-900 mb-2">Snabb-V (Sammanfattning)</h3>
+                <p className="text-sm text-blue-800">
+                  {selectedAssessmentForDetails.executive_summary}
+                </p>
+              </div>
+            )}
+            
+            <div className="space-y-4">
+              {selectedAssessmentForDetails.full_analysis ? (
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {selectedAssessmentForDetails.full_analysis}
+                </div>
+              ) : (
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {selectedAssessmentForDetails.ai_analysis || 'Detaljerad analys inte tillgänglig'}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

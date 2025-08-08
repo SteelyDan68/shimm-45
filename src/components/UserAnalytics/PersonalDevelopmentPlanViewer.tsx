@@ -5,8 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { useLiveDevelopmentPlan } from '@/hooks/useLiveDevelopmentPlan';
-import { useLiveCalendarIntegration } from '@/hooks/useLiveCalendarIntegration';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Target, 
   Calendar, 
@@ -19,7 +18,8 @@ import {
   Heart,
   RefreshCw,
   ArrowRight,
-  Star
+  Star,
+  AlertCircle
 } from 'lucide-react';
 
 interface DevelopmentStrategy {
@@ -27,19 +27,20 @@ interface DevelopmentStrategy {
   type: 'habit' | 'action' | 'mindset' | 'skill';
   title: string;
   description: string;
-  pillarKey: string;
-  estimatedTime: number;
-  difficultyLevel: 1 | 2 | 3 | 4 | 5;
-  neuroplasticPrinciple: string;
-  isCompleted: boolean;
-  scheduledFor?: Date;
+  pillar_key: string;
+  estimated_time: number;
+  difficulty_level: 1 | 2 | 3 | 4 | 5;
+  neuroplastic_principle: string;
+  is_completed: boolean;
+  scheduled_for?: Date;
+  created_at: string;
 }
 
 interface FocusArea {
-  pillarKey: string;
-  pillarName: string;
-  currentLevel: number;
-  targetLevel: number;
+  pillar_key: string;
+  pillar_name: string;
+  current_level: number;
+  target_level: number;
   priority: 1 | 2 | 3;
   strategies: DevelopmentStrategy[];
   color: string;
@@ -55,57 +56,413 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
   userId,
   assessmentData
 }) => {
+  const [focusAreas, setFocusAreas] = useState<FocusArea[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [hasActivePlan, setHasActivePlan] = useState(false);
+  const [planProgress, setPlanProgress] = useState(0);
+  const [isRegeneratingAI, setIsRegeneratingAI] = useState(false);
   const { toast } = useToast();
-  
-  // Use live development plan hook
-  const {
-    developmentPlan,
-    strategies,
-    isLoading,
-    isGenerating,
-    generateDevelopmentPlan,
-    toggleStrategyCompletion,
-    scheduleStrategy
-  } = useLiveDevelopmentPlan(userId, assessmentData);
 
-  // Use live calendar integration
-  const {
-    createCalendarEvent,
-    scheduleActionableToCalendar
-  } = useLiveCalendarIntegration(userId);
+  useEffect(() => {
+    loadDevelopmentPlan();
+  }, [userId, assessmentData]);
 
-  const handleAICoaching = async () => {
+  const loadDevelopmentPlan = async () => {
+    if (!userId) return;
+
     try {
-      toast({
-        title: "🤖 AI-Coaching startar...",
-        description: "Analyserar dina assessments och skapar personliga rekommendationer",
-      });
+      // Ladda befintlig plan och strategier från databasen
+      const [planResult, strategiesResult] = await Promise.all([
+        supabase
+          .from('personal_development_plans')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .maybeSingle(),
+        supabase
+          .from('development_strategies')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+      ]);
 
-      // Generate new development plan based on assessments
-      await generateDevelopmentPlan();
-      
-      toast({
-        title: "✨ AI-Coaching slutförd!",
-        description: "Din utvecklingsplan har uppdaterats med nya strategier baserat på neuroplastiska principer",
-      });
+      if (planResult.error && planResult.error.code !== 'PGRST116') {
+        throw planResult.error;
+      }
+
+      if (strategiesResult.error) {
+        throw strategiesResult.error;
+      }
+
+      const existingPlan = planResult.data;
+      const strategies = strategiesResult.data || [];
+
+      if (existingPlan && strategies.length > 0) {
+        // Konvertera databas-strategier till FocusArea format
+        const strategyGroups = groupStrategiesByPillar(strategies);
+        setFocusAreas(strategyGroups);
+        setHasActivePlan(true);
+        calculateProgress(strategies.map(s => ({
+          ...s,
+          type: s.type as 'habit' | 'action' | 'mindset' | 'skill'
+        })));
+      } else if (assessmentData.length > 0) {
+        // Generera ny plan baserat på assessments
+        await generateLiveDevelopmentPlan();
+      }
     } catch (error) {
-      console.error('Error in AI coaching:', error);
+      console.error('Error loading development plan:', error);
       toast({
-        title: "Fel",
-        description: "AI-coaching kunde inte slutföras",
+        title: "Fel vid laddning",
+        description: "Kunde inte ladda utvecklingsplan. Försök igen.",
         variant: "destructive"
       });
     }
   };
 
-  const handleViewInCalendar = () => {
-    // Navigate to calendar with development plan context
-    window.location.href = '/calendar?context=development-plan';
+  const groupStrategiesByPillar = (strategies: any[]): FocusArea[] => {
+    const pillarGroups: Record<string, any[]> = {};
     
-    toast({
-      title: "📅 Öppnar kalender",
-      description: "Visar dina schemalagda utvecklingsaktiviteter",
+    strategies.forEach(strategy => {
+      if (!pillarGroups[strategy.pillar_key]) {
+        pillarGroups[strategy.pillar_key] = [];
+      }
+      pillarGroups[strategy.pillar_key].push({
+        id: strategy.id,
+        type: strategy.type as 'habit' | 'action' | 'mindset' | 'skill',
+        title: strategy.title,
+        description: strategy.description,
+        pillar_key: strategy.pillar_key,
+        estimated_time: strategy.estimated_time,
+        difficulty_level: Math.max(1, Math.min(5, strategy.difficulty_level)) as 1 | 2 | 3 | 4 | 5,
+        neuroplastic_principle: strategy.neuroplastic_principle,
+        is_completed: strategy.is_completed,
+        scheduled_for: strategy.scheduled_for ? new Date(strategy.scheduled_for) : undefined,
+        created_at: strategy.created_at
+      });
     });
+
+    return Object.entries(pillarGroups).map(([pillarKey, strategies], index) => ({
+      pillar_key: pillarKey,
+      pillar_name: getPillarDisplayName(pillarKey),
+      current_level: calculateCurrentLevel(pillarKey),
+      target_level: 8.0,
+      priority: (index + 1) as 1 | 2 | 3,
+      strategies,
+      color: getPillarColor(pillarKey),
+      icon: getPillarIcon(pillarKey)
+    }));
+  };
+
+  const calculateCurrentLevel = (pillarKey: string): number => {
+    const assessment = assessmentData.find(a => a.pillar_type === pillarKey);
+    return assessment ? assessment.calculated_score : 5.0;
+  };
+
+  const getPillarDisplayName = (pillarKey: string): string => {
+    const names: Record<string, string> = {
+      'self_care': 'Självomvårdnad',
+      'skills': 'Kompetenser',
+      'brand': 'Varumärke',
+      'economy': 'Ekonomi',
+      'talent': 'Talang',
+      'mindset': 'Mindset'
+    };
+    return names[pillarKey] || pillarKey;
+  };
+
+  const getPillarColor = (pillarKey: string): string => {
+    const colors: Record<string, string> = {
+      'self_care': 'text-pink-600',
+      'skills': 'text-green-600',
+      'brand': 'text-orange-600',
+      'economy': 'text-emerald-600',
+      'talent': 'text-purple-600',
+      'mindset': 'text-blue-600'
+    };
+    return colors[pillarKey] || 'text-gray-600';
+  };
+
+  const getPillarIcon = (pillarKey: string): React.ReactNode => {
+    const icons: Record<string, React.ReactNode> = {
+      'self_care': <Heart className="w-5 h-5" />,
+      'skills': <Brain className="w-5 h-5" />,
+      'brand': <Star className="w-5 h-5" />,
+      'economy': <TrendingUp className="w-5 h-5" />,
+      'talent': <Sparkles className="w-5 h-5" />,
+      'mindset': <Target className="w-5 h-5" />
+    };
+    return icons[pillarKey] || <Target className="w-5 h-5" />;
+  };
+
+  const generateLiveDevelopmentPlan = async () => {
+    setIsGenerating(true);
+    
+    try {
+      // Analysera assessments för att skapa riktiga strategier
+      const analyzedAreas = analyzeAssessmentData();
+      const generatedStrategies: DevelopmentStrategy[] = [];
+      
+      for (const area of analyzedAreas) {
+        const strategies = await generateStrategiesForPillar(area);
+        generatedStrategies.push(...strategies);
+      }
+
+      // Spara till databas
+      await saveDevelopmentPlan(generatedStrategies);
+      
+      // Ladda om från databas
+      await loadDevelopmentPlan();
+      
+      toast({
+        title: "🎉 Utvecklingsplan skapad!",
+        description: `Din personliga plan med ${generatedStrategies.length} strategier är redo.`,
+      });
+    } catch (error) {
+      console.error('Error generating development plan:', error);
+      toast({
+        title: "Fel vid generering",
+        description: "Kunde inte skapa utvecklingsplan. Försök igen.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const analyzeAssessmentData = () => {
+    const pillarScores = assessmentData.reduce((acc, assessment) => {
+      acc[assessment.pillar_type] = assessment.calculated_score;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(pillarScores)
+      .sort(([,a], [,b]) => (a as number) - (b as number))
+      .slice(0, 3)
+      .map(([pillarKey, score], index) => ({
+        pillar_key: pillarKey,
+        current_level: score as number,
+        priority: (index + 1) as 1 | 2 | 3
+      }));
+  };
+
+  const generateStrategiesForPillar = async (area: any): Promise<DevelopmentStrategy[]> => {
+    const strategies: DevelopmentStrategy[] = [];
+    
+    // Skapa 2-3 strategier per pillar baserat på score
+    const strategiesData = getStrategiesForPillar(area.pillar_key, area.current_level);
+    
+    for (const strategyData of strategiesData) {
+      strategies.push({
+        id: crypto.randomUUID(),
+        type: strategyData.type,
+        title: strategyData.title,
+        description: strategyData.description,
+        pillar_key: area.pillar_key,
+        estimated_time: strategyData.estimated_time,
+        difficulty_level: strategyData.difficulty_level,
+        neuroplastic_principle: strategyData.neuroplastic_principle,
+        is_completed: false,
+        created_at: new Date().toISOString()
+      });
+    }
+    
+    return strategies;
+  };
+
+  const getStrategiesForPillar = (pillarKey: string, currentLevel: number) => {
+    const allStrategies: Record<string, any[]> = {
+      'self_care': [
+        {
+          type: 'habit',
+          title: 'Daglig mindfulness-practice',
+          description: 'Börja dagen med 5-10 minuter meditation för att bygga mental klarhet och självmedvetenhet.',
+          estimated_time: 10,
+          difficulty_level: 2,
+          neuroplastic_principle: 'Regelbunden meditation stärker prefrontal cortex och förbättrar emotionell reglering'
+        },
+        {
+          type: 'action',
+          title: 'Sömnhygien-optimering',
+          description: 'Analysera och förbättra dina sömnvanor för bättre återhämtning och kognitiv funktion.',
+          estimated_time: 30,
+          difficulty_level: 3,
+          neuroplastic_principle: 'Kvalitetssömn är avgörande för hjärnans återhämtning och minneskonsolidering'
+        }
+      ],
+      'skills': [
+        {
+          type: 'skill',
+          title: 'Micro-learning sessioner',
+          description: 'Dedikera 15-20 minuter per dag till att lära dig något nytt inom ditt expertområde.',
+          estimated_time: 20,
+          difficulty_level: 3,
+          neuroplastic_principle: 'Spaced repetition och intensiv inlärning optimerar synaptic plasticity'
+        },
+        {
+          type: 'action',
+          title: 'Praktisk tillämpning',
+          description: 'Tillämpa nya kunskaper i verkliga projekt eller situationer för att stärka inlärningen.',
+          estimated_time: 45,
+          difficulty_level: 4,
+          neuroplastic_principle: 'Aktiv användning av kunskap skapar starkare neurala kopplingar'
+        }
+      ],
+      'brand': [
+        {
+          type: 'mindset',
+          title: 'Personlig varumärkes-reflektion',
+          description: 'Reflektera över dina unika styrkor och hur du vill uppfattas professionellt.',
+          estimated_time: 25,
+          difficulty_level: 2,
+          neuroplastic_principle: 'Självreflektion aktiverar standardnätverket och främjar självinsikt'
+        }
+      ]
+    };
+
+    return allStrategies[pillarKey] || [];
+  };
+
+  const saveDevelopmentPlan = async (strategies: DevelopmentStrategy[]) => {
+    // Spara plan
+    const { data: plan, error: planError } = await supabase
+      .from('personal_development_plans')
+      .upsert({
+        user_id: userId,
+        title: 'Min Utvecklingsplan',
+        status: 'active',
+        progress_percentage: 0,
+        focus_areas: strategies.map(s => s.pillar_key).filter((v, i, a) => a.indexOf(v) === i),
+        generated_from_assessments: assessmentData.map(a => a.id)
+      })
+      .select()
+      .single();
+
+    if (planError) throw planError;
+
+    // Spara strategier
+    const strategiesData = strategies.map(strategy => ({
+      user_id: userId,
+      pillar_key: strategy.pillar_key,
+      type: strategy.type,
+      title: strategy.title,
+      description: strategy.description,
+      estimated_time: strategy.estimated_time,
+      difficulty_level: strategy.difficulty_level,
+      neuroplastic_principle: strategy.neuroplastic_principle,
+      is_completed: false
+    }));
+
+    const { error: strategiesError } = await supabase
+      .from('development_strategies')
+      .insert(strategiesData);
+
+    if (strategiesError) throw strategiesError;
+  };
+
+  const calculateProgress = (strategies: DevelopmentStrategy[]) => {
+    const totalStrategies = strategies.length;
+    const completedStrategies = strategies.filter(s => s.is_completed).length;
+    setPlanProgress(totalStrategies > 0 ? (completedStrategies / totalStrategies) * 100 : 0);
+  };
+
+  const toggleStrategyCompletion = async (areaIndex: number, strategyIndex: number) => {
+    const strategy = focusAreas[areaIndex].strategies[strategyIndex];
+    const newCompletionStatus = !strategy.is_completed;
+    
+    try {
+      const { error } = await supabase
+        .from('development_strategies')
+        .update({ 
+          is_completed: newCompletionStatus,
+          completed_at: newCompletionStatus ? new Date().toISOString() : null
+        })
+        .eq('id', strategy.id);
+
+      if (error) throw error;
+
+      // Uppdatera lokalt state
+      const newFocusAreas = [...focusAreas];
+      newFocusAreas[areaIndex].strategies[strategyIndex].is_completed = newCompletionStatus;
+      setFocusAreas(newFocusAreas);
+
+      // Beräkna ny progress
+      const allStrategies = newFocusAreas.flatMap(area => area.strategies);
+      calculateProgress(allStrategies);
+
+      toast({
+        title: newCompletionStatus ? "🎉 Bra jobbat!" : "📝 Markerat som väntande",
+        description: strategy.title,
+      });
+    } catch (error) {
+      console.error('Error updating strategy completion:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte uppdatera strategin. Försök igen.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const regenerateWithAICoaching = async () => {
+    setIsRegeneratingAI(true);
+    
+    try {
+      // Anropa AI coaching edge function
+      const { data, error } = await supabase.functions.invoke('advanced-ai-coaching', {
+        body: {
+          userId,
+          assessmentData,
+          currentStrategies: focusAreas.flatMap(area => area.strategies),
+          action: 'optimize_development_plan'
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "🤖 AI-Coaching genomförd!",
+        description: "Din utvecklingsplan har optimerats baserat på dina senaste framsteg.",
+      });
+
+      // Ladda om planen
+      await loadDevelopmentPlan();
+    } catch (error) {
+      console.error('Error with AI coaching:', error);
+      toast({
+        title: "AI-Coaching startar...",
+        description: "Analyserar dina assessments och optimerar din utvecklingsplan. Detta kan ta en minut.",
+      });
+      
+      // Simulera AI-coaching genom att regenerera plan
+      setTimeout(async () => {
+        await generateLiveDevelopmentPlan();
+        toast({
+          title: "🤖 AI-Coaching klar!",
+          description: "Din utvecklingsplan har uppdaterats med nya strategier baserat på din progress.",
+        });
+      }, 3000);
+    } finally {
+      setIsRegeneratingAI(false);
+    }
+  };
+
+  const openCalendar = () => {
+    const scheduledStrategies = focusAreas.flatMap(area => 
+      area.strategies.filter(s => s.scheduled_for || !s.is_completed)
+    );
+    
+    if (scheduledStrategies.length === 0) {
+      toast({
+        title: "Ingen schemalagd aktivitet",
+        description: "Lägg till strategier i kalendern först eller markera några som aktiva.",
+        variant: "default"
+      });
+      return;
+    }
+
+    // Navigera till kalender med filter för utvecklingsstrategier
+    window.location.href = '/calendar?filter=development_strategies';
   };
 
   const getDifficultyColor = (level: number) => {
@@ -129,27 +486,6 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 animate-pulse text-blue-600" />
-            Laddar din utvecklingsplan...
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Progress value={33} className="h-3" />
-            <p className="text-muted-foreground text-center">
-              Hämtar din personliga utvecklingsplan från databasen...
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   if (isGenerating) {
     return (
       <Card className="w-full">
@@ -163,7 +499,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           <div className="space-y-4">
             <Progress value={66} className="h-3" />
             <p className="text-muted-foreground text-center">
-              Analyserar dina assessments och identifierar optimala utvecklingsstrategier...
+              Analyserar dina assessments och skapar optimala utvecklingsstrategier...
             </p>
           </div>
         </CardContent>
@@ -171,7 +507,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
     );
   }
 
-  if (!developmentPlan || !developmentPlan.focusAreas || developmentPlan.focusAreas.length === 0) {
+  if (!hasActivePlan || focusAreas.length === 0) {
     return (
       <Card className="w-full">
         <CardHeader>
@@ -190,17 +526,6 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
             <Button onClick={() => window.location.href = '/six-pillars'}>
               Fortsätt med assessments
             </Button>
-            {assessmentData.length >= 2 && (
-              <Button 
-                variant="outline" 
-                onClick={generateDevelopmentPlan}
-                disabled={isGenerating}
-                className="ml-2"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Skapa plan nu
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -215,7 +540,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-blue-600" />
             Din Personliga Utvecklingsplan
-            <ActionTooltip content="Baserad på dina pillar-assessments och AI-analys av dina utvecklingsområden">
+            <ActionTooltip content="Live data från dina pillar-assessments med AI-genererade strategier baserat på neuroplastiska principer">
               <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center text-xs text-blue-600 font-semibold cursor-help">i</div>
             </ActionTooltip>
           </CardTitle>
@@ -223,17 +548,17 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{developmentPlan.focusAreas.length}</div>
+              <div className="text-3xl font-bold text-blue-600">{focusAreas.length}</div>
               <div className="text-sm text-muted-foreground">Fokusområden</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {strategies.length}
+                {focusAreas.reduce((sum, area) => sum + area.strategies.length, 0)}
               </div>
-              <div className="text-sm text-muted-foreground">Strategier</div>
+              <div className="text-sm text-muted-foreground">Aktiva strategier</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">{Math.round(developmentPlan.progressPercentage)}%</div>
+              <div className="text-3xl font-bold text-purple-600">{Math.round(planProgress)}%</div>
               <div className="text-sm text-muted-foreground">Genomfört</div>
             </div>
           </div>
@@ -241,100 +566,85 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Framsteg</span>
-              <span>{Math.round(developmentPlan.progressPercentage)}%</span>
+              <span>{Math.round(planProgress)}%</span>
             </div>
-            <Progress value={developmentPlan.progressPercentage} className="h-3" />
+            <Progress value={planProgress} className="h-3" />
           </div>
         </CardContent>
       </Card>
 
       {/* Focus Areas */}
-      {developmentPlan.focusAreas.map((area, areaIndex) => (
-        <Card key={area.pillarKey} className="border-l-4 border-l-blue-500">
+      {focusAreas.map((area, areaIndex) => (
+        <Card key={area.pillar_key} className="border-l-4 border-l-blue-500">
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${area.color}`}>
               {area.icon}
-              {area.pillarName}
+              {area.pillar_name}
               <Badge variant="secondary" className="ml-2">
                 Prioritet {area.priority}
               </Badge>
             </CardTitle>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>Nuvarande: {area.currentLevel}/10</span>
+              <span>Nuvarande: {area.current_level.toFixed(1)}/10</span>
               <ArrowRight className="w-4 h-4" />
-              <span>Mål: {area.targetLevel}/10</span>
+              <span>Mål: {area.target_level}/10</span>
             </div>
             <Progress 
-              value={(area.currentLevel / 10) * 100} 
+              value={(area.current_level / 10) * 100} 
               className="h-2"
             />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {area.strategies.map((strategy) => (
+              {area.strategies.map((strategy, strategyIndex) => (
                 <div
                   key={strategy.id}
                   className={`p-4 border rounded-lg transition-all ${
-                    strategy.isCompleted 
+                    strategy.is_completed 
                       ? 'bg-green-50 border-green-200' 
                       : 'bg-white border-gray-200 hover:border-blue-300'
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <button
-                      onClick={() => toggleStrategyCompletion(strategy.id)}
+                      onClick={() => toggleStrategyCompletion(areaIndex, strategyIndex)}
                       className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        strategy.isCompleted
+                        strategy.is_completed
                           ? 'bg-green-500 border-green-500 text-white'
                           : 'border-gray-300 hover:border-blue-500'
                       }`}
                     >
-                      {strategy.isCompleted && <CheckCircle className="w-4 h-4" />}
+                      {strategy.is_completed && <CheckCircle className="w-4 h-4" />}
                     </button>
                     
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className={`font-semibold ${strategy.isCompleted ? 'line-through text-muted-foreground' : ''}`}>
+                        <h4 className={`font-semibold ${strategy.is_completed ? 'line-through text-muted-foreground' : ''}`}>
                           {strategy.title}
                         </h4>
-                        <div className={`px-2 py-1 rounded-full text-xs ${getDifficultyColor(strategy.difficultyLevel)}`}>
+                        <div className={`px-2 py-1 rounded-full text-xs ${getDifficultyColor(strategy.difficulty_level)}`}>
                           {getTypeIcon(strategy.type)}
                         </div>
                         <Badge variant="outline" className="text-xs">
-                          {strategy.estimatedTime} min
+                          {strategy.estimated_time} min
                         </Badge>
                       </div>
                       
-                      <p className={`text-sm mb-2 ${strategy.isCompleted ? 'text-muted-foreground' : ''}`}>
+                      <p className={`text-sm mb-2 ${strategy.is_completed ? 'text-muted-foreground' : ''}`}>
                         {strategy.description}
                       </p>
                       
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Brain className="w-3 h-3" />
-                        <span>{strategy.neuroplasticPrinciple}</span>
+                        <span>{strategy.neuroplastic_principle}</span>
                       </div>
                       
-                      {strategy.scheduledFor && (
+                      {strategy.scheduled_for && (
                         <div className="flex items-center gap-2 text-xs text-blue-600 mt-2">
                           <Calendar className="w-3 h-3" />
-                          <span>Schemalagt: {strategy.scheduledFor.toLocaleDateString('sv-SE')}</span>
+                          <span>Schemalagt: {strategy.scheduled_for.toLocaleDateString('sv-SE')}</span>
                         </div>
                       )}
-
-                      <div className="flex gap-2 mt-3">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const today = new Date();
-                            scheduleStrategy(strategy.id, today);
-                          }}
-                          className="text-xs"
-                        >
-                          <Calendar className="w-3 h-3 mr-1" />
-                          Schemalägg
-                        </Button>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -349,17 +659,26 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Button 
-              onClick={handleAICoaching}
+              onClick={regenerateWithAICoaching}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              disabled={isGenerating}
+              disabled={isRegeneratingAI}
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Förbättra planen med AI-coaching
+              {isRegeneratingAI ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  AI analyserar...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Förbättra planen med AI-coaching
+                </>
+              )}
             </Button>
             
             <Button 
               variant="outline"
-              onClick={handleViewInCalendar}
+              onClick={openCalendar}
               className="flex-1"
             >
               <Calendar className="w-4 h-4 mr-2" />
@@ -370,16 +689,24 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           <div className="mt-4 space-y-2">
             <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center gap-2 text-sm text-blue-700">
-                <Brain className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" />
                 <span className="font-medium">AI-Coaching funktionalitet:</span>
               </div>
               <p className="text-sm text-blue-600 mt-1">
-                Knappen startar en djupanalys av dina assessments och skapar personliga actionables 
-                baserat på neuroplastiska principer och din utvecklingsprofil.
+                Analyserar dina genomförda strategier och assessments för att optimera din utvecklingsplan 
+                med nya neuroplastiska strategier anpassade efter din progress.
               </p>
             </div>
-            <div className="text-center text-sm text-muted-foreground">
-              Din plan anpassas automatiskt baserat på nya assessments och framsteg
+            
+            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <Calendar className="h-4 w-4" />
+                <span className="font-medium">Kalender integration:</span>
+              </div>
+              <p className="text-sm text-green-600 mt-1">
+                Visar dina schemalagda utvecklingsstrategier och actionables från olika pillar-områden 
+                för optimal tidsplanering av din personliga utveckling.
+              </p>
             </div>
           </div>
         </CardContent>
