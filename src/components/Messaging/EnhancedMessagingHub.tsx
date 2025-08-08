@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +9,10 @@ import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ModernMessageBubble } from './ModernMessageBubble';
+import { ModernMessageInput } from './ModernMessageInput';
 import { 
-  Send, 
   MessageSquare, 
-  Trash2,
   X
 } from 'lucide-react';
 
@@ -26,7 +25,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
   const {
     conversations,
     activeConversation,
-    messages,
+    currentMessages, // Use currentMessages instead of messages
     setActiveConversation,
     sendMessage,
     markConversationAsRead
@@ -40,7 +39,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, activeConversation]);
+  }, [currentMessages, activeConversation]);
 
   // Focus input when conversation changes
   useEffect(() => {
@@ -139,96 +138,99 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
     }
   };
 
-  const currentMessages = messages[activeConversation || ''] || [];
   const conversation = conversations.find(c => c.id === activeConversation);
 
   return (
-    <div className={cn("h-full flex", className)}>
+    <div className={cn("h-full flex bg-gradient-to-br from-background to-muted/20", className)}>
       {/* Main messaging area */}
       <div className="flex-1 flex flex-col">
         
         {/* Header */}
-        <div className="p-4 border-b bg-gradient-to-r from-primary/5 to-accent/5">
+        <div className="p-6 border-b bg-background/95 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold">Meddelanden</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Meddelanden
+              </h1>
               <p className="text-sm text-muted-foreground">
-                Kommunikation och Stefan AI
+                Kommunikation och Stefan AI chat
               </p>
             </div>
           </div>
         </div>
 
         {/* Conversation list */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
           
-          {/* Conversations */}
-          <div className="md:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
+          {/* Conversations Sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="h-full shadow-sm border-border/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2 text-foreground">
+                  <MessageSquare className="h-4 w-4 text-primary" />
                   Konversationer
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px]">
+              <CardContent className="p-0">
+                <ScrollArea className="h-[calc(100vh-200px)]">
                   {conversations.length === 0 ? (
-                    <div className="text-center py-8 space-y-3">
-                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                        <MessageSquare className="h-6 w-6 text-primary" />
+                    <div className="text-center py-12 px-4 space-y-4">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                        <MessageSquare className="h-8 w-8 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-sm">Inga konversationer</h3>
-                        <p className="text-xs text-muted-foreground">
+                        <h3 className="font-medium">Inga konversationer</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
                           Konversationer skapas automatiskt när du chattar
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {conversations.map((conv) => (
                         <div
                           key={conv.id}
                           className={cn(
-                            "p-3 rounded-lg transition-colors hover:bg-muted/50 relative group",
-                            activeConversation === conv.id && "bg-primary/10 border border-primary/20"
+                            "p-4 rounded-xl transition-all duration-200 hover:bg-muted/50 relative group cursor-pointer",
+                            "border-l-4 border-transparent hover:border-primary/20",
+                            activeConversation === conv.id && "bg-primary/5 border-primary shadow-sm"
                           )}
                         >
                           <div 
-                            className="cursor-pointer"
                             onClick={() => {
                               setActiveConversation(conv.id);
                               markConversationAsRead(conv.id);
                             }}
                           >
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="text-xs">
-                                  {conv.title?.charAt(0) || '?'}
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+                                <AvatarFallback className="text-sm font-medium bg-gradient-to-br from-primary/20 to-accent/20">
+                                  {conv.title?.charAt(0)?.toUpperCase() || '?'}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">
+                                <p className="font-medium truncate text-foreground">
                                   {conv.title || 'Okänd konversation'}
                                 </p>
-                                <p className="text-xs text-muted-foreground truncate">
+                                <p className="text-sm text-muted-foreground truncate mt-0.5">
                                   {conv.last_message?.content || 'Inga meddelanden än...'}
                                 </p>
                               </div>
                               {(conv.unread_count || 0) > 0 && (
-                                <Badge variant="destructive" className="text-xs">
+                                <Badge 
+                                  variant="default" 
+                                  className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full"
+                                >
                                   {conv.unread_count}
                                 </Badge>
                               )}
                             </div>
                           </div>
-                          
                           {/* Delete button */}
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-3 right-3 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteConversation(conv.id);
@@ -245,107 +247,73 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
             </Card>
           </div>
 
-          {/* Messages */}
-          <div className="md:col-span-2">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="text-sm">
+          {/* Modern Chat Interface */}
+          <div className="lg:col-span-3">
+            <Card className="h-full shadow-sm border-border/50 bg-background/50 backdrop-blur-sm">
+              <CardHeader className="pb-3 border-b border-border/50">
+                <CardTitle className="text-lg font-medium">
                   {conversation?.title || 'Välj en konversation'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col h-[500px]">
+              <CardContent className="flex flex-col h-[calc(100vh-240px)] p-0">
                 
                 {activeConversation ? (
                   <>
-                    {/* Messages area with proper scroll */}
-                    <div className="flex-1 overflow-y-auto mb-4">
-                      <div className="space-y-4 p-1">
-                        {currentMessages.length === 0 ? (
-                          <div className="text-center py-8">
-                            <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                            <p className="text-sm text-muted-foreground">
-                              Inga meddelanden än. Skriv det första!
-                            </p>
+                    {/* Messages Container */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth">
+                      {(currentMessages || []).length === 0 ? (
+                        <div className="text-center py-16">
+                          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <MessageSquare className="h-10 w-10 text-primary" />
                           </div>
-                        ) : (
-                          currentMessages.map((message) => {
+                          <h3 className="text-lg font-medium mb-2">Börja konversationen</h3>
+                          <p className="text-muted-foreground">
+                            Skriv ditt första meddelande nedan
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          {(currentMessages || []).map((message, index) => {
                             const isOwn = message.sender_id === user?.id;
+                            const prevMessage = index > 0 ? currentMessages[index - 1] : null;
+                            const showAvatar = !isOwn && (!prevMessage || prevMessage.sender_id !== message.sender_id);
                             
                             return (
-                              <div key={message.id} className={cn(
-                                "flex gap-2 group",
-                                isOwn && "justify-end"
-                              )}>
-                                {!isOwn && (
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarFallback className="text-xs">
-                                      {message.sender_profile?.first_name?.charAt(0) || '?'}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                )}
-                                
-                                <div className={cn(
-                                  "max-w-[70%] p-3 rounded-lg text-sm relative",
-                                  isOwn 
-                                    ? "bg-primary text-primary-foreground" 
-                                    : "bg-muted"
-                                )}>
-                                  <p className="whitespace-pre-wrap">{message.content}</p>
-                                  <div className="flex items-center justify-between mt-1">
-                                    <span className={cn(
-                                      "text-xs",
-                                      isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
-                                    )}>
-                                      {new Date(message.created_at).toLocaleTimeString('sv-SE', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
+                              <ModernMessageBubble
+                                key={message.id}
+                                message={message}
+                                isOwn={isOwn}
+                                showAvatar={showAvatar}
+                                showTimestamp={true}
+                                className="animate-fade-in"
+                              />
                             );
-                          })
-                        )}
-                        <div ref={messagesEndRef} />
-                      </div>
+                          })}
+                        </>
+                      )}
+                      <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Input area */}
-                    <div className="border-t pt-4">
-                      <div className="flex gap-2">
-                        <Input
-                          ref={inputRef}
-                          value={messageInput}
-                          onChange={(e) => setMessageInput(e.target.value)}
-                          placeholder="Skriv ditt meddelande här..."
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              handleSendMessage();
-                            }
-                          }}
-                          className="flex-1"
-                        />
-                        <Button 
-                          onClick={handleSendMessage}
-                          disabled={!messageInput.trim()}
-                          size="icon"
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    {/* Modern Input Area */}
+                    <div className="border-t border-border/50 p-6 bg-background/80 backdrop-blur-sm">
+                      <ModernMessageInput
+                        value={messageInput}
+                        onChange={setMessageInput}
+                        onSend={handleSendMessage}
+                        placeholder="Skriv ditt meddelande här..."
+                        disabled={false}
+                      />
                     </div>
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center space-y-3">
-                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                        <MessageSquare className="h-8 w-8 text-primary" />
+                    <div className="text-center space-y-6 p-8">
+                      <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full flex items-center justify-center mx-auto">
+                        <MessageSquare className="h-12 w-12 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-medium">Välj en konversation</h3>
-                        <p className="text-sm text-muted-foreground">
+                        <h3 className="text-xl font-semibold mb-2">Välj en konversation</h3>
+                        <p className="text-muted-foreground">
                           Klicka på en konversation till vänster för att börja chatta
                         </p>
                       </div>

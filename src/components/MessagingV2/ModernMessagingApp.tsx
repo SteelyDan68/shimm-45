@@ -30,7 +30,7 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
   const {
     conversations,
     activeConversation,
-    messages,
+    currentMessages, // Use currentMessages instead of messages
     connectionStatus,
     totalUnreadCount,
     setActiveConversation,
@@ -53,7 +53,7 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [currentMessages]);
 
   // Automatisk Stefan-konversation när användaren kommer till Messages
   useEffect(() => {
@@ -364,13 +364,13 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
           {/* Messages */}
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
-              {messages.map((message, index) => {
+              {(currentMessages || []).map((message, index) => {
                 const isOwn = message.sender_id === user?.id;
                 const showDate = index === 0 || 
-                  formatMessageDate(message.created_at) !== formatMessageDate(messages[index - 1]?.created_at);
+                  formatMessageDate(message.created_at) !== formatMessageDate((currentMessages || [])[index - 1]?.created_at);
                 const showAvatar = !isOwn && (
-                  index === messages.length - 1 || 
-                  messages[index + 1]?.sender_id !== message.sender_id
+                  index === (currentMessages || []).length - 1 || 
+                  (currentMessages || [])[index + 1]?.sender_id !== message.sender_id
                 );
 
                 return (
@@ -437,7 +437,7 @@ export const ModernMessagingApp: React.FC<ModernMessagingAppProps> = ({ classNam
                                 key={userId}
                                 className="bg-muted px-2 py-1 rounded-full text-xs flex items-center gap-1"
                               >
-                                {emoji}
+                                {String(emoji)}
                               </span>
                             ))}
                           </div>

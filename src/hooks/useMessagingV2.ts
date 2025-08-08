@@ -577,7 +577,8 @@ export const useMessagingV2 = () => {
     // State
     conversations,
     activeConversation,
-    messages: activeConversation ? messages[activeConversation] || [] : [],
+    messages: messages, // Return full messages object instead of filtering
+    currentMessages: activeConversation ? messages[activeConversation] || [] : [], // Add current messages
     allMessages: messages,
     userPresence,
     typingUsers,
