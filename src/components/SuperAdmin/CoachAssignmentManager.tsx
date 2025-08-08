@@ -92,37 +92,47 @@ export const CoachAssignmentManager: React.FC<CoachAssignmentManagerProps> = ({
     }
   };
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      const formattedAssignments = data?.map(assignment => ({
-        ...assignment,
-        coach_name: 'Coach',
-        client_name: 'Klient'
-      })) || [];
-
-      setAssignments(formattedAssignments);
-
-    } catch (error: any) {
-      console.error('Error loading assignments:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda tilldelningar",
-        variant: "destructive"
-      });
-    }
-  };
-
   const loadAvailableUsers = async () => {
     if (!canManageAssignments) return;
 
     try {
-      // Simplified - just set empty arrays for now
-      setAvailableCoaches([]);
-      setAvailableClients([]);
+      // Hämta alla profiler och sedan filtrera på roller
+      const { data: allProfiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .eq('is_active', true);
 
-      
+      if (profileError) throw profileError;
+
+      const coaches: AvailableUser[] = [];
+      const clients: AvailableUser[] = [];
+
+      // För varje profil, hämta roller
+      for (const profile of allProfiles || []) {
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', profile.id);
+
+        const roles = userRoles?.map(ur => ur.role) || [];
+
+        const userData = {
+          id: profile.id,
+          name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email,
+          email: profile.email,
+          roles
+        };
+
+        if (roles.includes('coach')) {
+          coaches.push(userData);
+        }
+        if (roles.includes('client')) {
+          clients.push(userData);
+        }
+      }
+
+      setAvailableCoaches(coaches);
+      setAvailableClients(clients);
 
     } catch (error: any) {
       console.error('Error loading available users:', error);
