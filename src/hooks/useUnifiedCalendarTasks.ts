@@ -54,11 +54,9 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
   const loading = calendarLoading || tasksLoading;
   const error = calendarError;
 
-  // 🔄 REAL-TIME SYNCHRONIZATION
+  // 🔄 REAL-TIME SYNCHRONIZATION - FIXED INFINITE LOOP
   useEffect(() => {
     if (!userId) return;
-
-    
 
     const channel = supabase
       .channel(`unified-calendar-tasks-${userId}`)
@@ -71,11 +69,9 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          
           refetchCalendar();
-          
-          // Track analytics
-          trackCalendarEngagement('calendar_event_updated', payload);
+          // Track analytics without causing re-renders
+          trackCalendarEngagement('calendar_event_updated', payload).catch(console.error);
         }
       )
       .on(
@@ -87,11 +83,9 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          
           refreshTasks();
-          
-          // Track analytics
-          trackCalendarEngagement('task_updated', payload);
+          // Track analytics without causing re-renders
+          trackCalendarEngagement('task_updated', payload).catch(console.error);
         }
       )
       .subscribe();
@@ -99,12 +93,11 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
     setRealtimeSubscription(channel);
 
     return () => {
-      
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
-  }, [userId, refetchCalendar, refreshTasks]);
+  }, [userId]); // FIXED: Removed function dependencies that cause infinite loops
 
   // 📊 ANALYTICS TRACKING
   const trackCalendarEngagement = async (action: string, data: any) => {
@@ -327,12 +320,11 @@ export const useUnifiedCalendarTasks = (userId?: string) => {
     }
   }, [user, userId, updateTask, toast, refetchCalendar]);
 
-  // 🔄 REFRESH ALL DATA
+  // 🔄 REFRESH ALL DATA - FIXED DEPENDENCIES
   const refreshAll = useCallback(() => {
-    
     refetchCalendar();
     refreshTasks();
-  }, [refetchCalendar, refreshTasks]);
+  }, []); // FIXED: Empty dependency array to prevent loops
 
   // 📊 COMBINED STATISTICS
   const statistics = {
