@@ -68,7 +68,7 @@ export const useAIProcessingTracking = () => {
 
       if (error) throw error;
 
-      setCurrentSession(data);
+      setCurrentSession(data as AIProcessingSession);
       return data.id;
     } catch (error) {
       console.error('Failed to start processing session:', error);
@@ -104,7 +104,7 @@ export const useAIProcessingTracking = () => {
         .single();
 
       if (error) throw error;
-      setCurrentSession(data);
+      setCurrentSession(data as AIProcessingSession);
     } catch (error) {
       console.error('Failed to update progress:', error);
     }
@@ -130,7 +130,7 @@ export const useAIProcessingTracking = () => {
         .single();
 
       if (error) throw error;
-      setCurrentSession(data);
+      setCurrentSession(data as AIProcessingSession);
     } catch (error) {
       console.error('Failed to complete session:', error);
     }
@@ -151,7 +151,7 @@ export const useAIProcessingTracking = () => {
         .single();
 
       if (error) throw error;
-      setCurrentSession(data);
+      setCurrentSession(data as AIProcessingSession);
     } catch (error) {
       console.error('Failed to mark session as failed:', error);
     }
@@ -189,7 +189,7 @@ export const useAIProcessingTracking = () => {
         .single();
 
       if (error) throw error;
-      setPipelineProgress(data);
+      setPipelineProgress(data as PipelineProgress);
     } catch (error) {
       console.error('Failed to update pipeline progress:', error);
     }
@@ -235,7 +235,7 @@ export const useAIProcessingTracking = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setPipelineProgress(data);
+      setPipelineProgress(data as PipelineProgress);
     } catch (error) {
       console.error('Failed to load pipeline progress:', error);
     }
@@ -256,7 +256,7 @@ export const useAIProcessingTracking = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          setCurrentSession(payload.new as any);
+          setCurrentSession(payload.new as AIProcessingSession);
         }
       )
       .on(
@@ -268,7 +268,7 @@ export const useAIProcessingTracking = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          setPipelineProgress(payload.new as any);
+          setPipelineProgress(payload.new as PipelineProgress);
         }
       )
       .subscribe();
