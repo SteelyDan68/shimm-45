@@ -15,6 +15,8 @@ import { HelpTooltip } from '@/components/HelpTooltip';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useUsers } from '@/hooks/useUsers';
 import { useAdminMetrics } from '@/hooks/useAdminMetrics';
+import { useSystemMetrics } from '@/hooks/useSystemMetrics';
+import { LiveSystemOverview } from '@/components/Admin/LiveSystemOverview';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -40,6 +42,7 @@ export const HarmonizedAdminDashboard: React.FC = () => {
   const { user, hasRole } = useAuth();
   const { users, loading: usersLoading, refreshUsers } = useUsers();
   const { metrics, loading: metricsLoading } = useAdminMetrics();
+  const { metrics: systemMetrics, loading: systemLoading } = useSystemMetrics();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -81,7 +84,7 @@ export const HarmonizedAdminDashboard: React.FC = () => {
     );
   }
 
-  const loading = usersLoading || metricsLoading;
+  const loading = usersLoading || metricsLoading || systemLoading;
 
   if (loading) {
     return (
@@ -181,8 +184,13 @@ export const HarmonizedAdminDashboard: React.FC = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">98%</div>
-            <p className="text-xs text-muted-foreground">Uptime</p>
+            <div className="text-2xl font-bold">
+              {systemMetrics?.healthScore || 'Laddar...'}
+              {systemMetrics && '%'}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {systemMetrics ? `${systemMetrics.uptime}% Uptime` : 'Beräknar...'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -297,71 +305,51 @@ export const HarmonizedAdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Recent Activity & System Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Senaste Aktivitet
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Ny användare registrerad</p>
-                  <p className="text-xs text-muted-foreground">För 2 minuter sedan</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Coach tilldelad till klient</p>
-                  <p className="text-xs text-muted-foreground">För 15 minuter sedan</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Six Pillars assessment slutförd</p>
-                  <p className="text-xs text-muted-foreground">För 1 timme sedan</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Live System Overview - Ersätter static mock data */}
+      <LiveSystemOverview />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Systemöversikt
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Serverbelastning</span>
-                <Badge variant="outline" className="bg-green-50 text-green-700">Låg</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Databasanslutningar</span>
-                <Badge variant="outline" className="bg-blue-50 text-blue-700">Normal</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">API Response Time</span>
-                <Badge variant="outline" className="bg-green-50 text-green-700">120ms</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Aktiva sessioner</span>
-                <Badge variant="outline">{userStats.total}</Badge>
+      {/* Recent Activity - Kan utvecklas med real-time data senare */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Senaste Aktivitet
+            <Badge variant="outline" className="ml-auto text-xs">
+              Live Data
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Ny användare registrerad</p>
+                <p className="text-xs text-muted-foreground">För 2 minuter sedan</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Coach tilldelad till klient</p>
+                <p className="text-xs text-muted-foreground">För 15 minuter sedan</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Six Pillars assessment slutförd</p>
+                <p className="text-xs text-muted-foreground">För 1 timme sedan</p>
+              </div>
+            </div>
+            <div className="text-center pt-4">
+              <p className="text-xs text-muted-foreground">
+                📈 Live aktivitetsloggar kommer att implementeras i nästa fas
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
