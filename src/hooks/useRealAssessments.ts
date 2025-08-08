@@ -299,20 +299,26 @@ export const useRealAssessments = () => {
     if (!user) return false;
 
     try {
-      // Create assessment round record
-      const { data: assessment, error: assessmentError } = await supabase
+      // Create assessment round record using safe upsert to prevent duplicates
+      const { data: assessmentId, error: assessmentError } = await supabase.rpc('safe_assessment_upsert', {
+        p_user_id: user.id,
+        p_pillar_type: pillarType,
+        p_answers: finalAnswers,
+        p_scores: scores,
+        p_comments: comments || null,
+        p_ai_analysis: null
+      });
+
+      if (assessmentError) throw assessmentError;
+
+      // Get the created assessment for further processing
+      const { data: assessment, error: fetchError } = await supabase
         .from('assessment_rounds')
-        .insert({
-          user_id: user.id,
-          form_definition_id: formDefinitionId,
-          pillar_type: pillarType,
-          answers: finalAnswers,
-          scores: scores,
-          comments: comments,
-          created_by: user.id
-        })
         .select()
+        .eq('id', assessmentId)
         .single();
+
+      if (fetchError) throw fetchError;
 
       if (assessmentError) throw assessmentError;
 

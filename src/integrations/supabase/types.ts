@@ -4767,6 +4767,17 @@ export type Database = {
         Args: { _user_id: string }
         Returns: string
       }
+      safe_assessment_upsert: {
+        Args: {
+          p_user_id: string
+          p_pillar_type: string
+          p_answers: Json
+          p_scores: Json
+          p_comments?: string
+          p_ai_analysis?: string
+        }
+        Returns: string
+      }
       secure_validate_invitation: {
         Args: { token_param: string }
         Returns: Json

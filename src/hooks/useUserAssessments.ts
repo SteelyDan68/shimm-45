@@ -105,15 +105,15 @@ export const useUserAssessments = (userId: string) => {
     if (!userId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('assessment_rounds')
-        .insert({
-          ...assessmentData,
-          user_id: userId,
-          created_by: userId,
-        })
-        .select()
-        .single();
+      // Use safe upsert function to prevent duplicates
+      const { data, error } = await supabase.rpc('safe_assessment_upsert', {
+        p_user_id: userId,
+        p_pillar_type: assessmentData.pillar_type,
+        p_answers: assessmentData.answers,
+        p_scores: assessmentData.scores,
+        p_comments: assessmentData.comments || null,
+        p_ai_analysis: null
+      });
 
       if (error) throw error;
 
