@@ -135,10 +135,15 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
     }
   }, [activeConversation]);
 
-  // Load available recipients based on user role
+  // Load available recipients and auto-create Stefan conversation
   useEffect(() => {
     loadAvailableRecipients();
-  }, [user?.id, hasRole]);
+    
+    // Auto-create Stefan AI conversation if none exists
+    if (conversations.length === 0 && user?.id) {
+      createStefanConversation();
+    }
+  }, [user?.id, hasRole, conversations.length]);
 
   const loadAvailableRecipients = async () => {
     if (!user?.id) return;
@@ -241,6 +246,47 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
     } catch (error) {
       console.error('Error loading recipients:', error);
       toast.error("Kunde inte ladda mottagare");
+    }
+  };
+
+  // Auto-create Stefan AI conversation for immediate access
+  const createStefanConversation = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data: existingStefan } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('created_by', user.id)
+        .eq('conversation_type', 'support')
+        .contains('metadata', { stefan_ai: 'true' })
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!existingStefan) {
+        const { data: newConversation, error } = await supabase
+          .from('conversations')
+          .insert({
+            created_by: user.id,
+            participant_ids: [user.id, 'stefan_ai'],
+            conversation_type: 'support',
+            title: '🤖 Stefan AI Chat',
+            metadata: {
+              stefan_ai: 'true',
+              ai_model: 'auto',
+              created_from: 'web'
+            }
+          })
+          .select('id')
+          .single();
+
+        if (!error && newConversation) {
+          await sendMessage(newConversation.id, '🤖 Stefan: Hej! Jag är Stefan, din AI-coach. Hur kan jag hjälpa dig idag?');
+          setActiveConversation(newConversation.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error creating Stefan conversation:', error);
     }
   };
 
