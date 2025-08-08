@@ -103,7 +103,7 @@ export const useMessagingV2 = () => {
 
     try {
       
-      // Simplified query utan nested selects som kan orsaka problem
+        // Simplified query utan nested selects som kan orsaka problem
       const { data: conversationsData, error } = await supabase
         .from('conversations')
         .select('*')
@@ -131,10 +131,15 @@ export const useMessagingV2 = () => {
             if (conv.metadata?.stefan_ai === 'true') {
               conversationTitle = '🤖 Stefan AI Chat';
             } else {
-              // Find other participants (not current user)
-              const otherParticipants = (participants || []).filter(p => p.id !== user.id);
-              if (otherParticipants.length > 0) {
-                const participant = otherParticipants[0];
+              // Find other participants (not current user) - REMOVE DUPLICATES
+              const uniqueParticipants = (participants || [])
+                .filter(p => p.id !== user.id)
+                .filter((participant, index, array) => 
+                  array.findIndex(p => p.id === participant.id) === index
+                );
+              
+              if (uniqueParticipants.length > 0) {
+                const participant = uniqueParticipants[0];
                 conversationTitle = `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || participant.email;
               } else {
                 conversationTitle = 'Konversation';
@@ -158,14 +163,31 @@ export const useMessagingV2 = () => {
           return {
             ...conv,
             title: conversationTitle,
-            participants: participants || [],
+            participants: (participants || []).filter((participant, index, array) => 
+              array.findIndex(p => p.id === participant.id) === index
+            ), // Remove duplicates from participants
             unread_count: unreadCount || 0,
             last_message: conv.last_message?.[0] || null
           };
         })
       );
 
-      setConversations(enrichedConversations);
+      // Remove duplicate conversations by ID and participant combination
+      const uniqueConversations = enrichedConversations.filter((conv, index, array) => {
+        // First deduplication by ID
+        const idIndex = array.findIndex(c => c.id === conv.id);
+        if (idIndex !== index) return false;
+        
+        // Second deduplication by participant combination (for same participants)
+        const participantKey = conv.participant_ids.sort().join(',');
+        const participantIndex = array.findIndex(c => 
+          c.participant_ids.sort().join(',') === participantKey &&
+          c.conversation_type === conv.conversation_type
+        );
+        return participantIndex === index;
+      });
+
+      setConversations(uniqueConversations);
     } catch (error) {
       console.error('❌ Error fetching conversations:', error);
       toast({

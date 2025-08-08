@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageIcon } from "@/components/Messaging/MessageIcon";
+import { UnifiedNotificationSystem } from "@/components/UnifiedNotificationSystem";
 
 export function TopNavigation() {
   const { user, signOut, hasRole, roles } = useAuth();
@@ -49,7 +49,7 @@ export function TopNavigation() {
 
         {/* Messages & Quick Actions - Clean and focused */}
         <div className="flex items-center gap-3">
-          <MessageIcon />
+          <UnifiedNotificationSystem />
           
           {/* Email - Desktop Only */}
           {!isMobile && (

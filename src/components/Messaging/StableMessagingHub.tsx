@@ -447,19 +447,27 @@ export const StableMessagingHub: React.FC = () => {
                         </AvatarFallback>
                       </Avatar>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        {conv.title || 'Utan titel'}
-                      </p>
-                      <p className="text-xs opacity-70 truncate">
-                        {conv.last_message?.content || 'Ingen meddelanden än'}
-                      </p>
-                    </div>
-                    {conv.unread_count && conv.unread_count > 0 && (
-                      <Badge variant="secondary" className="text-xs">
-                        {conv.unread_count}
-                      </Badge>
-                    )}
+                     <div className="flex-1 min-w-0">
+                       <p className={cn(
+                         "font-medium truncate",
+                         conv.unread_count && conv.unread_count > 0 && "font-bold"
+                       )}>
+                         {conv.title || 'Utan titel'}
+                       </p>
+                       <p className="text-xs opacity-70 truncate">
+                         {conv.last_message?.content || 'Ingen meddelanden än'}
+                       </p>
+                     </div>
+                     <div className="flex items-center gap-2">
+                       {conv.unread_count && conv.unread_count > 0 && (
+                         <div className="flex items-center gap-1">
+                           <div className="w-2 h-2 bg-destructive rounded-full animate-pulse"></div>
+                           <Badge variant="destructive" className="text-xs animate-pulse">
+                             {conv.unread_count}
+                           </Badge>
+                         </div>
+                       )}
+                     </div>
                   </div>
                   
                   {!isStefan && (
