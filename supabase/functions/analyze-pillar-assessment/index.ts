@@ -203,6 +203,25 @@ Ge en konkret handlingsplan i 2-3 steg. Håll tonen varm, konkret och profession
       return displayNames[pillarType] || pillarType;
     }
 
+    // Generate actionables for open_track pillar
+    if (assessmentData.pillar_type === 'open_track') {
+      try {
+        const { data: actionablesData, error: actionablesError } = await supabase.functions.invoke('generate-open-track-actionables', {
+          body: {
+            assessment_data: assessmentData,
+            ai_analysis: aiResponse.content,
+            user_id: userData.user_id
+          }
+        });
+        
+        if (!actionablesError && actionablesData) {
+          console.log('✅ Open track actionables generated successfully');
+        }
+      } catch (actionableError) {
+        console.warn('⚠️ Failed to generate open track actionables:', actionableError);
+      }
+    }
+
     return new Response(JSON.stringify({
       analysis: aiResponse.content,
       pillar_type: assessmentData.pillar_type,
