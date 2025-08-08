@@ -282,6 +282,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                           {(currentMessages || []).map((message, index) => {
                             const isOwn = message.sender_id === user?.id;
                             const isStefanAI = message.content.includes('🤖 Stefan:');
+                            console.log('Message check:', { content: message.content.substring(0, 50), isStefanAI });
                             const prevMessage = index > 0 ? currentMessages[index - 1] : null;
                             const showAvatar = !isOwn && (!prevMessage || prevMessage.sender_id !== message.sender_id);
                             
@@ -292,6 +293,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                                 isOwn={isOwn}
                                 showAvatar={showAvatar}
                                 showTimestamp={true}
+                                className="animate-fade-in"
                                 isStefanAI={isStefanAI}
                               />
                             );
