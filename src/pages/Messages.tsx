@@ -1,6 +1,8 @@
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ModernMessagingApp } from '@/components/MessagingV2/ModernMessagingApp';
 import { AutonomousMessagingInterface } from '@/components/Stefan/AutonomousMessagingInterface';
+import { Button } from '@/components/ui/button';
+import { Brain, MessageSquare } from 'lucide-react';
 
 export function Messages() {
   const { user } = useAuth();
@@ -32,6 +34,30 @@ export function Messages() {
         <p className="text-muted-foreground">
           Kommunicera med ditt team och få hjälp från Stefan AI - allt på ett ställe
         </p>
+      </div>
+      
+      {/* Quick access to Stefan AI */}
+      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-6 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+              <Brain className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Stefan AI Coaching</h3>
+              <p className="text-sm text-muted-foreground">
+                Få personlig coaching och vägledning med AI-driven support
+              </p>
+            </div>
+          </div>
+          <Button 
+            onClick={() => window.location.href = '/stefan/chat'}
+            className="bg-gradient-to-r from-primary to-primary/80"
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Starta Chat
+          </Button>
+        </div>
       </div>
       
       {/* Autonomous Messaging Interface - Stefan's proactive messaging */}

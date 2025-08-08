@@ -52,7 +52,7 @@ import { IntelligenceHubPage } from "./pages/IntelligenceHub";
 import { ClientIntelligencePage } from "./pages/ClientIntelligence";
 import { TasksPage } from "./pages/Tasks";
 import { CalendarPage } from "./pages/Calendar";
-import { StefanChatPage } from "./pages/StefanChat";
+import { StefanChatPage } from "./pages/StefanChatPage";
 import { StefanAICentralHub } from "./components/Stefan/StefanAICentralHub";
 import { AIInsights } from "./pages/AIInsights";
 import NotFound from "./pages/NotFound";
