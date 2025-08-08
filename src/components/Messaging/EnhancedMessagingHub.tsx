@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { ModernMessageBubble } from './ModernMessageBubble';
 import { ModernMessageInput } from './ModernMessageInput';
 import { ActionTooltip } from '@/components/ui/action-tooltip';
+import { usePerformanceMonitoringV2, useMemoryOptimization } from '@/utils/performanceOptimizationV2';
 import { 
   MessageSquare, 
   X
@@ -21,7 +22,10 @@ interface EnhancedMessagingHubProps {
   className?: string;
 }
 
-export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ className }) => {
+const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ className }) => {
+  usePerformanceMonitoringV2('EnhancedMessagingHub');
+  const { registerCleanup } = useMemoryOptimization();
+  
   const { user } = useAuth();
   const {
     conversations,
@@ -341,3 +345,6 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
     </div>
   );
 };
+
+// PERFORMANCE OPTIMIZATION: Memoized export
+export const EnhancedMessagingHub = memo(EnhancedMessagingHubComponent);

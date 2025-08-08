@@ -2,7 +2,7 @@
  * 🎯 PILLAR PROGRESS WIDGET - Six Pillars utvecklingsöversikt
  */
 
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -15,8 +15,12 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { PillarRetakeDialog } from '@/components/Shared/PillarRetakeDialog';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { PillarKey } from '@/types/sixPillarsModular';
+import { usePerformanceMonitoringV2, useMemoryOptimization } from '@/utils/performanceOptimizationV2';
 
-const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
+const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
+  usePerformanceMonitoringV2('PillarProgressWidget');
+  const { registerCleanup } = useMemoryOptimization();
+  
   const { user } = useAuth();
   const { 
     getCompletedPillars, 
@@ -31,17 +35,18 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
   const completedPillars = getCompletedPillars();
   const activatedPillars = getActivatedPillars();
   
-  // All possible pillars in order
-  const allPillars = [
+  // OPTIMIZED: Memoized pillar data calculation
+  const allPillars = useMemo(() => [
     { key: 'self_care', name: 'Self Care' },
     { key: 'skills', name: 'Skills' },
     { key: 'talent', name: 'Talent' },
     { key: 'brand', name: 'Brand' },
     { key: 'economy', name: 'Economy' },
     { key: 'open_track', name: 'Open Track' }
-  ];
+  ], []);
 
-  const getPillarData = () => {
+  // OPTIMIZED: Memoized pillar data processing
+  const pillars = useMemo(() => {
     return allPillars.map((pillar, index) => {
       const completed = completedPillars.some(cp => cp === pillar.key);
       const activated = activatedPillars.some(ap => ap === pillar.key);
@@ -66,17 +71,18 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
         available
       };
     });
-  };
+  }, [allPillars, completedPillars, activatedPillars]);
 
-  const pillars = getPillarData();
-  const completedCount = pillars.filter(p => p.completed).length;
-  const totalProgress = (completedCount / pillars.length) * 100;
+  const { completedCount, totalProgress } = useMemo(() => ({
+    completedCount: pillars.filter(p => p.completed).length,
+    totalProgress: (pillars.filter(p => p.completed).length / pillars.length) * 100
+  }), [pillars]);
 
-  const getPillarStatus = (pillar: any) => {
+  const getPillarStatus = useCallback((pillar: any) => {
     if (pillar.completed) return { label: 'Slutförd', variant: 'default', icon: CheckCircle };
     if (pillar.inProgress) return { label: 'Pågår', variant: 'secondary', icon: Clock };
     return { label: 'Ej påbörjad', variant: 'outline', icon: Target };
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -102,13 +108,13 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
       {/* Overall Progress Header */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-600" />
+          <Sparkles className="w-5 h-5 text-brain" />
           <span className="font-semibold">Din Utvecklingsresa</span>
           <HelpTooltip content="Six Pillars utvecklingssystem - din progress genom alla sex grundpelare för hållbar framgång." />
         </div>
         
         <div className="space-y-1">
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-brain">
             {completedCount}/6 Pillars
           </div>
           <Progress value={totalProgress} className="h-2" />
@@ -131,9 +137,9 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
             >
               <div className="flex items-center gap-3">
                 <StatusIcon className={`w-4 h-4 ${
-                  pillar.completed ? 'text-green-600' : 
-                  pillar.inProgress ? 'text-blue-600' : 
-                  'text-gray-400'
+                  pillar.completed ? 'text-success' : 
+                  pillar.inProgress ? 'text-primary' : 
+                  'text-muted-foreground'
                 }`} />
                 
                 <div>
@@ -168,7 +174,7 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
                         variant="ghost"
                         size="sm"
                         onClick={() => setRetakePillarKey(pillar.key as PillarKey)}
-                        className="w-8 h-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                        className="w-8 h-8 p-0 text-warning hover:text-warning/80 hover:bg-warning/10"
                       >
                         ↻
                       </Button>
@@ -260,5 +266,8 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
     </div>
   );
 };
+
+// PERFORMANCE OPTIMIZATION: Memoized export
+export const PillarProgressWidget = memo(PillarProgressWidgetComponent);
 
 export default PillarProgressWidget;
