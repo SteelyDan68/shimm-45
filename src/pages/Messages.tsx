@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ModernMessagingApp } from '@/components/MessagingV2/ModernMessagingApp';
-import { AutonomousMessagingInterface } from '@/components/Stefan/AutonomousMessagingInterface';
+
 import { AiReplyAssistant } from '@/components/MessagingV2/AiReplyAssistant';
 
 export function Messages() {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
 
   // Show loading state while authentication is loading
   if (!user) {
@@ -58,13 +58,16 @@ export function Messages() {
       <main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Huvudchatten */}
         <section aria-label="Meddelanden" className="lg:col-span-2">
-          <ModernMessagingApp className="h-[75vh]" />
+          <div className="h-[calc(100vh-220px)] min-h-[500px] overflow-hidden">
+            <ModernMessagingApp className="h-full" />
+          </div>
         </section>
 
         {/* AI-hjälp och proaktiva meddelanden */}
         <aside className="space-y-6">
-          <AiReplyAssistant />
-          <AutonomousMessagingInterface />
+          {(hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
+            <AiReplyAssistant />
+          )}
         </aside>
       </main>
     </div>
