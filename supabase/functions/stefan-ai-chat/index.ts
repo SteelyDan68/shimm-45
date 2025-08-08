@@ -209,6 +209,65 @@ function extractTags(message: string): string[] {
   return tags;
 }
 
+// New handlers for additional AI actions
+interface CoachingAnalysisRequest { action: 'coaching_analysis'; data: { sessionType: string; userContext: any; assessmentData?: any; }; context: { userId: string; language: string; priority: string; }; }
+
+interface AssessmentAnalysisRequest { action: 'assessment_analysis'; data: { assessmentType: string; scores: any; responses: any; pillarKey?: string; }; context: { userId: string; language: string; priority: string; }; }
+
+async function handleCoachingAnalysis(request: CoachingAnalysisRequest): Promise<any> {
+  const start = Date.now();
+  const { sessionType, userContext, assessmentData } = request.data;
+  const { userId } = request.context;
+  const messages = [
+    { role: 'system', content: 'Du är Stefan AI Coach. Leverera endast JSON. Struktur: {"analysis": {"analysis": string, "recommendations": [{"title": string, "description": string, "actionSteps": string[], "timeframe": string, "difficulty": number, "priority": "high"|"medium"|"low", "category": string}], "nextSteps": string}}' },
+    { role: 'user', content: `Session: ${sessionType}. Kontext: ${JSON.stringify(userContext)}. Bedömningsdata: ${JSON.stringify(assessmentData || {})}` }
+  ];
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${openAIApiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.4, max_tokens: 1200 })
+  });
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`OpenAI API error: ${response.status} ${errorData}`);
+  }
+  const ai = await response.json();
+  let content = ai.choices?.[0]?.message?.content ?? '';
+  // Strip code fences if present
+  content = content.replace(/^```json\n?|```$/g, '');
+  let parsed: any;
+  try { parsed = JSON.parse(content); } catch { parsed = { analysis: { analysis: content, recommendations: [], nextSteps: '' } }; }
+
+  // Log usage
+  await supabase.from('ai_usage_logs').insert({ user_id: userId, interaction_type: 'coaching_analysis', model_used: 'gpt-4o-mini', response_time_ms: Date.now() - start, context_used: { sessionType, hasAssessmentData: !!assessmentData } });
+
+  return { success: true, data: { analysis: parsed.analysis ?? parsed, ai_model: 'gpt-4o-mini', timestamp: new Date().toISOString() }, aiModel: 'gpt-4o-mini', processingTime: Date.now() - start, tokens: ai.usage?.total_tokens || 0 };
+}
+
+async function handleAssessmentAnalysis(request: AssessmentAnalysisRequest): Promise<any> {
+  const start = Date.now();
+  const { assessmentType, scores, responses, pillarKey } = request.data;
+  const { userId } = request.context;
+  const messages = [
+    { role: 'system', content: 'Du är Stefan AI Assessment-analytiker. Svara ENDAST med JSON: {"analysis": string, "scores": object, "pillar_key": string}' },
+    { role: 'user', content: `Typ: ${assessmentType}. Poäng: ${JSON.stringify(scores)}. Svar: ${JSON.stringify(responses)}. Pillar: ${pillarKey || ''}` }
+  ];
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST', headers: { 'Authorization': `Bearer ${openAIApiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.3, max_tokens: 900 })
+  });
+  if (!response.ok) { const errorData = await response.text(); throw new Error(`OpenAI API error: ${response.status} ${errorData}`); }
+  const ai = await response.json();
+  let content = ai.choices?.[0]?.message?.content ?? '';
+  content = content.replace(/^```json\n?|```$/g, '');
+  let parsed: any; try { parsed = JSON.parse(content); } catch { parsed = { analysis: content, scores, pillar_key: pillarKey || null }; }
+
+  await supabase.from('ai_usage_logs').insert({ user_id: userId, interaction_type: 'assessment_analysis', model_used: 'gpt-4o-mini', response_time_ms: Date.now() - start, context_used: { assessmentType, pillarKey } });
+
+  return { success: true, data: { analysis: parsed.analysis, scores: parsed.scores ?? scores, pillar_key: parsed.pillar_key ?? pillarKey, ai_model: 'gpt-4o-mini', timestamp: new Date().toISOString() }, aiModel: 'gpt-4o-mini', processingTime: Date.now() - start, tokens: ai.usage?.total_tokens || 0 };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -228,17 +287,20 @@ serve(async (req) => {
     const request: StefanChatRequest = await req.json();
     console.log('Stefan Chat request received for user:', request.context.userId);
 
-    if (request.action !== 'stefan_chat') {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Invalid action'
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    let result: any;
+    switch (request.action) {
+      case 'stefan_chat':
+        result = await handleStefanChat(request);
+        break;
+      case 'coaching_analysis':
+        result = await handleCoachingAnalysis(request as any);
+        break;
+      case 'assessment_analysis':
+        result = await handleAssessmentAnalysis(request as any);
+        break;
+      default:
+        return new Response(JSON.stringify({ success: false, error: 'Invalid action' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const result = await handleStefanChat(request);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
