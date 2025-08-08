@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ConsolidatedSuperAdminHub } from '@/components/SuperAdmin/ConsolidatedSuperAdminHub';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,7 +46,12 @@ export const HarmonizedAdminDashboard: React.FC = () => {
   const isSuperAdmin = hasRole('superadmin');
   const isAdmin = hasRole('admin');
 
-  if (!isAdmin && !isSuperAdmin) {
+  // Superadmins get the consolidated hub
+  if (isSuperAdmin) {
+    return <ConsolidatedSuperAdminHub />;
+  }
+
+  if (!isAdmin) {
     return (
       <div className="p-6">
         <Alert className="max-w-2xl mx-auto">

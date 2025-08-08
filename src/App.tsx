@@ -20,7 +20,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { GlobalSearchPage } from "./pages/GlobalSearch";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { AdminAnalyticsPage } from "./pages/AdminAnalyticsPage";
-import { DataCollectionPage } from "./pages/DataCollectionPage";
+import { StefanAdministrationPage } from "./pages/StefanAdministrationPage";
 import { Collaboration } from "@/pages/Collaboration";
 
 import { TestingPage } from "@/pages/TestingPage";
@@ -149,8 +149,7 @@ const AppRoutes = () => {
                  <Route path="/ai-insights" element={<AIInsights />} />
                  <Route path="/user-analytics" element={<UserAnalytics />} />
                  <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
-                  <Route path={NAVIGATION_ROUTES.ANALYTICS} element={<AdminAnalyticsPage />} />
-                  <Route path={NAVIGATION_ROUTES.DATA_COLLECTION} element={<DataCollectionPage />} />
+                   <Route path={NAVIGATION_ROUTES.STEFAN_ADMIN} element={<StefanAdministrationPage />} />
                    <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
                    <Route path="/stefan/*" element={<StefanAICentralHub />} />
                    <Route path="/system-map" element={<SystemMapPage />} />

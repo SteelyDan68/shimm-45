@@ -64,10 +64,8 @@ export const NAVIGATION_ROUTES = {
   ONBOARDING: "/onboarding",
   USER_ASSESSMENT: (id: string) => `/user/${id}?context=assessment`,
   
-  // Analytics & Reports
-  ANALYTICS: "/analytics",
-  DATA_COLLECTION: "/data-collection", 
-  REPORTS: "/reports",
+  // Consolidated Admin
+  STEFAN_ADMIN: "/stefan-administration",
   
   // Auth
   AUTH: "/auth",
@@ -167,15 +165,9 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach"]
       },
       {
-        title: "Analytics & Reports",
-        url: NAVIGATION_ROUTES.ANALYTICS,
-        icon: BarChart3,
-        roles: ["superadmin", "admin"]
-      },
-      {
-        title: "Data Collection",
-        url: NAVIGATION_ROUTES.DATA_COLLECTION,
-        icon: Database,
+        title: "Stefan AI Administration",
+        url: NAVIGATION_ROUTES.STEFAN_CHAT,
+        icon: Brain,
         roles: ["superadmin", "admin"]
       },
       {
