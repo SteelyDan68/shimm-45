@@ -139,25 +139,43 @@ export const UserRoleManager: React.FC<UserRoleManagerProps> = ({
 
     setLoading(true);
     try {
-      // Remove existing roles
-      await supabase
+      console.log('Starting role update for user:', user.id);
+      console.log('Current user:', currentUser?.id);
+      console.log('New roles:', userRoles);
+      console.log('Original roles:', originalRoles);
+
+      // First, remove existing roles
+      console.log('Deleting existing roles...');
+      const { error: deleteError } = await supabase
         .from('user_roles')
         .delete()
         .eq('user_id', user.id);
 
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+        throw deleteError;
+      }
+
       // Add new roles
       if (userRoles.length > 0) {
+        console.log('Inserting new roles...');
         const roleInserts = userRoles.map(role => ({
           user_id: user.id,
           role: role as any,
-          assigned_by: currentUser?.id
+          assigned_by: currentUser?.id,
+          assigned_at: new Date().toISOString()
         }));
 
-        const { error } = await supabase
+        console.log('Role inserts:', roleInserts);
+
+        const { error: insertError } = await supabase
           .from('user_roles')
           .insert(roleInserts);
 
-        if (error) throw error;
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          throw insertError;
+        }
       }
 
       setOriginalRoles([...userRoles]);
@@ -171,9 +189,19 @@ export const UserRoleManager: React.FC<UserRoleManagerProps> = ({
 
     } catch (error: any) {
       console.error('Error updating user roles:', error);
+      let errorMessage = "Kunde inte uppdatera användarroller";
+      
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      
+      if (error.code) {
+        errorMessage += ` (Code: ${error.code})`;
+      }
+
       toast({
         title: "Fel",
-        description: "Kunde inte uppdatera användarroller",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
