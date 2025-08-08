@@ -125,18 +125,6 @@ const TasksOptimized = () => {
         <TabsContent value="calendar">
           <EnhancedCalendarView 
             userId={user.id}
-            onEventClick={(event) => {
-              console.log('Event clicked:', event);
-              // Handle event click
-            }}
-            onDateClick={(date) => {
-              console.log('Date clicked:', date);
-              // Handle date click
-            }}
-            onCreateEvent={(date) => {
-              console.log('Create event for date:', date);
-              // Handle create event
-            }}
           />
         </TabsContent>
 
