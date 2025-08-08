@@ -369,7 +369,7 @@ export default function UserAnalytics() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setSearchParams({ tab: value })}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="analyses" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
             Analyser
@@ -386,10 +386,6 @@ export default function UserAnalytics() {
             <Brain className="h-4 w-4" />
             Prioritering
           </TabsTrigger>
-          <TabsTrigger value="ai-pipeline" className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            AI Pipeline
-          </TabsTrigger>
         </TabsList>
 
         {/* 🧠 PILLAR ANALYSES TAB */}
@@ -403,7 +399,7 @@ export default function UserAnalytics() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
-                Dina Pillar-Analyser
+                Sex assessments
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -450,18 +446,14 @@ export default function UserAnalytics() {
                             {new Date(analysis.created_at).toLocaleDateString('sv-SE')}
                           </span>
                           <div className="flex gap-2">
-                            <span 
-                              className="text-blue-600 hover:underline cursor-pointer" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 h-auto text-xs"
                               onClick={() => setSelectedAnalysis(analysis)}
                             >
-                              Snabbvy →
-                            </span>
-                            <span 
-                              className="text-purple-600 hover:underline cursor-pointer" 
-                              onClick={() => setShowDetailedView(analysis.pillar_type)}
-                            >
-                              Detaljvy →
-                            </span>
+                              ⚡ Snabbvy
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -579,12 +571,37 @@ export default function UserAnalytics() {
                     Starta bedömning för att få utvecklingsplan
                   </Button>
                 ) : (
-                  <Button onClick={() => navigate('/ai-coaching')}>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Förbättra planen med AI-coaching
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                    <Button 
+                      onClick={() => navigate('/ai-coaching')}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      <Brain className="h-4 w-4 mr-2" />
+                      Förbättra planen med AI-coaching
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate('/calendar')}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Se i kalender
+                    </Button>
+                  </div>
                 )}
               </div>
+              
+              {assessmentData.length > 0 && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 text-sm text-blue-700">
+                    <Brain className="h-4 w-4" />
+                    <span className="font-medium">Funktionalitet:</span>
+                  </div>
+                  <p className="text-sm text-blue-600 mt-1">
+                    "Förbättra planen med AI-coaching" startar en djupanalys av dina assessments och skapar 
+                    personliga actionables baserat på neuroplastiska principer och din utvecklingsprofil.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -604,10 +621,6 @@ export default function UserAnalytics() {
           <ActionablePriorityDashboard userId={targetUserId || ''} />
         </TabsContent>
 
-        {/* 🔄 AI PIPELINE TAB */}
-        <TabsContent value="ai-pipeline">
-          <AIActionablesPipelineStatus userId={targetUserId || ''} />
-        </TabsContent>
       </Tabs>
     </div>
   );

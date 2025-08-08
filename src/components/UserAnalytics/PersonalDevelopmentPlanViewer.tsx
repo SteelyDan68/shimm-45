@@ -443,7 +443,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           <div className="flex flex-col sm:flex-row gap-4">
             <Button 
               onClick={() => generateNewPlan()}
-              className="flex-1"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               disabled={isGenerating}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -460,8 +460,20 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
             </Button>
           </div>
           
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            Din plan anpassas automatiskt baserat på nya assessments och framsteg
+          <div className="mt-4 space-y-2">
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-2 text-sm text-blue-700">
+                <Brain className="h-4 w-4" />
+                <span className="font-medium">AI-Coaching funktionalitet:</span>
+              </div>
+              <p className="text-sm text-blue-600 mt-1">
+                Knappen startar en djupanalys av dina assessments och skapar personliga actionables 
+                baserat på neuroplastiska principer och din utvecklingsprofil.
+              </p>
+            </div>
+            <div className="text-center text-sm text-muted-foreground">
+              Din plan anpassas automatiskt baserat på nya assessments och framsteg
+            </div>
           </div>
         </CardContent>
       </Card>

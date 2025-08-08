@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import TaskOptimizationSystem from '@/components/Tasks/TaskOptimizationSystem';
-import EnhancedCalendarView from '@/components/Calendar/EnhancedCalendarView';
+import { EnhancedCalendarView } from '@/components/Calendar/EnhancedCalendarView';
 import { ClientTaskList } from '@/components/ClientTasks/ClientTaskList';
 
 const TasksOptimized = () => {
