@@ -52,48 +52,58 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
   const handleSendMessage = async () => {
     if (!activeConversation || !messageInput.trim()) return;
 
+    const userMessage = messageInput.trim();
+    setMessageInput(''); // Clear immediately
+
     // Check if this is Stefan AI conversation
     const conversation = conversations.find(c => c.id === activeConversation);
     const isStefanConversation = conversation?.metadata?.stefan_ai === 'true' || 
                                 conversation?.title?.toLowerCase().includes('stefan');
 
-    if (isStefanConversation) {
-      // Send user message first
-      await sendMessage(activeConversation, messageInput.trim());
+    try {
+      // Send user message first (without showing duplicate toast)
+      const success = await sendMessage(activeConversation, userMessage);
       
-      // Send message to Stefan Enhanced Chat and get response
-      try {
-        const { data, error } = await supabase.functions.invoke('stefan-enhanced-chat', {
-          body: {
-            message: messageInput.trim(),
-            user_id: user?.id,
-            interactionType: 'chat',
-            includeAssessmentContext: true,
-            generateRecommendations: false,
-            forceModel: 'auto'
-          }
-        });
+      if (!success) return;
 
-        if (!error && data?.message) {
-          // Send AI response after a short delay
+      if (isStefanConversation) {
+        // Send message to Stefan Enhanced Chat and get response
+        try {
+          const { data, error } = await supabase.functions.invoke('stefan-enhanced-chat', {
+            body: {
+              message: userMessage,
+              user_id: user?.id,
+              interactionType: 'chat',
+              includeAssessmentContext: true,
+              generateRecommendations: false,
+              forceModel: 'auto'
+            }
+          });
+
+          if (!error && data?.message) {
+            // Send AI response after a short delay
+            setTimeout(async () => {
+              await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
+            }, 1500);
+          } else {
+            console.error('Stefan AI error:', error);
+            // Send fallback response
+            setTimeout(async () => {
+              await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);
+            }, 1500);
+          }
+        } catch (aiError) {
+          console.error('Stefan AI error:', aiError);
+          // Send fallback response
           setTimeout(async () => {
-            await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
+            await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);
           }, 1500);
         }
-      } catch (error) {
-        console.error('Stefan AI error:', error);
-        // Send fallback response
-        setTimeout(async () => {
-          await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);
-        }, 1500);
       }
-    } else {
-      // Regular message
-      await sendMessage(activeConversation, messageInput.trim());
+    } catch (error) {
+      console.error('Message sending error:', error);
+      setMessageInput(userMessage); // Restore message on error
     }
-
-    setMessageInput('');
-    toast.success("Meddelande skickat! ✅");
   };
 
   const handleDeleteConversation = async (conversationId: string) => {

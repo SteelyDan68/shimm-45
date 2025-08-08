@@ -255,11 +255,8 @@ export const useMessagingV2 = () => {
       // Update presence (stop typing)
       await updateTypingStatus(conversationId, false);
 
-      toast({
-        title: "Meddelande skickat",
-        description: "Ditt meddelande har skickats framgångsrikt"
-      });
-
+      // Only show toast if it's not a Stefan AI conversation to avoid duplicates
+      // (Stefan conversations handle their own feedback)
       return true;
     } catch (error) {
       console.error('❌ Error sending message:', error);
