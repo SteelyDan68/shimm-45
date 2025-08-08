@@ -143,9 +143,15 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     ]
   },
   {
-    title: "Administration",
-    roles: ["superadmin", "admin"],
+    title: "Administration", 
+    roles: ["superadmin", "admin", "coach"],
     items: [
+      {
+        title: "Unified User Center",
+        url: NAVIGATION_ROUTES.UNIFIED_USERS,
+        icon: Users,
+        roles: ["superadmin", "admin", "coach"]
+      },
       {
         title: "Intelligence Hub",
         url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
@@ -156,12 +162,18 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Stefan AI Administration",
         url: NAVIGATION_ROUTES.STEFAN_CHAT,
         icon: Brain,
-        roles: ["admin"]
+        roles: ["superadmin", "admin"]
       },
       {
-        title: "Mobil",
+        title: "Användaradministration",
+        url: NAVIGATION_ROUTES.ADMINISTRATION,
+        icon: Users2,
+        roles: ["superadmin", "admin"]
+      },
+      {
+        title: "Systeminställningar",
         url: NAVIGATION_ROUTES.MOBILE,
-        icon: Smartphone,
+        icon: Settings,
         roles: ["superadmin", "admin"]
       }
     ]
