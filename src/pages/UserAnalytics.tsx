@@ -560,7 +560,7 @@ Baserat på din poäng på ${score}/10 inom ${pillarName} finns det flera områd
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setSearchParams({ tab: value })}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="analyses" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
             Analyser
@@ -568,10 +568,6 @@ Baserat på din poäng på ${score}/10 inom ${pillarName} finns det flera områd
           <TabsTrigger value="timeline" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             Timeline
-          </TabsTrigger>
-          <TabsTrigger value="actionables" className="flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            Actionables
           </TabsTrigger>
           <TabsTrigger value="priority" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
@@ -737,76 +733,6 @@ Baserat på din poäng på ${score}/10 inom ${pillarName} finns det flera områd
           </div>
         </TabsContent>
 
-        {/* 🎯 ACTIONABLES TAB - Enhanced Development Plan */}
-        <TabsContent value="actionables" className="space-y-6">
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Din Personliga Utvecklingsplan
-              </CardTitle>
-              <CardDescription>
-                Baserad på dina pillar-assessments och AI-analys av dina utvecklingsområden
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-4">
-                  {assessmentData.length === 0 
-                    ? "Genomför dina första pillar-bedömningar för att få en personlig utvecklingsplan"
-                    : "Din utvecklingsplan genereras automatiskt efter varje ny assessment"
-                  }
-                </p>
-                {assessmentData.length === 0 ? (
-                  <Button onClick={() => navigate('/six-pillars')}>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Starta bedömning för att få utvecklingsplan
-                  </Button>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-                    <Button 
-                      onClick={() => navigate('/ai-coaching')}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    >
-                      <Brain className="h-4 w-4 mr-2" />
-                      Förbättra planen med AI-coaching
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => navigate('/calendar')}
-                    >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Se i kalender
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              {assessmentData.length > 0 && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-2 text-sm text-blue-700">
-                    <Brain className="h-4 w-4" />
-                    <span className="font-medium">Funktionalitet:</span>
-                  </div>
-                  <p className="text-sm text-blue-600 mt-1">
-                    "Förbättra planen med AI-coaching" startar en djupanalys av dina assessments och skapar 
-                    personliga actionables baserat på neuroplastiska principer och din utvecklingsprofil.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Target className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-semibold mb-2">Utvecklingsplan kommer snart</h3>
-              <p className="text-muted-foreground">
-                Detaljerad utvecklingsplanering baserad på dina analyser
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* 🧠 PRIORITY DASHBOARD TAB */}
         <TabsContent value="priority">
