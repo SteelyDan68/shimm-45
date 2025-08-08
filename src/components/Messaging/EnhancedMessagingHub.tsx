@@ -93,7 +93,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
           console.log('Stefan AI response:', { data, error });
 
           if (!error && data?.message) {
-            // Send AI response immediately 
+            // Send AI response with Stefan's consistent format
             const success = await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
             if (success) {
               toast.success("Stefan AI har svarat!");
@@ -281,8 +281,9 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                         <>
                           {(currentMessages || []).map((message, index) => {
                             const isOwn = message.sender_id === user?.id;
-                            const isStefanAI = message.content.includes('🤖 Stefan:');
-                            console.log('Message check:', { content: message.content.substring(0, 50), isStefanAI });
+                            // Define Stefan AI constant UUID for consistent messaging
+                            const STEFAN_AI_ID = '00000000-0000-0000-0000-000000000001';
+                            const isStefanAI = message.content.includes('🤖 Stefan:') || message.sender_id === STEFAN_AI_ID;
                             const prevMessage = index > 0 ? currentMessages[index - 1] : null;
                             const showAvatar = !isOwn && (!prevMessage || prevMessage.sender_id !== message.sender_id);
                             
