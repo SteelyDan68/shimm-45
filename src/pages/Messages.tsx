@@ -47,13 +47,6 @@ export function Messages() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <header className="text-center space-y-2 mb-6">
-        <h1 className="text-3xl font-bold">Intelligent Meddelandecenter</h1>
-        <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-          Real-time kommunikation med AI-stöd, självinstruerande gränssnitt och avancerad coaching-integration. 
-          En enhetlig plattform för all din kommunikation.
-        </p>
-      </header>
 
       <main className="h-[calc(100vh-200px)] min-h-[600px]">
         <RoleBasedMessagingHub />
