@@ -92,7 +92,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Coach Dashboard", 
         url: NAVIGATION_ROUTES.COACH_DASHBOARD,
         icon: TrendingUp,
-        roles: ["coach"],
+        roles: ["coach", "admin"],
         exact: true
       },
       {
@@ -168,7 +168,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Stefan AI Administration",
         url: NAVIGATION_ROUTES.STEFAN_CHAT,
         icon: Brain,
-        roles: ["superadmin", "admin"]
+        roles: ["admin"]
       },
       {
         title: "Mobil",
