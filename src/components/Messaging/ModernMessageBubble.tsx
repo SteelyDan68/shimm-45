@@ -52,13 +52,13 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
         "relative rounded-2xl px-4 py-2 shadow-sm transition-all duration-200 hover:shadow-md",
         "max-w-[280px] sm:max-w-[400px] md:max-w-[500px]",
         isOwn ? (
-          // Own messages (right side) - Primary color like iMessage blue
-          "bg-primary text-primary-foreground rounded-br-md"
+          // Own messages (right side) - Blue for client
+          "bg-blue-500 text-white rounded-br-md"
         ) : isStefanAI ? (
-          // Stefan AI messages - Special gradient styling
-          "bg-gradient-to-br from-accent to-accent/80 text-accent-foreground rounded-bl-md border border-accent/20"
+          // Stefan AI messages - Green for AI  
+          "bg-green-500 text-white rounded-bl-md"
         ) : (
-          // Other users' messages (left side) - Light gray like WhatsApp
+          // Other users' messages (left side) - Light gray
           "bg-muted/80 text-foreground rounded-bl-md border border-border/50"
         )
       )}>
@@ -71,7 +71,7 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
         {showTimestamp && (
           <div className={cn(
             "flex items-center justify-end mt-1 gap-1",
-            isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+            isOwn ? "text-white/70" : isStefanAI ? "text-white/70" : "text-muted-foreground"
           )}>
             <span className="text-xs leading-none">
               {format(new Date(message.created_at), 'HH:mm', { locale: sv })}
@@ -81,7 +81,7 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
               <div className="flex">
                 <div className={cn(
                   "h-3 w-3 text-xs leading-none",
-                  message.is_read ? "text-primary-foreground/70" : "text-primary-foreground/50"
+                  message.is_read ? "text-white/70" : "text-white/50"
                 )}>
                   ✓
                 </div>
@@ -94,9 +94,9 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
         <div className={cn(
           "absolute bottom-0 w-3 h-3",
           isOwn ? (
-            "right-0 bg-primary transform rotate-45 translate-x-1 translate-y-1"
+            "right-0 bg-blue-500 transform rotate-45 translate-x-1 translate-y-1"
           ) : isStefanAI ? (
-            "left-0 bg-accent transform rotate-45 -translate-x-1 translate-y-1"
+            "left-0 bg-green-500 transform rotate-45 -translate-x-1 translate-y-1"
           ) : (
             "left-0 bg-muted/80 transform rotate-45 -translate-x-1 translate-y-1"
           )

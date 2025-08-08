@@ -36,10 +36,16 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom only when new messages arrive (not on conversation change)
+  const previousMessageCount = useRef(0);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [currentMessages, activeConversation]);
+    const currentCount = currentMessages?.length || 0;
+    // Only auto-scroll if we have new messages, not when switching conversations
+    if (currentCount > previousMessageCount.current && previousMessageCount.current > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    previousMessageCount.current = currentCount;
+  }, [currentMessages]);
 
   // Focus input when conversation changes
   useEffect(() => {
