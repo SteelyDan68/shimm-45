@@ -60,24 +60,37 @@ export const CoachAssignmentManager: React.FC<CoachAssignmentManagerProps> = ({
 
   const loadAssignments = async () => {
     try {
-      let query = supabase
+      const { data: assignments, error } = await supabase
         .from('coach_client_assignments')
         .select(`
           *,
-          coach_profiles:profiles!coach_id(first_name, last_name, email),
-          client_profiles:profiles!client_id(first_name, last_name, email)
+          coach_profile:profiles!coach_id(first_name, last_name, email),
+          client_profile:profiles!client_id(first_name, last_name, email)
         `)
         .eq('is_active', true);
 
-      // Filter based on user's role
-      if (isUserCoach) {
-        query = query.eq('coach_id', user.id);
-      } else if (isUserClient) {
-        query = query.eq('client_id', user.id);
-      } else {
-        // Admin view - show assignments involving this user
-        query = query.or(`coach_id.eq.${user.id},client_id.eq.${user.id}`);
-      }
+      if (error) throw error;
+
+      const formattedAssignments = assignments?.map(assignment => ({
+        ...assignment,
+        coach_name: assignment.coach_profile 
+          ? `${assignment.coach_profile.first_name || ''} ${assignment.coach_profile.last_name || ''}`.trim() || assignment.coach_profile.email
+          : 'Okänd coach',
+        client_name: assignment.client_profile
+          ? `${assignment.client_profile.first_name || ''} ${assignment.client_profile.last_name || ''}`.trim() || assignment.client_profile.email
+          : 'Okänd klient'
+      })) || [];
+
+      setAssignments(formattedAssignments);
+    } catch (error: any) {
+      console.error('Error loading assignments:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda tilldelningar",
+        variant: "destructive"
+      });
+    }
+  };
 
       const { data, error } = await query;
 
