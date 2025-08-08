@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ModernMessageBubble } from './ModernMessageBubble';
 import { ModernMessageInput } from './ModernMessageInput';
+import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { 
   MessageSquare, 
   X
@@ -233,17 +234,19 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                             </div>
                           </div>
                           {/* Delete button */}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-3 right-3 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteConversation(conv.id);
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
+                          <ActionTooltip content="Radera konversation">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute top-3 right-3 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteConversation(conv.id);
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </ActionTooltip>
                         </div>
                       ))}
                     </div>

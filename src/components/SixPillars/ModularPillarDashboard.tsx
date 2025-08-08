@@ -124,7 +124,7 @@ export const ModularPillarDashboard = ({
           <p className="text-muted-foreground">
             {isCoachView 
               ? `Hantera ${userName}s utvecklingspelare` 
-              : "Dina aktiverade utvecklingspelare"
+              : "Aktiverade utvecklingspelare"
             }
           </p>
         </div>

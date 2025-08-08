@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { 
   Users, 
   TrendingUp, 
@@ -108,10 +109,12 @@ export const RealTimeCoachMetrics = ({ coachId }: RealTimeCoachMetricsProps) => 
             Realtidsöversikt över dina klienter - senast uppdaterad {lastUpdated.toLocaleTimeString('sv-SE')}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={refreshData} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Uppdatera
-        </Button>
+        <ActionTooltip content="Hämta senaste data från databasen">
+          <Button variant="outline" size="sm" onClick={refreshData} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Uppdatera
+          </Button>
+        </ActionTooltip>
       </div>
 
       {/* Coach KPI:er */}

@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Target, CheckCircle, Clock, ArrowRight, Sparkles } from 'lucide-react';
+import { ActionTooltip } from '@/components/ui/action-tooltip';
+import { HelpTooltip } from '@/components/HelpTooltip';
 import { WidgetProps } from '../types/dashboard-types';
 import { useUserPillars } from '@/hooks/useUserPillars';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
@@ -102,6 +104,7 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
         <div className="flex items-center justify-center gap-2">
           <Sparkles className="w-5 h-5 text-purple-600" />
           <span className="font-semibold">Din Utvecklingsresa</span>
+          <HelpTooltip content="Six Pillars utvecklingssystem - din progress genom alla sex grundpelare för hållbar framgång." />
         </div>
         
         <div className="space-y-1">
@@ -150,45 +153,49 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
                 
                 {pillar.completed ? (
                   <div className="flex gap-1">
+                    <ActionTooltip content="Visa pillar-resultat och analys">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onAction?.(`view-pillar-${pillar.key}`)}
+                        className="w-8 h-8 p-0"
+                      >
+                        <ArrowRight className="w-3 h-3" />
+                      </Button>
+                    </ActionTooltip>
+                    <ActionTooltip content="Gör om bedömningen för denna pillar">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setRetakePillarKey(pillar.key as PillarKey)}
+                        className="w-8 h-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                      >
+                        ↻
+                      </Button>
+                    </ActionTooltip>
+                  </div>
+                ) : pillar.available ? (
+                  <ActionTooltip content={`Starta ${pillar.name} assessment`}>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onAction?.(`view-pillar-${pillar.key}`)}
+                      onClick={() => onAction?.(`start-pillar-${pillar.key}`)}
                       className="w-8 h-8 p-0"
-                      title="Visa resultat"
                     >
                       <ArrowRight className="w-3 h-3" />
                     </Button>
+                  </ActionTooltip>
+                ) : (
+                  <ActionTooltip content="Slutför föregående pillar först för att låsa upp denna">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setRetakePillarKey(pillar.key as PillarKey)}
-                      className="w-8 h-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                      title="Gör om pillar"
+                      disabled
+                      className="w-8 h-8 p-0 opacity-50"
                     >
-                      ↻
+                      <Target className="w-3 h-3" />
                     </Button>
-                  </div>
-                ) : pillar.available ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onAction?.(`start-pillar-${pillar.key}`)}
-                    className="w-8 h-8 p-0"
-                    title="Starta pillar"
-                  >
-                    <ArrowRight className="w-3 h-3" />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled
-                    className="w-8 h-8 p-0 opacity-50"
-                    title="Slutför föregående pillar först"
-                  >
-                    <Target className="w-3 h-3" />
-                  </Button>
+                  </ActionTooltip>
                 )}
               </div>
             </div>
@@ -198,13 +205,15 @@ const PillarProgressWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }
 
       {/* Action Buttons */}
       <div className="flex gap-2">
-        <Button 
-          className="flex-1"
-          onClick={() => onAction?.('view-pillars')}
-        >
-          <Target className="w-4 h-4 mr-2" />
-          Se Alla Pillars
-        </Button>
+        <ActionTooltip content="Öppna Six Pillars dashboard för fullständig översikt">
+          <Button 
+            className="flex-1"
+            onClick={() => onAction?.('view-pillars')}
+          >
+            <Target className="w-4 h-4 mr-2" />
+            Se Alla Pillars
+          </Button>
+        </ActionTooltip>
         
         {(() => {
           const nextPillar = pillars.find(p => p.available && !p.completed && !p.inProgress);

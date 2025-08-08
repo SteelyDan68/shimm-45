@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -155,10 +156,12 @@ export const IntegratedAdminDashboard = ({ onNavigateToTab }: IntegratedAdminDas
             </div>
             
               <div className="flex items-center gap-4">
-                <Button variant="outline" size="sm" onClick={refreshData} disabled={loading}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Uppdatera
-                </Button>
+                <ActionTooltip content="Uppdatera alla admin-metriker från databasen">
+                  <Button variant="outline" size="sm" onClick={refreshData} disabled={loading}>
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                    Uppdatera
+                  </Button>
+                </ActionTooltip>
               
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -194,10 +195,12 @@ export function RealCoachDashboard() {
               <Users className="h-5 w-5 text-green-600" />
               Klient-data
             </CardTitle>
-            <Button variant="outline" size="sm" onClick={refreshData}>
-              <Activity className="h-4 w-4 mr-1" />
-              Uppdatera
-            </Button>
+            <ActionTooltip content="Uppdatera klient-data från databasen">
+              <Button variant="outline" size="sm" onClick={refreshData}>
+                <Activity className="h-4 w-4 mr-1" />
+                Uppdatera
+              </Button>
+            </ActionTooltip>
           </div>
         </CardHeader>
         <CardContent>

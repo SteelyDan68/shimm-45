@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Send, Smile, Paperclip, Mic } from 'lucide-react';
+import { ActionTooltip } from '@/components/ui/action-tooltip';
 
 interface ModernMessageInputProps {
   value: string;
@@ -77,14 +78,16 @@ export const ModernMessageInput: React.FC<ModernMessageInputProps> = ({
     )}>
       <div className="flex items-end gap-2 p-2">
         {/* Emoji button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
-          disabled={disabled}
-        >
-          <Smile className="h-4 w-4" />
-        </Button>
+        <ActionTooltip content="Lägg till emoji">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
+            disabled={disabled}
+          >
+            <Smile className="h-4 w-4" />
+          </Button>
+        </ActionTooltip>
 
         {/* Text input */}
         <Textarea
@@ -105,34 +108,40 @@ export const ModernMessageInput: React.FC<ModernMessageInputProps> = ({
         />
 
         {/* Attachment button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
-          disabled={disabled}
-        >
-          <Paperclip className="h-4 w-4" />
-        </Button>
-
-        {/* Send/Voice button */}
-        {value.trim() ? (
-          <Button
-            onClick={handleSendClick}
-            disabled={disabled || !value.trim()}
-            size="icon"
-            className="h-8 w-8 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        ) : (
+        <ActionTooltip content="Bifoga fil">
           <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
             disabled={disabled}
           >
-            <Mic className="h-4 w-4" />
+            <Paperclip className="h-4 w-4" />
           </Button>
+        </ActionTooltip>
+
+        {/* Send/Voice button */}
+        {value.trim() ? (
+          <ActionTooltip content="Skicka meddelande (Enter)">
+            <Button
+              onClick={handleSendClick}
+              disabled={disabled || !value.trim()}
+              size="icon"
+              className="h-8 w-8 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </ActionTooltip>
+        ) : (
+          <ActionTooltip content="Röstmeddelande">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
+              disabled={disabled}
+            >
+              <Mic className="h-4 w-4" />
+            </Button>
+          </ActionTooltip>
         )}
       </div>
     </div>
