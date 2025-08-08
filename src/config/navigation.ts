@@ -135,6 +135,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["client"]
       },
       {
+        title: "Mobil",
+        url: NAVIGATION_ROUTES.MOBILE,
+        icon: Smartphone,
+        roles: ["client"]
+      },
+      {
         title: "Meddelanden",
         url: NAVIGATION_ROUTES.MESSAGES,
         icon: MessageSquare,

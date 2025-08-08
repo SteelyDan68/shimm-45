@@ -26,7 +26,7 @@ import { Collaboration } from "@/pages/Collaboration";
 
 import { TestingPage } from "@/pages/TestingPage";
 import { SixPillars } from "@/pages/SixPillars";
-import { MobileOptimization } from "@/pages/MobileOptimization";
+import Mobile from "@/pages/Mobile";
 
 import GDPRManagement from './pages/GDPRManagement';
 import UnifiedUserManagement from './pages/UnifiedUserManagement';
@@ -133,7 +133,7 @@ const AppRoutes = () => {
                 <Route path="/testing" element={<TestingPage />} />
                <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
                <Route path="/six-pillars/:pillarKey" element={<SixPillars />} />
-               <Route path="/mobile" element={<MobileOptimization />} />
+               <Route path="/mobile" element={<Mobile />} />
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
                 <Route path="/intelligence/:userId" element={<Intelligence />} />
