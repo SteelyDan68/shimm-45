@@ -1,8 +1,8 @@
+import { useEffect } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ModernMessagingApp } from '@/components/MessagingV2/ModernMessagingApp';
 import { AutonomousMessagingInterface } from '@/components/Stefan/AutonomousMessagingInterface';
-import { Button } from '@/components/ui/button';
-import { Brain, MessageSquare } from 'lucide-react';
+import { AiReplyAssistant } from '@/components/MessagingV2/AiReplyAssistant';
 
 export function Messages() {
   const { user } = useAuth();
@@ -23,48 +23,50 @@ export function Messages() {
       </div>
     );
   }
-
-  
+  // SEO
+  useEffect(() => {
+    document.title = 'Meddelanden & AI Chat | Live meddelanden';
+    const ensureMeta = (name: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        document.head.appendChild(el);
+      }
+      return el as HTMLMetaElement;
+    };
+    const desc = ensureMeta('description');
+    desc.setAttribute('content', 'Meddelanden och Stefan AI-chat med live funktioner och självinstruerande UX.');
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', window.location.href);
+  }, []);
 
   return (
     <div className="container mx-auto p-6 max-w-7xl space-y-6">
-      {/* Header - förtydligar funktionaliteten */}
-      <div className="text-center space-y-2 mb-6">
+      <header className="text-center space-y-2 mb-2">
         <h1 className="text-2xl font-bold">Meddelanden & AI Chat</h1>
-        <p className="text-muted-foreground">
-          Kommunicera med ditt team och få hjälp från Stefan AI - allt på ett ställe
+        <p className="text-muted-foreground text-sm">
+          Live-meddelanden med Stefan AI-stöd – snabbt, tydligt och självinstruerande
         </p>
-      </div>
-      
-      {/* Quick access to Stefan AI */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-              <Brain className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h3 className="font-semibold">Stefan AI Coaching</h3>
-              <p className="text-sm text-muted-foreground">
-                Få personlig coaching och vägledning med AI-driven support
-              </p>
-            </div>
-          </div>
-          <Button 
-            onClick={() => window.location.href = '/stefan/chat'}
-            className="bg-gradient-to-r from-primary to-primary/80"
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Starta Chat
-          </Button>
-        </div>
-      </div>
-      
-      {/* Autonomous Messaging Interface - Stefan's proactive messaging */}
-      <AutonomousMessagingInterface />
-      
-      {/* Main Messaging App */}
-      <ModernMessagingApp />
+      </header>
+
+      <main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Huvudchatten */}
+        <section aria-label="Meddelanden" className="lg:col-span-2">
+          <ModernMessagingApp className="h-[75vh]" />
+        </section>
+
+        {/* AI-hjälp och proaktiva meddelanden */}
+        <aside className="space-y-6">
+          <AiReplyAssistant />
+          <AutonomousMessagingInterface />
+        </aside>
+      </main>
     </div>
   );
 }
