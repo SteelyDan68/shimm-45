@@ -3,16 +3,16 @@
  * Central controller för unified dashboard-arkitektur med rollbaserad widget-komposition
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { DashboardProvider, useDashboard } from './contexts/DashboardContext';
 import { BaseDashboardLayout } from './layouts/BaseDashboardLayout';
 import { DashboardGrid } from './components/DashboardGrid';
 import { DynamicWidget } from './components/DynamicWidget';
 import { DashboardStats, WidgetProps } from './types/dashboard-types';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useUserPillars } from '@/hooks/useUserPillars';
 import { useTasks } from '@/hooks/useTasks';
 import { useRealCoachDashboard } from '@/hooks/useRealCoachDashboard';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
@@ -170,13 +170,33 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
   const { user } = useAuth();
   const effectiveUserId = userId || user?.id;
 
-  // 📊 DATA HOOKS - Ladda data baserat på användarroll och behörigheter
-  const { 
-    getCompletedPillars, 
-    getActivatedPillars,
-    loading: pillarLoading 
-  } = useUserPillars(effectiveUserId || '');
+  // 📊 DATA HOOKS - Use assessment_rounds as single source of truth
+  const [assessmentRounds, setAssessmentRounds] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
+  // Load assessment rounds directly  
+  useEffect(() => {
+    const loadAssessmentRounds = async () => {
+      if (!effectiveUserId) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('assessment_rounds')
+          .select('*')
+          .eq('user_id', effectiveUserId);
+          
+        if (error) throw error;
+        setAssessmentRounds(data || []);
+      } catch (error) {
+        console.error('Error loading assessment rounds:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadAssessmentRounds();
+  }, [effectiveUserId]);
+
   const { 
     tasks, 
     loading: tasksLoading 
@@ -198,8 +218,13 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
 
   // 🧮 CALCULATE DASHBOARD STATS
   const dashboardStats: DashboardStats = useMemo(() => {
-    const completedPillars = getCompletedPillars().length;
-    const activePillars = getActivatedPillars().length;
+    // Calculate from assessment_rounds (single source of truth)
+    const completedPillars = assessmentRounds
+      .map(a => a.pillar_type)
+      .filter((pillar, index, arr) => arr.indexOf(pillar) === index)
+      .length;
+      
+    const activePillars = 6; // Total pillars
     const activeTasks = tasks?.filter(task => task.status !== 'completed') || [];
     const completedTasks = tasks?.filter(task => task.status === 'completed') || [];
     
@@ -224,9 +249,16 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
       // General stats
       completedAssessments: completedPillars
     };
-  }, [effectiveUserId, user, getCompletedPillars, getActivatedPillars, tasks, clients, coachStats]);
+  }, [effectiveUserId, user, assessmentRounds, tasks, clients, coachStats]);
 
-  // 🎨 RENDER LOGIC
+  if (loading || tasksLoading) {
+    return (
+      <div className="p-8 text-center">
+        Laddar dashboard-data...
+      </div>
+    );
+  }
+
   if (layout === 'embedded') {
     // Embedded mode - bara innehållet utan layout
     return (

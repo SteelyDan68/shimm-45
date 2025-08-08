@@ -42,9 +42,9 @@ interface ActionableData {
 export function DevelopmentOverview() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { activations, assessments, getCompletedPillars } = useUserPillars(user?.id || '');
   
   const [loading, setLoading] = useState(true);
+  const [assessmentRounds, setAssessmentRounds] = useState<AssessmentData[]>([]);
   const [completedActionables, setCompletedActionables] = useState<ActionableData[]>([]);
   const [recentInsights, setRecentInsights] = useState<any[]>([]);
 
@@ -75,6 +75,16 @@ export function DevelopmentOverview() {
     
     setLoading(true);
     try {
+      // Load assessment rounds (real source of truth)
+      const { data: assessmentData, error: assessmentError } = await supabase
+        .from('assessment_rounds')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (assessmentError) throw assessmentError;
+      setAssessmentRounds(assessmentData || []);
+      
       // Load completed actionables
       const { data: actionablesData, error: actionablesError } = await supabase
         .from('calendar_actionables')
@@ -119,7 +129,11 @@ export function DevelopmentOverview() {
     );
   }
 
-  const completedPillars = getCompletedPillars();
+  // Calculate completion data from assessment_rounds (single source of truth)
+  const completedPillars = assessmentRounds
+    .map(a => a.pillar_type as PillarKey)
+    .filter((pillar, index, arr) => arr.indexOf(pillar) === index);
+  
   const totalPillars = Object.keys(pillarNames).length;
   const completionRate = (completedPillars.length / totalPillars) * 100;
 
@@ -174,7 +188,7 @@ export function DevelopmentOverview() {
                 {Object.entries(pillarNames).map(([key, name]) => {
                   const pillarKey = key as PillarKey;
                   const isCompleted = completedPillars.includes(pillarKey);
-                  const assessment = assessments.find(a => a.pillar_key === pillarKey);
+                  const assessment = assessmentRounds.find(a => a.pillar_type === pillarKey);
                   
                   return (
                     <div
@@ -189,9 +203,9 @@ export function DevelopmentOverview() {
                         <span className="text-sm font-medium">{name}</span>
                         {isCompleted && <CheckCircle2 className="h-4 w-4" />}
                       </div>
-                      {assessment && (
+                      {assessment && assessment.scores && (
                         <div className="text-xs mt-1 opacity-75">
-                          Score: {assessment.calculated_score || 'N/A'}
+                          Genomförd: {new Date(assessment.created_at).toLocaleDateString('sv-SE')}
                         </div>
                       )}
                     </div>
@@ -211,7 +225,7 @@ export function DevelopmentOverview() {
             <CardContent className="space-y-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl font-bold text-blue-600">
-                  {assessments.length}
+                  {assessmentRounds.length}
                 </div>
                 <div className="text-sm text-muted-foreground">Genomförda bedömningar</div>
               </div>
