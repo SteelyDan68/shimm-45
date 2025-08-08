@@ -308,6 +308,60 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_processing_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          current_step: string | null
+          error_details: string | null
+          estimated_completion_time: string | null
+          id: string
+          input_data: Json | null
+          pillar_type: string | null
+          process_type: string
+          processing_metadata: Json | null
+          progress_percentage: number | null
+          started_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_step?: string | null
+          error_details?: string | null
+          estimated_completion_time?: string | null
+          id?: string
+          input_data?: Json | null
+          pillar_type?: string | null
+          process_type: string
+          processing_metadata?: Json | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_step?: string | null
+          error_details?: string | null
+          estimated_completion_time?: string | null
+          id?: string
+          input_data?: Json | null
+          pillar_type?: string | null
+          process_type?: string
+          processing_metadata?: Json | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_recommendations: {
         Row: {
           category: string
@@ -567,6 +621,63 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      assessment_actionable_mappings: {
+        Row: {
+          actionable_id: string | null
+          actionable_reasoning: string
+          assessment_question_key: string
+          assessment_round_id: string | null
+          confidence_score: number | null
+          created_at: string | null
+          id: string
+          neuroplastic_rationale: string | null
+          pillar_connection: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          actionable_id?: string | null
+          actionable_reasoning: string
+          assessment_question_key: string
+          assessment_round_id?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          neuroplastic_rationale?: string | null
+          pillar_connection: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          actionable_id?: string | null
+          actionable_reasoning?: string
+          assessment_question_key?: string
+          assessment_round_id?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          neuroplastic_rationale?: string | null
+          pillar_connection?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_actionable_mappings_actionable_id_fkey"
+            columns: ["actionable_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_actionables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_actionable_mappings_assessment_round_id_fkey"
+            columns: ["assessment_round_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       assessment_detailed_analyses: {
         Row: {
@@ -3323,6 +3434,48 @@ export type Database = {
           },
         ]
       }
+      predictive_user_analytics: {
+        Row: {
+          based_on_patterns: Json | null
+          confidence_level: number | null
+          created_at: string | null
+          id: string
+          pillar_type: string | null
+          prediction_metadata: Json | null
+          prediction_type: string
+          prediction_value: number | null
+          updated_at: string | null
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          based_on_patterns?: Json | null
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          pillar_type?: string | null
+          prediction_metadata?: Json | null
+          prediction_type: string
+          prediction_value?: number | null
+          updated_at?: string | null
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          based_on_patterns?: Json | null
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          pillar_type?: string | null
+          prediction_metadata?: Json | null
+          prediction_type?: string
+          prediction_value?: number | null
+          updated_at?: string | null
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       proactive_interventions: {
         Row: {
           content: string
@@ -4506,6 +4659,54 @@ export type Database = {
           pillar_type?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_pipeline_progress: {
+        Row: {
+          completed_at: string | null
+          completion_timestamps: Json | null
+          created_at: string | null
+          current_step: string
+          id: string
+          last_activity_at: string | null
+          pillar_type: string
+          started_at: string | null
+          step_data: Json | null
+          step_progress_percentage: number | null
+          total_progress_percentage: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_timestamps?: Json | null
+          created_at?: string | null
+          current_step: string
+          id?: string
+          last_activity_at?: string | null
+          pillar_type: string
+          started_at?: string | null
+          step_data?: Json | null
+          step_progress_percentage?: number | null
+          total_progress_percentage?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_timestamps?: Json | null
+          created_at?: string | null
+          current_step?: string
+          id?: string
+          last_activity_at?: string | null
+          pillar_type?: string
+          started_at?: string | null
+          step_data?: Json | null
+          step_progress_percentage?: number | null
+          total_progress_percentage?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
