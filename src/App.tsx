@@ -55,6 +55,7 @@ import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChatPage";
 import { StefanAICentralHub } from "./components/Stefan/StefanAICentralHub";
 import { AIInsights } from "./pages/AIInsights";
+import SystemMapPage from "./pages/SystemMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -148,11 +149,12 @@ const AppRoutes = () => {
                  <Route path="/ai-insights" element={<AIInsights />} />
                  <Route path="/user-analytics" element={<UserAnalytics />} />
                  <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
-                 <Route path={NAVIGATION_ROUTES.ANALYTICS} element={<AdminAnalyticsPage />} />
-                 <Route path={NAVIGATION_ROUTES.DATA_COLLECTION} element={<DataCollectionPage />} />
-                  <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-                  <Route path="/stefan/*" element={<StefanAICentralHub />} />
-                <Route path="*" element={<NotFound />} />
+                  <Route path={NAVIGATION_ROUTES.ANALYTICS} element={<AdminAnalyticsPage />} />
+                  <Route path={NAVIGATION_ROUTES.DATA_COLLECTION} element={<DataCollectionPage />} />
+                   <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
+                   <Route path="/stefan/*" element={<StefanAICentralHub />} />
+                   <Route path="/system-map" element={<SystemMapPage />} />
+                 <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>
             </AppLayout>

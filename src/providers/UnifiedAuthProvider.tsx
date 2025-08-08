@@ -142,6 +142,7 @@ const PAGE_ACCESS: Record<string, AppRole[]> = {
   '/messages': ['superadmin', 'admin', 'coach', 'client'],
   '/dashboard': ['client'],
   '/profile': ['superadmin', 'admin', 'coach', 'client'],
+  '/system-map': ['superadmin'],
 };
 
 const FEATURE_FLAGS: Record<string, AppRole[]> = {
