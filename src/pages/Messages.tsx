@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { EnhancedMessagingHub } from '@/components/Messaging/EnhancedMessagingHub';
+import { RoleBasedMessagingHub } from '@/components/Messaging/RoleBasedMessagingHub';
 
 export function Messages() {
   const { user } = useAuth();
@@ -56,9 +56,7 @@ export function Messages() {
       </header>
 
       <main className="h-[calc(100vh-200px)] min-h-[600px]">
-        <EnhancedMessagingHub 
-          className="h-full"
-        />
+        <RoleBasedMessagingHub />
       </main>
     </div>
   );

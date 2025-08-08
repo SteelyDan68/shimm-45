@@ -18,5 +18,8 @@ port = 54324
 [functions.stefan-ai-chat]
 verify_jwt = false
 
+[functions.send-message-notification]
+verify_jwt = true
+
 [auth]
 enabled = true
