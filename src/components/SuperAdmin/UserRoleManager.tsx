@@ -117,6 +117,16 @@ export const UserRoleManager: React.FC<UserRoleManagerProps> = ({
       return;
     }
 
+    // Prevent any self-assignment of administrative roles (admin, superadmin)
+    if (user.id === currentUser?.id && role !== 'client' && role !== 'coach') {
+      toast({
+        title: "Åtgärd inte tillåten",
+        description: "Du kan inte ändra dina egna administrativa roller av säkerhetsskäl",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Prevent removing own superadmin role
     if (role === 'superadmin' && !checked && user.id === currentUser?.id) {
       toast({
