@@ -74,28 +74,27 @@ export const useUserPillars = (userId: string) => {
     if (!userId) return;
     
     try {
-      // Get pillar assessments from path_entries using correct field names
+      // Use assessment_rounds as single source of truth (same as dashboard)
       const { data, error } = await supabase
-        .from('path_entries')
+        .from('assessment_rounds')
         .select('*')
         .eq('user_id', userId)
-        .eq('type', 'assessment')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      // Convert path entries to expected format
-      const formattedAssessments: UserPillarAssessment[] = (data || []).map((entry: any) => ({
-        id: entry.id,
+      // Convert assessment_rounds to expected format
+      const formattedAssessments: UserPillarAssessment[] = (data || []).map((round: any) => ({
+        id: round.id,
         user_id: userId,
-        pillar_key: entry.metadata?.pillar_key || 'self_care', // fallback
-        assessment_data: entry.metadata?.assessment_data || {},
-        calculated_score: entry.metadata?.assessment_score || null,
-        ai_analysis: entry.content || null,
-        insights: entry.metadata?.insights || {},
-        created_by: entry.created_by,
-        created_at: entry.created_at,
-        updated_at: entry.updated_at
+        pillar_key: round.pillar_type, // Map pillar_type to pillar_key
+        assessment_data: round.answers || {},
+        calculated_score: round.scores ? (Object.values(round.scores).reduce((a: any, b: any) => a + b, 0) as number) : null,
+        ai_analysis: round.ai_analysis || null,
+        insights: round.scores || {},
+        created_by: round.created_by,
+        created_at: round.created_at,
+        updated_at: round.updated_at
       })).filter(assessment => assessment.pillar_key);
       
       setAssessments(formattedAssessments);
@@ -217,6 +216,7 @@ export const useUserPillars = (userId: string) => {
   };
 
   const getCompletedPillars = () => {
+    // Use assessment_rounds as single source of truth (same as dashboard)
     return assessments
       .filter(assessment => assessment.calculated_score !== null)
       .map(assessment => assessment.pillar_key)
