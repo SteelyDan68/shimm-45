@@ -146,7 +146,7 @@ const TasksWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onAction?.(`view-task-${task.id}`)}
+                    onClick={() => window.location.href = `/tasks?task=${task.id}`}
                     className="w-8 h-8 p-0 ml-2"
                   >
                     <ArrowRight className="w-3 h-3" />

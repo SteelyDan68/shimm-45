@@ -231,13 +231,6 @@ export const SixPillars = () => {
         </CardContent>
       </Card>
 
-      {/* Main Dashboard Component - Huvudpolicy från Systemarkitekt: Modular structure */}
-      <div className="border-t pt-8">
-        <ModularPillarDashboard 
-          userId={profile.id} 
-          userName={profile.first_name || profile.email || 'Användare'} 
-        />
-      </div>
     </div>
   );
 };

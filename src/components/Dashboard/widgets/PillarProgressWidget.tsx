@@ -163,7 +163,7 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onAction?.(`view-pillar-${pillar.key}`)}
+                        onClick={() => window.location.href = `/development-overview?focus=${pillar.key}`}
                         className="w-8 h-8 p-0"
                       >
                         <ArrowRight className="w-3 h-3" />
@@ -185,7 +185,7 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onAction?.(`start-pillar-${pillar.key}`)}
+                      onClick={() => window.location.href = `/six-pillars/${pillar.key}`}
                       className="w-8 h-8 p-0"
                     >
                       <ArrowRight className="w-3 h-3" />

@@ -193,11 +193,18 @@ export function DevelopmentOverview() {
                   return (
                     <div
                       key={key}
-                      className={`p-3 rounded-lg border-2 ${
+                      className={`p-3 rounded-lg border-2 cursor-pointer hover:shadow-md transition-all ${
                         isCompleted 
                           ? pillarColors[pillarKey]
-                          : 'bg-gray-50 text-gray-500 border-gray-200'
+                          : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
                       }`}
+                      onClick={() => {
+                        if (isCompleted) {
+                          window.location.href = `/user-analytics?focus=${pillarKey}`;
+                        } else {
+                          window.location.href = `/six-pillars/${pillarKey}`;
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">{name}</span>
@@ -208,6 +215,9 @@ export function DevelopmentOverview() {
                           Genomförd: {new Date(assessment.created_at).toLocaleDateString('sv-SE')}
                         </div>
                       )}
+                      <div className="text-xs mt-1 text-blue-600 opacity-75">
+                        {isCompleted ? 'Klicka för analys →' : 'Klicka för att starta →'}
+                      </div>
                     </div>
                   );
                 })}

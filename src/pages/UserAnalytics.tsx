@@ -361,7 +361,7 @@ export default function UserAnalytics() {
               <div className="text-3xl font-bold text-purple-900">
                 {assessmentData.filter(a => a.source === 'assessment_rounds').length}
               </div>
-              <div className="text-sm text-purple-700">Moderna assessments</div>
+              <div className="text-sm text-purple-700">Assessments</div>
             </CardContent>
           </Card>
         </div>
@@ -450,10 +450,16 @@ export default function UserAnalytics() {
                             {new Date(analysis.created_at).toLocaleDateString('sv-SE')}
                           </span>
                           <div className="flex gap-2">
-                            <span className="text-blue-600 hover:underline" onClick={() => setSelectedAnalysis(analysis)}>
+                            <span 
+                              className="text-blue-600 hover:underline cursor-pointer" 
+                              onClick={() => setSelectedAnalysis(analysis)}
+                            >
                               Snabbvy →
                             </span>
-                            <span className="text-purple-600 hover:underline" onClick={() => setShowDetailedView(analysis.pillar_type)}>
+                            <span 
+                              className="text-purple-600 hover:underline cursor-pointer" 
+                              onClick={() => setShowDetailedView(analysis.pillar_type)}
+                            >
                               Detaljvy →
                             </span>
                           </div>
@@ -499,53 +505,6 @@ export default function UserAnalytics() {
             </Card>
           )}
 
-          {/* Konsoliderings Knapp */}
-          <Card className="border-orange-200 bg-orange-50/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <RefreshCw className="h-5 w-5" />
-                Assessment Konsolidering
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Regenerera AI-analyser och actionables för assessments som missade pipeline.
-              </p>
-              <Button 
-                onClick={async () => {
-                  if (!targetUserId) return;
-                  
-                  toast({
-                    title: "🔄 Startar konsolidering...",
-                    description: "Regenererar AI-analyser för ofullständiga assessments",
-                  });
-                  
-                  const result = await consolidateAssessmentSystems(targetUserId);
-                  
-                  if (result.success) {
-                    toast({
-                      title: "✅ Konsolidering klar!",
-                      description: `${result.ai_analyses_generated} AI-analyser + ${result.actionables_created} actionables genererade`,
-                    });
-                    loadUserAnalytics(); // Refresh data
-                  } else {
-                    toast({
-                      title: "⚠️ Konsolidering delvis misslyckades",
-                      description: `${result.errors.length} fel inträffade. Kontrollera konsolen.`,
-                      variant: "destructive"
-                    });
-                  }
-                }}
-                className="w-full"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Kör Assessment Konsolidering
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* AI-till-Actionables Pipeline Status */}
-          <AIActionablesPipelineStatus userId={targetUserId || ''} />
         </TabsContent>
 
         {/* 📈 TIMELINE TAB */}
