@@ -1,11 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "@/providers/UnifiedAuthProvider";
+import { useOptimizedAuth } from "@/hooks/useOptimizedAuth";
 import { useNavigation } from "@/hooks/useNavigation";
 import { Button } from "@/components/ui/button";
 import { GlobalSearchBar } from "@/components/GlobalSearch/GlobalSearchBar";
 import { MobileTouchButton } from "@/components/ui/mobile-responsive";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { logger } from '@/utils/logger';
+import { UnifiedNotificationSystem } from "@/components/UnifiedNotificationSystem";
 import { 
   LogOut,
   Shield,
@@ -20,14 +22,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { UnifiedNotificationSystem } from "@/components/UnifiedNotificationSystem";
 
 export function TopNavigation() {
-  const { user, signOut, hasRole, roles } = useAuth();
+  const { user, signOut, isSuperAdmin, isAdmin, isCoach, isClient, isLoading } = useOptimizedAuth();
   const { routes } = useNavigation();
   const { open: sidebarOpen } = useSidebar();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+
+  // Set logger context
+  logger.setContext({ component: 'TopNavigation' });
   
   return (
     <header className="h-16 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-40">
@@ -82,15 +86,15 @@ export function TopNavigation() {
                   {user?.email}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {hasRole('superadmin') ? 'Superadministratör' : 
-                   hasRole('admin') ? 'Administratör' : 
-                   hasRole('coach') ? 'Coach' : 'Klient'}
+                  {isSuperAdmin ? 'Superadministratör' : 
+                   isAdmin ? 'Administratör' : 
+                   isCoach ? 'Coach' : 'Klient'}
                 </p>
               </div>
               
               {/* RENSAD NAVIGATION - Endast essentiella användarfunktioner */}
               <div className="py-1">
-                {(hasRole('superadmin') || hasRole('admin')) && (
+                {(isSuperAdmin || isAdmin) && (
                   <DropdownMenuItem asChild>
                     <NavLink to="/administration" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
                       <Shield className="h-4 w-4 mr-3 text-muted-foreground" />
@@ -114,10 +118,11 @@ export function TopNavigation() {
                 <DropdownMenuItem 
                   onClick={async () => {
                     try {
+                      logger.info('User signing out');
                       await signOut();
                       navigate('/');
                     } catch (error) {
-                      console.error('Logout error:', error);
+                      logger.error('Logout error:', error);
                     }
                   }}
                   className="flex items-center w-full px-3 py-2 text-sm text-destructive focus:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"

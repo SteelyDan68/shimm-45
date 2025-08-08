@@ -27,6 +27,8 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ModernMessageBubble } from './ModernMessageBubble';
 import { ModernMessageInput } from './ModernMessageInput';
+import { logger } from '@/utils/logger';
+import { LoadingState } from '@/components/ui/optimized-loading';
 import { 
   MessageSquare, 
   X,
@@ -173,10 +175,10 @@ export const StableMessagingHub: React.FC = () => {
         // Refresh conversations to show the new one
         await fetchConversations();
         
-        console.log('✅ Stefan AI conversation created:', newConversation.id);
+        logger.debug('Stefan AI conversation created:', newConversation.id);
       }
     } catch (error) {
-      console.error('❌ Error ensuring Stefan conversation:', error);
+      logger.error('Error ensuring Stefan conversation:', error);
     }
   };
 

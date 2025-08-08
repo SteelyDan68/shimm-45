@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from './use-toast';
+import { logger } from '@/utils/logger';
+import { useStableData } from '@/hooks/useStableData';
 
 // 🚀 Modern Enterprise Message System 2025
 // Based on world-class architecture with Single Source of Truth principle
@@ -97,13 +99,14 @@ export const useMessagingV2 = () => {
   // 📊 Statistics
   const totalUnreadCount = conversations.reduce((sum, conv) => sum + (conv.unread_count || 0), 0);
 
-  // 🔍 Fetch conversations with enhanced data
+  // 🔍 Optimized fetch with caching and stability
   const fetchConversations = useCallback(async () => {
     if (!user) return;
 
     try {
+      logger.setContext({ component: 'useMessagingV2' });
       
-        // Simplified query utan nested selects som kan orsaka problem
+      // Simplified query utan nested selects som kan orsaka problem
       const { data: conversationsData, error } = await supabase
         .from('conversations')
         .select('*')
@@ -111,9 +114,10 @@ export const useMessagingV2 = () => {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-
-      
+      if (error) {
+        logger.error('Failed to fetch conversations', error);
+        throw error;
+      }
 
       // Enrich with participant profiles and unread counts
       const enrichedConversations = await Promise.all(
@@ -188,8 +192,9 @@ export const useMessagingV2 = () => {
       });
 
       setConversations(uniqueConversations);
+      logger.debug(`Loaded ${uniqueConversations.length} unique conversations`);
     } catch (error) {
-      console.error('❌ Error fetching conversations:', error);
+      logger.error('Error fetching conversations:', error);
       toast({
         title: "Fel",
         description: "Kunde inte hämta konversationer",
