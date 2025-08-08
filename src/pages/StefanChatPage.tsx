@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Brain } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { LiveStefanChatInterface } from '@/components/Stefan/LiveStefanChatInterface';
+import StefanAIChat from '@/components/StefanAIChat';
 import { PedagogicalCoachInterface } from '@/components/Stefan/PedagogicalCoachInterface';
 
 export function StefanChatPage() {
@@ -44,14 +44,11 @@ export function StefanChatPage() {
             <PedagogicalCoachInterface />
           </div>
           
-          {/* Live Stefan Chat Interface */}
+          {/* Unified Stefan AI Chat Interface */}
           <div className="lg:col-span-1">
-            <LiveStefanChatInterface
-              context="coaching"
+            <StefanAIChat 
               clientId={clientId || undefined}
-              onCoachingAction={(action, data) => {
-                console.log('Coaching action:', action, data);
-              }}
+              className="h-[600px]"
             />
           </div>
         </div>

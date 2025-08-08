@@ -67,8 +67,13 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
       if (!success) return;
 
       if (isStefanConversation) {
+        // Show immediate feedback
+        toast.success("Skickar till Stefan AI...");
+        
         // Send message to Stefan Enhanced Chat and get response
         try {
+          console.log('🚀 Calling Stefan Enhanced Chat for user:', user?.id);
+          
           const { data, error } = await supabase.functions.invoke('stefan-enhanced-chat', {
             body: {
               message: userMessage,
@@ -80,25 +85,24 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
             }
           });
 
+          console.log('Stefan AI response:', { data, error });
+
           if (!error && data?.message) {
-            // Send AI response after a short delay
-            setTimeout(async () => {
-              await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
-            }, 1500);
+            // Send AI response immediately 
+            await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
+            toast.success("Stefan AI har svarat!");
           } else {
             console.error('Stefan AI error:', error);
-            // Send fallback response
-            setTimeout(async () => {
-              await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);
-            }, 1500);
+            await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);
+            toast.error("Stefan AI hade problem - försök igen");
           }
         } catch (aiError) {
-          console.error('Stefan AI error:', aiError);
-          // Send fallback response
-          setTimeout(async () => {
-            await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);
-          }, 1500);
+          console.error('Stefan AI network error:', aiError);
+          await sendMessage(activeConversation, `🤖 Stefan: Teknisk störning upptäckt. Försöker igen...`);
+          toast.error("Nätverksproblem - försök igen");
         }
+      } else {
+        toast.success("Meddelande skickat!");
       }
     } catch (error) {
       console.error('Message sending error:', error);
