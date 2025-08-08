@@ -1,9 +1,30 @@
+/**
+ * 🌟 ENHANCED MESSAGING HUB - BASERAT PÅ ANNAS KLIENTMODUL
+ * 
+ * Använder samma vackra bubbel-design som den ursprungliga klientmodulen
+ * men utökar funktionaliteten för admin/coach/superadmin roller
+ * 
+ * BEHÅLLER:
+ * - ModernMessageBubble med färgade bubblor 
+ * - Samma designspråk och UX
+ * - Stefan AI integration
+ * 
+ * LÄGGER TILL:
+ * - Live meddelanden till andra roller
+ * - Broadcast funktionalitet för admin
+ * - Coach-klient direktkommunikation
+ */
+
 import React, { useState, useEffect, useRef, memo, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,8 +36,51 @@ import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { usePerformanceMonitoringV2, useMemoryOptimization } from '@/utils/performanceOptimizationV2';
 import { 
   MessageSquare, 
-  X
+  X,
+  Send,
+  Users,
+  Crown,
+  Shield,
+  UserCheck,
+  Heart,
+  Brain,
+  Plus,
+  Zap,
+  Radio
 } from 'lucide-react';
+
+interface AvailableRecipient {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+  avatar_url?: string;
+  is_coach_assigned?: boolean;
+}
+
+const roleIcons = {
+  superadmin: Crown,
+  admin: Shield,
+  coach: UserCheck,
+  client: Heart,
+  stefan_ai: Brain
+};
+
+const roleColors = {
+  superadmin: 'from-purple-600 to-pink-600',
+  admin: 'from-blue-600 to-indigo-600',
+  coach: 'from-green-600 to-emerald-600',
+  client: 'from-orange-500 to-red-500',
+  stefan_ai: 'from-emerald-500 to-teal-500'
+};
+
+const roleLabels = {
+  superadmin: 'Superadmin',
+  admin: 'Admin',
+  coach: 'Coach',
+  client: 'Klient',
+  stefan_ai: 'Stefan AI'
+};
 
 interface EnhancedMessagingHubProps {
   className?: string;
@@ -26,26 +90,38 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
   usePerformanceMonitoringV2('EnhancedMessagingHub');
   const { registerCleanup } = useMemoryOptimization();
   
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const {
     conversations,
     activeConversation,
-    currentMessages, // Use currentMessages instead of messages
+    currentMessages,
     setActiveConversation,
     sendMessage,
     markConversationAsRead
   } = useMessagingV2();
   
   const [messageInput, setMessageInput] = useState('');
+  const [showCompose, setShowCompose] = useState(false);
+  const [availableRecipients, setAvailableRecipients] = useState<AvailableRecipient[]>([]);
+  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastSubject, setBroadcastSubject] = useState('');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom only when new messages arrive (not on conversation change)
+  // Permission checks
+  const isSuperAdmin = hasRole('superadmin');
+  const isAdmin = hasRole('admin');
+  const isCoach = hasRole('coach');
+  const isClient = hasRole('client');
+  
+  const canBroadcast = isSuperAdmin || isAdmin;
+
+  // Auto-scroll to bottom only when new messages arrive
   const previousMessageCount = useRef(0);
   useEffect(() => {
     const currentCount = currentMessages?.length || 0;
-    // Only auto-scroll if we have new messages, not when switching conversations
     if (currentCount > previousMessageCount.current && previousMessageCount.current > 0) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -59,6 +135,115 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
     }
   }, [activeConversation]);
 
+  // Load available recipients based on user role
+  useEffect(() => {
+    loadAvailableRecipients();
+  }, [user?.id, hasRole]);
+
+  const loadAvailableRecipients = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Stefan AI är alltid tillgänglig
+      const stefanAI: AvailableRecipient = {
+        id: 'stefan_ai',
+        name: 'Stefan AI',
+        email: 'stefan@ai.coach',
+        roles: ['stefan_ai'],
+        avatar_url: undefined
+      };
+
+      let recipients: AvailableRecipient[] = [stefanAI];
+
+      if (isClient) {
+        // Klienter kan bara skicka till sin tilldelade coach
+        const { data: assignments } = await supabase
+          .from('coach_client_assignments')
+          .select(`
+            coach_id,
+            profiles!coach_id(id, first_name, last_name, email, avatar_url)
+          `)
+          .eq('client_id', user.id)
+          .eq('is_active', true);
+
+        if (assignments) {
+          assignments.forEach(assignment => {
+            if (assignment.profiles) {
+              const profile = assignment.profiles as any;
+              recipients.push({
+                id: profile.id,
+                name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email,
+                email: profile.email,
+                roles: ['coach'],
+                avatar_url: profile.avatar_url,
+                is_coach_assigned: true
+              });
+            }
+          });
+        }
+      } else if (isCoach) {
+        // Coaches kan skicka till sina tilldelade klienter
+        const { data: assignments } = await supabase
+          .from('coach_client_assignments')
+          .select(`
+            client_id,
+            profiles!client_id(id, first_name, last_name, email, avatar_url)
+          `)
+          .eq('coach_id', user.id)
+          .eq('is_active', true);
+
+        if (assignments) {
+          assignments.forEach(assignment => {
+            if (assignment.profiles) {
+              const profile = assignment.profiles as any;
+              recipients.push({
+                id: profile.id,
+                name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email,
+                email: profile.email,
+                roles: ['client'],
+                avatar_url: profile.avatar_url
+              });
+            }
+          });
+        }
+      } else if (canBroadcast) {
+        // Superadmin och Admin kan skicka till alla
+        const { data: allUsers, error: usersError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email, avatar_url')
+          .eq('is_active', true)
+          .neq('id', user.id);
+
+        if (usersError) {
+          console.error('Error fetching users:', usersError);
+          return;
+        }
+
+        if (allUsers) {
+          for (const profile of allUsers) {
+            const { data: userRoles } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', profile.id);
+
+            recipients.push({
+              id: profile.id,
+              name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email,
+              email: profile.email,
+              roles: userRoles?.map(ur => ur.role) || [],
+              avatar_url: profile.avatar_url
+            });
+          }
+        }
+      }
+
+      setAvailableRecipients(recipients);
+    } catch (error) {
+      console.error('Error loading recipients:', error);
+      toast.error("Kunde inte ladda mottagare");
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!activeConversation || !messageInput.trim()) return;
 
@@ -71,7 +256,7 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
                                 conversation?.title?.toLowerCase().includes('stefan');
 
     try {
-      // Send user message first (without showing duplicate toast)
+      // Send user message first
       const success = await sendMessage(activeConversation, userMessage);
       
       if (!success) return;
@@ -95,14 +280,11 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
             }
           });
 
-          console.log('Stefan AI response:', { data, error });
-
           if (!error && data?.message) {
             // Send AI response with Stefan's consistent format
             const success = await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
             if (success) {
               toast.success("Stefan AI har svarat!");
-              // Force scroll to bottom to show new message
               setTimeout(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
               }, 100);
@@ -126,6 +308,42 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
     }
   };
 
+  const handleBroadcastMessage = async () => {
+    if (!broadcastMessage.trim() || selectedRecipients.length === 0) {
+      toast.error("Välj mottagare och skriv ett meddelande");
+      return;
+    }
+
+    try {
+      // Send broadcast message via edge function
+      const { data, error } = await supabase.functions.invoke('live-message-sender', {
+        body: {
+          sender_id: user?.id,
+          recipient_ids: selectedRecipients,
+          recipient_type: 'multiple',
+          subject: broadcastSubject,
+          content: broadcastMessage,
+          notification_type: 'broadcast',
+          is_broadcast: true
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success(`Meddelande skickat till ${selectedRecipients.length} mottagare`);
+      
+      // Clear form
+      setBroadcastMessage('');
+      setBroadcastSubject('');
+      setSelectedRecipients([]);
+      setShowCompose(false);
+      
+    } catch (error) {
+      console.error('Error sending broadcast:', error);
+      toast.error("Kunde inte skicka meddelandet");
+    }
+  };
+
   const handleDeleteConversation = async (conversationId: string) => {
     if (!confirm('Är du säker på att du vill radera denna konversation?')) return;
     
@@ -138,7 +356,6 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
       
       if (error) throw error;
       
-      // Clear active conversation if it was deleted
       if (activeConversation === conversationId) {
         setActiveConversation(null);
       }
@@ -149,6 +366,14 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
     }
   };
 
+  const getPrimaryRole = (roles: string[]): string => {
+    if (roles.includes('superadmin')) return 'superadmin';
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('coach')) return 'coach';
+    if (roles.includes('client')) return 'client';
+    return roles[0] || 'client';
+  };
+
   const conversation = conversations.find(c => c.id === activeConversation);
 
   return (
@@ -156,7 +381,7 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
       {/* Main messaging area */}
       <div className="flex-1 flex flex-col">
         
-        {/* Header */}
+        {/* Header med ny funktionalitet */}
         <div className="p-6 border-b bg-background/95 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <div>
@@ -167,13 +392,117 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
                 Kommunikation och Stefan AI chat
               </p>
             </div>
+            
+            {/* Admin broadcast button */}
+            {canBroadcast && (
+              <Button
+                onClick={() => setShowCompose(!showCompose)}
+                className="flex items-center gap-2"
+                variant={showCompose ? "default" : "outline"}
+              >
+                {showCompose ? <X className="h-4 w-4" /> : <Radio className="h-4 w-4" />}
+                {showCompose ? "Stäng" : "Broadcast"}
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Conversation list */}
+        {/* Broadcast compose area */}
+        {showCompose && canBroadcast && (
+          <div className="border-b bg-muted/30 p-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Radio className="h-5 w-5" />
+                  Skicka till flera mottagare
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Ämne (valfritt)</label>
+                  <Input
+                    value={broadcastSubject}
+                    onChange={(e) => setBroadcastSubject(e.target.value)}
+                    placeholder="Ämne för meddelandet..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium">Meddelande</label>
+                  <Textarea
+                    value={broadcastMessage}
+                    onChange={(e) => setBroadcastMessage(e.target.value)}
+                    placeholder="Skriv ditt meddelande här..."
+                    rows={4}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Mottagare ({selectedRecipients.length} valda)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded p-2">
+                    {availableRecipients.filter(r => r.id !== 'stefan_ai').map((recipient) => {
+                      const primaryRole = getPrimaryRole(recipient.roles);
+                      const Icon = roleIcons[primaryRole as keyof typeof roleIcons] || MessageSquare;
+                      const isSelected = selectedRecipients.includes(recipient.id);
+                      
+                      return (
+                        <div
+                          key={recipient.id}
+                          className={cn(
+                            "flex items-center gap-2 p-2 rounded cursor-pointer transition-colors",
+                            isSelected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                          )}
+                          onClick={() => {
+                            setSelectedRecipients(prev => 
+                              isSelected 
+                                ? prev.filter(id => id !== recipient.id)
+                                : [...prev, recipient.id]
+                            );
+                          }}
+                        >
+                          <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${roleColors[primaryRole as keyof typeof roleColors]} flex items-center justify-center text-white text-xs`}>
+                            <Icon className="h-3 w-3" />
+                          </div>
+                          <span className="text-xs truncate">{recipient.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleBroadcastMessage}
+                    disabled={!broadcastMessage.trim() || selectedRecipients.length === 0}
+                    className="flex items-center gap-2"
+                  >
+                    <Send className="h-4 w-4" />
+                    Skicka till {selectedRecipients.length} mottagare
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedRecipients(availableRecipients.filter(r => r.id !== 'stefan_ai').map(r => r.id));
+                    }}
+                  >
+                    Välj alla
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedRecipients([])}
+                  >
+                    Rensa
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Conversation list och chat interface - SAMMA SOM ORIGINALET */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
           
-          {/* Conversations Sidebar */}
+          {/* Conversations Sidebar - EXAKT SAMMA SOM ANNA's MODUL */}
           <div className="lg:col-span-1">
             <Card className="h-full shadow-sm border-border/50">
               <CardHeader className="pb-3">
@@ -237,7 +566,6 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
                               )}
                             </div>
                           </div>
-                          {/* Delete button */}
                           <ActionTooltip content="Radera konversation">
                             <Button
                               variant="ghost"
@@ -260,7 +588,7 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
             </Card>
           </div>
 
-          {/* Modern Chat Interface */}
+          {/* Modern Chat Interface - EXAKT SAMMA SOM ANNA's MODUL MED BUBBLOR */}
           <div className="lg:col-span-3">
             <Card className="h-full shadow-sm border-border/50 bg-background/50 backdrop-blur-sm">
               <CardHeader className="pb-3 border-b border-border/50">
@@ -272,7 +600,7 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
                 
                 {activeConversation ? (
                   <>
-                    {/* Messages Container */}
+                    {/* Messages Container med samma design som Anna's modul */}
                     <div className="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth">
                       {(currentMessages || []).length === 0 ? (
                         <div className="text-center py-16">
@@ -288,7 +616,6 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
                         <>
                           {(currentMessages || []).map((message, index) => {
                             const isOwn = message.sender_id === user?.id;
-                            // Define Stefan AI constant UUID for consistent messaging
                             const STEFAN_AI_ID = '00000000-0000-0000-0000-000000000001';
                             const isStefanAI = message.content.includes('🤖 Stefan:') || message.sender_id === STEFAN_AI_ID;
                             const prevMessage = index > 0 ? currentMessages[index - 1] : null;
@@ -311,7 +638,7 @@ const EnhancedMessagingHubComponent: React.FC<EnhancedMessagingHubProps> = ({ cl
                       <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Modern Input Area */}
+                    {/* Modern Input Area - SAMMA SOM ANNA's MODUL */}
                     <div className="border-t border-border/50 p-6 bg-background/80 backdrop-blur-sm">
                       <ModernMessageInput
                         value={messageInput}
