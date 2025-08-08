@@ -9,7 +9,7 @@ interface DevelopmentStrategy {
   description: string;
   pillarKey: string;
   estimatedTime: number;
-  difficultyLevel: 1 | 2 | 3 | 4 | 5;
+  difficultyLevel: number;
   neuroplasticPrinciple: string;
   isCompleted: boolean;
   scheduledFor?: Date;
@@ -78,7 +78,7 @@ export const useLiveDevelopmentPlan = (userId: string, assessmentData: any[]) =>
           description: strategy.description,
           pillarKey: strategy.pillar_key,
           estimatedTime: strategy.estimated_time,
-          difficultyLevel: strategy.difficulty_level as 1 | 2 | 3 | 4 | 5,
+          difficultyLevel: strategy.difficulty_level,
           neuroplasticPrinciple: strategy.neuroplastic_principle,
           isCompleted: strategy.is_completed,
           scheduledFor: strategy.scheduled_for ? new Date(strategy.scheduled_for) : undefined,

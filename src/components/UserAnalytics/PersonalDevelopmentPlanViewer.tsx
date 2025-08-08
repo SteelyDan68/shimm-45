@@ -29,10 +29,10 @@ interface DevelopmentStrategy {
   description: string;
   pillar_key: string;
   estimated_time: number;
-  difficulty_level: 1 | 2 | 3 | 4 | 5;
+  difficulty_level: number;
   neuroplastic_principle: string;
   is_completed: boolean;
-  scheduled_for?: Date;
+  scheduled_for?: string;
   created_at: string;
 }
 
@@ -642,7 +642,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
                       {strategy.scheduled_for && (
                         <div className="flex items-center gap-2 text-xs text-blue-600 mt-2">
                           <Calendar className="w-3 h-3" />
-                          <span>Schemalagt: {strategy.scheduled_for.toLocaleDateString('sv-SE')}</span>
+                          <span>Schemalagt: {new Date(strategy.scheduled_for).toLocaleDateString('sv-SE')}</span>
                         </div>
                       )}
                     </div>
