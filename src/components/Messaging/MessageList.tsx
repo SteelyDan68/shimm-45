@@ -5,7 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
-import { ComposeMessage } from './ComposeMessage';
+// Removed ComposeMessage import - functionality moved to StableMessagingHub
 
 export const MessageList = () => {
   const { currentMessages } = useMessagingV2();
@@ -18,14 +18,7 @@ export const MessageList = () => {
 
   const recentMessages = currentMessages?.slice(0, 10) || [];
 
-  if (showCompose) {
-    return (
-      <ComposeMessage 
-        onClose={() => setShowCompose(false)}
-        onSent={() => setShowCompose(false)}
-      />
-    );
-  }
+  // Simplified - compose functionality moved to main hub
 
   return (
     <div className="max-h-96">
