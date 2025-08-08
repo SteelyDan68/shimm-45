@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 export interface AIProcessingSession {
   id: string;
   user_id: string;
-  process_type: 'assessment_analysis' | 'actionable_generation' | 'calendar_optimization';
+  process_type: string;
   pillar_type?: string;
   status: 'started' | 'processing' | 'completed' | 'failed';
   progress_percentage: number;
@@ -21,7 +21,7 @@ export interface PipelineProgress {
   id: string;
   user_id: string;
   pillar_type: string;
-  current_step: 'assessment' | 'ai_processing' | 'results_preview' | 'actionables_generation' | 'calendar_integration' | 'completed';
+  current_step: string;
   step_progress_percentage: number;
   total_progress_percentage: number;
   step_data: Record<string, any>;
@@ -39,7 +39,7 @@ export const useAIProcessingTracking = () => {
 
   // Start new AI processing session
   const startProcessingSession = async (
-    processType: AIProcessingSession['process_type'],
+    processType: string,
     pillarType?: string,
     inputData?: Record<string, any>
   ): Promise<string | null> => {
@@ -160,7 +160,7 @@ export const useAIProcessingTracking = () => {
   // Update pipeline progress
   const updatePipelineProgress = async (
     pillarType: string,
-    step: PipelineProgress['current_step'],
+    step: string,
     stepProgress: number,
     stepData?: Record<string, any>
   ) => {
@@ -196,7 +196,7 @@ export const useAIProcessingTracking = () => {
   };
 
   // Calculate total progress based on current step
-  const calculateTotalProgress = (step: PipelineProgress['current_step'], stepProgress: number): number => {
+  const calculateTotalProgress = (step: string, stepProgress: number): number => {
     const stepWeights = {
       assessment: 20,
       ai_processing: 30,
