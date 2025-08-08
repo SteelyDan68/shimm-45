@@ -115,6 +115,33 @@ const DashboardContent: React.FC<{
   };
 
   if (!state.config) {
+    if (state.error) {
+      return (
+        <Card className="p-8 text-center">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Dashboard-fel</h3>
+          <p className="text-muted-foreground mb-4">
+            {state.error}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Försök uppdatera sidan eller kontakta support om problemet kvarstår.
+          </p>
+        </Card>
+      );
+    }
+    
+    if (state.isLoading) {
+      return (
+        <Card className="p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium mb-2">Laddar dashboard...</h3>
+          <p className="text-muted-foreground">
+            Konfigurerar din personliga dashboard.
+          </p>
+        </Card>
+      );
+    }
+    
     return (
       <Card className="p-8 text-center">
         <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
@@ -180,7 +207,13 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
   // Load assessment rounds directly  
   useEffect(() => {
     const loadAssessmentRounds = async () => {
-      if (!effectiveUserId) return;
+      if (!effectiveUserId) {
+        console.log('DashboardOrchestrator: No user ID available');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('DashboardOrchestrator: Loading assessment rounds for user:', effectiveUserId);
       
       try {
         const { data, error } = await supabase
@@ -188,10 +221,17 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
           .select('*')
           .eq('user_id', effectiveUserId);
           
-        if (error) throw error;
+        if (error) {
+          console.error('DashboardOrchestrator: Error loading assessment rounds:', error);
+          throw error;
+        }
+        
+        console.log('DashboardOrchestrator: Loaded assessment rounds:', data);
         setAssessmentRounds(data || []);
       } catch (error) {
-        console.error('Error loading assessment rounds:', error);
+        console.error('DashboardOrchestrator: Error loading assessment rounds:', error);
+        // Continue without assessment data
+        setAssessmentRounds([]);
       } finally {
         setLoading(false);
       }
@@ -265,10 +305,16 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
     };
   }, [effectiveUserId, user, assessmentRounds, tasks, clients, coachStats]);
 
+  console.log('DashboardOrchestrator: Render state - loading:', loading, 'tasksLoading:', tasksLoading, 'effectiveUserId:', effectiveUserId);
+
   if (loading || tasksLoading) {
     return (
-      <div className="p-8 text-center">
-        Laddar dashboard-data...
+      <div className="p-8 text-center space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <p>Laddar dashboard-data...</p>
+        <p className="text-sm text-muted-foreground">
+          Status: Loading={loading ? 'true' : 'false'}, TasksLoading={tasksLoading ? 'true' : 'false'}
+        </p>
       </div>
     );
   }

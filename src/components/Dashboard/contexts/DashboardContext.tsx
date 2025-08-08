@@ -95,16 +95,24 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
 
   const loadDashboardConfig = async () => {
     try {
+      console.log('🔄 DashboardContext: Starting loadDashboardConfig');
       dispatch({ type: 'SET_LOADING', payload: true });
       
       const role = getUserRole();
+      console.log('🔄 DashboardContext: Determined role:', role);
+      
       if (!role) {
-        throw new Error('Ingen giltig användarroll hittades');
+        const error = 'Ingen giltig användarroll hittades';
+        console.error('❌ DashboardContext:', error);
+        throw new Error(error);
       }
 
       dispatch({ type: 'SET_ROLE', payload: role });
 
+      console.log('🔄 DashboardContext: Loading config for role:', role, 'userId:', userId || user?.id);
       const config = getDashboardConfig(role, userId || user?.id);
+      console.log('✅ DashboardContext: Config loaded:', config);
+      
       dispatch({ type: 'SET_CONFIG', payload: config });
 
       // Load user customizations från localStorage eller database
@@ -118,6 +126,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
         }
       }
 
+      console.log('✅ DashboardContext: Configuration completed successfully');
     } catch (error) {
       console.error('Dashboard config loading error:', error);
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Okänt fel' });
