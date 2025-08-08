@@ -4,6 +4,7 @@
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { DashboardProvider, useDashboard } from './contexts/DashboardContext';
 import { BaseDashboardLayout } from './layouts/BaseDashboardLayout';
 import { DashboardGrid } from './components/DashboardGrid';
@@ -168,6 +169,8 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
   layout = 'full'
 }) => {
   const { user } = useAuth();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const effectiveUserId = userId || user?.id;
 
   // 📊 DATA HOOKS - Use assessment_rounds as single source of truth
@@ -196,6 +199,17 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
     
     loadAssessmentRounds();
   }, [effectiveUserId]);
+
+  // Handle navigation state for pillar activation
+  useEffect(() => {
+    const state = (location as any).state as { activatePillar?: string } | null;
+    if (state?.activatePillar) {
+      console.log('Activating pillar from navigation state:', state.activatePillar);
+      // Navigate to the specific pillar assessment
+      const pillarKey = state.activatePillar;
+      window.location.href = `/six-pillars/${pillarKey}`;
+    }
+  }, [(location as any).state]);
 
   const { 
     tasks, 
