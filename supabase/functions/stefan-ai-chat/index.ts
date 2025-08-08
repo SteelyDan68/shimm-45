@@ -209,6 +209,59 @@ function extractTags(message: string): string[] {
   return tags;
 }
 
+// ---------- Robust JSON helpers ----------
+function stripCodeFences(input: string): string {
+  return input
+    .trim()
+    .replace(/^```(?:json|JSON)?\s*/m, '')
+    .replace(/```\s*$/m, '')
+    .trim();
+}
+
+function extractFirstJsonObject(text: string): string | null {
+  const s = stripCodeFences(text);
+  let start = s.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = start; i < s.length; i++) {
+    const ch = s[i];
+    if (inStr) {
+      if (esc) {
+        esc = false;
+      } else if (ch === '\\') {
+        esc = true;
+      } else if (ch === '"') {
+        inStr = false;
+      }
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        return s.slice(start, i + 1);
+      }
+    }
+  }
+  return null;
+}
+
+function safeJsonParse<T = any>(text: string): T | null {
+  const stripped = stripCodeFences(text);
+  try {
+    return JSON.parse(stripped) as T;
+  } catch (_) {
+    const extracted = extractFirstJsonObject(text);
+    if (extracted) {
+      try { return JSON.parse(extracted) as T; } catch (_) { /* noop */ }
+    }
+    return null;
+  }
+}
+
 // New handlers for additional AI actions
 interface CoachingAnalysisRequest { action: 'coaching_analysis'; data: { sessionType: string; userContext: any; assessmentData?: any; }; context: { userId: string; language: string; priority: string; }; }
 
@@ -234,10 +287,7 @@ async function handleCoachingAnalysis(request: CoachingAnalysisRequest): Promise
   }
   const ai = await response.json();
   let content = ai.choices?.[0]?.message?.content ?? '';
-  // Strip code fences if present
-  content = content.replace(/^```json\n?|```$/g, '');
-  let parsed: any;
-  try { parsed = JSON.parse(content); } catch { parsed = { analysis: { analysis: content, recommendations: [], nextSteps: '' } }; }
+  const parsed = safeJsonParse<any>(content) ?? { analysis: { analysis: (stripCodeFences(content)), recommendations: [], nextSteps: '' } };
 
   // Log usage
   await supabase.from('ai_usage_logs').insert({ user_id: userId, interaction_type: 'coaching_analysis', model_used: 'gpt-4o-mini', response_time_ms: Date.now() - start, context_used: { sessionType, hasAssessmentData: !!assessmentData } });
@@ -260,12 +310,40 @@ async function handleAssessmentAnalysis(request: AssessmentAnalysisRequest): Pro
   if (!response.ok) { const errorData = await response.text(); throw new Error(`OpenAI API error: ${response.status} ${errorData}`); }
   const ai = await response.json();
   let content = ai.choices?.[0]?.message?.content ?? '';
-  content = content.replace(/^```json\n?|```$/g, '');
-  let parsed: any; try { parsed = JSON.parse(content); } catch { parsed = { analysis: content, scores, pillar_key: pillarKey || null }; }
+  const parsed = safeJsonParse<any>(content) ?? { analysis: stripCodeFences(content), scores, pillar_key: pillarKey || null };
 
   await supabase.from('ai_usage_logs').insert({ user_id: userId, interaction_type: 'assessment_analysis', model_used: 'gpt-4o-mini', response_time_ms: Date.now() - start, context_used: { assessmentType, pillarKey } });
 
   return { success: true, data: { analysis: parsed.analysis, scores: parsed.scores ?? scores, pillar_key: parsed.pillar_key ?? pillarKey, ai_model: 'gpt-4o-mini', timestamp: new Date().toISOString() }, aiModel: 'gpt-4o-mini', processingTime: Date.now() - start, tokens: ai.usage?.total_tokens || 0 };
+}
+
+// Lightweight health endpoint
+async function handleHealth() {
+  const start = Date.now();
+  let openaiReachable = false;
+  if (openAIApiKey) {
+    try {
+      const r = await fetch('https://api.openai.com/v1/models', {
+        headers: { 'Authorization': `Bearer ${openAIApiKey}` }
+      });
+      openaiReachable = r.ok;
+    } catch (_) {
+      openaiReachable = false;
+    }
+  }
+  return {
+    success: true,
+    data: {
+      openai_key: !!openAIApiKey,
+      supabase_url_configured: !!supabaseUrl,
+      supabase_key_configured: !!supabaseKey,
+      openai_reachable: openaiReachable,
+      timestamp: new Date().toISOString(),
+    },
+    aiModel: 'none',
+    processingTime: Date.now() - start,
+    tokens: 0
+  };
 }
 
 serve(async (req) => {
@@ -274,18 +352,20 @@ serve(async (req) => {
   }
 
   try {
-    if (!openAIApiKey) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'OpenAI API key not configured'
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    const request = await req.json().catch(() => ({}));
+    const action = request?.action;
+
+    // Health should always work, independent of AI keys
+    if (action === 'health') {
+      const result = await handleHealth();
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const request: StefanChatRequest = await req.json();
-    console.log('Stefan Chat request received for user:', request.context.userId);
+    if (!openAIApiKey) {
+      return new Response(JSON.stringify({ success: false, error: 'OpenAI API key not configured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    console.log('Stefan Chat request received for user:', request?.context?.userId);
 
     let result: any;
     switch (request.action) {
@@ -297,6 +377,9 @@ serve(async (req) => {
         break;
       case 'assessment_analysis':
         result = await handleAssessmentAnalysis(request as any);
+        break;
+      case 'health':
+        result = await handleHealth();
         break;
       default:
         return new Response(JSON.stringify({ success: false, error: 'Invalid action' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -311,7 +394,7 @@ serve(async (req) => {
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Internal server error',
+      error: (error as any).message || 'Internal server error',
       aiModel: 'none',
       processingTime: 0
     }), {
