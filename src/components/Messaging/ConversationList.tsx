@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, Plus } from 'lucide-react';
-import { useMessages, type Message } from '@/hooks/useMessages';
+import { useMessagingV2, type MessageV2 } from '@/hooks/useMessagingV2';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useUserRelationships } from '@/hooks/useUserRelationships';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,7 +17,7 @@ interface Conversation {
   participantId: string;
   participantName: string;
   participantAvatar?: string;
-  lastMessage: Message;
+  lastMessage: MessageV2;
   unreadCount: number;
   isOnline: boolean;
 }

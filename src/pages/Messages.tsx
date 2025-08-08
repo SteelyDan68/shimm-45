@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { EnhancedMessagingHub } from '@/components/Messaging/EnhancedMessagingHub';
+import { StableMessagingHub } from '@/components/Messaging/StableMessagingHub';
 
 export function Messages() {
   const { user } = useAuth();
@@ -49,7 +49,7 @@ export function Messages() {
     <div className="container mx-auto p-6 max-w-7xl">
 
       <main className="h-[calc(100vh-200px)] min-h-[600px]">
-        <EnhancedMessagingHub />
+        <StableMessagingHub />
       </main>
     </div>
   );

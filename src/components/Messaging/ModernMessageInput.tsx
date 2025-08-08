@@ -15,7 +15,7 @@ interface ModernMessageInputProps {
   onTyping?: (isTyping: boolean) => void;
 }
 
-export const ModernMessageInput: React.FC<ModernMessageInputProps> = ({
+export const ModernMessageInput = React.forwardRef<HTMLTextAreaElement, ModernMessageInputProps>(({
   value,
   onChange,
   onSend,
@@ -23,7 +23,7 @@ export const ModernMessageInput: React.FC<ModernMessageInputProps> = ({
   placeholder = "Skriv ett meddelande...",
   className,
   onTyping
-}) => {
+}, ref) => {
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -91,7 +91,7 @@ export const ModernMessageInput: React.FC<ModernMessageInputProps> = ({
 
         {/* Text input */}
         <Textarea
-          ref={textareaRef}
+          ref={ref || textareaRef}
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -146,4 +146,6 @@ export const ModernMessageInput: React.FC<ModernMessageInputProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ModernMessageInput.displayName = 'ModernMessageInput';

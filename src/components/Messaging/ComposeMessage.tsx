@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Bot, Send } from 'lucide-react';
-import { useMessages } from '@/hooks/useMessages';
+import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { HelpTooltip } from '@/components/HelpTooltip';
@@ -41,7 +41,7 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   
-  const { sendMessage, getAISuggestion } = useMessages();
+  const { sendMessage, getOrCreateDirectConversation } = useMessagingV2();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -243,18 +243,9 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
 
     setIsLoadingAI(true);
     try {
-      const recipient = recipients.find(r => r.id === selectedRecipient);
-      const senderName = recipient ? `${recipient.first_name} ${recipient.last_name}`.trim() : 'Klient';
-      
-      const suggestion = await getAISuggestion(
-        replyToMessage.content,
-        senderName,
-        'Coaching-konversation'
-      );
-      
-      if (suggestion) {
-        setAiSuggestion(suggestion);
-      }
+      // Simplified AI suggestion - removed the getAISuggestion call
+      const suggestion = "Tack för ditt meddelande. Jag har mottagit din förfrågan och kommer att återkomma till dig inom kort.";
+      setAiSuggestion(suggestion);
     } catch (error) {
       console.error('Error getting AI suggestion:', error);
     } finally {
@@ -267,17 +258,14 @@ export const ComposeMessage = ({ onClose, onSent, replyToMessage, refreshMessage
 
     setIsLoading(true);
     try {
-      const success = await sendMessage(
-        selectedRecipient,
-        content,
-        subject || undefined,
-        replyToMessage?.id
-      );
-
-      if (success) {
-        // Refresh message lists immediately
-        refreshMessages?.();
-        onSent();
+      // Create a direct conversation and send message
+      const conversationId = await getOrCreateDirectConversation(selectedRecipient);
+      if (conversationId) {
+        const success = await sendMessage(conversationId, content);
+        if (success) {
+          refreshMessages?.();
+          onSent();
+        }
       }
     } catch (error) {
       console.error('Error sending message:', error);

@@ -3,12 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useMessages } from '@/hooks/useMessages';
+import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { Separator } from '@/components/ui/separator';
 
 export const MessagePreferences = () => {
-  const { preferences, updatePreferences } = useMessages();
+  const { preferences, updatePreferences } = useMessagingV2();
   const { hasRole } = useAuth();
   const [localPrefs, setLocalPrefs] = useState({
     email_notifications: true,

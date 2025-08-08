@@ -3,26 +3,26 @@ import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useMessages } from '@/hooks/useMessages';
+import { useMessagingV2 } from '@/hooks/useMessagingV2';
 import { MessageList } from './MessageList';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 export const MessageIcon = () => {
-  const { unreadCount } = useMessages();
+  const { totalUnreadCount } = useMessagingV2();
   const { navigate } = useUnifiedNavigation();
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <ActionTooltip content={`Meddelanden ${unreadCount > 0 ? `(${unreadCount} olästa)` : ''}`}>
+        <ActionTooltip content={`Meddelanden ${totalUnreadCount > 0 ? `(${totalUnreadCount} olästa)` : ''}`}>
           <Button variant="ghost" size="icon" className="relative">
             <MessageCircle className="h-5 w-5" />
-            {unreadCount > 0 && (
+            {totalUnreadCount > 0 && (
               <Badge 
                 variant="destructive" 
                 className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse"
               >
-                {unreadCount > 99 ? '99+' : unreadCount}
+                {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
               </Badge>
             )}
           </Button>
@@ -34,9 +34,9 @@ export const MessageIcon = () => {
             <MessageCircle className="h-4 w-4 text-blue-600" />
             Meddelanden
           </h3>
-          {unreadCount > 0 && (
+          {totalUnreadCount > 0 && (
             <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-              {unreadCount} olästa
+              {totalUnreadCount} olästa
             </Badge>
           )}
         </div>

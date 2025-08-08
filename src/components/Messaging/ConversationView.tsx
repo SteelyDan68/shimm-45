@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, MoreVertical, Phone, Video } from 'lucide-react';
-import { useMessages, type Message } from '@/hooks/useMessages';
+import { useMessagingV2, type MessageV2 } from '@/hooks/useMessagingV2';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { formatDistanceToNow, format, isSameDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -35,7 +35,7 @@ export const ConversationView = ({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { user } = useAuth();
-  const { messages, sendMessage, markAsRead } = useMessages();
+  const { currentMessages, sendMessage } = useMessagingV2();
 
   // Filter messages for this conversation with better error handling
   useEffect(() => {
