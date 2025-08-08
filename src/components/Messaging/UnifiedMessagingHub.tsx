@@ -81,12 +81,12 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // 🎯 SELF-INSTRUCTING UX: Guide user through messaging journey
+  // 🎯 SELF-INSTRUCTING UX: Guide user through messaging journey  
   const getInstructionalMessage = () => {
     if (conversations.length === 0) {
       return {
         title: "Välkommen till ditt meddelandecenter! 🎉",
-        description: "Här kan du chatta med coaches och Stefan AI. Börja genom att klicka på + ovan.",
+        description: "Här kan du chatta med coaches. Börja genom att klicka på + ovan.",
         action: "Starta din första konversation",
         progress: 10
       };
@@ -101,20 +101,11 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
       };
     }
 
-    if (messages[activeConversation]?.length === 0) {
-      return {
-        title: "Dags att säga hej! 👋",
-        description: "Skriv ditt första meddelande nedan och tryck Enter för att skicka.",
-        action: "Skriv ditt meddelande",
-        progress: 60
-      };
-    }
-
     return {
-      title: "Du behärskar meddelanden! ⭐",
-      description: "Fortsätt konversationen eller utforska AI-hjälp till höger.",
-      action: "Fortsätt chatta",
-      progress: 100
+      title: "Dags att chatta! 💬", 
+      description: "Skriv ditt meddelande i fältet nedan.",
+      action: "Skriv ditt meddelande",
+      progress: 60
     };
   };
 
@@ -141,18 +132,11 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
     }
   }, [messageInput, activeConversation, isTyping, updateTypingStatus]);
 
-  // 🎯 PROGRESS TRACKING & NEUROPLASTIC FEEDBACK
+  // 🎯 PROGRESS TRACKING (DISABLED - CAUSING LOOPS)
   useEffect(() => {
     setProgressStep(instruction.progress);
-    
-    if (instruction.progress === 100 && !celebrationMoment && messages && Object.keys(messages).length > 0) {
-      setCelebrationMoment(true);
-      toast.success("Fantastiskt! Du behärskar meddelandesystemet! 🎉", {
-        description: "Du har lärt dig att navigera, chatta och använda AI-hjälp."
-      });
-      setTimeout(() => setCelebrationMoment(false), 5000);
-    }
-  }, [instruction.progress, celebrationMoment, messages]);
+    // Celebration temporarily disabled due to loop bug
+  }, [instruction.progress]);
 
   // 💬 ENHANCED MESSAGE SENDING WITH FEEDBACK
   const handleSendMessage = async () => {
@@ -453,8 +437,8 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
             </div>
           </div>
 
-          {/* 📨 MESSAGES AREA */}
-          <ScrollArea className="flex-1 p-4">
+          {/* 📨 MESSAGES AREA - FIXED SCROLL */}
+          <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-4">
               {currentMessages.length === 0 ? (
                 <div className="text-center py-8 space-y-3">
@@ -510,7 +494,7 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
               )}
               <div ref={messagesEndRef} />
             </div>
-          </ScrollArea>
+            </div>
 
           {/* ⌨️ MESSAGE INPUT */}
           <div className="p-4 border-t bg-background/50">
