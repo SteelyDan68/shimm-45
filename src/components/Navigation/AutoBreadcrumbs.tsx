@@ -11,7 +11,7 @@ export function AutoBreadcrumbs() {
   return (
     <nav aria-label="Breadcrumb" className="flex items-center space-x-1 text-sm text-muted-foreground mb-6">
       {breadcrumbs.map((breadcrumb, index) => (
-        <div key={breadcrumb.path} className="flex items-center">
+        <div key={`${breadcrumb.path}-${index}`} className="flex items-center">
           {index > 0 && <ChevronRight className="h-4 w-4 mx-1" />}
           
           {breadcrumb.isLast ? (
