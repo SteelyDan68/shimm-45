@@ -10,6 +10,7 @@ import { Sparkles, ArrowRight, Trophy, Target } from 'lucide-react';
 import { WidgetProps } from '../types/dashboard-types';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { DevelopmentOverviewContent } from './DevelopmentOverviewContent';
 
 const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   const { user, profile } = useAuth();
@@ -85,7 +86,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
         </div>
       )}
 
-      {/* Quick Actions - Removed for all users */}
+      {/* Quick Actions */}
       <div className="flex gap-2 justify-center">
         <Button 
           size="sm"
@@ -95,6 +96,11 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
           <Target className="w-4 h-4" />
           Visa pillars
         </Button>
+      </div>
+
+      {/* Development Overview Content - Flytta hit från utvecklingsöversikt */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <DevelopmentOverviewContent />
       </div>
     </div>
   );

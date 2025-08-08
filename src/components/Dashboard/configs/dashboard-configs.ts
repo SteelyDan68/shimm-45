@@ -65,50 +65,7 @@ const CLIENT_CONFIG: DashboardConfig = {
         showNextSteps: true
       }
     },
-    {
-      id: 'client-analytics',
-      type: 'client-analytics',
-      title: 'Min Utvecklingsanalys',
-      description: 'Snabbstatistik och länkar till fullständig analys',
-      icon: BarChart3,
-      span: 4,
-      minHeight: 300,
-      order: 3,
-      permissions: ['read-own-data'],
-      isVisible: true,
-      isConfigurable: false
-    },
-    {
-      id: 'quick-stats',
-      type: 'stats',
-      title: 'Snabbstatistik', 
-      description: 'Översikt av dina framsteg',
-      icon: BarChart3,
-      span: 4,
-      minHeight: 300,
-      order: 4,
-      permissions: ['read-own-data'],
-      isVisible: true,
-      isConfigurable: false
-    },
-    {
-      id: 'active-tasks',
-      type: 'tasks',
-      title: 'Pågående Uppgifter',
-      description: 'Dina aktiva utvecklingsuppgifter',
-      icon: CheckSquare,
-      span: 6,
-      minHeight: 250,
-      order: 4,
-      permissions: ['read-own-data', 'manage-own-tasks'],
-      isVisible: true,
-      isConfigurable: true,
-      config: {
-        maxItems: 5,
-        showPriority: true,
-        showDueDate: true
-      }
-    },
+    // Ta bort widgets: Min utvecklingsanalys, Snabbstatistik, Pågående Uppgifter
     {
       id: 'upcoming-calendar',
       type: 'calendar',

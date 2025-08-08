@@ -111,12 +111,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         icon: TrendingUp,
         roles: ["client"]
       },
-      {
-        title: "Min Utvecklingsöversikt",
-        url: "/development-overview",
-        icon: BarChart3,
-        roles: ["client"]
-      },
+      // Ta bort "Min Utvecklingsöversikt" från navigation
       {
         title: "Min Utvecklingsanalys", 
         url: "/user-analytics", 
@@ -320,13 +315,7 @@ export const QUICK_ACTIONS = {
       url: NAVIGATION_ROUTES.TASKS,
       variant: "outline" as const
     },
-    {
-      title: "Min Utvecklingsöversikt",
-      description: "Se din personliga utvecklingsresa",
-      icon: TrendingUp,
-      url: "/development-overview",
-      variant: "outline" as const
-    }
+    // Ta bort "Min Utvecklingsöversikt" från quickActions
   ]
 };
 
