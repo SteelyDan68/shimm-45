@@ -73,7 +73,7 @@ const TasksOptimized = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ClientTaskList />
+                <ClientTaskList clientId={user.id} />
                 <div className="mt-4 pt-4 border-t">
                   <Button 
                     variant="outline" 
@@ -116,7 +116,7 @@ const TasksOptimized = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ClientTaskList />
+              <ClientTaskList clientId={user.id} />
             </CardContent>
           </Card>
         </TabsContent>

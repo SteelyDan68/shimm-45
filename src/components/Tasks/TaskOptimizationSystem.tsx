@@ -273,7 +273,7 @@ export const TaskOptimizationSystem: React.FC<TaskOptimizationProps> = ({
           .from('calendar_actionables')
           .update({ 
             completion_status: 'deferred',
-            notes: `Automatiskt uppskjuten för bättre fokus - ${new Date().toLocaleDateString('sv-SE')}`
+            user_notes: `Automatiskt uppskjuten för bättre fokus - ${new Date().toLocaleDateString('sv-SE')}`
           })
           .eq('id', task.id);
       }
@@ -296,7 +296,7 @@ export const TaskOptimizationSystem: React.FC<TaskOptimizationProps> = ({
           .from('calendar_actionables')
           .update({ 
             priority: 'low',
-            notes: `Prioritet sänkt för bättre balans - ${new Date().toLocaleDateString('sv-SE')}`
+            user_notes: `Prioritet sänkt för bättre balans - ${new Date().toLocaleDateString('sv-SE')}`
           })
           .eq('id', task.id);
       }
@@ -312,7 +312,7 @@ export const TaskOptimizationSystem: React.FC<TaskOptimizationProps> = ({
       .from('calendar_actionables')
       .update({ 
         completion_status: 'under_review',
-        notes: `Automatisk granskning av gammal uppgift - ${new Date().toLocaleDateString('sv-SE')}`
+        user_notes: `Automatisk granskning av gammal uppgift - ${new Date().toLocaleDateString('sv-SE')}`
       })
       .eq('user_id', userId)
       .lt('created_at', oneWeekAgo.toISOString())
@@ -342,7 +342,7 @@ export const TaskOptimizationSystem: React.FC<TaskOptimizationProps> = ({
         await supabase
           .from('calendar_actionables')
           .update({ 
-            notes: `Markerad som utmanande för neuroplastisk balans - ${new Date().toLocaleDateString('sv-SE')}`
+            user_notes: `Markerad som utmanande för neuroplastisk balans - ${new Date().toLocaleDateString('sv-SE')}`
           })
           .eq('id', task.id);
       }
