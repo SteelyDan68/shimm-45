@@ -89,8 +89,14 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
 
           if (!error && data?.message) {
             // Send AI response immediately 
-            await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
-            toast.success("Stefan AI har svarat!");
+            const success = await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
+            if (success) {
+              toast.success("Stefan AI har svarat!");
+              // Force scroll to bottom to show new message
+              setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }
           } else {
             console.error('Stefan AI error:', error);
             await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);

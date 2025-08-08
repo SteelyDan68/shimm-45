@@ -184,9 +184,9 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     roles: ["client"],
     items: [
       {
-        title: "Min Intelligence",
-        url: "/client-intelligence",
-        icon: Brain,
+        title: "Min Utvecklingsöversikt",
+        url: "/development-overview",
+        icon: TrendingUp,
         roles: ["client"]
       }
     ]
@@ -321,10 +321,10 @@ export const QUICK_ACTIONS = {
       variant: "outline" as const
     },
     {
-      title: "Min Intelligence",
-      description: "Se din digitala analys",
-      icon: Brain,
-      url: "/client-intelligence",
+      title: "Min Utvecklingsöversikt",
+      description: "Se din personliga utvecklingsresa",
+      icon: TrendingUp,
+      url: "/development-overview",
       variant: "outline" as const
     }
   ]

@@ -49,7 +49,7 @@ import { InvitationSignup } from "./pages/InvitationSignup";
 import { Intelligence } from "./pages/Intelligence";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
 import { IntelligenceHubPage } from "./pages/IntelligenceHub";
-import { ClientIntelligencePage } from "./pages/ClientIntelligence";
+import { DevelopmentOverview } from "./pages/DevelopmentOverview";
 import { TasksPage } from "./pages/Tasks";
 import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChatPage";
@@ -136,7 +136,7 @@ const AppRoutes = () => {
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
                 <Route path="/intelligence/:userId" element={<Intelligence />} />
-                <Route path="/client-intelligence" element={<ClientIntelligencePage />} />
+                <Route path="/development-overview" element={<DevelopmentOverview />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
                 
               <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
