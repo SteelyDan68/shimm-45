@@ -54,34 +54,38 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
 
     // Check if this is Stefan AI conversation
     const conversation = conversations.find(c => c.id === activeConversation);
-    const isStefanConversation = conversation?.title?.toLowerCase().includes('stefan') || 
-                                conversation?.participants?.some(p => p.email?.includes('stefan'));
+    const isStefanConversation = conversation?.metadata?.stefan_ai === 'true' || 
+                                conversation?.title?.toLowerCase().includes('stefan');
 
     if (isStefanConversation) {
-      // Send message to Stefan AI and get response
+      // Send user message first
+      await sendMessage(activeConversation, messageInput.trim());
+      
+      // Send message to Stefan Enhanced Chat and get response
       try {
-        const { data, error } = await supabase.functions.invoke('ai-message-assistant', {
+        const { data, error } = await supabase.functions.invoke('stefan-enhanced-chat', {
           body: {
-            messageContent: messageInput.trim(),
-            senderName: user?.email || 'User',
-            context: 'Stefan AI Chat - Direct conversation with digital twin'
+            message: messageInput.trim(),
+            user_id: user?.id,
+            interactionType: 'chat',
+            includeAssessmentContext: true,
+            generateRecommendations: false,
+            forceModel: 'auto'
           }
         });
 
-        if (!error && data?.aiSuggestion) {
-          // Send user message first
-          await sendMessage(activeConversation, messageInput.trim());
-          
-          // Then send AI response
+        if (!error && data?.message) {
+          // Send AI response after a short delay
           setTimeout(async () => {
-            await sendMessage(activeConversation, `🤖 Stefan: ${data.aiSuggestion}`);
-          }, 1000);
-        } else {
-          await sendMessage(activeConversation, messageInput.trim());
+            await sendMessage(activeConversation, `🤖 Stefan: ${data.message}`);
+          }, 1500);
         }
       } catch (error) {
         console.error('Stefan AI error:', error);
-        await sendMessage(activeConversation, messageInput.trim());
+        // Send fallback response
+        setTimeout(async () => {
+          await sendMessage(activeConversation, `🤖 Stefan: Jag har tekniska utmaningar just nu, men är här för dig. Kan du formulera om din fråga så försöker jag igen?`);
+        }, 1500);
       }
     } else {
       // Regular message
