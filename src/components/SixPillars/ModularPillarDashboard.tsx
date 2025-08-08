@@ -280,29 +280,7 @@ export const ModularPillarDashboard = ({
           })}
         </div>
         </div>
-      ) : (
-        <Card>
-          <CardContent className="text-center py-10">
-            <h2 className="text-xl font-semibold mb-2">
-              {isCoachView ? "Inga pelare aktiverade" : "Inga pelare tilldelade"}
-            </h2>
-            <p className="text-muted-foreground">
-              {isCoachView 
-                ? "Aktivera pelare för klienten genom att klicka på 'Hantera pelare'" 
-                : "Din coach har inte aktiverat några utvecklingspelare än."
-              }
-            </p>
-            {isCoachView && (
-              <Button 
-                onClick={() => setShowManager(true)}
-                className="mt-4"
-              >
-                Aktivera pelare
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      ) : null}
 
       {/* Timeline Integration */}
       {!isCoachView && activatedPillars.length > 0 && (

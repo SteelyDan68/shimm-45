@@ -106,6 +106,18 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
       },
       // CLIENT NAVIGATION
       {
+        title: "Six Pillars", 
+        url: NAVIGATION_ROUTES.SIX_PILLARS, 
+        icon: TrendingUp,
+        roles: ["client"]
+      },
+      {
+        title: "Min Utvecklingsöversikt",
+        url: "/development-overview",
+        icon: BarChart3,
+        roles: ["client"]
+      },
+      {
         title: "Min Utvecklingsanalys", 
         url: "/user-analytics", 
         icon: BarChart3,
@@ -176,18 +188,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         url: NAVIGATION_ROUTES.MOBILE,
         icon: Smartphone,
         roles: ["superadmin", "admin"]
-      }
-    ]
-  },
-  {
-    title: "AI & Verktyg",
-    roles: ["client"],
-    items: [
-      {
-        title: "Min Utvecklingsöversikt",
-        url: "/development-overview",
-        icon: TrendingUp,
-        roles: ["client"]
       }
     ]
   },
