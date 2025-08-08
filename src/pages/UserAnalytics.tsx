@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DetailedAnalysisView } from '@/components/UserAnalytics/DetailedAnalysisView';
+import { PersonalDevelopmentPlanViewer } from '@/components/UserAnalytics/PersonalDevelopmentPlanViewer';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { 
   Brain, 
@@ -393,6 +394,11 @@ export default function UserAnalytics() {
 
         {/* 🧠 PILLAR ANALYSES TAB */}
         <TabsContent value="analyses" className="space-y-6">
+          {/* Personlig Utvecklingsplan Section */}
+          <PersonalDevelopmentPlanViewer 
+            userId={targetUserId!}
+            assessmentData={assessmentData}
+          />
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
