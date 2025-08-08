@@ -34,7 +34,7 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
       {(!isOwn || isStefanAI) && (
         <div className={cn(
           "text-xs font-medium px-2",
-          isOwn ? "text-primary/70" : isStefanAI ? "text-ai-primary" : "text-muted-foreground"
+          isOwn ? "text-primary/70" : isStefanAI ? "text-green-600 font-semibold" : "text-muted-foreground"
         )}>
           {isStefanAI ? "🤖 Stefan AI" : isOwn ? "Du" : message.sender_profile?.first_name || "Okänd"}
         </div>
@@ -49,8 +49,8 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
         {showAvatar && !isOwn && (
         <Avatar className="h-8 w-8 mb-1 shrink-0">
           {isStefanAI ? (
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-ai-primary to-ai-secondary flex items-center justify-center">
-              <span className="text-xs font-bold text-ai-primary-foreground">🤖</span>
+            <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center">
+              <span className="text-xs font-bold text-white">🤖</span>
             </div>
           ) : (
             <>
@@ -71,8 +71,8 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
           // Own messages (right side) - Primary color for client
           "bg-primary text-primary-foreground rounded-br-md"
         ) : isStefanAI ? (
-          // Stefan AI messages - AI semantic colors
-          "bg-ai-primary text-ai-primary-foreground rounded-bl-md"
+          // Stefan AI messages - FORCED GREEN COLORS
+          "bg-green-600 text-white rounded-bl-md"
         ) : (
           // Other users' messages (left side) - Muted colors
           "bg-muted/80 text-foreground rounded-bl-md border border-border/50"
@@ -87,7 +87,7 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
         {showTimestamp && (
           <div className={cn(
             "flex items-center justify-end mt-1 gap-1",
-            isOwn ? "text-primary-foreground/70" : isStefanAI ? "text-ai-primary-foreground/70" : "text-muted-foreground"
+            isOwn ? "text-primary-foreground/70" : isStefanAI ? "text-white/70" : "text-muted-foreground"
           )}>
             <span className="text-xs leading-none">
               {format(new Date(message.created_at), 'HH:mm', { locale: sv })}
@@ -112,7 +112,7 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
           isOwn ? (
             "right-0 bg-primary transform rotate-45 translate-x-1 translate-y-1"
           ) : isStefanAI ? (
-            "left-0 bg-ai-primary transform rotate-45 -translate-x-1 translate-y-1"
+            "left-0 bg-green-600 transform rotate-45 -translate-x-1 translate-y-1"
           ) : (
             "left-0 bg-muted/80 transform rotate-45 -translate-x-1 translate-y-1"
           )
