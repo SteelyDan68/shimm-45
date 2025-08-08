@@ -30,6 +30,12 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
+    
+    /* AI Assistant Colors */
+    --ai-primary: 142 76% 36%;        /* Green for Stefan AI */
+    --ai-primary-foreground: 210 40% 98%;
+    --ai-secondary: 142 64% 24%;      /* Darker green for hover */
+    --ai-muted: 142 40% 94%;          /* Light green for subtle elements */
 
     /* Mobile-First Spacing System */
     --space-mobile-xs: 0.25rem;   /* 4px */
@@ -108,6 +114,13 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    
+    /* AI Assistant Colors - Dark Mode */
+    --ai-primary: 142 69% 58%;        /* Lighter green for dark mode */
+    --ai-primary-foreground: 222.2 84% 4.9%;
+    --ai-secondary: 142 76% 36%;      /* Medium green for hover */
+    --ai-muted: 142 30% 15%;          /* Dark green for subtle elements */
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
