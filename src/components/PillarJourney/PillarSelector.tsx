@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { PILLAR_MODULES } from '@/config/pillarModules';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { 
   CheckCircle, 
   Clock, 
@@ -36,6 +37,7 @@ export const PillarSelector = ({
   onPillarSelect 
 }: PillarSelectorProps) => {
   const sixPillarsHook = useSixPillarsModular(userId);
+  const { navigate } = useUnifiedNavigation();
   const { 
     getActivatedPillars, 
     getLatestAssessment, 
@@ -126,8 +128,7 @@ export const PillarSelector = ({
     for (const pillarKey of selectedPillars) {
       const result = await onPillarSelect(pillarKey);
       if (result && 'shouldNavigate' in result && result.shouldNavigate) {
-        
-        window.location.href = result.url!;
+        navigate(result.url!);
         break; // Endast navigera till första pillar assessment
       }
     }
@@ -276,7 +277,7 @@ export const PillarSelector = ({
             </p>
             <Button 
               variant="outline" 
-              onClick={() => window.location.href = '/six-pillars'}
+              onClick={() => navigate('/six-pillars')}
             >
               Gå till Six Pillars Dashboard
             </Button>

@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useMessages } from '@/hooks/useMessages';
 import { MessageList } from './MessageList';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 export const MessageIcon = () => {
   const { unreadCount } = useMessages();
+  const { navigate } = useUnifiedNavigation();
 
   return (
     <Popover>
@@ -41,7 +43,7 @@ export const MessageIcon = () => {
             variant="outline" 
             size="sm" 
             className="w-full"
-            onClick={() => window.location.href = '/messages'}
+            onClick={() => navigate('/messages')}
           >
             Visa alla meddelanden
           </Button>

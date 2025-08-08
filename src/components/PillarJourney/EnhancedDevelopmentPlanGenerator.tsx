@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Target, CheckCircle, Clock, Zap, Trophy } from 'lucide-react';
 import { PillarKey } from '@/types/sixPillarsModular';
 import { IntensityLevel, DurationLevel } from './IntensityCalibrationDialog';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 interface DevelopmentActivity {
   id: string;
@@ -40,6 +41,7 @@ const EnhancedDevelopmentPlanGenerator: React.FC<EnhancedDevelopmentPlanGenerato
   onPlanGenerated
 }) => {
   const { toast } = useToast();
+  const { navigate } = useUnifiedNavigation();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<string>('');
   const [activities, setActivities] = useState<DevelopmentActivity[]>([]);
@@ -466,7 +468,7 @@ const EnhancedDevelopmentPlanGenerator: React.FC<EnhancedDevelopmentPlanGenerato
 
       <div className="text-center">
         <Button 
-          onClick={() => window.location.href = '/calendar'}
+          onClick={() => navigate('/calendar')}
           className="bg-blue-600 hover:bg-blue-700"
         >
           <Calendar className="w-4 h-4 mr-2" />

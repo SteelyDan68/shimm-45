@@ -7,6 +7,7 @@ import { PillarSelector } from './PillarSelector';
 import { useUserJourney } from '@/hooks/useUserJourney';
 import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
 import { Lightbulb, ChevronDown, ChevronUp, Users, BookOpen } from 'lucide-react';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 interface GuidedPillarDiscoveryProps {
   userId: string;
@@ -23,6 +24,7 @@ export const GuidedPillarDiscovery: React.FC<GuidedPillarDiscoveryProps> = ({
 }) => {
   const { hasCompletedWelcomeAssessment } = useUserJourney();
   const { getLatestWelcomeAssessment } = useWelcomeAssessment();
+  const { navigate } = useUnifiedNavigation();
   const [showAlternatives, setShowAlternatives] = useState(false);
   const [welcomeAssessment, setWelcomeAssessment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -80,7 +82,7 @@ export const GuidedPillarDiscovery: React.FC<GuidedPillarDiscoveryProps> = ({
           </Alert>
           <Button 
             className="w-full mt-4" 
-            onClick={() => window.location.href = '/client-dashboard'}
+            onClick={() => navigate('/client-dashboard')}
           >
             Gå till välkomstbedömning
           </Button>

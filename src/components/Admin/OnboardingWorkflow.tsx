@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { 
   Users, 
   UserPlus, 
@@ -44,6 +45,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
   const [currentStep, setCurrentStep] = useState<'create' | 'onboard' | 'assess' | 'habits' | 'complete'>('create');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { navigate } = useUnifiedNavigation();
 
   const loadClients = async () => {
     try {
@@ -228,7 +230,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
               <div className="text-center py-8">
                 <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground mb-4">Användarskapa är nu integrerat i Central Användarhantering</p>
-                <Button onClick={() => window.location.href = '/administration'}>
+                <Button onClick={() => navigate('/administration')}>
                   Gå till Central Användarhantering
                 </Button>
               </div>

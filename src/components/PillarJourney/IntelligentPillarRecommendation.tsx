@@ -55,13 +55,11 @@ export const IntelligentPillarRecommendation: React.FC<IntelligentPillarRecommen
     
     // Om onPillarSelect returnerar navigation-info, använd den
     if (result && 'shouldNavigate' in result && result.shouldNavigate) {
-      
-      window.location.href = result.url!;
+      navigate(result.url!);
     } else {
       // Fallback - navigera direkt till assessment
       const assessmentUrl = `/six-pillars?pillar=${pillarKey}&startAssessment=true`;
-      
-      window.location.href = assessmentUrl;
+      navigate(assessmentUrl);
     }
   };
 
