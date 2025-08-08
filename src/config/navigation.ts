@@ -165,9 +165,9 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin"]
       },
       {
-        title: "Användaradministration",
+        title: "Teknisk administration",
         url: NAVIGATION_ROUTES.ADMINISTRATION,
-        icon: Users2,
+        icon: Settings,
         roles: ["superadmin", "admin"]
       },
       {

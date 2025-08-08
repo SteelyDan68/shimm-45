@@ -186,9 +186,9 @@ export function Administration() {
               <div className="flex items-center gap-3">
                 <Shield className="h-8 w-8 text-primary" />
                  <div>
-                   <h1 className="text-2xl font-bold tracking-tight">Administration</h1>
+                   <h1 className="text-2xl font-bold tracking-tight">Teknisk administration</h1>
                    <p className="text-sm text-muted-foreground">
-                     Användarhantering och systemkonfiguration
+                     Systemkonfiguration och tekniska inställningar
                    </p>
                  </div>
               </div>
@@ -206,24 +206,10 @@ export function Administration() {
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-6 max-w-7xl">
-        <Tabs defaultValue="dashboard" className="space-y-8">
+        <Tabs defaultValue="stefan-overview" className="space-y-8">
           {/* Navigation Tabs */}
           <div className="bg-card rounded-lg border p-1 mb-8">
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 gap-1">
-              <TabsTrigger 
-                value="dashboard" 
-                className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
-              >
-                <Activity className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="users" 
-                className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
-              >
-                <Users className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Användare</span>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5 gap-1">
               <TabsTrigger 
                 value="stefan-overview" 
                 className="flex items-center gap-2 text-xs lg:text-sm px-2 lg:px-4 py-2"
@@ -262,51 +248,6 @@ export function Administration() {
             </TabsList>
           </div>
 
-          {/* Integrated Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-6 mt-12">
-            <IntegratedAdminDashboard onNavigateToTab={(tab) => {
-              // Navigera till angiven tab programmatiskt
-              const tabTrigger = document.querySelector(`[value="${tab}"]`) as HTMLElement;
-              tabTrigger?.click();
-            }} />
-          </TabsContent>
-
-          {/* User Management Tab */}
-          <TabsContent value="users" className="space-y-6 mt-12">
-            <div className="bg-card rounded-lg border">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <Users className="h-5 w-5 text-primary" />
-                      Användarhantering
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Hantera användare, skapa nya och tilldela roller
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <UserManagementTabs />
-              </div>
-            </div>
-              
-            <div className="bg-card rounded-lg border">
-              <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  Six Pillars Management
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Hantera och tilldela Six Pillars pelare till klienter
-                </p>
-              </div>
-              <div className="p-6">
-                <AdminPillarManagement />
-              </div>
-            </div>
-          </TabsContent>
 
           {/* Stefan AI Overview Tab */}
           <TabsContent value="stefan-overview" className="space-y-6 mt-12">
