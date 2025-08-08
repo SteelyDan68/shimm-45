@@ -4902,6 +4902,14 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      check_rate_limit: {
+        Args: {
+          identifier: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: Json
+      }
       check_security_violations: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -5171,6 +5179,10 @@ export type Database = {
         Args:
           | { _user_id: string; _action: string }
           | { action_type: string; admin_id: string }
+        Returns: Json
+      }
+      validate_and_sanitize_input: {
+        Args: { input_text: string; max_length?: number; allow_html?: boolean }
         Returns: Json
       }
       validate_edge_function_auth: {
