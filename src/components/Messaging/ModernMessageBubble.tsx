@@ -11,6 +11,7 @@ interface ModernMessageBubbleProps {
   showAvatar?: boolean;
   showTimestamp?: boolean;
   className?: string;
+  isStefanAI?: boolean;
 }
 
 export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
@@ -18,9 +19,9 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
   isOwn,
   showAvatar = true,
   showTimestamp = true,
-  className
+  className,
+  isStefanAI = false
 }) => {
-  const isStefanAI = message.content.startsWith('🤖 Stefan:') || message.sender_profile?.first_name?.toLowerCase().includes('stefan');
   const cleanContent = isStefanAI ? message.content.replace('🤖 Stefan: ', '') : message.content;
   
   return (

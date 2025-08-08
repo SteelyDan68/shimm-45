@@ -261,7 +261,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                   {conversation?.title || 'Välj en konversation'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col h-[calc(100vh-260px)] p-0">
+              <CardContent className="flex flex-col h-[calc(100vh-300px)] p-0">
                 
                 {activeConversation ? (
                   <>
@@ -281,6 +281,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                         <>
                           {(currentMessages || []).map((message, index) => {
                             const isOwn = message.sender_id === user?.id;
+                            const isStefanAI = message.content.includes('🤖 Stefan:');
                             const prevMessage = index > 0 ? currentMessages[index - 1] : null;
                             const showAvatar = !isOwn && (!prevMessage || prevMessage.sender_id !== message.sender_id);
                             
@@ -291,7 +292,7 @@ export const EnhancedMessagingHub: React.FC<EnhancedMessagingHubProps> = ({ clas
                                 isOwn={isOwn}
                                 showAvatar={showAvatar}
                                 showTimestamp={true}
-                                className="animate-fade-in"
+                                isStefanAI={isStefanAI}
                               />
                             );
                           })}
