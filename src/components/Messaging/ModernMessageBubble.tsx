@@ -26,12 +26,27 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
   
   return (
     <div className={cn(
-      "flex items-end gap-2 max-w-[85%] animate-fade-in",
-      isOwn ? "ml-auto flex-row-reverse" : "mr-auto",
+      "flex flex-col gap-1 max-w-[85%] animate-fade-in",
+      isOwn ? "ml-auto items-end" : "mr-auto items-start",
       className
     )}>
-      {/* Avatar */}
-      {showAvatar && !isOwn && (
+      {/* Sender name */}
+      {(!isOwn || isStefanAI) && (
+        <div className={cn(
+          "text-xs font-medium px-2",
+          isOwn ? "text-primary/70" : isStefanAI ? "text-ai-primary" : "text-muted-foreground"
+        )}>
+          {isStefanAI ? "🤖 Stefan AI" : isOwn ? "Du" : message.sender_profile?.first_name || "Okänd"}
+        </div>
+      )}
+      
+      {/* Message container */}
+      <div className={cn(
+        "flex items-end gap-2",
+        isOwn ? "flex-row-reverse" : ""
+      )}>
+        {/* Avatar */}
+        {showAvatar && !isOwn && (
         <Avatar className="h-8 w-8 mb-1 shrink-0">
           {isStefanAI ? (
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-ai-primary to-ai-secondary flex items-center justify-center">
@@ -102,6 +117,7 @@ export const ModernMessageBubble: React.FC<ModernMessageBubbleProps> = ({
             "left-0 bg-muted/80 transform rotate-45 -translate-x-1 translate-y-1"
           )
         )} />
+        </div>
       </div>
     </div>
   );
