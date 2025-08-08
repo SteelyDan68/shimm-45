@@ -25,9 +25,11 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useTasks } from '@/hooks/useTasks';
 import { useToast } from '@/hooks/use-toast';
 import { useUnifiedCalendarTasks } from '@/hooks/useUnifiedCalendarTasks';
+import { TaskCalendarScheduler } from '@/components/Calendar/TaskCalendarScheduler';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { usePerformanceMonitoringV2, useMemoryOptimization } from '@/utils/performanceOptimizationV2';
+import type { Task } from '@/types/tasks';
 
 interface LiveTaskListProps {
   className?: string;
@@ -41,6 +43,8 @@ const LiveTaskListComponent: React.FC<LiveTaskListProps> = ({ className }) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTab, setFilterTab] = useState('all');
+  const [selectedTaskForScheduling, setSelectedTaskForScheduling] = useState<Task | null>(null);
+  const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   
   const { 
     tasks, 
@@ -285,16 +289,9 @@ const LiveTaskListComponent: React.FC<LiveTaskListProps> = ({ className }) => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={async () => {
-                          await createUnifiedTaskEvent({
-                            title: task.title,
-                            description: task.description,
-                            date: new Date(task.deadline || Date.now()),
-                            type: 'event',
-                            priority: task.priority,
-                            ai_generated: task.ai_generated,
-                            created_by_role: 'user'
-                          });
+                        onClick={() => {
+                          setSelectedTaskForScheduling(task);
+                          setIsSchedulerOpen(true);
                         }}
                       >
                         <CalendarPlus className="w-4 h-4 mr-1" />
@@ -319,6 +316,20 @@ const LiveTaskListComponent: React.FC<LiveTaskListProps> = ({ className }) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Calendar Scheduler Dialog */}
+      <TaskCalendarScheduler
+        task={selectedTaskForScheduling}
+        isOpen={isSchedulerOpen}
+        onClose={() => {
+          setIsSchedulerOpen(false);
+          setSelectedTaskForScheduling(null);
+        }}
+        onScheduled={() => {
+          // Refresh tasks after scheduling
+          refreshTasks();
+        }}
+      />
     </div>
   );
 };
