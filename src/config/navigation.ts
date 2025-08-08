@@ -147,18 +147,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     roles: ["superadmin", "admin"],
     items: [
       {
-        title: "Unified User Center",
-        url: NAVIGATION_ROUTES.UNIFIED_USERS,
-        icon: Users,
-        roles: ["superadmin", "admin", "coach"]
-      },
-      {
-        title: "System Administration",
-        url: NAVIGATION_ROUTES.ADMINISTRATION,
-        icon: Settings,
-        roles: ["superadmin", "admin"]
-      },
-      {
         title: "Intelligence Hub",
         url: NAVIGATION_ROUTES.INTELLIGENCE_HUB,
         icon: Brain,
