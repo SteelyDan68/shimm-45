@@ -118,11 +118,29 @@ export const useMessagingV2 = () => {
       // Enrich with participant profiles and unread counts
       const enrichedConversations = await Promise.all(
         (conversationsData || []).map(async (conv: any) => {
-          // Get participant profiles
+          // Get participant profiles (excluding current user for title)
           const { data: participants } = await supabase
             .from('profiles')
             .select('id, first_name, last_name, email, avatar_url')
             .in('id', conv.participant_ids);
+
+          // Generate conversation title
+          let conversationTitle = conv.title;
+          
+          if (!conversationTitle || conversationTitle === 'Utan titel') {
+            if (conv.metadata?.stefan_ai === 'true') {
+              conversationTitle = '🤖 Stefan AI Chat';
+            } else {
+              // Find other participants (not current user)
+              const otherParticipants = (participants || []).filter(p => p.id !== user.id);
+              if (otherParticipants.length > 0) {
+                const participant = otherParticipants[0];
+                conversationTitle = `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || participant.email;
+              } else {
+                conversationTitle = 'Konversation';
+              }
+            }
+          }
 
           // Count unread messages for current user
           const { count: unreadCount } = await supabase
@@ -139,6 +157,7 @@ export const useMessagingV2 = () => {
 
           return {
             ...conv,
+            title: conversationTitle,
             participants: participants || [],
             unread_count: unreadCount || 0,
             last_message: conv.last_message?.[0] || null

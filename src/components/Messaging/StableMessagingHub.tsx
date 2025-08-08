@@ -109,17 +109,18 @@ export const StableMessagingHub: React.FC = () => {
     }
   }, [activeConversation]);
 
-  // Initialize Stefan AI conversation and load recipients
+  // Initialize messaging system
   useEffect(() => {
     if (!user?.id) return;
 
     const initializeMessaging = async () => {
       await loadAvailableRecipients();
-      await ensureStefanConversation();
+      await fetchConversations(); // Load conversations first
+      await ensureStefanConversation(); // Then ensure Stefan exists
     };
 
     initializeMessaging();
-  }, [user?.id]);
+  }, [user?.id, fetchConversations]);
 
   // Ensure Stefan AI conversation exists and persists
   const ensureStefanConversation = async () => {
@@ -145,7 +146,7 @@ export const StableMessagingHub: React.FC = () => {
         .from('conversations')
         .insert({
           created_by: user.id,
-          participant_ids: [user.id, 'stefan_ai'],
+          participant_ids: [user.id],
           conversation_type: 'support',
           title: '🤖 Stefan AI Chat',
           metadata: {
@@ -164,11 +165,13 @@ export const StableMessagingHub: React.FC = () => {
         // Send welcome message
         await sendMessage(newConversation.id, '🤖 Stefan: Hej! Jag är Stefan, din AI-coach. Hur kan jag hjälpa dig idag?');
         
-        // Set as active conversation
-        setActiveConversation(newConversation.id);
+        // Set as active conversation if no other is active
+        if (!activeConversation) {
+          setActiveConversation(newConversation.id);
+        }
         
-        // Refresh conversations
-        fetchConversations();
+        // Refresh conversations to show the new one
+        await fetchConversations();
         
         console.log('✅ Stefan AI conversation created:', newConversation.id);
       }
