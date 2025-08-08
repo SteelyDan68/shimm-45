@@ -1,11 +1,9 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { ModernMessagingApp } from '@/components/MessagingV2/ModernMessagingApp';
-
-import { AiReplyAssistant } from '@/components/MessagingV2/AiReplyAssistant';
+import { UnifiedMessagingHub } from '@/components/Messaging/UnifiedMessagingHub';
 
 export function Messages() {
-  const { user, hasRole } = useAuth();
+  const { user } = useAuth();
 
   // Show loading state while authentication is loading
   if (!user) {
@@ -23,9 +21,10 @@ export function Messages() {
       </div>
     );
   }
+
   // SEO
   useEffect(() => {
-    document.title = 'Meddelanden & AI Chat | Live meddelanden';
+    document.title = 'Meddelanden | SHMMS - Intelligent Kommunikation';
     const ensureMeta = (name: string) => {
       let el = document.querySelector(`meta[name="${name}"]`);
       if (!el) {
@@ -36,7 +35,7 @@ export function Messages() {
       return el as HTMLMetaElement;
     };
     const desc = ensureMeta('description');
-    desc.setAttribute('content', 'Meddelanden och Stefan AI-chat med live funktioner och självinstruerande UX.');
+    desc.setAttribute('content', 'Intelligent meddelandecenter med AI-stöd, real-time kommunikation och självinstruerande gränssnitt för optimal användarupplevelse.');
     let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!link) {
       link = document.createElement('link');
@@ -47,28 +46,21 @@ export function Messages() {
   }, []);
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl space-y-6">
-      <header className="text-center space-y-2 mb-2">
-        <h1 className="text-2xl font-bold">Meddelanden & AI Chat</h1>
-        <p className="text-muted-foreground text-sm">
-          Live-meddelanden med Stefan AI-stöd – snabbt, tydligt och självinstruerande
+    <div className="container mx-auto p-6 max-w-7xl">
+      <header className="text-center space-y-2 mb-6">
+        <h1 className="text-3xl font-bold">Intelligent Meddelandecenter</h1>
+        <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+          Real-time kommunikation med AI-stöd, självinstruerande gränssnitt och avancerad coaching-integration. 
+          En enhetlig plattform för all din kommunikation.
         </p>
       </header>
 
-      <main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Huvudchatten */}
-        <section aria-label="Meddelanden" className="lg:col-span-2">
-          <div className="h-[calc(100vh-220px)] min-h-[500px] overflow-hidden">
-            <ModernMessagingApp className="h-full" />
-          </div>
-        </section>
-
-        {/* AI-hjälp och proaktiva meddelanden */}
-        <aside className="space-y-6">
-          {(hasRole('coach') || hasRole('admin') || hasRole('superadmin')) && (
-            <AiReplyAssistant />
-          )}
-        </aside>
+      <main className="h-[calc(100vh-200px)] min-h-[600px]">
+        <UnifiedMessagingHub 
+          className="h-full" 
+          mode="full" 
+          showAIAssistant={true}
+        />
       </main>
     </div>
   );
