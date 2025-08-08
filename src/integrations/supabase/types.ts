@@ -568,6 +568,51 @@ export type Database = {
         }
         Relationships: []
       }
+      assessment_detailed_analyses: {
+        Row: {
+          action_items: Json
+          assessment_round_id: string
+          executive_summary: string
+          full_analysis: string
+          generated_at: string
+          id: string
+          insights: Json
+          metadata: Json | null
+          pillar_type: string
+          recommendations: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_items?: Json
+          assessment_round_id: string
+          executive_summary: string
+          full_analysis: string
+          generated_at?: string
+          id?: string
+          insights?: Json
+          metadata?: Json | null
+          pillar_type: string
+          recommendations?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_items?: Json
+          assessment_round_id?: string
+          executive_summary?: string
+          full_analysis?: string
+          generated_at?: string
+          id?: string
+          insights?: Json
+          metadata?: Json | null
+          pillar_type?: string
+          recommendations?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       assessment_events: {
         Row: {
           assessment_state_id: string | null
@@ -1788,6 +1833,63 @@ export type Database = {
         }
         Relationships: []
       }
+      development_strategies: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string
+          difficulty_level: number
+          estimated_time: number
+          id: string
+          is_completed: boolean
+          metadata: Json | null
+          neuroplastic_principle: string
+          pillar_key: string
+          progress_percentage: number
+          scheduled_for: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description: string
+          difficulty_level: number
+          estimated_time?: number
+          id?: string
+          is_completed?: boolean
+          metadata?: Json | null
+          neuroplastic_principle: string
+          pillar_key: string
+          progress_percentage?: number
+          scheduled_for?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          difficulty_level?: number
+          estimated_time?: number
+          id?: string
+          is_completed?: boolean
+          metadata?: Json | null
+          neuroplastic_principle?: string
+          pillar_key?: string
+          progress_percentage?: number
+          scheduled_for?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       edge_function_security_logs: {
         Row: {
           authentication_method: string | null
@@ -2772,6 +2874,51 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           visible_to_client?: boolean
+        }
+        Relationships: []
+      }
+      personal_development_plans: {
+        Row: {
+          ai_analysis: string | null
+          created_at: string
+          expires_at: string | null
+          focus_areas: Json
+          generated_from_assessments: Json | null
+          id: string
+          metadata: Json | null
+          progress_percentage: number
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          created_at?: string
+          expires_at?: string | null
+          focus_areas?: Json
+          generated_from_assessments?: Json | null
+          id?: string
+          metadata?: Json | null
+          progress_percentage?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          created_at?: string
+          expires_at?: string | null
+          focus_areas?: Json
+          generated_from_assessments?: Json | null
+          id?: string
+          metadata?: Json | null
+          progress_percentage?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

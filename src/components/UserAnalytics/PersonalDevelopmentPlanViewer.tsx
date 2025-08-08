@@ -5,7 +5,8 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ActionTooltip } from '@/components/ui/action-tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useLiveDevelopmentPlan } from '@/hooks/useLiveDevelopmentPlan';
+import { useLiveCalendarIntegration } from '@/hooks/useLiveCalendarIntegration';
 import { 
   Target, 
   Calendar, 
@@ -54,197 +55,56 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
   userId,
   assessmentData
 }) => {
-  const [focusAreas, setFocusAreas] = useState<FocusArea[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [hasActivePlan, setHasActivePlan] = useState(false);
-  const [planProgress, setPlanProgress] = useState(0);
   const { toast } = useToast();
+  
+  // Use live development plan hook
+  const {
+    developmentPlan,
+    strategies,
+    isLoading,
+    isGenerating,
+    generateDevelopmentPlan,
+    toggleStrategyCompletion,
+    scheduleStrategy
+  } = useLiveDevelopmentPlan(userId, assessmentData);
 
-  useEffect(() => {
-    loadOrGeneratePlan();
-  }, [userId, assessmentData]);
+  // Use live calendar integration
+  const {
+    createCalendarEvent,
+    scheduleActionableToCalendar
+  } = useLiveCalendarIntegration(userId);
 
-  const loadOrGeneratePlan = async () => {
+  const handleAICoaching = async () => {
     try {
-      // För nu, hoppa över databas-ladning och generera direkt
-      // const { data: existingPlan, error } = await supabase
-      //   .from('personal_development_plans')
-      //   .select('*')
-      //   .eq('user_id', userId)
-      //   .eq('status', 'active')
-      //   .single();
+      toast({
+        title: "🤖 AI-Coaching startar...",
+        description: "Analyserar dina assessments och skapar personliga rekommendationer",
+      });
 
-      let existingPlan = null;
-      let error = null;
-
-      if (existingPlan && !error) {
-        // Ladda befintlig plan
-        await loadExistingPlan(existingPlan);
-        setHasActivePlan(true);
-      } else if (assessmentData.length > 0) {
-        // Generera ny plan baserad på assessments
-        await generateNewPlan();
-        setHasActivePlan(true);
-      }
+      // Generate new development plan based on assessments
+      await generateDevelopmentPlan();
+      
+      toast({
+        title: "✨ AI-Coaching slutförd!",
+        description: "Din utvecklingsplan har uppdaterats med nya strategier baserat på neuroplastiska principer",
+      });
     } catch (error) {
-      console.error('Error loading/generating plan:', error);
+      console.error('Error in AI coaching:', error);
+      toast({
+        title: "Fel",
+        description: "AI-coaching kunde inte slutföras",
+        variant: "destructive"
+      });
     }
   };
 
-  const loadExistingPlan = async (planData: any) => {
-    // Implementera laddning av befintlig plan
-    // För nu, generera en mock-plan
-    generateMockFocusAreas();
-  };
-
-  const generateNewPlan = async () => {
-    setIsGenerating(true);
+  const handleViewInCalendar = () => {
+    // Navigate to calendar with development plan context
+    window.location.href = '/calendar?context=development-plan';
     
-    try {
-      // Analysera assessments för att identifiera fokusområden
-      const analyzedAreas = analyzeAssessmentData();
-      
-      // För demo, hoppa över AI-anrop och använd mock-data direkt
-      // const { data: aiResponse, error } = await supabase.functions.invoke('generate-development-plan', {
-      //   body: {
-      //     userId,
-      //     assessmentData,
-      //     focusAreas: analyzedAreas
-      //   }
-      // });
-
-      // Generera mock-plan baserat på analyserade områden
-      generateMockFocusAreas();
-      
-      toast({
-        title: "🎉 Din utvecklingsplan är klar!",
-        description: `Utvecklingsplan skapad baserat på ${analyzedAreas.length} fokusområden.`,
-      });
-    } catch (error) {
-      console.error('Error generating plan:', error);
-      // Fallback till mock-data
-      generateMockFocusAreas();
-      
-      toast({
-        title: "Plan skapad (demo-läge)",
-        description: "Vi har skapat en exempelplan baserad på dina assessments.",
-        variant: "default"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const analyzeAssessmentData = () => {
-    // Analysera assessments för att hitta de viktigaste utvecklingsområdena
-    const pillarScores = assessmentData.reduce((acc, assessment) => {
-      acc[assessment.pillar_type] = assessment.calculated_score;
-      return acc;
-    }, {} as Record<string, number>);
-
-    // Identifiera de 2-3 viktigaste områdena att fokusera på
-    const sortedPillars = Object.entries(pillarScores)
-      .sort(([,a], [,b]) => (a as number) - (b as number)) // Sortera på lägsta poäng först
-      .slice(0, 3);
-
-    return sortedPillars.map(([pillarKey, score], index) => ({
-      pillarKey,
-      currentLevel: score as number,
-      priority: (index + 1) as 1 | 2 | 3
-    }));
-  };
-
-  const generateMockFocusAreas = () => {
-    // Mock-data för demo
-    const mockAreas: FocusArea[] = [
-      {
-        pillarKey: 'self_care',
-        pillarName: 'Självomvårdnad',
-        currentLevel: 4.2,
-        targetLevel: 7.5,
-        priority: 1,
-        color: 'text-pink-600',
-        icon: <Heart className="w-5 h-5" />,
-        strategies: [
-          {
-            id: '1',
-            type: 'habit',
-            title: 'Daglig mindfulness-practice',
-            description: 'Börja dagen med 5 minuter meditation för att bygga mental klarhet och självmedvetenhet.',
-            pillarKey: 'self_care',
-            estimatedTime: 5,
-            difficultyLevel: 2,
-            neuroplasticPrinciple: 'Regelbunden meditation stärker prefrontal cortex och förbättrar emotionell reglering',
-            isCompleted: false,
-            scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000)
-          },
-          {
-            id: '2',
-            type: 'action',
-            title: 'Sömnhygien-audit',
-            description: 'Analysera dina sömnvanor i en vecka och identifiera 2-3 konkreta förbättringar.',
-            pillarKey: 'self_care',
-            estimatedTime: 30,
-            difficultyLevel: 2,
-            neuroplasticPrinciple: 'Kvalitetssömn är avgörande för hjärnans återhämtning och minneskonsolidering',
-            isCompleted: false
-          }
-        ]
-      },
-      {
-        pillarKey: 'skills',
-        pillarName: 'Kompetenser',
-        currentLevel: 5.8,
-        targetLevel: 8.0,
-        priority: 2,
-        color: 'text-green-600',
-        icon: <Brain className="w-5 h-5" />,
-        strategies: [
-          {
-            id: '3',
-            type: 'skill',
-            title: 'Micro-learning sessions',
-            description: 'Dedicera 15 minuter per dag till att lära dig något nytt inom ditt expertområde.',
-            pillarKey: 'skills',
-            estimatedTime: 15,
-            difficultyLevel: 3,
-            neuroplasticPrinciple: 'Spaced repetition och kort, intensiv inlärning optimerar synaptic plasticity',
-            isCompleted: false
-          }
-        ]
-      }
-    ];
-
-    setFocusAreas(mockAreas);
-    
-    // Beräkna progress
-    const totalStrategies = mockAreas.reduce((sum, area) => sum + area.strategies.length, 0);
-    const completedStrategies = mockAreas.reduce((sum, area) => 
-      sum + area.strategies.filter(s => s.isCompleted).length, 0);
-    setPlanProgress((completedStrategies / totalStrategies) * 100);
-  };
-
-  const savePlanToDatabase = async (planData: any) => {
-    // Spara planen till databasen (implementation när tabeller skapas)
-    console.log('Saving plan to database:', planData);
-  };
-
-  const toggleStrategyCompletion = async (areaIndex: number, strategyIndex: number) => {
-    const newFocusAreas = [...focusAreas];
-    newFocusAreas[areaIndex].strategies[strategyIndex].isCompleted = 
-      !newFocusAreas[areaIndex].strategies[strategyIndex].isCompleted;
-    
-    setFocusAreas(newFocusAreas);
-    
-    // Uppdatera progress
-    const totalStrategies = newFocusAreas.reduce((sum, area) => sum + area.strategies.length, 0);
-    const completedStrategies = newFocusAreas.reduce((sum, area) => 
-      sum + area.strategies.filter(s => s.isCompleted).length, 0);
-    setPlanProgress((completedStrategies / totalStrategies) * 100);
-
     toast({
-      title: newFocusAreas[areaIndex].strategies[strategyIndex].isCompleted ? "🎉 Bra jobbat!" : "📝 Markerat som väntande",
-      description: newFocusAreas[areaIndex].strategies[strategyIndex].title,
+      title: "📅 Öppnar kalender",
+      description: "Visar dina schemalagda utvecklingsaktiviteter",
     });
   };
 
@@ -269,6 +129,27 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
     }
   };
 
+  if (isLoading) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="w-6 h-6 animate-pulse text-blue-600" />
+            Laddar din utvecklingsplan...
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Progress value={33} className="h-3" />
+            <p className="text-muted-foreground text-center">
+              Hämtar din personliga utvecklingsplan från databasen...
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (isGenerating) {
     return (
       <Card className="w-full">
@@ -290,7 +171,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
     );
   }
 
-  if (!hasActivePlan || focusAreas.length === 0) {
+  if (!developmentPlan || !developmentPlan.focusAreas || developmentPlan.focusAreas.length === 0) {
     return (
       <Card className="w-full">
         <CardHeader>
@@ -309,6 +190,17 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
             <Button onClick={() => window.location.href = '/six-pillars'}>
               Fortsätt med assessments
             </Button>
+            {assessmentData.length >= 2 && (
+              <Button 
+                variant="outline" 
+                onClick={generateDevelopmentPlan}
+                disabled={isGenerating}
+                className="ml-2"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Skapa plan nu
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -331,17 +223,17 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{focusAreas.length}</div>
+              <div className="text-3xl font-bold text-blue-600">{developmentPlan.focusAreas.length}</div>
               <div className="text-sm text-muted-foreground">Fokusområden</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {focusAreas.reduce((sum, area) => sum + area.strategies.length, 0)}
+                {strategies.length}
               </div>
               <div className="text-sm text-muted-foreground">Strategier</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">{Math.round(planProgress)}%</div>
+              <div className="text-3xl font-bold text-purple-600">{Math.round(developmentPlan.progressPercentage)}%</div>
               <div className="text-sm text-muted-foreground">Genomfört</div>
             </div>
           </div>
@@ -349,15 +241,15 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Framsteg</span>
-              <span>{Math.round(planProgress)}%</span>
+              <span>{Math.round(developmentPlan.progressPercentage)}%</span>
             </div>
-            <Progress value={planProgress} className="h-3" />
+            <Progress value={developmentPlan.progressPercentage} className="h-3" />
           </div>
         </CardContent>
       </Card>
 
       {/* Focus Areas */}
-      {focusAreas.map((area, areaIndex) => (
+      {developmentPlan.focusAreas.map((area, areaIndex) => (
         <Card key={area.pillarKey} className="border-l-4 border-l-blue-500">
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${area.color}`}>
@@ -379,7 +271,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {area.strategies.map((strategy, strategyIndex) => (
+              {area.strategies.map((strategy) => (
                 <div
                   key={strategy.id}
                   className={`p-4 border rounded-lg transition-all ${
@@ -390,7 +282,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
                 >
                   <div className="flex items-start gap-3">
                     <button
-                      onClick={() => toggleStrategyCompletion(areaIndex, strategyIndex)}
+                      onClick={() => toggleStrategyCompletion(strategy.id)}
                       className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                         strategy.isCompleted
                           ? 'bg-green-500 border-green-500 text-white'
@@ -428,6 +320,21 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
                           <span>Schemalagt: {strategy.scheduledFor.toLocaleDateString('sv-SE')}</span>
                         </div>
                       )}
+
+                      <div className="flex gap-2 mt-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const today = new Date();
+                            scheduleStrategy(strategy.id, today);
+                          }}
+                          className="text-xs"
+                        >
+                          <Calendar className="w-3 h-3 mr-1" />
+                          Schemalägg
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -442,7 +349,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Button 
-              onClick={() => generateNewPlan()}
+              onClick={handleAICoaching}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               disabled={isGenerating}
             >
@@ -452,7 +359,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
             
             <Button 
               variant="outline"
-              onClick={() => window.location.href = '/calendar'}
+              onClick={handleViewInCalendar}
               className="flex-1"
             >
               <Calendar className="w-4 h-4 mr-2" />
