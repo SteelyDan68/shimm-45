@@ -145,14 +145,14 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
   useEffect(() => {
     setProgressStep(instruction.progress);
     
-    if (instruction.progress === 100 && !celebrationMoment) {
+    if (instruction.progress === 100 && !celebrationMoment && messages && Object.keys(messages).length > 0) {
       setCelebrationMoment(true);
       toast.success("Fantastiskt! Du behärskar meddelandesystemet! 🎉", {
         description: "Du har lärt dig att navigera, chatta och använda AI-hjälp."
       });
-      setTimeout(() => setCelebrationMoment(false), 3000);
+      setTimeout(() => setCelebrationMoment(false), 5000);
     }
-  }, [instruction.progress, celebrationMoment]);
+  }, [instruction.progress, celebrationMoment, messages]);
 
   // 💬 ENHANCED MESSAGE SENDING WITH FEEDBACK
   const handleSendMessage = async () => {
