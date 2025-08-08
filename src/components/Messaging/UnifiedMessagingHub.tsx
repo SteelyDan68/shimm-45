@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useMessagingV2 } from '@/hooks/useMessagingV2';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -53,6 +54,7 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
   showAIAssistant = true
 }) => {
   const { user, hasRole } = useAuth();
+  const { navigate } = useUnifiedNavigation();
   const {
     conversations,
     activeConversation,
@@ -64,6 +66,7 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
     markConversationAsRead,
     getOrCreateDirectConversation,
     updateTypingStatus,
+    
   } = useMessagingV2();
 
   // 🎯 UX STATE MANAGEMENT
@@ -272,7 +275,7 @@ export const UnifiedMessagingHub: React.FC<UnifiedMessagingHubProps> = ({
               variant="outline" 
               size="sm" 
               className="w-full"
-              onClick={() => window.location.href = '/messages'}
+              onClick={() => navigate('/messages')}
             >
               Visa alla
             </Button>
