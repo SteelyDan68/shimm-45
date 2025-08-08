@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnalyticsProvider } from '@/components/Analytics/AnalyticsProvider';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UnifiedAuthProvider, useAuth } from "@/providers/UnifiedAuthProvider";
+import { NotificationProvider } from "@/providers/NotificationProvider";
 import { EnhancedStefanContextProvider } from "@/providers/EnhancedStefanContextProvider";
 import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
 import { Auth } from "@/pages/Auth";
@@ -174,14 +175,16 @@ const App = () => {
           <BrowserRouter>
             <TooltipProvider delayDuration={300} skipDelayDuration={100}>
               <UnifiedAuthProvider>
-                <EnhancedStefanContextProvider>
-                  <AnalyticsProvider>
-                    <AppRoutes />
-                    <AutoNotificationSystem />
-                    <Toaster />
-                    <Sonner />
-                  </AnalyticsProvider>
-                </EnhancedStefanContextProvider>
+                <NotificationProvider>
+                  <EnhancedStefanContextProvider>
+                    <AnalyticsProvider>
+                      <AppRoutes />
+                      <AutoNotificationSystem />
+                      <Toaster />
+                      <Sonner />
+                    </AnalyticsProvider>
+                  </EnhancedStefanContextProvider>
+                </NotificationProvider>
               </UnifiedAuthProvider>
             </TooltipProvider>
           </BrowserRouter>
