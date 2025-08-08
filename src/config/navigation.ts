@@ -159,21 +159,15 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["superadmin", "admin", "coach"]
       },
       {
-        title: "Stefan AI Administration",
-        url: NAVIGATION_ROUTES.STEFAN_CHAT,
-        icon: Brain,
-        roles: ["superadmin", "admin"]
-      },
-      {
         title: "Teknisk administration",
         url: NAVIGATION_ROUTES.ADMINISTRATION,
         icon: Settings,
         roles: ["superadmin", "admin"]
       },
       {
-        title: "Systeminställningar",
+        title: "Mobil",
         url: NAVIGATION_ROUTES.MOBILE,
-        icon: Settings,
+        icon: Smartphone,
         roles: ["superadmin", "admin"]
       }
     ]
