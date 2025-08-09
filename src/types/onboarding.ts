@@ -38,6 +38,14 @@ export interface OnboardingData {
     pastCrises: string;
   };
 
+  // Sektion 4 - Intention (ny för förbättrad pillarrekommendation)
+  intention?: {
+    primaryIntention: string;
+    specificArea: string;
+    currentSituation: string;
+    desiredOutcome: string;
+  };
+
   // Onboarding status tracking
   onboardingCompleted?: boolean;
   onboardingCompletedAt?: string;

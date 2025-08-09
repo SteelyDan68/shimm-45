@@ -20,8 +20,9 @@ import {
   Sparkles
 } from 'lucide-react';
 import type { OnboardingData } from '@/types/onboarding';
+import { generatePillarRecommendations, getRecommendationSummary, type RecommendationResult } from '@/utils/pillarRecommendations';
 
-type StreamlinedStep = 'welcome' | 'essentials' | 'goals' | 'complete';
+type StreamlinedStep = 'welcome' | 'intention' | 'essentials' | 'goals' | 'complete';
 
 interface StreamlinedOnboardingFlowProps {
   onComplete: () => void;
@@ -67,17 +68,25 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
       hasChildren: '',
       ongoingChanges: '',
       pastCrises: ''
+    },
+    intention: {
+      primaryIntention: '',
+      specificArea: '',
+      currentSituation: '',
+      desiredOutcome: ''
     }
   });
 
   const { user } = useAuth();
   const { saveOnboardingData, isLoading } = useOnboarding();
   const { toast } = useToast();
+  const [recommendations, setRecommendations] = useState<RecommendationResult | null>(null);
 
   const steps = [
     { id: 'welcome', title: 'Välkommen', icon: User },
+    { id: 'intention', title: 'Din intention', icon: Target },
     { id: 'essentials', title: 'Grundinfo', icon: Briefcase },
-    { id: 'goals', title: 'Mål & Vision', icon: Target },
+    { id: 'goals', title: 'Mål & Vision', icon: Sparkles },
     { id: 'complete', title: 'Klar', icon: CheckCircle }
   ];
 
@@ -121,6 +130,12 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
     switch (step) {
       case 'welcome':
         return true;
+      case 'intention':
+        return !!(
+          formData.intention?.primaryIntention?.trim() &&
+          formData.intention?.specificArea?.trim() &&
+          formData.intention?.currentSituation?.trim()
+        );
       case 'essentials':
         return !!(
           formData.generalInfo.first_name?.trim() &&
@@ -140,8 +155,14 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
   };
 
   const handleNext = () => {
-    const stepOrder: StreamlinedStep[] = ['welcome', 'essentials', 'goals', 'complete'];
+    const stepOrder: StreamlinedStep[] = ['welcome', 'intention', 'essentials', 'goals', 'complete'];
     const currentIndex = stepOrder.indexOf(currentStep);
+    
+    // Generate recommendations when moving from essentials to goals
+    if (currentStep === 'essentials' && formData.intention?.primaryIntention) {
+      const recs = generatePillarRecommendations(formData);
+      setRecommendations(recs);
+    }
     
     if (currentIndex < stepOrder.length - 1) {
       setCurrentStep(stepOrder[currentIndex + 1]);
@@ -149,7 +170,7 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
   };
 
   const handlePrevious = () => {
-    const stepOrder: StreamlinedStep[] = ['welcome', 'essentials', 'goals', 'complete'];
+    const stepOrder: StreamlinedStep[] = ['welcome', 'intention', 'essentials', 'goals', 'complete'];
     const currentIndex = stepOrder.indexOf(currentStep);
     
     if (currentIndex > 0) {
@@ -224,6 +245,117 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
               <Button onClick={handleNext} className="w-full" size="lg">
                 Låt oss börja! <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
+            </CardContent>
+          </Card>
+        );
+
+      case 'intention':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Vad vill du utveckla?
+              </CardTitle>
+              <CardDescription>
+                Berätta vad du mest vill fokusera på så rekommenderar vi rätt pelare för dig
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="primaryIntention" className="flex items-center gap-1">
+                  Vad vill du främst utveckla? <span className="text-red-500">*</span>
+                </Label>
+                <Select 
+                  value={formData.intention?.primaryIntention || ''} 
+                  onValueChange={(value) => updateFormData('intention', 'primaryIntention', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj ditt huvudfokus..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="health_lifestyle">Hälsa & livsstil</SelectItem>
+                    <SelectItem value="career_skills">Karriär & kompetenser</SelectItem>
+                    <SelectItem value="creative_talents">Kreativitet & talanger</SelectItem>
+                    <SelectItem value="personal_brand">Personlig brand & synlighet</SelectItem>
+                    <SelectItem value="business_economy">Företag & ekonomi</SelectItem>
+                    <SelectItem value="relationships">Relationer & nätverk</SelectItem>
+                    <SelectItem value="life_balance">Balans & välmående</SelectItem>
+                    <SelectItem value="performance">Prestationsförmåga</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="specificArea" className="flex items-center gap-1">
+                  Vilket specifikt område? <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="specificArea"
+                  value={formData.intention?.specificArea || ''}
+                  onChange={(e) => updateFormData('intention', 'specificArea', e.target.value)}
+                  placeholder="t.ex. kondition, content creation, nätverkande, stress..."
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Var så specifik som möjligt för bästa rekommendationer
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="currentSituation" className="flex items-center gap-1">
+                  Hur ser din situation ut idag? <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="currentSituation"
+                  value={formData.intention?.currentSituation || ''}
+                  onChange={(e) => updateFormData('intention', 'currentSituation', e.target.value)}
+                  placeholder="Beskriv kort var du står idag inom detta område..."
+                  rows={3}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="desiredOutcome">Vad vill du uppnå? (valfritt)</Label>
+                <Textarea
+                  id="desiredOutcome"
+                  value={formData.intention?.desiredOutcome || ''}
+                  onChange={(e) => updateFormData('intention', 'desiredOutcome', e.target.value)}
+                  placeholder="Vad skulle vara ditt ideala resultat inom 3-6 månader?"
+                  rows={2}
+                />
+              </div>
+
+              {/* Progress validation feedback */}
+              {!isStepValid('intention') && (
+                <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-amber-800">
+                    <div className="h-4 w-4 rounded-full bg-amber-200 flex items-center justify-center">
+                      <span className="text-xs font-bold">!</span>
+                    </div>
+                    <span className="text-sm font-medium">Fyll i obligatoriska fält för att fortsätta</span>
+                  </div>
+                  <ul className="text-xs text-amber-700 mt-2 ml-6 space-y-1">
+                    {!formData.intention?.primaryIntention?.trim() && <li>• Huvudfokus krävs</li>}
+                    {!formData.intention?.specificArea?.trim() && <li>• Specifikt område krävs</li>}
+                    {!formData.intention?.currentSituation?.trim() && <li>• Nuvarande situation krävs</li>}
+                  </ul>
+                </div>
+              )}
+
+              <div className="flex justify-between pt-4">
+                <Button variant="outline" onClick={handlePrevious}>
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Tillbaka
+                </Button>
+                <Button 
+                  onClick={handleNext} 
+                  disabled={!isStepValid('intention')}
+                  className={!isStepValid('intention') ? 'opacity-50 cursor-not-allowed' : ''}
+                >
+                  Nästa <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         );
@@ -367,6 +499,43 @@ export const StreamlinedOnboardingFlow: React.FC<StreamlinedOnboardingFlowProps>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Recommendations Display */}
+              {recommendations && (
+                <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-primary">Dina rekommenderade pelare</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {getRecommendationSummary(recommendations)}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {recommendations.recommendations.filter(r => r.priority === 'high').map((rec) => {
+                      const pillarNames = {
+                        'self-care': 'Self Care',
+                        'skills': 'Skills', 
+                        'talent': 'Talent',
+                        'brand': 'Brand',
+                        'economy': 'Economy'
+                      };
+                      const colors = {
+                        'self-care': 'bg-self-care/10 border-self-care/30 text-self-care',
+                        'skills': 'bg-skills/10 border-skills/30 text-skills',
+                        'talent': 'bg-talent/10 border-talent/30 text-talent',
+                        'brand': 'bg-brand/10 border-brand/30 text-brand',
+                        'economy': 'bg-economy/10 border-economy/30 text-economy'
+                      };
+                      return (
+                        <div key={rec.pillar} className={`p-3 rounded-lg border ${colors[rec.pillar]}`}>
+                          <div className="font-semibold text-sm">{pillarNames[rec.pillar]}</div>
+                          <div className="text-xs opacity-80 mt-1">{rec.reason}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="niche" className="flex items-center gap-1">
                   Ditt fokusområde <span className="text-red-500">*</span>
