@@ -41,6 +41,8 @@ import { OnboardingPage } from "./pages/OnboardingPage";
 import UnifiedProfilePage from "./pages/UnifiedProfilePage";
 import { ClientAssessmentPage } from "./pages/ClientAssessmentPage";
 import { MyAssessments } from "./pages/MyAssessments";
+import MyAnalyses from "./pages/MyAnalyses";
+import MyProgram from "./pages/MyProgram";
 import { GuidedAssessmentFlow } from "./pages/GuidedAssessmentFlow";
 import { Messages } from "./pages/Messages";
 import { Administration } from "./pages/Administration";
@@ -117,8 +119,10 @@ const AppRoutes = () => {
                 <Route path={NAVIGATION_ROUTES.ONBOARDING} element={<OnboardingPage />} />
                 <Route path={NAVIGATION_ROUTES.EDIT_PROFILE} element={<UnifiedProfilePage />} />
                 <Route path="/client-assessment/:clientId" element={<ClientAssessmentPage />} />
-                <Route path="/my-assessments" element={<MyAssessments />} />
-                <Route path="/guided-assessment" element={<GuidedAssessmentFlow />} />
+        <Route path="/my-assessments" element={<MyAssessments />} />
+        <Route path="/my-analyses" element={<MyAnalyses />} />
+        <Route path="/my-program" element={<MyProgram />} />
+        <Route path="/guided-assessment" element={<GuidedAssessmentFlow />} />
               
                <Route path={NAVIGATION_ROUTES.COACH_DASHBOARD} element={<CoachDashboardPage />} />
                <Route path={NAVIGATION_ROUTES.USERS} element={

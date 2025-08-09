@@ -11,6 +11,7 @@ import { WidgetProps } from '../types/dashboard-types';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { DevelopmentOverviewContent } from './DevelopmentOverviewContent';
+import StefanGuidanceWidget from '@/components/Stefan/StefanGuidanceWidget';
 
 const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   const { user, profile } = useAuth();
@@ -87,16 +88,35 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
       )}
 
       {/* Quick Actions */}
-      <div className="flex gap-2 justify-center">
+      <div className="flex gap-2 justify-center flex-wrap">
         {stats && stats.completedPillars && stats.completedPillars > 0 ? (
-          <Button 
-            size="sm"
-            onClick={() => navigate('/my-assessments')}
-            className="flex items-center gap-1"
-          >
-            <Target className="w-4 h-4" />
-            Se mina assessments
-          </Button>
+          <>
+            <Button 
+              size="sm"
+              onClick={() => navigate('/my-assessments')}
+              className="flex items-center gap-1"
+            >
+              <Target className="w-4 h-4" />
+              Se mina assessments
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/my-analyses')}
+              className="flex items-center gap-1"
+            >
+              Mina analyser
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate('/my-program')}
+              className="flex items-center gap-1"
+            >
+              Mitt program
+            </Button>
+          </>
         ) : (
           <Button 
             size="sm"
@@ -105,11 +125,23 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
           >
             <Target className="w-4 h-4" />
             Gör din första assessment
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         )}
       </div>
 
-      {/* Development Overview Content - Flytta hit från utvecklingsöversikt */}
+      {/* Stefan Guidance */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-blue-500" />
+            Stefan säger
+          </h3>
+          <StefanGuidanceWidget />
+        </div>
+      </div>
+
+      {/* Development Overview Content */}
       <div className="mt-8 pt-6 border-t border-gray-200">
         <DevelopmentOverviewContent />
       </div>
@@ -117,4 +149,5 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   );
 };
 
+export { WelcomeWidget };
 export default WelcomeWidget;
