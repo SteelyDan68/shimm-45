@@ -7,6 +7,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { DashboardProvider, useDashboard } from './contexts/DashboardContext';
 import { BaseDashboardLayout } from './layouts/BaseDashboardLayout';
+import MobileOptimizedLayout from './layouts/MobileOptimizedLayout';
 import { DashboardGrid } from './components/DashboardGrid';
 import { DynamicWidget } from './components/DynamicWidget';
 import { DashboardStats, WidgetProps } from './types/dashboard-types';
@@ -332,16 +333,16 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
     );
   }
 
-  // Full mode - komplett layout med header och navigation
+  // Full mode - komplett layout med mobile-first design
   return (
     <DashboardProvider userId={effectiveUserId}>
-      <BaseDashboardLayout className={className}>
+      <MobileOptimizedLayout className={className}>
         <DashboardContent 
           stats={dashboardStats}
           layout={layout}
           className=""
         />
-      </BaseDashboardLayout>
+      </MobileOptimizedLayout>
     </DashboardProvider>
   );
 };

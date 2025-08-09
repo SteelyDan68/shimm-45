@@ -13,11 +13,13 @@ import { cn } from '@/lib/utils';
 
 // 🚀 LAZY LOADED WIDGETS för optimal prestanda
 const WelcomeWidget = lazy(() => import('../widgets/WelcomeWidget'));
+const ClientSimplifiedWidget = lazy(() => import('../widgets/ClientSimplifiedWidget'));
 const StatsWidget = lazy(() => import('../widgets/StatsWidget'));
 const PillarProgressWidget = lazy(() => import('../widgets/PillarProgressWidget'));
 const TasksWidget = lazy(() => import('../widgets/TasksWidget'));
 const CalendarWidget = lazy(() => import('../widgets/CalendarWidget'));
 const ClientAnalyticsWidget = lazy(() => import('../widgets/ClientAnalyticsWidget'));
+const CoachAnalyticsWidget = lazy(() => import('../widgets/CoachAnalyticsWidget'));
 const ClientOverviewWidget = lazy(() => import('../widgets/ClientOverviewWidget'));
 const CoachingToolsWidget = lazy(() => import('../widgets/CoachingToolsWidget'));
 const ActivityFeedWidget = lazy(() => import('../widgets/ActivityFeedWidget'));
@@ -29,11 +31,13 @@ const UserManagementWidget = lazy(() => import('../widgets/UserManagementWidget'
  */
 const WIDGET_COMPONENTS = {
   'welcome': WelcomeWidget,
+  'client-simplified': ClientSimplifiedWidget,
   'stats': StatsWidget,
   'pillar-progress': PillarProgressWidget,
   'tasks': TasksWidget,
   'calendar': CalendarWidget,
   'client-analytics': ClientAnalyticsWidget,
+  'coach-analytics': CoachAnalyticsWidget,
   'client-overview': ClientOverviewWidget,
   'coaching-tools': CoachingToolsWidget,
   'activity-feed': ActivityFeedWidget,
