@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,9 +30,11 @@ import {
 import { generatePillarRecommendations, getRecommendationSummary, type RecommendationResult } from '@/utils/pillarRecommendations';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
+import { IntentDiscovery, IntentData } from '@/components/Assessment/IntentDiscovery';
+import { PillarEducation } from '@/components/Assessment/PillarEducation';
 import type { OnboardingData } from '@/types/onboarding';
 
-type FlowStep = 'welcome' | 'recommendations' | 'select' | 'ready';
+type FlowStep = 'welcome' | 'intent' | 'education' | 'recommendations' | 'select' | 'ready';
 
 interface AssessmentOption {
   pillar: string;
@@ -107,6 +110,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [isFirstAssessment, setIsFirstAssessment] = useState<boolean>(true);
+  const [intentData, setIntentData] = useState<IntentData | null>(null);
   
   // Check if we should auto-start with specific pillar
   useEffect(() => {
@@ -237,9 +241,9 @@ export const GuidedAssessmentFlow: React.FC = () => {
         <Button 
           size="lg" 
           className="w-full" 
-          onClick={() => setCurrentStep('recommendations')}
+          onClick={() => setCurrentStep(isFirstAssessment ? 'intent' : 'recommendations')}
         >
-          Se Stefans rekommendationer
+          {isFirstAssessment ? 'Berätta om dina mål' : 'Se Stefans rekommendationer'}
           <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </CardContent>
@@ -451,8 +455,20 @@ export const GuidedAssessmentFlow: React.FC = () => {
     );
   };
 
+  const handleIntentComplete = (data: IntentData) => {
+    setIntentData(data);
+    setCurrentStep('education');
+  };
+
+  const handlePillarEducationSelect = (pillarKey: string) => {
+    setSelectedPillar(pillarKey);
+    setCurrentStep('ready');
+  };
+
   const renderProgress = () => {
-    const steps = ['welcome', 'recommendations', 'select', 'ready'];
+    const steps = isFirstAssessment 
+      ? ['welcome', 'intent', 'education', 'ready']
+      : ['welcome', 'recommendations', 'ready'];
     const currentIndex = steps.indexOf(currentStep);
     const progress = ((currentIndex + 1) / steps.length) * 100;
 
@@ -472,6 +488,19 @@ export const GuidedAssessmentFlow: React.FC = () => {
       {renderProgress()}
       
       {currentStep === 'welcome' && renderWelcomeStep()}
+      {currentStep === 'intent' && (
+        <IntentDiscovery 
+          onComplete={handleIntentComplete}
+          onSkip={() => setCurrentStep('education')}
+        />
+      )}
+      {currentStep === 'education' && intentData && (
+        <PillarEducation 
+          intentData={intentData}
+          onPillarSelect={handlePillarEducationSelect}
+          onBack={() => setCurrentStep('intent')}
+        />
+      )}
       {currentStep === 'recommendations' && renderRecommendationsStep()}
       {currentStep === 'ready' && renderReadyStep()}
     </div>
