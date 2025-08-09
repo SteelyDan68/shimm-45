@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { generatePillarRecommendations, getRecommendationSummary, type RecommendationResult } from '@/utils/pillarRecommendations';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
 import type { OnboardingData } from '@/types/onboarding';
 
 type FlowStep = 'welcome' | 'recommendations' | 'select' | 'ready';
@@ -99,11 +100,13 @@ export const GuidedAssessmentFlow: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { getOnboardingData } = useOnboarding();
+  const { hasCompletedWelcomeAssessment } = useWelcomeAssessment();
   
   const [currentStep, setCurrentStep] = useState<FlowStep>('welcome');
   const [recommendations, setRecommendations] = useState<RecommendationResult | null>(null);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
+  const [isFirstAssessment, setIsFirstAssessment] = useState<boolean>(true);
   
   // Check if we should auto-start with specific pillar
   useEffect(() => {
@@ -114,12 +117,16 @@ export const GuidedAssessmentFlow: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Load onboarding data and generate recommendations
+  // Load onboarding data and check assessment status
   useEffect(() => {
     const loadRecommendations = async () => {
       if (!user) return;
       
       try {
+        // Check if user has completed any assessments
+        const hasCompleted = await hasCompletedWelcomeAssessment();
+        setIsFirstAssessment(!hasCompleted);
+        
         const data = await getOnboardingData(user.id);
         setOnboardingData(data);
         
@@ -133,7 +140,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
     };
     
     loadRecommendations();
-  }, [user, getOnboardingData]);
+  }, [user, getOnboardingData, hasCompletedWelcomeAssessment]);
 
   const generateAssessmentOptions = (): AssessmentOption[] => {
     if (!recommendations) {
@@ -182,9 +189,15 @@ export const GuidedAssessmentFlow: React.FC = () => {
             <h3 className="font-semibold text-blue-900">Stefan säger:</h3>
           </div>
           <p className="text-blue-800 text-left">
-            "Hej! Jag har analyserat din onboarding och kan rekommendera de assessments 
-            som passar bäst för dina mål. Varje assessment tar 8-15 minuter och ger dig 
-            personliga insikter samt en handlingsplan."
+            {isFirstAssessment ? (
+              `"Hej! Välkommen till din utvecklingsresa! Jag är Stefan, din AI-coach. 
+              Baserat på ditt onboarding kan jag föreslå vilken assessment som passar dig bäst som start. 
+              Varje assessment tar 8-15 minuter och ger dig personliga insikter samt en handlingsplan."`
+            ) : (
+              `"Hej igen! Jag har analyserat dina tidigare assessments och kan rekommendera 
+              vilka områden som skulle vara bra att utforska härnäst. Varje assessment bygger 
+              på det vi redan vet om dig och ger dig djupare insikter."`
+            )}
           </p>
         </div>
 
