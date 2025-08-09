@@ -143,10 +143,13 @@ const handler = async (req: Request): Promise<Response> => {
       password, 
       firstName, 
       lastName, 
-      role, 
+      role: rawRole, 
       extendedProfile,
       sendInviteEmail = false 
     }: CreateUserRequest = requestBody;
+    
+    // Handle role extraction - it might come as array or string
+    const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
     console.log('Fields extracted:', { 
       email, 
       firstName, 
