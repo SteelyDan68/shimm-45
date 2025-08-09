@@ -88,14 +88,25 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
 
       {/* Quick Actions */}
       <div className="flex gap-2 justify-center">
-        <Button 
-          size="sm"
-          onClick={() => navigate('/six-pillars')}
-          className="flex items-center gap-1"
-        >
-          <Target className="w-4 h-4" />
-          Visa pillars
-        </Button>
+        {stats && stats.completedPillars && stats.completedPillars > 0 ? (
+          <Button 
+            size="sm"
+            onClick={() => navigate('/my-assessments')}
+            className="flex items-center gap-1"
+          >
+            <Target className="w-4 h-4" />
+            Se mina assessments
+          </Button>
+        ) : (
+          <Button 
+            size="sm"
+            onClick={() => navigate('/guided-assessment')}
+            className="flex items-center gap-1"
+          >
+            <Target className="w-4 h-4" />
+            Gör din första assessment
+          </Button>
+        )}
       </div>
 
       {/* Development Overview Content - Flytta hit från utvecklingsöversikt */}

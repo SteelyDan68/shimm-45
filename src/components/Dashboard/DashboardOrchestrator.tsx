@@ -72,14 +72,14 @@ const DashboardContent: React.FC<{
     // Implementera widget-specifika actions
     switch (actionId) {
       case 'start-assessment':
-        // Navigera till pillar assessment flow
-        window.location.href = '/six-pillars?startAssessment=true';
+        // Navigate to guided assessment flow
+        window.location.href = '/guided-assessment';
         break;
       case 'view-tasks':
         window.location.href = '/tasks';
         break;
       case 'view-progress':
-        window.location.href = '/pillar-journey';
+        window.location.href = '/my-assessments';
         break;
       case 'view-pillars':
         window.location.href = '/six-pillars';
