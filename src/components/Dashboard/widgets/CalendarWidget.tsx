@@ -5,19 +5,15 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { WidgetProps } from '../types/dashboard-types';
-import { useCalendarData } from '@/hooks/useCalendarData';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 const CalendarWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
-  const { events = [], loading, error } = useCalendarData({
-    userId: undefined, // Will use auth context
-    dateRange: {
-      start: new Date(),
-      end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
-    }
-  });
+  // Temporarily disable calendar functionality to prevent crashes
+  const events = [];
+  const loading = false;
+  const error = null;
 
   const maxItems = widget.config?.maxItems || 5;
   const upcomingEvents = events?.slice(0, maxItems) || [];
