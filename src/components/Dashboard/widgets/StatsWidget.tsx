@@ -10,15 +10,31 @@ import { WidgetProps } from '../types/dashboard-types';
 
 const StatsWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
   
+  // Mock data för development - ersätt med riktig data från databas
+  const mockStats = {
+    completedPillars: 3,
+    activeTasks: 5,
+    overallProgress: 65,
+    velocityScore: 78,
+    activeClients: 12,
+    averageClientProgress: 72,
+    completedAssessments: 24,
+    totalUsers: 156,
+    systemHealth: 98
+  };
+  
+  // Använd mock data om stats inte finns
+  const currentStats = stats || mockStats;
+  
   const getStatsForRole = () => {
-    if (!stats) return [];
+    if (!currentStats) return [];
     
     // Client stats
     if (widget.permissions.includes('read-own-data')) {
       return [
         {
           label: 'Genomförda Pillars',
-          value: stats.completedPillars || 0,
+          value: currentStats.completedPillars || 0,
           max: 6,
           icon: Target,
           color: 'text-blue-600',
@@ -26,14 +42,14 @@ const StatsWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
         },
         {
           label: 'Aktiva Uppgifter',
-          value: stats.activeTasks || 0,
+          value: currentStats.activeTasks || 0,
           icon: CheckSquare,
           color: 'text-green-600',
           trend: 'stable'
         },
         {
           label: 'Total Progress',
-          value: Math.round(stats.overallProgress || 0),
+          value: Math.round(currentStats.overallProgress || 0),
           max: 100,
           suffix: '%',
           icon: Activity,
@@ -42,7 +58,7 @@ const StatsWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
         },
         {
           label: 'Velocity Score',
-          value: stats.velocityScore || 0,
+          value: currentStats.velocityScore || 0,
           max: 100,
           icon: TrendingUp,
           color: 'text-orange-600',
@@ -56,14 +72,14 @@ const StatsWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
       return [
         {
           label: 'Aktiva Klienter',
-          value: stats.activeClients || 0,
+          value: currentStats.activeClients || 0,
           icon: Users,
           color: 'text-blue-600',
           trend: 'up'
         },
         {
           label: 'Genomsnittlig Progress',
-          value: Math.round(stats.averageClientProgress || 0),
+          value: Math.round(currentStats.averageClientProgress || 0),
           max: 100,
           suffix: '%',
           icon: TrendingUp,
@@ -72,7 +88,7 @@ const StatsWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
         },
         {
           label: 'Slutförda Assessments',
-          value: stats.completedAssessments || 0,
+          value: currentStats.completedAssessments || 0,
           icon: Target,
           color: 'text-purple-600',
           trend: 'stable'
@@ -85,14 +101,14 @@ const StatsWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
       return [
         {
           label: 'Totala Användare',
-          value: stats.totalUsers || 0,
+          value: currentStats.totalUsers || 0,
           icon: Users,
           color: 'text-blue-600',
           trend: 'up'
         },
         {
           label: 'Systemhälsa',
-          value: stats.systemHealth || 0,
+          value: currentStats.systemHealth || 0,
           max: 100,
           suffix: '%',
           icon: Activity,
@@ -101,7 +117,7 @@ const StatsWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
         },
         {
           label: 'Aktiva Klienter',
-          value: stats.activeClients || 0,
+          value: currentStats.activeClients || 0,
           icon: Users,
           color: 'text-purple-600',
           trend: 'stable'

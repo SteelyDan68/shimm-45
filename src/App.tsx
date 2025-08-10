@@ -56,6 +56,7 @@ import { Intelligence } from "./pages/Intelligence";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
 import { IntelligenceHubPage } from "./pages/IntelligenceHub";
 import { DevelopmentOverview } from "./pages/DevelopmentOverview";
+import MyDevelopment from "./pages/MyDevelopment";
 import { TasksPage } from "./pages/Tasks";
 import { CalendarPage } from "./pages/Calendar";
 import { StefanChatPage } from "./pages/StefanChatPage";
@@ -147,7 +148,8 @@ const AppRoutes = () => {
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
                 <Route path="/intelligence/:userId" element={<Intelligence />} />
-                <Route path="/development-overview" element={<DevelopmentOverview />} />
+                 <Route path="/development-overview" element={<DevelopmentOverview />} />
+                 <Route path="/my-development" element={<MyDevelopment />} />
               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
                 
               <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
