@@ -97,7 +97,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
               className="flex items-center gap-1"
             >
               <Target className="w-4 h-4" />
-              Se mina assessments
+              Se mina självskattningar
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button 
@@ -118,33 +118,12 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
             </Button>
           </>
         ) : (
-          <Button 
-            size="sm"
-            onClick={() => navigate('/guided-assessment')}
-            className="flex items-center gap-1"
-          >
-            <Target className="w-4 h-4" />
-            Gör din första assessment
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          // Ingen knapp för första självskattning längre
+          null
         )}
       </div>
 
-      {/* Stefan Guidance */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-500" />
-            Stefan säger
-          </h3>
-          <StefanGuidanceWidget />
-        </div>
-      </div>
-
-      {/* Development Overview Content */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <DevelopmentOverviewContent />
-      </div>
+      {/* Stefan och utvecklingsöversikt flyttat till egna widgets */}
     </div>
   );
 };
