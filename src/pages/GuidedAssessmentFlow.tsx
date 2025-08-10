@@ -179,9 +179,9 @@ export const GuidedAssessmentFlow: React.FC = () => {
         <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center mb-4">
           <Brain className="w-8 h-8 text-white" />
         </div>
-        <CardTitle className="text-2xl">Dags för din assessment!</CardTitle>
+        <CardTitle className="text-2xl">Dags för din självskattning!</CardTitle>
         <CardDescription className="text-base">
-          Stefan hjälper dig hitta rätt assessment baserat på dina mål och behov
+          Stefan hjälper dig hitta rätt självskattning baserat på dina mål och behov
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -195,18 +195,18 @@ export const GuidedAssessmentFlow: React.FC = () => {
           <p className="text-blue-800 text-left">
             {isFirstAssessment ? (
               `"Hej! Välkommen till din utvecklingsresa! Jag är Stefan, din AI-coach. 
-              Baserat på ditt onboarding kan jag föreslå vilken assessment som passar dig bäst som start. 
-              Varje assessment tar 8-15 minuter och ger dig personliga insikter samt en handlingsplan."`
+               Baserat på ditt onboarding kan jag föreslå vilken självskattning som passar dig bäst som start. 
+               Varje självskattning tar 8-15 minuter och ger dig personliga insikter samt en handlingsplan."`
             ) : (
-              `"Hej igen! Jag har analyserat dina tidigare assessments och kan rekommendera 
-              vilka områden som skulle vara bra att utforska härnäst. Varje assessment bygger 
-              på det vi redan vet om dig och ger dig djupare insikter."`
+               `"Hej igen! Jag har analyserat dina tidigare självskattningar och kan rekommendera 
+               vilka områden som skulle vara bra att utforska härnäst. Varje självskattning bygger 
+               på det vi redan vet om dig och ger dig djupare insikter."`
             )}
           </p>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="font-semibold">Vad händer efter din assessment?</h3>
+         <div className="space-y-4">
+           <h3 className="font-semibold">Vad händer efter din självskattning?</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex flex-col items-center gap-2">
               <div className="p-3 bg-green-100 rounded-full">
@@ -241,9 +241,9 @@ export const GuidedAssessmentFlow: React.FC = () => {
         <Button 
           size="lg" 
           className="w-full" 
-          onClick={() => setCurrentStep(isFirstAssessment ? 'intent' : 'recommendations')}
-        >
-          {isFirstAssessment ? 'Berätta om dina mål' : 'Se Stefans rekommendationer'}
+           onClick={() => setCurrentStep(isFirstAssessment ? 'intent' : 'recommendations')}
+         >
+           {isFirstAssessment ? 'Berätta om dina mål' : 'Se Stefans rekommendationer'}
           <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </CardContent>
@@ -265,7 +265,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
             </CardTitle>
             <CardDescription>
               {recommendations ? getRecommendationSummary(recommendations) : 
-               'Här är assessments som passar dina mål bäst'}
+               'Här är självskattningar som passar dina mål bäst'}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -331,7 +331,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
 
         {others.length > 0 && (
           <div className="space-y-4">
-            <Badge variant="secondary">Andra assessments</Badge>
+            <Badge variant="secondary">Andra självskattningar</Badge>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {others.map((option) => {
                 const IconComponent = option.icon;
@@ -378,7 +378,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
             onClick={() => setCurrentStep('ready')}
             className="px-8"
           >
-            {selectedPillar ? `Fortsätt med ${PILLAR_OPTIONS[selectedPillar]?.name}` : 'Välj en assessment'}
+            {selectedPillar ? `Fortsätt med ${PILLAR_OPTIONS[selectedPillar]?.name}` : 'Välj en självskattning'}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
@@ -404,7 +404,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
           >
             <IconComponent className="w-8 h-8" />
           </div>
-          <CardTitle className="text-2xl">Redo för {option.name} Assessment</CardTitle>
+          <CardTitle className="text-2xl">Redo för {option.name} Självskattning</CardTitle>
           <CardDescription className="text-base">
             {option.description}
           </CardDescription>
@@ -440,7 +440,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
             className="w-full"
             onClick={handleStartAssessment}
           >
-            Starta {option.name} Assessment
+            Starta {option.name} Självskattning
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
 
@@ -448,7 +448,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
             variant="outline" 
             onClick={() => setCurrentStep('recommendations')}
           >
-            Välj en annan assessment
+            Välj en annan självskattning
           </Button>
         </CardContent>
       </Card>

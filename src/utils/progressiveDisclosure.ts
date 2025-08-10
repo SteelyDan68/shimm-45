@@ -88,8 +88,8 @@ export function getContextualGuidance(userLevel: UserExperienceLevel, currentRou
   // Nya användare
   if (level === 'beginner' && completedPillars === 0) {
     return {
-      message: 'Välkommen! Låt oss börja med din första assessment för att förstå dina mål.',
-      action: { label: 'Starta assessment', href: '/guided-assessment' },
+      message: 'Välkommen! Låt oss börja med din första självskattning för att förstå dina mål.',
+      action: { label: 'Starta självskattning', href: '/guided-assessment' },
       priority: 'high'
     };
   }

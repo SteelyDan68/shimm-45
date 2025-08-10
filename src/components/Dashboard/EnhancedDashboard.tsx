@@ -242,7 +242,7 @@ export const EnhancedDashboard = ({ userId, userName }: EnhancedDashboardProps) 
               </h4>
               <p className="text-sm text-muted-foreground">
                 {journeyState?.next_recommended_assessment 
-                  ? `Rekommenderat: ${journeyState.next_recommended_assessment} bedömning`
+                  ? `Rekommenderat: ${journeyState.next_recommended_assessment} självskattning`
                   : 'Utforska dina utvecklingsområden'
                 }
               </p>

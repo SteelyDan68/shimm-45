@@ -1,9 +1,9 @@
 /**
- * UNIVERSELL ASSESSMENT STATE CARD
+ * UNIVERSELL SJÄLVSKATTNINGS STATE CARD
  * 
- * Unified component för hantering av alla assessment states:
+ * Unified component för hantering av alla självskattnings states:
  * - NOT_STARTED, IN_PROGRESS, COMPLETED, EXPIRED, ERROR
- * - Konsekvent UX pattern för alla assessment typer
+ * - Konsekvent UX pattern för alla självskattnings typer
  * - Kontrollerad användarresa med tydlig messaging
  */
 
@@ -338,7 +338,7 @@ export const AssessmentStateCard = (props: AssessmentStateData) => {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-green-600">
               <CheckCircle className="h-5 w-5" />
-              <span className="font-medium">Assessment slutförd!</span>
+              <span className="font-medium">Självskattning slutförd!</span>
             </div>
             
             <p className="text-muted-foreground">

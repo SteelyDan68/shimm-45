@@ -166,7 +166,7 @@ export const MyAssessments: React.FC = () => {
               </div>
               <div>
                 <CardTitle className="text-2xl">
-                  {pillarConfig?.name || assessment.pillar_type} Assessment
+                  {pillarConfig?.name || assessment.pillar_type} Självskattning
                 </CardTitle>
                 <CardDescription>
                   Genomförd {formatAssessmentDate(assessment.created_at)}
@@ -300,7 +300,7 @@ export const MyAssessments: React.FC = () => {
     return (
       <div className="p-8 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p>Laddar dina assessments...</p>
+        <p>Laddar dina självskattningar...</p>
       </div>
     );
   }
@@ -319,11 +319,11 @@ export const MyAssessments: React.FC = () => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <FileText className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Mina Assessments</h1>
+          <h1 className="text-3xl font-bold">Mina Självskattningar</h1>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Här ser du alla dina genomförda assessments formaterade som vackra rapporter. 
-          Varje assessment visar dina svar och poäng inom respektive område.
+          Här ser du alla dina genomförda självskattningar formaterade som vackra rapporter. 
+          Varje självskattning visar dina svar och poäng inom respektive område.
         </p>
       </div>
 
@@ -333,13 +333,13 @@ export const MyAssessments: React.FC = () => {
           <TrendingUp className="h-4 w-4" />
           <AlertDescription className="text-center">
             <div className="space-y-3">
-              <p><strong>Du har inte genomfört några assessments än.</strong></p>
-              <p>Börja med att göra din första assessment för att få personliga insikter och rekommendationer från Stefan AI.</p>
+              <p><strong>Du har inte genomfört några självskattningar än.</strong></p>
+              <p>Börja med att göra din första självskattning för att få personliga insikter och rekommendationer från Stefan AI.</p>
               <Button 
                 className="mt-3"
                 onClick={() => navigate('/client-dashboard?startAssessment=true')}
               >
-                Gör din första assessment
+                Gör din första självskattning
               </Button>
             </div>
           </AlertDescription>
@@ -351,13 +351,13 @@ export const MyAssessments: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
-              Dina Genomförda Assessments ({assessments.length})
+              Dina Genomförda Självskattningar ({assessments.length})
             </h2>
             <Button 
               variant="outline"
               onClick={() => navigate('/client-dashboard?startAssessment=true')}
             >
-              Gör ny assessment
+              Gör ny självskattning
             </Button>
           </div>
 

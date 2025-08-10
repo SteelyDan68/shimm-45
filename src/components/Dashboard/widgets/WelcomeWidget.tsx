@@ -97,7 +97,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
               className="flex items-center gap-1"
             >
               <Target className="w-4 h-4" />
-              Se mina assessments
+              Se mina självskattningar
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button 
@@ -124,7 +124,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
             className="flex items-center gap-1"
           >
             <Target className="w-4 h-4" />
-            Gör din första assessment
+            Gör din första självskattning
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         )}

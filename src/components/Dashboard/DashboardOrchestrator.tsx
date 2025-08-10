@@ -56,7 +56,7 @@ const DashboardContent: React.FC<{
     
     if (state.currentRole === 'client') {
       actions.push(
-        { id: 'start-assessment', label: 'Starta Assessment', permissions: ['complete-assessments'] },
+        { id: 'start-assessment', label: 'Starta Självskattning', permissions: ['complete-assessments'] },
         { id: 'view-tasks', label: 'Se Uppgifter', permissions: ['manage-own-tasks'] }
       );
     } else if (state.currentRole === 'coach') {
