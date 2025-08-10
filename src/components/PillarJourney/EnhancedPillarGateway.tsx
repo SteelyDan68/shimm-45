@@ -222,7 +222,7 @@ const EnhancedPillarGateway: React.FC<EnhancedPillarGatewayProps> = ({
                     onClick={() => handlePillarClick(pillarKey)}
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    Starta självskattning
+                    Starta assessment
                   </Button>
                 )}
                 

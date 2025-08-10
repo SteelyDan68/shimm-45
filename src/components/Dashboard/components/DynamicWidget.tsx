@@ -14,9 +14,6 @@ import { cn } from '@/lib/utils';
 // 🚀 LAZY LOADED WIDGETS för optimal prestanda
 const WelcomeWidget = lazy(() => import('../widgets/WelcomeWidget'));
 const ClientSimplifiedWidget = lazy(() => import('../widgets/ClientSimplifiedWidget'));
-const SelfAssessmentPromoWidget = lazy(() => import('../widgets/SelfAssessmentPromoWidget'));
-const StefanGuidanceWidget = lazy(() => import('../widgets/StefanGuidanceWidget'));
-const DevelopmentOverviewWidget = lazy(() => import('../widgets/DevelopmentOverviewWidget'));
 const StatsWidget = lazy(() => import('../widgets/StatsWidget'));
 const PillarProgressWidget = lazy(() => import('../widgets/PillarProgressWidget'));
 const TasksWidget = lazy(() => import('../widgets/TasksWidget'));
@@ -35,9 +32,6 @@ const UserManagementWidget = lazy(() => import('../widgets/UserManagementWidget'
 const WIDGET_COMPONENTS = {
   'welcome': WelcomeWidget,
   'client-simplified': ClientSimplifiedWidget,
-  'self-assessment-promo': SelfAssessmentPromoWidget,
-  'stefan-guidance': StefanGuidanceWidget,
-  'development-overview': DevelopmentOverviewWidget,
   'stats': StatsWidget,
   'pillar-progress': PillarProgressWidget,
   'tasks': TasksWidget,

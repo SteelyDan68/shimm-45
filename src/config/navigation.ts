@@ -42,7 +42,6 @@ export const NAVIGATION_ROUTES = {
   DASHBOARD: "/dashboard",
   CLIENT_DASHBOARD: "/client-dashboard", 
   COACH_DASHBOARD: "/coach",
-  CLIENT_SETTINGS: "/client-settings",
   
   // User management - SINGLE SOURCE OF TRUTH: ONLY user_id
   UNIFIED_USERS: "/unified-users",
@@ -83,25 +82,39 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     items: [
       // SUPERADMIN & ADMIN DASHBOARDS
       {
-        title: "Översikt",
+        title: "Dashboard",
         url: NAVIGATION_ROUTES.DASHBOARD,
         icon: Home,
         roles: ["superadmin", "admin"],
         exact: true
       },
       {
-        title: "Coach Översikt", 
+        title: "Coach Dashboard", 
         url: NAVIGATION_ROUTES.COACH_DASHBOARD,
         icon: TrendingUp,
         roles: ["coach", "admin"],
         exact: true
       },
       {
-        title: "Översikt",
+        title: "Dashboard",
         url: NAVIGATION_ROUTES.CLIENT_DASHBOARD,
         icon: Home, 
         roles: ["client"],
         exact: true
+      },
+      // CLIENT NAVIGATION
+      {
+        title: "Six Pillars", 
+        url: NAVIGATION_ROUTES.SIX_PILLARS, 
+        icon: TrendingUp,
+        roles: ["client"]
+      },
+      // Ta bort "Min Utvecklingsöversikt" från navigation
+      {
+        title: "Min Utvecklingsanalys", 
+        url: "/user-analytics", 
+        icon: BarChart3,
+        roles: ["client"]
       },
       {
         title: "Uppgifter", 
@@ -109,36 +122,30 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         icon: CheckSquare,
         roles: ["client"]
       },
-        {
-          title: "Kalender", 
-          url: NAVIGATION_ROUTES.CALENDAR, 
-          icon: Calendar,
-          roles: ["client", "coach"]
-        },
-        {
-          title: "Självskattningar",
-          url: NAVIGATION_ROUTES.ONBOARDING,
-          icon: ClipboardList,
-          roles: ["client"]
-        },
-        {
-          title: "AI-analyser",
-          url: "/user-analytics",
-          icon: BarChart3,
-          roles: ["client"]
-        },
-        {
-          title: "Program",
-          url: NAVIGATION_ROUTES.SIX_PILLARS,
-          icon: TrendingUp,
-          roles: ["client"]
-        },
-        {
-          title: "Meddelanden",
-          url: NAVIGATION_ROUTES.MESSAGES,
-          icon: MessageSquare,
-          roles: ["superadmin", "admin", "coach"]
-        }
+      {
+        title: "Kalender", 
+        url: NAVIGATION_ROUTES.CALENDAR, 
+        icon: Calendar,
+        roles: ["client", "coach"]
+      },
+      {
+        title: "Min Profil", 
+        url: NAVIGATION_ROUTES.EDIT_PROFILE, 
+        icon: User,
+        roles: ["client"]
+      },
+      {
+        title: "Mobil",
+        url: NAVIGATION_ROUTES.MOBILE,
+        icon: Smartphone,
+        roles: ["client"]
+      },
+      {
+        title: "Meddelanden",
+        url: NAVIGATION_ROUTES.MESSAGES,
+        icon: MessageSquare,
+        roles: ["superadmin", "admin", "coach", "client"]
+      }
     ]
   },
   {

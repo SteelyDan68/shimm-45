@@ -109,6 +109,7 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2">
           <Sparkles className="w-5 h-5 text-brain" />
+          <span className="font-semibold">Din Utvecklingsresa</span>
           <HelpTooltip content="Six Pillars utvecklingssystem - din progress genom alla sex grundpelare för hållbar framgång." />
         </div>
         

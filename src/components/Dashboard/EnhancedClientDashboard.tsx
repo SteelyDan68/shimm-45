@@ -216,7 +216,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
             ) : (
               <div className="space-y-3">
                 <p className="text-blue-600">
-                  Välkommen! Börja din utvecklingsresa genom att genomföra dina första pillar-självskattningar.
+                  Välkommen! Börja din utvecklingsresa genom att genomföra dina första pillar-assessments.
                 </p>
                 <Button 
                   className="w-full bg-blue-600 hover:bg-blue-700"
@@ -298,7 +298,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                   Inga aktiva utvecklingsplaner just nu.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Genomför en pillar-självskattning för att få personliga aktiviteter!
+                  Genomför en pillar-assessment för att få personliga aktiviteter!
                 </p>
               </div>
             )}
