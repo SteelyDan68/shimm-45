@@ -51,8 +51,8 @@ const CLIENT_CONFIG: DashboardConfig = {
     {
       id: 'self-assessment-promo',
       type: 'self-assessment-promo',
-      title: 'Dags för din självskattning',
-      description: 'Uppdatera din utvecklingsresa med nya insikter',
+      title: 'Börja med en inventering',
+      description: 'Ta en inventering av ditt liv idag',
       icon: Target,
       span: 12,
       minHeight: 250,

@@ -189,30 +189,13 @@ export const AssessmentStateCard = (props: AssessmentStateData) => {
   };
 
   const renderNeuroplasticPrinciple = () => {
-    if (!neuroplasticPrinciple || state !== 'not_started') return null;
-    
-    return (
-      <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-        <div className="flex items-center gap-2 text-sm">
-          <Brain className="h-4 w-4 text-primary" />
-          <span className="font-medium text-primary">
-            Aktuell Neuroplastisk princip:
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground mt-1">{neuroplasticPrinciple}</p>
-      </div>
-    );
+    // Dold enligt användarens önskemål
+    return null;
   };
 
   const renderTimeEstimate = () => {
-    if (!timeEstimate || state === 'completed') return null;
-    
-    return (
-      <div className="text-sm text-muted-foreground">
-        <Clock className="h-3 w-3 inline mr-1" />
-        Beräknad tid: {timeEstimate}
-      </div>
-    );
+    // Dold enligt användarens önskemål  
+    return null;
   };
 
   const renderAIPreview = () => {

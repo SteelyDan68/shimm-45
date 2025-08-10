@@ -21,12 +21,6 @@ const SelfAssessmentPromoWidget: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="text-center space-y-2">
-        <p className="text-sm text-muted-foreground">
-          Uppdatera din utvecklingsresa med nya insikter
-        </p>
-      </div>
-      
       <WelcomeAssessmentCard userId={user.id} />
     </div>
   );
