@@ -22,10 +22,6 @@ const SelfAssessmentPromoWidget: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 text-xl font-semibold">
-          <Target className="w-5 h-5 text-purple-600" />
-          Dags för din självskattning
-        </div>
         <p className="text-sm text-muted-foreground">
           Uppdatera din utvecklingsresa med nya insikter
         </p>

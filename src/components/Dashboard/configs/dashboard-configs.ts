@@ -114,6 +114,20 @@ const CLIENT_CONFIG: DashboardConfig = {
       permissions: ['read-own-data']
     },
     {
+      id: 'six-pillars',
+      label: 'Six Pillars',
+      icon: Target,
+      path: '/six-pillars',
+      permissions: ['complete-assessments']
+    },
+    {
+      id: 'development-journey',
+      label: 'Min utvecklingsresa',
+      icon: TrendingUp,
+      path: '/my-development',
+      permissions: ['read-own-data']
+    },
+    {
       id: 'pillars',
       label: 'Utvecklingsresan',
       icon: Target,
