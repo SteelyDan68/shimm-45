@@ -10,13 +10,6 @@ import StefanGuidanceWidgetComponent from '@/components/Stefan/StefanGuidanceWid
 const StefanGuidanceWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   return (
     <div className="space-y-4">
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
-          <Sparkles className="w-5 h-5 text-blue-500" />
-          Stefan säger
-        </div>
-      </div>
-      
       <StefanGuidanceWidgetComponent />
     </div>
   );

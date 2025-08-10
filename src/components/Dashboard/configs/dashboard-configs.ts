@@ -49,17 +49,17 @@ const CLIENT_CONFIG: DashboardConfig = {
       isConfigurable: false
     },
     {
-      id: 'self-assessment-promo',
-      type: 'self-assessment-promo',
-      title: 'Börja med en inventering',
-      description: 'Ta en inventering av ditt liv idag',
-      icon: Target,
+      id: 'stefan-guidance',
+      type: 'stefan-guidance',
+      title: 'Stefan säger',
+      description: 'Personliga råd och insikter från din AI-coach',
+      icon: Sparkles,
       span: 12,
-      minHeight: 250,
+      minHeight: 200,
       order: 2,
       permissions: ['read-own-data'],
       isVisible: true,
-      isConfigurable: false
+      isConfigurable: true
     },
     {
       id: 'pillar-progress',
@@ -78,32 +78,6 @@ const CLIENT_CONFIG: DashboardConfig = {
         showNextSteps: true
       }
     },
-    {
-      id: 'stefan-guidance',
-      type: 'stefan-guidance',
-      title: 'Stefan säger',
-      description: 'Personliga råd och insikter från din AI-coach',
-      icon: Sparkles,
-      span: 6,
-      minHeight: 200,
-      order: 4,
-      permissions: ['read-own-data'],
-      isVisible: true,
-      isConfigurable: true
-    },
-    {
-      id: 'development-overview',
-      type: 'development-overview',
-      title: 'Utvecklingsöversikt',
-      description: 'Översikt av din utvecklingsresa och framsteg',
-      icon: BarChart3,
-      span: 6,
-      minHeight: 200,
-      order: 5,
-      permissions: ['read-own-data'],
-      isVisible: true,
-      isConfigurable: true
-    }
   ],
   navigation: [
     {
