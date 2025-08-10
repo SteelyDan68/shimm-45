@@ -64,31 +64,13 @@ const CLIENT_CONFIG: DashboardConfig = {
         showDetailed: true,
         showNextSteps: true
       }
-    },
-    // Ta bort widgets: Min utvecklingsanalys, Snabbstatistik, Pågående Uppgifter
-    {
-      id: 'upcoming-calendar',
-      type: 'calendar',
-      title: 'Kommande Aktiviteter',
-      description: 'Dina schemalagda utvecklingsaktiviteter',
-      icon: Calendar,
-      span: 6,
-      minHeight: 250,
-      order: 5,
-      permissions: ['read-own-data'],
-      isVisible: true,
-      isConfigurable: true,
-      config: {
-        maxItems: 5,
-        showTime: true,
-        showCategory: true
-      }
     }
+    // Ta bort widgets: Min utvecklingsanalys, Snabbstatistik, Pågående Uppgifter, Kommande aktiviteter
   ],
   navigation: [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Översikt',
       icon: BarChart3,
       path: '/client-dashboard',
       permissions: ['read-own-data']
@@ -215,7 +197,7 @@ const COACH_CONFIG: DashboardConfig = {
   navigation: [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Översikt',
       icon: BarChart3,
       path: '/coach-dashboard',
       permissions: ['read-client-data']
@@ -346,7 +328,7 @@ const ADMIN_CONFIG: DashboardConfig = {
   navigation: [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Översikt',
       icon: BarChart3,
       path: '/administration',
       permissions: ['admin-all']

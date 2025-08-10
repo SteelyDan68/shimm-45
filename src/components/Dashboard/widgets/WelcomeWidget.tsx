@@ -118,15 +118,8 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
             </Button>
           </>
         ) : (
-          <Button 
-            size="sm"
-            onClick={() => navigate('/guided-assessment')}
-            className="flex items-center gap-1"
-          >
-            <Target className="w-4 h-4" />
-            Gör din första självskattning
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          // Ingen knapp för första självskattning längre
+          null
         )}
       </div>
 

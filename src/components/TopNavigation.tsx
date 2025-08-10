@@ -12,7 +12,8 @@ import {
   LogOut,
   Shield,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  Settings as SettingsIcon
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -99,6 +100,16 @@ export function TopNavigation() {
                     <NavLink to="/administration" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
                       <Shield className="h-4 w-4 mr-3 text-muted-foreground" />
                       <span>Administration</span>
+                    </NavLink>
+                  </DropdownMenuItem>
+                )}
+                
+                {/* KLIENT INSTÄLLNINGAR - Bara synlig för klienter */}
+                {isClient && (
+                  <DropdownMenuItem asChild>
+                    <NavLink to="/client-settings" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                      <SettingsIcon className="h-4 w-4 mr-3 text-muted-foreground" />
+                      <span>Inställningar</span>
                     </NavLink>
                   </DropdownMenuItem>
                 )}

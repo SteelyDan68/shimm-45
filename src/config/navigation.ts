@@ -42,6 +42,7 @@ export const NAVIGATION_ROUTES = {
   DASHBOARD: "/dashboard",
   CLIENT_DASHBOARD: "/client-dashboard", 
   COACH_DASHBOARD: "/coach",
+  CLIENT_SETTINGS: "/client-settings",
   
   // User management - SINGLE SOURCE OF TRUTH: ONLY user_id
   UNIFIED_USERS: "/unified-users",
@@ -82,21 +83,21 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     items: [
       // SUPERADMIN & ADMIN DASHBOARDS
       {
-        title: "Dashboard",
+        title: "Översikt",
         url: NAVIGATION_ROUTES.DASHBOARD,
         icon: Home,
         roles: ["superadmin", "admin"],
         exact: true
       },
       {
-        title: "Coach Dashboard", 
+        title: "Coach Översikt", 
         url: NAVIGATION_ROUTES.COACH_DASHBOARD,
         icon: TrendingUp,
         roles: ["coach", "admin"],
         exact: true
       },
       {
-        title: "Dashboard",
+        title: "Översikt",
         url: NAVIGATION_ROUTES.CLIENT_DASHBOARD,
         icon: Home, 
         roles: ["client"],
@@ -127,18 +128,6 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         url: NAVIGATION_ROUTES.CALENDAR, 
         icon: Calendar,
         roles: ["client", "coach"]
-      },
-      {
-        title: "Min Profil", 
-        url: NAVIGATION_ROUTES.EDIT_PROFILE, 
-        icon: User,
-        roles: ["client"]
-      },
-      {
-        title: "Mobil",
-        url: NAVIGATION_ROUTES.MOBILE,
-        icon: Smartphone,
-        roles: ["client"]
       },
       {
         title: "Meddelanden",
