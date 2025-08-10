@@ -39,7 +39,7 @@ const CLIENT_CONFIG: DashboardConfig = {
       id: 'welcome',
       type: 'welcome',
       title: 'Välkommen',
-      description: 'Personlig översikt och välkomstmeddelande',
+      description: 'Hej! Jag är Stefan, din AI-guide. För att kunna hjälpa dig bäst behöver jag först förstå dig bättre. Låt oss börja med några enkla frågor om ditt liv så förstår vi vad du behöver.',
       icon: Sparkles,
       span: 12,
       minHeight: 200,
