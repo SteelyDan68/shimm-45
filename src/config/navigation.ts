@@ -103,38 +103,42 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         roles: ["client"],
         exact: true
       },
-      // CLIENT NAVIGATION
-      {
-        title: "Six Pillars", 
-        url: NAVIGATION_ROUTES.SIX_PILLARS, 
-        icon: TrendingUp,
-        roles: ["client"]
-      },
-      // Ta bort "Min Utvecklingsöversikt" från navigation
-      {
-        title: "Min Utvecklingsanalys", 
-        url: "/user-analytics", 
-        icon: BarChart3,
-        roles: ["client"]
-      },
       {
         title: "Uppgifter", 
         url: NAVIGATION_ROUTES.TASKS, 
         icon: CheckSquare,
         roles: ["client"]
       },
-      {
-        title: "Kalender", 
-        url: NAVIGATION_ROUTES.CALENDAR, 
-        icon: Calendar,
-        roles: ["client", "coach"]
-      },
-      {
-        title: "Meddelanden",
-        url: NAVIGATION_ROUTES.MESSAGES,
-        icon: MessageSquare,
-        roles: ["superadmin", "admin", "coach", "client"]
-      }
+        {
+          title: "Kalender", 
+          url: NAVIGATION_ROUTES.CALENDAR, 
+          icon: Calendar,
+          roles: ["client", "coach"]
+        },
+        {
+          title: "Självskattningar",
+          url: NAVIGATION_ROUTES.ONBOARDING,
+          icon: ClipboardList,
+          roles: ["client"]
+        },
+        {
+          title: "AI-analyser",
+          url: "/user-analytics",
+          icon: BarChart3,
+          roles: ["client"]
+        },
+        {
+          title: "Program",
+          url: NAVIGATION_ROUTES.SIX_PILLARS,
+          icon: TrendingUp,
+          roles: ["client"]
+        },
+        {
+          title: "Meddelanden",
+          url: NAVIGATION_ROUTES.MESSAGES,
+          icon: MessageSquare,
+          roles: ["superadmin", "admin", "coach"]
+        }
     ]
   },
   {
