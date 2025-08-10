@@ -123,21 +123,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
         )}
       </div>
 
-      {/* Stefan Guidance */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-500" />
-            Stefan säger
-          </h3>
-          <StefanGuidanceWidget />
-        </div>
-      </div>
-
-      {/* Development Overview Content */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <DevelopmentOverviewContent />
-      </div>
+      {/* Stefan och utvecklingsöversikt flyttat till egna widgets */}
     </div>
   );
 };

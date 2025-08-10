@@ -77,8 +77,33 @@ const CLIENT_CONFIG: DashboardConfig = {
         showDetailed: true,
         showNextSteps: true
       }
+    },
+    {
+      id: 'stefan-guidance',
+      type: 'stefan-guidance',
+      title: 'Stefan säger',
+      description: 'Personliga råd och insikter från din AI-coach',
+      icon: Sparkles,
+      span: 6,
+      minHeight: 200,
+      order: 4,
+      permissions: ['read-own-data'],
+      isVisible: true,
+      isConfigurable: true
+    },
+    {
+      id: 'development-overview',
+      type: 'development-overview',
+      title: 'Utvecklingsöversikt',
+      description: 'Översikt av din utvecklingsresa och framsteg',
+      icon: BarChart3,
+      span: 6,
+      minHeight: 200,
+      order: 5,
+      permissions: ['read-own-data'],
+      isVisible: true,
+      isConfigurable: true
     }
-    // Ta bort widgets: Min utvecklingsanalys, Snabbstatistik, Pågående Uppgifter, Kommande aktiviteter
   ],
   navigation: [
     {

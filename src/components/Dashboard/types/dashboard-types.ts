@@ -18,6 +18,8 @@ export type WidgetType =
   | 'stats' 
   | 'pillar-progress'
   | 'self-assessment-promo'
+  | 'stefan-guidance'
+  | 'development-overview'
   | 'tasks'
   | 'calendar'
   | 'client-analytics'
