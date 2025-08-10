@@ -34,7 +34,7 @@ const ClientSimplifiedWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
           id: 'first-assessment',
           title: 'Gör din första assessment',
           description: 'Stefan behöver förstå dig för att ge personliga rekommendationer',
-          action: 'Starta självskattning',
+          action: 'Starta assessment',
           href: '/guided-assessment',
           priority: 'high',
           icon: Target

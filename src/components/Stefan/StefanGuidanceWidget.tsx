@@ -80,7 +80,7 @@ const StefanGuidanceWidget = () => {
         id: 'no-assessments',
         type: 'recommendation',
         title: 'Välkommen till din utvecklingsresa!',
-        message: 'Hej! Jag är Stefan, din AI-guide. För att kunna hjälpa dig bäst behöver jag först förstå dig bättre. Låt oss börja med några enkla frågor om ditt liv så förstår vi vad du behöver.',
+        message: 'Hej! Jag är Stefan, din AI-guide. För att kunna hjälpa dig bäst behöver jag först förstå dig bättre. Låt oss börja med din första assessment.',
         action: {
           label: 'Gör din första assessment',
           href: '/guided-assessment'

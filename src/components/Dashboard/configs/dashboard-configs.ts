@@ -49,19 +49,6 @@ const CLIENT_CONFIG: DashboardConfig = {
       isConfigurable: false
     },
     {
-      id: 'stefan-guidance',
-      type: 'stefan-guidance',
-      title: 'Stefan säger',
-      description: 'Personliga råd och insikter från din AI-coach',
-      icon: Sparkles,
-      span: 12,
-      minHeight: 200,
-      order: 2,
-      permissions: ['read-own-data'],
-      isVisible: true,
-      isConfigurable: true
-    },
-    {
       id: 'pillar-progress',
       type: 'pillar-progress', 
       title: 'Din Utvecklingsresa',
@@ -69,7 +56,7 @@ const CLIENT_CONFIG: DashboardConfig = {
       icon: Target,
       span: 8,
       minHeight: 300,
-      order: 3,
+      order: 2,
       permissions: ['read-own-data'],
       isVisible: true,
       isConfigurable: true,
@@ -78,67 +65,40 @@ const CLIENT_CONFIG: DashboardConfig = {
         showNextSteps: true
       }
     },
+    // Ta bort widgets: Min utvecklingsanalys, Snabbstatistik, Pågående Uppgifter
     {
-      id: 'quick-stats',
-      type: 'stats',
-      title: 'Snabbstatistik',
-      description: 'Översikt av din utvecklingsprogress',
-      icon: TrendingUp,
-      span: 4,
-      minHeight: 300,
-      order: 4,
-      permissions: ['read-own-data'],
-      isVisible: true,
-      isConfigurable: true
-    },
-    {
-      id: 'recent-achievements',
-      type: 'activity-feed',
-      title: 'Senaste prestationer',
-      description: 'Dina senaste framsteg och milstolpar',
-      icon: Trophy,
-      span: 8,
-      minHeight: 200,
+      id: 'upcoming-calendar',
+      type: 'calendar',
+      title: 'Kommande Aktiviteter',
+      description: 'Dina schemalagda utvecklingsaktiviteter',
+      icon: Calendar,
+      span: 6,
+      minHeight: 250,
       order: 5,
       permissions: ['read-own-data'],
       isVisible: true,
-      isConfigurable: true
-    },
-    {
-      id: 'upcoming-tasks',
-      type: 'tasks',
-      title: 'Kommande uppgifter',
-      description: 'Dina nästa steg i utvecklingsresan',
-      icon: CheckSquare,
-      span: 4,
-      minHeight: 200,
-      order: 6,
-      permissions: ['manage-own-tasks'],
-      isVisible: true,
-      isConfigurable: true
-    },
+      isConfigurable: true,
+      config: {
+        maxItems: 5,
+        showTime: true,
+        showCategory: true
+      }
+    }
   ],
   navigation: [
     {
       id: 'dashboard',
-      label: 'Översikt',
+      label: 'Dashboard',
       icon: BarChart3,
       path: '/client-dashboard',
       permissions: ['read-own-data']
     },
     {
-      id: 'six-pillars',
-      label: 'Six Pillars',
+      id: 'pillars',
+      label: 'Utvecklingsresan',
       icon: Target,
       path: '/six-pillars',
       permissions: ['complete-assessments']
-    },
-    {
-      id: 'development-journey',
-      label: 'Min utvecklingsresa',
-      icon: TrendingUp,
-      path: '/my-development',
-      permissions: ['read-own-data']
     },
     {
       id: 'tasks',
@@ -255,7 +215,7 @@ const COACH_CONFIG: DashboardConfig = {
   navigation: [
     {
       id: 'dashboard',
-      label: 'Översikt',
+      label: 'Dashboard',
       icon: BarChart3,
       path: '/coach-dashboard',
       permissions: ['read-client-data']
@@ -386,7 +346,7 @@ const ADMIN_CONFIG: DashboardConfig = {
   navigation: [
     {
       id: 'dashboard',
-      label: 'Översikt',
+      label: 'Dashboard',
       icon: BarChart3,
       path: '/administration',
       permissions: ['admin-all']

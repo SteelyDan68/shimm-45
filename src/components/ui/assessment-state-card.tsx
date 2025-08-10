@@ -1,9 +1,9 @@
 /**
- * UNIVERSELL SJÄLVSKATTNINGS STATE CARD
+ * UNIVERSELL ASSESSMENT STATE CARD
  * 
- * Unified component för hantering av alla självskattnings states:
+ * Unified component för hantering av alla assessment states:
  * - NOT_STARTED, IN_PROGRESS, COMPLETED, EXPIRED, ERROR
- * - Konsekvent UX pattern för alla självskattnings typer
+ * - Konsekvent UX pattern för alla assessment typer
  * - Kontrollerad användarresa med tydlig messaging
  */
 
@@ -189,13 +189,30 @@ export const AssessmentStateCard = (props: AssessmentStateData) => {
   };
 
   const renderNeuroplasticPrinciple = () => {
-    // Dold enligt användarens önskemål
-    return null;
+    if (!neuroplasticPrinciple || state !== 'not_started') return null;
+    
+    return (
+      <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+        <div className="flex items-center gap-2 text-sm">
+          <Brain className="h-4 w-4 text-primary" />
+          <span className="font-medium text-primary">
+            Aktuell Neuroplastisk princip:
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">{neuroplasticPrinciple}</p>
+      </div>
+    );
   };
 
   const renderTimeEstimate = () => {
-    // Dold enligt användarens önskemål  
-    return null;
+    if (!timeEstimate || state === 'completed') return null;
+    
+    return (
+      <div className="text-sm text-muted-foreground">
+        <Clock className="h-3 w-3 inline mr-1" />
+        Beräknad tid: {timeEstimate}
+      </div>
+    );
   };
 
   const renderAIPreview = () => {
@@ -321,7 +338,7 @@ export const AssessmentStateCard = (props: AssessmentStateData) => {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-green-600">
               <CheckCircle className="h-5 w-5" />
-              <span className="font-medium">Självskattning slutförd!</span>
+              <span className="font-medium">Assessment slutförd!</span>
             </div>
             
             <p className="text-muted-foreground">

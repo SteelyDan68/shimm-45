@@ -74,7 +74,7 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
       return {
         ...baseData,
         state: 'completed' as const,
-        description: "Du har slutfört välkomstsjälvskattningen och fått din AI-analys!",
+        description: "Du har slutfört välkomstbedömningen och fått din AI-analys!",
         completedAt: assessmentStatus.latestAssessment?.created_at,
         canStart: false,
         canResume: false,
