@@ -78,6 +78,45 @@ const CLIENT_CONFIG: DashboardConfig = {
         showNextSteps: true
       }
     },
+    {
+      id: 'quick-stats',
+      type: 'stats',
+      title: 'Snabbstatistik',
+      description: 'Översikt av din utvecklingsprogress',
+      icon: TrendingUp,
+      span: 4,
+      minHeight: 300,
+      order: 4,
+      permissions: ['read-own-data'],
+      isVisible: true,
+      isConfigurable: true
+    },
+    {
+      id: 'recent-achievements',
+      type: 'activity-feed',
+      title: 'Senaste prestationer',
+      description: 'Dina senaste framsteg och milstolpar',
+      icon: Trophy,
+      span: 8,
+      minHeight: 200,
+      order: 5,
+      permissions: ['read-own-data'],
+      isVisible: true,
+      isConfigurable: true
+    },
+    {
+      id: 'upcoming-tasks',
+      type: 'tasks',
+      title: 'Kommande uppgifter',
+      description: 'Dina nästa steg i utvecklingsresan',
+      icon: CheckSquare,
+      span: 4,
+      minHeight: 200,
+      order: 6,
+      permissions: ['manage-own-tasks'],
+      isVisible: true,
+      isConfigurable: true
+    },
   ],
   navigation: [
     {
@@ -100,13 +139,6 @@ const CLIENT_CONFIG: DashboardConfig = {
       icon: TrendingUp,
       path: '/my-development',
       permissions: ['read-own-data']
-    },
-    {
-      id: 'pillars',
-      label: 'Utvecklingsresan',
-      icon: Target,
-      path: '/six-pillars',
-      permissions: ['complete-assessments']
     },
     {
       id: 'tasks',
