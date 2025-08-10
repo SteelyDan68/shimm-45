@@ -24,10 +24,10 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
 
   const navigationItems = [
     { label: 'Dashboard', href: '/client-dashboard', icon: '🏠' },
-    { label: 'Assessments', href: '/my-assessments', icon: '📋' },
-    { label: 'Analyser', href: '/my-analyses', icon: '🧠' },
-    { label: 'Program', href: '/my-program', icon: '🎯' },
-    { label: 'Guided Assessment', href: '/guided-assessment', icon: '🚀' }
+    { label: 'Six Pillars', href: '/six-pillars', icon: '🎯' },
+    { label: 'Utvecklingsanalys', href: '/user-analytics', icon: '📊' },
+    { label: 'Uppgifter', href: '/tasks', icon: '✅' },
+    { label: 'Kalender', href: '/calendar', icon: '📅' }
   ];
 
   return (
