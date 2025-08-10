@@ -49,6 +49,19 @@ const CLIENT_CONFIG: DashboardConfig = {
       isConfigurable: false
     },
     {
+      id: 'self-assessment-promo',
+      type: 'self-assessment-promo',
+      title: 'Dags för din självskattning',
+      description: 'Uppdatera din utvecklingsresa med nya insikter',
+      icon: Target,
+      span: 12,
+      minHeight: 250,
+      order: 2,
+      permissions: ['read-own-data'],
+      isVisible: true,
+      isConfigurable: false
+    },
+    {
       id: 'pillar-progress',
       type: 'pillar-progress', 
       title: 'Din Utvecklingsresa',
@@ -56,7 +69,7 @@ const CLIENT_CONFIG: DashboardConfig = {
       icon: Target,
       span: 8,
       minHeight: 300,
-      order: 2,
+      order: 3,
       permissions: ['read-own-data'],
       isVisible: true,
       isConfigurable: true,

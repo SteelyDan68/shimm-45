@@ -17,6 +17,7 @@ export type WidgetType =
   | 'welcome'
   | 'stats' 
   | 'pillar-progress'
+  | 'self-assessment-promo'
   | 'tasks'
   | 'calendar'
   | 'client-analytics'
