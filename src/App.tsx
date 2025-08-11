@@ -104,7 +104,7 @@ const AppRoutes = () => {
           </MobileOptimizedLayout>
         ) : (
           <PageErrorBoundary>
-            <MobileOptimizedLayout showNavigation={false}>
+            <MobileOptimizedLayout>
               <AppLayout>
                 <Suspense fallback={
                   <div className="flex items-center justify-center p-8">

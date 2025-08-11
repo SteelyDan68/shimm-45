@@ -336,7 +336,7 @@ export const DashboardOrchestrator: React.FC<DashboardOrchestratorProps> = ({
   // Full mode - komplett layout med mobile-first design
   return (
     <DashboardProvider userId={effectiveUserId}>
-      <MobileOptimizedLayout className={className}>
+      <MobileOptimizedLayout className={className} showNavigation={false}>
         <DashboardContent 
           stats={dashboardStats}
           layout={layout}
