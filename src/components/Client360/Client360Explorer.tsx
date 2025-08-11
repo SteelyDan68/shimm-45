@@ -38,7 +38,7 @@ export const Client360Explorer: React.FC<Client360ExplorerProps> = ({ initialUse
     try {
       if (!search && !canSeeAll) {
         // For coaches without search, show assigned clients quickly
-        const mapped = assignedClients.map(c => ({ id: c.id, email: c.email, first_name: c.name?.split(' ')[0] || null, last_name: c.name?.split(' ').slice(1).join(' ') || null }));
+        const mapped = assignedClients.map(c => ({ id: c.id, email: c.email, first_name: c.first_name ?? null, last_name: c.last_name ?? null }));
         setResults(mapped);
         return;
       }
