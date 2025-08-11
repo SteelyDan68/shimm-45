@@ -49,7 +49,7 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
     };
 
     const welcomeText = routeMessages[location.pathname as keyof typeof routeMessages] || 
-      'Hej! Jag är din AI-guide genom SHMMS-systemet. Vad kan jag hjälpa dig med idag?';
+      'Hej! Jag är din AI-guide genom SHMMS och vet var du är i systemet. Vad kan jag hjälpa dig med just nu?';
 
     return {
       id: '1',
@@ -187,13 +187,9 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
               <Brain className="text-white text-sm" />
             </div>
             <div>
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                AI-Guide
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                  {pageContext.icon} {pageContext.title}
-                </span>
+              <h3 className="font-semibold text-sm">
+                Stefan guidar dig där du är
               </h3>
-              <p className="text-xs text-muted-foreground">Context-aware hjälp</p>
             </div>
           </div>
           <div className="flex gap-1">
@@ -278,7 +274,7 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
                 <Input
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder={`Fråga om ${pageContext.title.toLowerCase()}...`}
+                  placeholder="Här finns jag, skriv en fråga"
                   disabled={isLoading}
                   className="flex-1 bg-background/80 backdrop-blur border-primary/20"
                 />
