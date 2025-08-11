@@ -90,7 +90,7 @@ export const ClientAssessmentPage = () => {
               onClick={() => navigate('/client-dashboard')}
               className="mt-4"
             >
-              Tillbaka till dashboard
+              Tillbaka till översikt
             </Button>
           </CardContent>
         </Card>
@@ -107,7 +107,7 @@ export const ClientAssessmentPage = () => {
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Tillbaka till dashboard
+          Tillbaka till översikt
         </Button>
         
         <div className="text-center">

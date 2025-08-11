@@ -182,13 +182,13 @@ export function AssessmentForm({ clientId, clientName, onComplete }: AssessmentF
               variant="outline"
               className="flex-1"
             >
-              Gör ny assessment
+              Gör ny självskattning
             </Button>
             <Button 
               onClick={onComplete}
               className="flex-1"
             >
-              Tillbaka till Dashboard
+              Tillbaka till översikt
             </Button>
           </div>
         </CardContent>

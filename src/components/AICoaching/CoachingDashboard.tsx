@@ -282,7 +282,7 @@ export function CoachingDashboard() {
                 <div className="flex gap-2 justify-center">
                   <Button onClick={() => handleStartSession('assessment')}>
                     <Brain className="h-4 w-4 mr-2" />
-                    Starta Assessment
+                    Starta självskattning
                   </Button>
                   <Button variant="outline" onClick={() => handleStartSession('planning')}>
                     <Target className="h-4 w-4 mr-2" />

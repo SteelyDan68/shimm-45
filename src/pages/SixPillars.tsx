@@ -224,7 +224,7 @@ export const SixPillars = () => {
               onClick={() => navigate('/client-dashboard')}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              Tillbaka till Dashboard för att börja
+              Tillbaka till översikt för att börja
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>

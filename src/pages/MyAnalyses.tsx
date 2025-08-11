@@ -152,7 +152,7 @@ const MyAnalyses = () => {
           </div>
         </div>
         <p className="text-muted-foreground max-w-2xl">
-          Stefans AI-analyser av dina assessments ger dig djupa insikter och personliga rekommendationer för din utvecklingsresa.
+          Stefans AI-analyser av dina självskattningar ger dig djupa insikter och personliga rekommendationer för din utvecklingsresa.
         </p>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdAnalyses) }} />
         <style>{`@media print { .no-print{display:none!important} body{background:white} .card, .container{box-shadow:none!important} }`}</style>
@@ -168,18 +168,18 @@ const MyAnalyses = () => {
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold">Inga analyser än</h2>
               <p className="text-muted-foreground max-w-md">
-                Gör din första assessment så kommer Stefan att analysera dina svar och ge dig personliga insikter.
+                Gör din första självskattning så kommer Stefan att analysera dina svar och ge dig personliga insikter.
               </p>
             </div>
             <div className="flex gap-3">
               <Button asChild>
                 <a href="/guided-assessment">
-                  Gör din första assessment
+                  Gör din första självskattning
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
               <Button variant="outline" asChild>
-                <a href="/client-dashboard">Tillbaka till dashboard</a>
+                <a href="/client-dashboard">Tillbaka till översikt</a>
               </Button>
             </div>
           </div>

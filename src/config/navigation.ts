@@ -82,7 +82,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
     items: [
       // SUPERADMIN & ADMIN DASHBOARDS
       {
-        title: "Dashboard",
+        title: "Översikt",
         url: NAVIGATION_ROUTES.DASHBOARD,
         icon: Home,
         roles: ["superadmin", "admin"],
@@ -96,7 +96,7 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         exact: true
       },
       {
-        title: "Dashboard",
+        title: "Översikt",
         url: NAVIGATION_ROUTES.CLIENT_DASHBOARD,
         icon: Home, 
         roles: ["client"],

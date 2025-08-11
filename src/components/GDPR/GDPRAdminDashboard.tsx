@@ -220,7 +220,7 @@ export const GDPRAdminDashboard: React.FC = () => {
 
       <Tabs defaultValue="dashboard" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="dashboard">Översikt</TabsTrigger>
           <TabsTrigger value="requests">Alla Begäranden</TabsTrigger>
           <TabsTrigger value="notifications">
             Notifikationer

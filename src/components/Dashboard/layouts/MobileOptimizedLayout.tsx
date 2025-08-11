@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Bell, User } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 interface MobileOptimizedLayoutProps {
   children: React.ReactNode;
@@ -23,11 +24,11 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigationItems = [
-    { label: 'Dashboard', href: '/client-dashboard', icon: '🏠' },
-    { label: 'Assessments', href: '/my-assessments', icon: '📋' },
+    { label: 'Översikt', href: '/client-dashboard', icon: '🏠' },
+    { label: 'Självskattning', href: '/my-assessments', icon: '📋' },
     { label: 'Analyser', href: '/my-analyses', icon: '🧠' },
     { label: 'Program', href: '/my-program', icon: '🎯' },
-    { label: 'Guided Assessment', href: '/guided-assessment', icon: '🚀' }
+    { label: 'Guidad självskattning', href: '/guided-assessment', icon: '🚀' }
   ];
 
   return (
@@ -48,15 +49,18 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
                 <nav className="flex flex-col gap-4 mt-6">
                   <div className="px-4 py-2 text-lg font-semibold">SHIMMS</div>
                   {navigationItems.map((item) => (
-                    <a
+                    <NavLink
                       key={item.href}
-                      href={item.href}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-colors"
+                      to={item.href}
+                      className={({ isActive }) => cn(
+                        'flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors',
+                        isActive ? 'bg-muted text-primary' : 'hover:bg-muted'
+                      )}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <span className="text-lg">{item.icon}</span>
                       {item.label}
-                    </a>
+                    </NavLink>
                   ))}
                 </nav>
               </SheetContent>
@@ -86,14 +90,17 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
       {showNavigation && (
         <nav className="hidden md:flex items-center justify-center gap-6 py-4 border-b">
           {navigationItems.map((item) => (
-            <a
+            <NavLink
               key={item.href}
-              href={item.href}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted transition-colors"
+              to={item.href}
+              className={({ isActive }) => cn(
+                'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                isActive ? 'bg-muted text-primary' : 'hover:bg-muted'
+              )}
             >
               <span>{item.icon}</span>
               {item.label}
-            </a>
+            </NavLink>
           ))}
         </nav>
       )}
@@ -107,14 +114,17 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t">
         <div className="flex items-center justify-around py-2">
           {navigationItems.slice(0, 4).map((item) => (
-            <a
+            <NavLink
               key={item.href}
-              href={item.href}
-              className="flex flex-col items-center gap-1 p-2 text-xs font-medium rounded-lg hover:bg-muted transition-colors"
+              to={item.href}
+              className={({ isActive }) => cn(
+                'flex flex-col items-center gap-1 p-2 text-xs font-medium rounded-lg transition-colors',
+                isActive ? 'bg-muted text-primary' : 'hover:bg-muted'
+              )}
             >
               <span className="text-lg">{item.icon}</span>
               <span className="truncate max-w-[60px]">{item.label}</span>
-            </a>
+            </NavLink>
           ))}
         </div>
       </div>
