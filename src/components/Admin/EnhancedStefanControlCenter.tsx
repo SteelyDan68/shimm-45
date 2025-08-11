@@ -338,7 +338,7 @@ export function EnhancedStefanControlCenter() {
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Översikt</TabsTrigger>
-          <TabsTrigger value="assessment">Assessment-integration</TabsTrigger>
+          <TabsTrigger value="assessment">Självskattnings‑integration</TabsTrigger>
           <TabsTrigger value="models">AI-modeller</TabsTrigger>
           <TabsTrigger value="testing">A/B Testing</TabsTrigger>
           <TabsTrigger value="config">Konfiguration</TabsTrigger>
@@ -348,13 +348,13 @@ export function EnhancedStefanControlCenter() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Assessment-baserad AI</CardTitle>
+                <CardTitle>Självskattningsbaserad AI</CardTitle>
                 <CardDescription>Kontextuell Stefan AI med användardata</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Användare med assessment-data</span>
+                    <span className="text-sm font-medium">Användare med självskattningsdata</span>
                     <Badge variant="default">
                       {assessmentStatus ? Math.round((assessmentStatus.usersWithAssessments / assessmentStatus.totalUsers) * 100) : 0}%
                     </Badge>
@@ -403,7 +403,7 @@ export function EnhancedStefanControlCenter() {
         <TabsContent value="assessment" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Assessment-data integration</CardTitle>
+              <CardTitle>Självskattningsdata‑integration</CardTitle>
               <CardDescription>Övervakning av kontextuell AI-prestanda</CardDescription>
             </CardHeader>
             <CardContent>

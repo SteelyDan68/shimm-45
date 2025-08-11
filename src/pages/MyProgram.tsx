@@ -24,6 +24,7 @@ import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { Printer } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const MyProgram = () => {
   const { user } = useAuth();
@@ -230,15 +231,15 @@ const MyProgram = () => {
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold">Inget program än</h2>
               <p className="text-muted-foreground max-w-md">
-                Gör dina assessments så kommer Stefan att skapa personliga handlingsplaner och rekommendationer för dig.
+                Gör dina självskattningar så kommer Stefan att skapa personliga handlingsplaner och rekommendationer för dig.
               </p>
             </div>
             <div className="flex gap-3">
               <Button asChild>
-                <a href="/guided-assessment">
-                  Gör din första assessment
+                <Link to="/guided-assessment">
+                  Gör din första självskattning
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
+                </Link>
               </Button>
               <Button variant="outline" asChild>
                 <a href="/my-analyses">Se analyser</a>
@@ -432,10 +433,10 @@ const MyProgram = () => {
                       </p>
                     </div>
                     <Button variant="outline" asChild>
-                      <a href="/guided-assessment">
-                        Gör fler assessments för nya rekommendationer
+                      <Link to="/guided-assessment">
+                        Gör fler självskattningar för nya rekommendationer
                         <ArrowRight className="ml-2 h-4 w-4" />
-                      </a>
+                      </Link>
                     </Button>
                   </div>
                 </Card>
@@ -489,20 +490,20 @@ const MyProgram = () => {
       {hasProgram && (
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            Vill du ha fler rekommendationer? Gör assessments för andra utvecklingsområden.
+            Vill du ha fler rekommendationer? Gör självskattningar för andra utvecklingsområden.
           </p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" asChild>
-              <a href="/guided-assessment">
-                Gör fler assessments
+              <Link to="/guided-assessment">
+                Gör fler självskattningar
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </Link>
             </Button>
             <Button variant="ghost" asChild>
-              <a href="/my-analyses">
+              <Link to="/my-analyses">
                 Se analyser
                 <RotateCcw className="ml-2 h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </div>
         </div>

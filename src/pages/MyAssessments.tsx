@@ -166,7 +166,7 @@ export const MyAssessments: React.FC = () => {
               </div>
               <div>
                 <CardTitle className="text-2xl">
-                  {pillarConfig?.name || assessment.pillar_type} Assessment
+                  {pillarConfig?.name || assessment.pillar_type} Självskattning
                 </CardTitle>
                 <CardDescription>
                   Genomförd {formatAssessmentDate(assessment.created_at)}

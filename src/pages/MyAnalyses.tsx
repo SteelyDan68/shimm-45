@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { Printer } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const MyAnalyses = () => {
   const { user } = useAuth();
@@ -173,13 +174,13 @@ const MyAnalyses = () => {
             </div>
             <div className="flex gap-3">
               <Button asChild>
-                <a href="/guided-assessment">
+                <Link to="/guided-assessment">
                   Gör din första självskattning
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
+                </Link>
               </Button>
               <Button variant="outline" asChild>
-                <a href="/client-dashboard">Tillbaka till översikt</a>
+                <Link to="/client-dashboard">Tillbaka till översikt</Link>
               </Button>
             </div>
           </div>
@@ -299,15 +300,15 @@ const MyAnalyses = () => {
                   {/* Actions */}
                   <div className="flex gap-2 pt-4 border-t">
                     <Button variant="outline" size="sm" asChild>
-                      <a href={`/my-program?pillar=${assessment.pillar_type}`}>
+                      <Link to={`/my-program?pillar=${assessment.pillar_type}`}>
                         Se handlingsplan
                         <ArrowRight className="ml-2 h-3 w-3" />
-                      </a>
+                      </Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild>
-                      <a href={`/guided-assessment?retake=${assessment.pillar_type}`}>
-                        Gör om assessment
-                      </a>
+                      <Link to={`/guided-assessment?retake=${assessment.pillar_type}`}>
+                        Gör om självskattning
+                      </Link>
                     </Button>
                   </div>
                 </div>
@@ -320,13 +321,13 @@ const MyAnalyses = () => {
       {hasAnalyses && (
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            Vill du få fler analyser? Gör assessments för andra utvecklingsområden.
+            Vill du få fler analyser? Gör självskattningar för andra utvecklingsområden.
           </p>
           <Button variant="outline" asChild>
-            <a href="/guided-assessment">
-              Gör fler assessments
+            <Link to="/guided-assessment">
+              Gör fler självskattningar
               <ArrowRight className="ml-2 h-4 w-4" />
-            </a>
+            </Link>
           </Button>
         </div>
       )}
