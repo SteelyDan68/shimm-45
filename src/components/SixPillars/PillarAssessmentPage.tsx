@@ -10,6 +10,7 @@ import { ModularPillarAssessment } from './ModularPillarAssessment';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Target } from 'lucide-react';
+import { HelpTooltip } from '@/components/HelpTooltip';
 import { PillarKey } from '@/types/sixPillarsModular';
 
 const PILLAR_NAMES: Record<PillarKey, string> = {
@@ -79,7 +80,10 @@ export const PillarAssessmentPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <Target className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">{pillarName} Assessment</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{pillarName} Assessment</h1>
+              <HelpTooltip content={`Självskattning för ${pillarName}. Dina svar används för AI‑analys och rekommendationer.`} />
+            </div>
             <p className="text-muted-foreground">
               Bedöm din nuvarande nivå inom {pillarName.toLowerCase()}
             </p>
@@ -90,7 +94,10 @@ export const PillarAssessmentPage: React.FC = () => {
       {/* Assessment Container */}
       <Card>
         <CardHeader>
-          <CardTitle>Bedömning för {pillarName}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>Bedömning för {pillarName}</CardTitle>
+            <HelpTooltip content={`Denna sektion innehåller alla frågor för ${pillarName}. Du kan spara och återkomma senare.`} />
+          </div>
         </CardHeader>
         <CardContent>
           <ModularPillarAssessment 

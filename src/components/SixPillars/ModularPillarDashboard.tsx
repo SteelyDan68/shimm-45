@@ -130,9 +130,12 @@ export const ModularPillarDashboard = ({
         </div>
         
         {isCoachView && (
-          <Button onClick={() => setShowManager(true)}>
-            Hantera pelare
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setShowManager(true)}>
+              Hantera pelare
+            </Button>
+            <HelpTooltip content="Öppnar coach‑vyn för att aktivera/inaktivera pelare och hantera klientens flöde." />
+          </div>
         )}
       </div>
 
@@ -244,26 +247,30 @@ export const ModularPillarDashboard = ({
                     )}
                     
                     {!isCoachView && (
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={() => setSelectedPillar(pillarKey)}
-                          className="flex-1"
-                          variant={latestAssessment ? "outline" : "default"}
-                          style={latestAssessment ? {} : { backgroundColor: pillarDefinition?.color_code }}
-                        >
-                          {latestAssessment ? "Uppdatera bedömning" : "Gör bedömning"}
-                        </Button>
-                        
-                        {latestAssessment && (
+                      <div className="flex gap-2 items-center">
+                        <div className="flex items-center gap-2 flex-1">
                           <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="text-muted-foreground hover:text-orange-600"
-                            onClick={() => setRetakePillarKey(pillarKey)}
-                            title="Gör om pelare"
+                            onClick={() => setSelectedPillar(pillarKey)}
+                            className="flex-1"
+                            variant={latestAssessment ? "outline" : "default"}
+                            style={latestAssessment ? {} : { backgroundColor: pillarDefinition?.color_code }}
                           >
-                            <RotateCcw className="h-4 w-4" />
+                            {latestAssessment ? "Uppdatera bedömning" : "Gör bedömning"}
                           </Button>
+                          <HelpTooltip content={latestAssessment ? "Uppdatera dina svar för att få en ny AI‑analys." : "Starta första självskattningen för denna pelare."} />
+                        </div>
+                        {latestAssessment && (
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="text-muted-foreground hover:text-orange-600"
+                              onClick={() => setRetakePillarKey(pillarKey)}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
+                            <HelpTooltip content="Börja om. Tidigare sparade svar ersätts när du gör om bedömningen." />
+                          </div>
                         )}
                       </div>
                     )}

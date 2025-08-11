@@ -145,29 +145,32 @@ export const SixPillars = () => {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700">Fördelar:</h4>
-                    <ul className="space-y-1">
-                      {pillar.benefits.map((benefit, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
-                          <span>{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-700">Fördelar:</h4>
+                      <ul className="space-y-1">
+                        {pillar.benefits.map((benefit, idx) => (
+                          <li key={idx} className="flex items-center gap-2 text-sm">
+                            <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                            <span>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        className="w-full mt-4 text-sm sm:text-base px-2 sm:px-4 py-2"
+                        style={{ backgroundColor: pillar.color }}
+                        onClick={() => navigate('/client-dashboard?tab=pillars', { state: { activatePillar: pillar.key } })}
+                      >
+                        <span className="whitespace-normal text-center leading-tight">
+                          Aktivera denna pelare
+                        </span>
+                        <ArrowRight className="h-4 w-4 ml-2 flex-shrink-0" />
+                      </Button>
+                      <HelpTooltip content="Aktiverar pelaren i din översikt och öppnar för självskattning och rekommendationer." />
+                    </div>
                   </div>
-                  <Button 
-                    className="w-full mt-4 text-sm sm:text-base px-2 sm:px-4 py-2"
-                    style={{ backgroundColor: pillar.color }}
-                    onClick={() => navigate('/client-dashboard?tab=pillars', { state: { activatePillar: pillar.key } })}
-                  >
-                    <span className="whitespace-normal text-center leading-tight">
-                      Aktivera denna pelare
-                    </span>
-                    <ArrowRight className="h-4 w-4 ml-2 flex-shrink-0" />
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           ))}
@@ -219,14 +222,17 @@ export const SixPillars = () => {
           </div>
           
           <div className="text-center pt-4">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/client-dashboard')}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Tillbaka till översikt för att börja
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+            <div className="inline-flex items-center gap-2">
+              <Button 
+                size="lg" 
+                onClick={() => navigate('/client-dashboard')}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Tillbaka till översikt för att börja
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <HelpTooltip content="Öppnar din översikt där du kan aktivera pelare och göra självskattningar." />
+            </div>
           </div>
         </CardContent>
       </Card>
