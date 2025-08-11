@@ -17,6 +17,8 @@ import { useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useEnhancedStefanContext } from '@/providers/EnhancedStefanContextProvider';
 import { LiveTaskList } from '@/components/Tasks/LiveTaskList';
+import { ProgramOverviewCard } from '@/components/Program/ProgramOverviewCard';
+import { ActionablePriorityDashboard } from '@/components/ActionablePriorityDashboard';
 
 export function TasksPage() {
   const navigate = useNavigate();

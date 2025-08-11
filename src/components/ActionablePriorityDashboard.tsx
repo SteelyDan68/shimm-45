@@ -51,10 +51,12 @@ interface ActionableItem {
 
 interface ActionablePriorityDashboardProps {
   userId: string;
+  planId?: string;
 }
 
 export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardProps> = ({
-  userId
+  userId,
+  planId
 }) => {
   const [actionables, setActionables] = useState<ActionableItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,15 +66,19 @@ export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardPr
 
   useEffect(() => {
     loadActionables();
-  }, [userId]);
+  }, [userId, planId]);
 
   const loadActionables = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('calendar_actionables')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
+      if (planId) {
+        query = query.eq('plan_id', planId);
+      }
+      const { data, error } = await query;
 
       if (error) throw error;
       setActionables((data || []) as ActionableItem[]);
