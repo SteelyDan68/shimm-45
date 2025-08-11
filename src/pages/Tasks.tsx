@@ -255,13 +255,14 @@ export function TasksPage() {
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <CheckSquare className="w-8 h-8 text-primary" />
             Uppgifter
+            <span className="sr-only">AI-coachade uppgifter för din utveckling</span>
           </h1>
           <p className="text-muted-foreground">
             Dina personliga utvecklingsuppgifter och AI-genererade rekommendationer
           </p>
         </div>
-        <Button onClick={() => navigate('/tasks?action=create')}>
-          <Plus className="mr-2 h-4 w-4" />
+        <Button onClick={() => navigate('/tasks?action=create')} aria-label="Skapa ny uppgift">
+          <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
           Skapa uppgift
         </Button>
       </div>

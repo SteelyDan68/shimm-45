@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,10 +22,31 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { Printer } from 'lucide-react';
 
 const MyProgram = () => {
   const { user } = useAuth();
   const [selectedTab, setSelectedTab] = useState('active');
+
+  useEffect(() => {
+    document.title = 'Mitt program – AI-coachad plan';
+    const desc = 'Se din personliga handlingsplan och rekommendationer. Skriv ut eller spara som PDF.';
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'description');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', desc);
+    let link: HTMLLinkElement | null = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', window.location.origin + '/my-program');
+  }, []);
 
   const { data: recommendations, isLoading } = useQuery({
     queryKey: ['ai-coaching-recommendations', user?.id],
@@ -141,11 +162,25 @@ const MyProgram = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-            <Target className="h-6 w-6" />
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+              <Target className="h-6 w-6" />
+            </div>
+            <h1 className="text-3xl font-bold">Mitt program</h1>
           </div>
-          <h1 className="text-3xl font-bold">Mitt program</h1>
+          <div className="flex items-center gap-2">
+            <HelpTooltip content="Skriv ut eller spara som PDF för att dela ditt program eller jobba offline." />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.print()}
+              aria-label="Skriv ut eller spara som PDF"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Skriv ut / PDF
+            </Button>
+          </div>
         </div>
         <p className="text-muted-foreground max-w-2xl">
           Dina personliga handlingsplaner och rekommendationer baserat på Stefans AI-analyser av dina assessments.

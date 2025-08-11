@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,30 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { Brain, TrendingUp, Target, Calendar, ArrowRight, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { Printer } from 'lucide-react';
 
 const MyAnalyses = () => {
   const { user } = useAuth();
+
+  useEffect(() => {
+    document.title = 'Mina analyser – AI-insikter';
+    const desc = 'Se dina AI-analyser och insikter. Skriv ut eller spara som PDF.';
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'description');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', desc);
+    let link: HTMLLinkElement | null = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', window.location.origin + '/my-analyses');
+  }, []);
 
   const { data: assessmentRounds, isLoading } = useQuery({
     queryKey: ['assessment-rounds', user?.id],
@@ -92,11 +113,25 @@ const MyAnalyses = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-            <Brain className="h-6 w-6" />
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              <Brain className="h-6 w-6" />
+            </div>
+            <h1 className="text-3xl font-bold">Mina analyser</h1>
           </div>
-          <h1 className="text-3xl font-bold">Mina analyser</h1>
+          <div className="flex items-center gap-2">
+            <HelpTooltip content="Skriv ut eller spara som PDF för att dela dina analyser eller läsa offline." />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.print()}
+              aria-label="Skriv ut eller spara som PDF"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Skriv ut / PDF
+            </Button>
+          </div>
         </div>
         <p className="text-muted-foreground max-w-2xl">
           Stefans AI-analyser av dina assessments ger dig djupa insikter och personliga rekommendationer för din utvecklingsresa.

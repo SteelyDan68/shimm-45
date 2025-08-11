@@ -80,8 +80,8 @@ export const ProgramOverviewCard: React.FC<ProgramOverviewCardProps> = ({ onSele
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Target className="h-5 w-5 text-primary" />
-          Ditt program
+          <Target className="h-5 w-5 text-primary" aria-hidden="true" />
+          <span>Ditt program</span>
           <HelpTooltip content="Här ser du en snabb översikt över dina aktiva program och kan filtrera uppgifter per program. Pepp: Du är på rätt väg – välj ett program för laserfokus!" />
         </CardTitle>
       </CardHeader>
