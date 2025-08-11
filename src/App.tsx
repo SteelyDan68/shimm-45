@@ -64,6 +64,7 @@ import { StefanAICentralHub } from "./components/Stefan/StefanAICentralHub";
 import { AIInsights } from "./pages/AIInsights";
 import SystemMapPage from "./pages/SystemMap";
 import NotFound from "./pages/NotFound";
+import { Client360Page } from "./pages/Client360";
 
 const queryClient = new QueryClient();
 
@@ -143,18 +144,20 @@ const AppRoutes = () => {
                <Route path="/collaboration" element={<Collaboration />} />
                 
                 <Route path="/testing" element={<TestingPage />} />
-               <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
-               <Route path="/six-pillars/:pillarKey" element={<SixPillars />} />
-               <Route path="/mobile" element={<Mobile />} />
-                <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
-                <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
-                <Route path="/intelligence/:userId" element={<Intelligence />} />
-                <Route path="/development-overview" element={<DevelopmentOverview />} />
-              <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
-                
-              <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
-              <Route path="/gdpr-management" element={<GDPRManagement />} />
-              <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
+                <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
+                <Route path="/six-pillars/:pillarKey" element={<SixPillars />} />
+                <Route path="/mobile" element={<Mobile />} />
+                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
+                 <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
+                 <Route path="/intelligence/:userId" element={<Intelligence />} />
+                 <Route path="/development-overview" element={<DevelopmentOverview />} />
+               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
+               
+               <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
+               <Route path="/gdpr-management" element={<GDPRManagement />} />
+               <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
+               <Route path={NAVIGATION_ROUTES.CLIENT_360} element={<Client360Page />} />
+               <Route path={NAVIGATION_ROUTES.CLIENT_360_USER(":userId")} element={<Client360Page />} />
                  <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
                <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
                <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />

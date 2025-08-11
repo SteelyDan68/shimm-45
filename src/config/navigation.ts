@@ -43,6 +43,10 @@ export const NAVIGATION_ROUTES = {
   CLIENT_DASHBOARD: "/client-dashboard", 
   COACH_DASHBOARD: "/coach",
   
+  // Client 360 Explorer
+  CLIENT_360: "/client-360",
+  CLIENT_360_USER: (id: string) => `/client-360/${id}`,
+  
   // User management - SINGLE SOURCE OF TRUTH: ONLY user_id
   UNIFIED_USERS: "/unified-users",
   ADMINISTRATION: "/administration",
@@ -156,6 +160,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Unified User Center",
         url: NAVIGATION_ROUTES.UNIFIED_USERS,
         icon: Users,
+        roles: ["superadmin", "admin", "coach"]
+      },
+      {
+        title: "Client 360",
+        url: NAVIGATION_ROUTES.CLIENT_360,
+        icon: Users2,
         roles: ["superadmin", "admin", "coach"]
       },
       {
