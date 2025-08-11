@@ -117,7 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "SHIMMS <noreply@resend.dev>",
+      from: `${Deno.env.get('RESEND_FROM_NAME') || 'SHIMMS'} <${Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@resend.dev'}>`,
       to: [to],
       subject: `Välkommen till SHIMMS, ${firstName || 'ditt utvecklingscentrum väntar'}!`,
       html: emailHtml,

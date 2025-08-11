@@ -156,7 +156,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: `SHIMMS ${isCoachToClient ? 'Coach' : 'Klient'} <messages@resend.dev>`,
+      from: `${Deno.env.get('RESEND_FROM_NAME') || 'SHIMMS'} ${isCoachToClient ? 'Coach' : 'Klient'} <${Deno.env.get('RESEND_FROM_EMAIL') || 'messages@resend.dev'}>`,
       to: [to],
       subject: subjectLine,
       html: emailHtml,

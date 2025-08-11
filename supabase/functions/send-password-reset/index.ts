@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
     const recipientName = name || email.split('@')[0];
 
     const emailResponse = await resend.emails.send({
-      from: 'Security <no-reply@resend.dev>',
+      from: `${Deno.env.get('RESEND_FROM_NAME') || 'Security'} <${Deno.env.get('RESEND_FROM_EMAIL') || 'no-reply@resend.dev'}>`,
       to: [email],
       subject,
       html: `
