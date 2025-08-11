@@ -33,8 +33,10 @@ export default function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
+      // Flagga för bekräftelse-toast på klientdashboard
+      sessionStorage.setItem('showPasswordResetToast', '1');
       toast({ title: 'Klart', description: 'Ditt lösenord är uppdaterat.' });
-      navigate('/');
+      navigate('/client-dashboard', { replace: true });
     } catch (err: any) {
       toast({ title: 'Fel', description: err.message || 'Kunde inte uppdatera lösenord', variant: 'destructive' });
     } finally {
