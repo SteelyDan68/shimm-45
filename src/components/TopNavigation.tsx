@@ -57,7 +57,7 @@ export function TopNavigation() {
         </div>
 
         {/* Navigation Menu for Client */}
-        {isClient && !isMobile && (
+        {isClient && (
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               <NavigationMenuItem>
