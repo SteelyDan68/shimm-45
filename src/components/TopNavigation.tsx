@@ -12,7 +12,8 @@ import {
   LogOut,
   Shield,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  Menu
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,7 +38,7 @@ export function TopNavigation() {
     <header className="h-16 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-40">
       <div className="flex h-full items-center gap-4 px-4">
         {/* Sidebar Toggle - Ensure it's properly contained */}
-        <SidebarTrigger className="h-8 w-8 flex-shrink-0" />
+        {!isClient && <SidebarTrigger className="h-8 w-8 flex-shrink-0" />}
         
         {/* Logo - Hidden on mobile when sidebar is open */}
         <div className={`flex items-center ${isMobile && sidebarOpen ? 'hidden' : ''}`}>
@@ -46,15 +47,45 @@ export function TopNavigation() {
           </NavLink>
         </div>
 
+        {/* Client Primary Nav - only for Client */}
+        {isClient && (
+          <nav className="hidden md:flex items-center gap-2 ml-2">
+            <NavLink to="/six-pillars" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Six Pillars</NavLink>
+            <NavLink to="/user-analytics" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Min utvecklingsanalys</NavLink>
+            <NavLink to="/my-assessments" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Självskattning</NavLink>
+            <NavLink to="/my-analyses" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Analys</NavLink>
+            <NavLink to="/my-program" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Program</NavLink>
+          </nav>
+        )}
+
         {/* Center Search */}
         <div className="flex-1 max-w-md mx-4">
           <GlobalSearchBar variant={isMobile ? "compact" : "full"} className="w-full" />
         </div>
-
         {/* Messages & Quick Actions - Clean and focused */}
         <div className="flex items-center gap-3">
+          {/* Mobile Client Menu */}
+          {isClient && (
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-9 px-2">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Öppna meny</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-popover border shadow-lg z-50">
+                  <DropdownMenuItem asChild><NavLink to="/six-pillars" className="w-full">Six Pillars</NavLink></DropdownMenuItem>
+                  <DropdownMenuItem asChild><NavLink to="/user-analytics" className="w-full">Min utvecklingsanalys</NavLink></DropdownMenuItem>
+                  <DropdownMenuItem asChild><NavLink to="/my-assessments" className="w-full">Självskattning</NavLink></DropdownMenuItem>
+                  <DropdownMenuItem asChild><NavLink to="/my-analyses" className="w-full">Analys</NavLink></DropdownMenuItem>
+                  <DropdownMenuItem asChild><NavLink to="/my-program" className="w-full">Program</NavLink></DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
           <UnifiedNotificationSystem />
-          
           {/* Email - Desktop Only */}
           {!isMobile && (
             <span className="text-sm text-muted-foreground truncate max-w-48">
@@ -79,7 +110,7 @@ export function TopNavigation() {
               </Button>
             </DropdownMenuTrigger>
             
-            <DropdownMenuContent align="end" className="w-72 bg-popover/95 backdrop-blur border shadow-lg">
+            <DropdownMenuContent align="end" className="w-72 bg-popover border shadow-lg z-50">
               {/* User Info Header */}
               <div className="px-3 py-3 border-b border-border">
                 <p className="text-sm font-medium text-foreground truncate" title={user?.email}>

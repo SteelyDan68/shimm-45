@@ -5,6 +5,7 @@ import { AutoBreadcrumbs } from "@/components/Navigation/AutoBreadcrumbs";
 import { MobileContainer } from "@/components/ui/mobile-responsive";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useOptimizedAuth } from "@/hooks/useOptimizedAuth";
 import StefanAIChat from "@/components/StefanAIChat";
 
 interface AppLayoutProps {
@@ -14,16 +15,17 @@ interface AppLayoutProps {
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const { isClient } = useOptimizedAuth();
 
   if (!user) {
     return <>{children}</>;
   }
 
   return (
-    <SidebarProvider defaultOpen={!isMobile} open={undefined}>
+    <SidebarProvider defaultOpen={!isMobile && !isClient} open={undefined}>
       <div className="min-h-screen flex w-full bg-background">
         {/* Sidebar - Desktop Navigation */}
-        <AppSidebar />
+        {!isClient && <AppSidebar />}
         
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
