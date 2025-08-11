@@ -14,6 +14,7 @@ import { useAssessmentSafety } from '@/hooks/useAssessmentSafety';
 import { useAutonomousCoach } from '@/hooks/useAutonomousCoach';
 import { BreadcrumbNavigation } from '@/components/Navigation/BreadcrumbNavigation';
 import { OpenTrackAssessmentForm } from './OpenTrackAssessmentForm';
+import { HelpTooltip } from '@/components/HelpTooltip';
 import { useNavigate } from 'react-router-dom';
 
 interface ModularPillarAssessmentProps {
@@ -156,7 +157,10 @@ export const ModularPillarAssessment = ({
             <div className="flex items-center gap-2">
               <span className="text-2xl">{pillarConfig.icon}</span>
               <div>
-                <CardTitle>{pillarConfig.name} Assessment</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle>{pillarConfig.name} Assessment</CardTitle>
+                  <HelpTooltip content="Besvara frågorna ärligt. Dina svar används för AI-analys och en personlig plan." />
+                </div>
                 <p className="text-sm text-muted-foreground">{pillarConfig.description}</p>
               </div>
             </div>
@@ -164,7 +168,10 @@ export const ModularPillarAssessment = ({
         
         {/* Live Score Preview */}
         <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-          <span className="text-sm font-medium">Förhandsvisning av poäng:</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Förhandsvisning av poäng</span>
+            <HelpTooltip content="En uppskattning av din slutpoäng baserat på nuvarande svar. Uppdateras i realtid." />
+          </div>
           <div className="flex items-center gap-2">
             <span className={`text-lg font-bold ${getScoreColor(getScorePreview())}`}>
               {getScorePreview().toFixed(1)}
@@ -178,7 +185,16 @@ export const ModularPillarAssessment = ({
         {pillarConfig.questions.map((question) => (
           <div key={question.key} className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">{question.text}</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium">{question.text}</Label>
+                <HelpTooltip content={
+                  question.type === 'text'
+                    ? 'Skriv ett kort, konkret svar.'
+                    : question.type === 'multiple_choice'
+                      ? 'Välj det alternativ som passar bäst.'
+                      : 'Dra reglaget till den nivå som stämmer för dig.'
+                } />
+              </div>
               {question.weight && question.weight !== 1 && (
                 <Badge variant="outline" className="text-xs">
                   Vikt: {question.weight}x
@@ -271,24 +287,30 @@ export const ModularPillarAssessment = ({
         </div>
 
         <div className="flex gap-4">
-          <Button 
-            variant="outline"
-            onClick={() => assessmentSafety.manualSave()}
-            disabled={loading}
-            className="flex-1"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Spara och fortsätt senare
-          </Button>
+          <div className="flex items-center gap-2 flex-1">
+            <Button 
+              variant="outline"
+              onClick={() => assessmentSafety.manualSave()}
+              disabled={loading}
+              className="flex-1"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Spara och fortsätt senare
+            </Button>
+            <HelpTooltip content="Sparar dina svar så du kan återkomma utan att förlora framsteg." />
+          </div>
           
-          <Button 
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex-1"
-            size="lg"
-          >
-            {loading ? "Sparar och analyserar..." : "Slutför bedömning & Få AI-analys"}
-          </Button>
+          <div className="flex items-center gap-2 flex-1">
+            <Button 
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex-1"
+              size="lg"
+            >
+              {loading ? "Sparar och analyserar..." : "Slutför bedömning & Få AI-analys"}
+            </Button>
+            <HelpTooltip content="Skickar in din självskattning för AI-analys och sparar den." />
+          </div>
         </div>
       </CardContent>
     </Card>

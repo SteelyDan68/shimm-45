@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { HelpTooltip } from '@/components/HelpTooltip';
 import { Compass, ArrowRight, Lightbulb, Target, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -350,7 +351,10 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
 
     return (
       <div key={question.key} className="space-y-4">
-        <Label className="text-base font-medium">{question.text}</Label>
+        <div className="flex items-center gap-2">
+          <Label className="text-base font-medium">{question.text}</Label>
+          <HelpTooltip content={question.type === 'text' ? 'Skriv ett kort, konkret svar.' : question.type === 'multiple_choice' ? 'Välj det alternativ som passar bäst.' : question.type === 'checkboxes' ? 'Kryssa i alla alternativ som stämmer.' : 'Dra reglaget till den nivå som stämmer för dig.'} />
+        </div>
         
         {question.type === 'text' && (
           <div className="space-y-2">
@@ -442,10 +446,13 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
               <Sparkles className="h-4 w-4 text-yellow-400 absolute -top-1 -right-1" />
             </div>
             <div>
-              <CardTitle className="text-2xl">Öppna spåret - Neuroplastisk utforskning</CardTitle>
-              <CardDescription className="text-base">
-                {currentStepData.description}
-              </CardDescription>
+<div className="flex items-center gap-2">
+  <CardTitle className="text-2xl">Öppna spåret - Neuroplastisk utforskning</CardTitle>
+  <HelpTooltip content="Ett öppet spår där dina svar formar en personlig utvecklingsresa." />
+</div>
+<CardDescription className="text-base">
+  {currentStepData.description}
+</CardDescription>
             </div>
           </div>
           <div className="text-right">
@@ -460,6 +467,7 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
           <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
             <Target className="h-5 w-5 text-purple-500" />
             {currentStepData.title}
+            <HelpTooltip content="För detta steg: besvara frågorna för att hjälpa AI att skräddarsy din plan." />
           </h3>
           <p className="text-muted-foreground text-sm">{currentStepData.description}</p>
         </div>
@@ -469,27 +477,36 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
         </div>
 
         <div className="flex justify-between pt-6 border-t">
-          <Button
-            variant="outline"
-            onClick={prevStep}
-            disabled={currentStep === 0}
-          >
-            Föregående
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={prevStep}
+              disabled={currentStep === 0}
+            >
+              Föregående
+            </Button>
+            <HelpTooltip content="Gå tillbaka utan att tappa dina svar." />
+          </div>
           
           {currentStep < assessmentSteps.length - 1 ? (
-            <Button onClick={nextStep} className="flex items-center gap-2">
-              Nästa <ArrowRight className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={nextStep} className="flex items-center gap-2">
+                Nästa <ArrowRight className="h-4 w-4" />
+              </Button>
+              <HelpTooltip content="Gå vidare till nästa steg. Du kan alltid gå tillbaka." />
+            </div>
           ) : (
-            <Button 
-              onClick={handleSubmit} 
-              disabled={isSubmitting}
-              className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
-            >
-              {isSubmitting ? 'Skapar din resa...' : 'Slutför bedömning'}
-              <Sparkles className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={handleSubmit} 
+                disabled={isSubmitting}
+                className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+              >
+                {isSubmitting ? 'Skapar din resa...' : 'Slutför bedömning'}
+                <Sparkles className="h-4 w-4" />
+              </Button>
+              <HelpTooltip content="Skicka in dina svar och generera en personlig utvecklingsplan." />
+            </div>
           )}
         </div>
       </CardContent>
