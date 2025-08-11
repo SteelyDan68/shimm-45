@@ -183,7 +183,7 @@ export const GuidedAssessmentFlow: React.FC = () => {
           <Brain className="w-8 h-8 text-white" />
         </div>
         <CardTitle className="text-2xl flex items-center justify-center gap-2">
-          Dags för din självskattning!
+          Här startar din resa!
           <HelpTooltip content="Självskattningen hjälper oss matcha dig med rätt pillar. Tar ca 8–15 min." />
         </CardTitle>
         <CardDescription className="text-base">
@@ -201,8 +201,8 @@ export const GuidedAssessmentFlow: React.FC = () => {
           <p className="text-blue-800 text-left">
             {isFirstAssessment ? (
               `"Hej! Välkommen till din utvecklingsresa! Jag är Stefan, din AI-coach. 
-              Baserat på ditt onboarding kan jag föreslå vilken självskattning som passar dig bäst som start. 
-              Varje självskattning tar 8-15 minuter och ger dig personliga insikter samt en handlingsplan."`
+              Baserat på denna första bedömning kan jag föreslå vilka av våra sex pillars som passar dig bäst som start. 
+              Varje självskattning du sedan gör i en \"Pillar\" tar sedan 8-15 minuter och ger dig personliga insikter samt en handlingsplan."`
             ) : (
               `"Hej igen! Jag har analyserat dina tidigare självskattningar och kan rekommendera 
               vilka områden som skulle vara bra att utforska härnäst. Varje självskattning bygger 
