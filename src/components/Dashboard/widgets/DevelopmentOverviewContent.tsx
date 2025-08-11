@@ -21,6 +21,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PillarKey } from '@/types/sixPillarsModular';
+import { HelpTooltip } from '@/components/HelpTooltip';
 
 interface AssessmentData {
   id: string;
@@ -147,12 +148,16 @@ export const DevelopmentOverviewContent: React.FC = () => {
             <CardTitle className="flex items-center gap-2 text-lg">
               <TrendingUp className="h-5 w-5 text-blue-600" />
               Utvecklingsframsteg
+              <HelpTooltip content="Översikt av din progression baserad på genomförda självskattningar per pelare." />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Totalt framsteg</span>
+                <div className="flex items-center gap-1 text-sm font-medium">
+                  <span>Totalt framsteg</span>
+                  <HelpTooltip content="Andel pelare där du slutfört minst en självskattning." />
+                </div>
                 <span className="text-sm text-muted-foreground">{Math.round(completionRate)}%</span>
               </div>
               <Progress value={completionRate} className="h-2" />
@@ -201,6 +206,7 @@ export const DevelopmentOverviewContent: React.FC = () => {
             <CardTitle className="flex items-center gap-2 text-lg">
               <Star className="h-5 w-5 text-yellow-600" />
               Snabbstatistik
+              <HelpTooltip content="Nyckeltal från senaste aktiviteter, uppgifter och AI‑insikter." />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -309,15 +315,18 @@ export const DevelopmentOverviewContent: React.FC = () => {
                 Du har genomfört {completedPillars.length} av {totalPillars} utvecklingspelare. 
                 Varje steg tar dig närmare dina mål.
               </p>
-              <Button 
-                variant="secondary" 
-                size="sm"
-                onClick={() => window.location.href = '/six-pillars'}
-                className="bg-white text-blue-600 hover:bg-blue-50"
-              >
-                Fortsätt utveckling
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+              <div className="inline-flex items-center gap-2">
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => window.location.href = '/six-pillars'}
+                  className="bg-white text-blue-600 hover:bg-blue-50"
+                >
+                  Fortsätt utveckling
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+                <HelpTooltip content="Öppnar Six Pillars där du kan fortsätta med fler självskattningar." />
+              </div>
             </div>
           </CardContent>
         </Card>

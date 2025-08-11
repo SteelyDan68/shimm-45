@@ -17,6 +17,7 @@ import {
   ExternalLink,
   ArrowRight
 } from 'lucide-react';
+import { HelpTooltip } from '@/components/HelpTooltip';
 
 /**
  * 🎯 CLIENT ANALYTICS QUICK ACCESS
@@ -187,16 +188,20 @@ export const ClientAnalyticsWidget = ({
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
             Min Utveckling
+            <HelpTooltip content="Snabb översikt över dina analyser, genomsnittspoäng och aktivitet." />
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/user-analytics')}
-            className="flex items-center gap-1 text-xs"
-          >
-            <ExternalLink className="h-3 w-3" />
-            Fullständig analys
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/user-analytics')}
+              className="flex items-center gap-1 text-xs"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Fullständig analys
+            </Button>
+            <HelpTooltip content="Öppnar den detaljerade analysvyn med alla dina data och grafer." />
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -234,8 +239,9 @@ export const ClientAnalyticsWidget = ({
         {/* 🔧 CONSOLIDATION BUTTON - Visa om AI-analyser saknas */}
         {quickStats.totalAnalyses > 0 && validAnalyses < quickStats.totalAnalyses && (
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="text-sm text-amber-800 mb-2">
-              {validAnalyses} av {quickStats.totalAnalyses} bedömningar har AI-analys
+            <div className="text-sm text-amber-800 mb-2 flex items-center gap-2">
+              <span>{validAnalyses} av {quickStats.totalAnalyses} bedömningar har AI-analys</span>
+              <HelpTooltip content="Kompletterar saknade AI‑analyser för tidigare bedömningar." />
             </div>
             <Button
               size="sm"
@@ -317,13 +323,16 @@ export const ClientAnalyticsWidget = ({
             <p className="text-sm text-muted-foreground mb-2">
               Starta din utvecklingsresa
             </p>
-            <Button 
-              size="sm" 
-              onClick={() => navigate('/six-pillars')}
-              className="w-full"
-            >
-              Genomför första bedömning
-            </Button>
+            <div className="inline-flex items-center gap-2 w-full">
+              <Button 
+                size="sm" 
+                onClick={() => navigate('/six-pillars')}
+                className="w-full"
+              >
+                Genomför första bedömning
+              </Button>
+              <HelpTooltip content="Öppnar Six Pillars där du kan göra din första självskattning." />
+            </div>
           </div>
         )}
       </CardContent>
