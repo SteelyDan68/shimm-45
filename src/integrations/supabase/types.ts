@@ -1201,6 +1201,7 @@ export type Database = {
           id: string
           neuroplasticity_day: number | null
           pillar_key: string
+          plan_id: string | null
           priority: string | null
           scheduled_date: string | null
           timeline_reference: string | null
@@ -1221,6 +1222,7 @@ export type Database = {
           id?: string
           neuroplasticity_day?: number | null
           pillar_key: string
+          plan_id?: string | null
           priority?: string | null
           scheduled_date?: string | null
           timeline_reference?: string | null
@@ -1241,6 +1243,7 @@ export type Database = {
           id?: string
           neuroplasticity_day?: number | null
           pillar_key?: string
+          plan_id?: string | null
           priority?: string | null
           scheduled_date?: string | null
           timeline_reference?: string | null
@@ -1249,7 +1252,15 @@ export type Database = {
           user_id?: string
           user_notes?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "calendar_actionables_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "ai_coaching_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       calendar_events: {
         Row: {
