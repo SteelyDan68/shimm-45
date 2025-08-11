@@ -149,6 +149,16 @@ export const Auth = () => {
                   >
                     {isLoading ? 'Loggar in...' : 'Logga in'}
                   </Button>
+                  <div className="text-center mt-2">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 h-auto font-normal"
+                      onClick={() => navigate('/forgot-password')}
+                    >
+                      Glömt lösenord?
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
 

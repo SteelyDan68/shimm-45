@@ -10,6 +10,8 @@ import { NotificationProvider } from "@/providers/NotificationProvider";
 import { EnhancedStefanContextProvider } from "@/providers/EnhancedStefanContextProvider";
 import { NAVIGATION_ROUTES, getDefaultRouteForRole } from "@/config/navigation";
 import { Auth } from "@/pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import { AppLayout } from "@/components/AppLayout";
 import { MobileOptimizedLayout, useMobileViewport } from "@/components/ui/mobile-optimized-layout";
 import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation } from "@/components/ui/accessibility";
@@ -95,6 +97,8 @@ const AppRoutes = () => {
       <Routes>
       {/* Public routes that don't require authentication */}
       <Route path="/invitation/:token" element={<InvitationSignup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       
       {/* Protected routes */}
       <Route path="/*" element={

@@ -89,11 +89,12 @@ export function PasswordManagement({ userId, userEmail, userName }: PasswordMana
   const sendPasswordResetEmail = async () => {
     setIsEmailLoading(true);
     try {
-      // Använd säker admin edge function för e-post reset
       const { data, error } = await supabase.functions.invoke('admin-password-reset', {
         body: {
           targetUserId: userId,
-          sendResetEmail: true
+          sendResetEmail: true,
+          targetEmail: userEmail,
+          redirectTo: `${window.location.origin}/reset-password`
         }
       });
 

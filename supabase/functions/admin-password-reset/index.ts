@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { Resend } from "npm:resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -52,7 +53,12 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Invalid authentication');
     }
 
-    const { targetUserId, newPassword, sendResetEmail }: PasswordResetRequest = await req.json();
+    const body = await req.json();
+    const targetUserId: string = body.targetUserId;
+    const newPassword: string | undefined = body.newPassword;
+    const sendResetEmail: boolean | undefined = body.sendResetEmail;
+    const targetEmail: string | undefined = body.targetEmail;
+    const redirectTo: string | undefined = body.redirectTo;
 
     // Validate input
     if (!targetUserId) {
@@ -78,23 +84,53 @@ const handler = async (req: Request): Promise<Response> => {
     let result;
 
     if (sendResetEmail) {
-      // Send password reset email
-      const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'recovery',
-        email: '', // Email will be looked up automatically by user ID
-        options: {
-          redirectTo: `${supabaseUrl.replace('supabase.co', 'lovableproject.com')}/reset-password`
+      // Resolve email if not provided
+      let email = targetEmail;
+      if (!email) {
+        const { data: userData, error: userErr } = await supabaseAdmin.auth.admin.getUserById(targetUserId);
+        if (userErr || !userData?.user?.email) {
+          throw new Error('Could not resolve target user email');
         }
-      });
-
-      if (error) {
-        throw new Error(`Failed to generate reset link: ${error.message}`);
+        email = userData.user.email as string;
       }
 
-      result = { 
-        success: true, 
-        message: 'Password reset email sent',
-        resetLink: data.properties?.action_link
+      // Generate password reset link
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'recovery',
+        email,
+        options: redirectTo ? { redirectTo } : undefined,
+      });
+
+      if (linkError || !linkData?.properties?.action_link) {
+        throw new Error(`Failed to generate reset link: ${linkError?.message || 'no link returned'}`);
+      }
+
+      // Send via Resend
+      const resendApiKey = Deno.env.get('RESEND_API_KEY');
+      if (!resendApiKey) {
+        throw new Error('RESEND_API_KEY not configured');
+      }
+      const resend = new Resend(resendApiKey);
+      const actionLink = linkData.properties.action_link as string;
+
+      await resend.emails.send({
+        from: 'Security <no-reply@resend.dev>',
+        to: [email],
+        subject: 'Återställ ditt lösenord',
+        html: `
+          <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111">
+            <h2>Lösenordsåterställning</h2>
+            <p>Hej ${email.split('@')[0]}, du (eller en administratör) har begärt att återställa ditt lösenord.</p>
+            <p><a href="${actionLink}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:8px">Återställ lösenord</a></p>
+            <p>Om du inte begärt detta kan du ignorera detta meddelande.</p>
+          </div>
+        `,
+      });
+
+      result = {
+        success: true,
+        message: 'Password reset email sent via Resend',
+        resetLink: actionLink
       };
     } else {
       // Direct password reset
@@ -106,8 +142,8 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error(`Failed to update password: ${error.message}`);
       }
 
-      result = { 
-        success: true, 
+      result = {
+        success: true,
         message: 'Password updated successfully',
         userId: data.user?.id
       };
