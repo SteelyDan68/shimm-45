@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,9 +28,30 @@ export function TasksPage() {
   const { user } = useAuth();
   const { triggerContextualHelp } = useEnhancedStefanContext();
   
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  
   const action = searchParams.get('action');
   const isCreating = action === 'create';
-  
+
+  useEffect(() => {
+    document.title = 'Uppgifter – AI-coachad utveckling';
+    const desc = 'Hantera uppgifter och AI-rekommendationer. Filtrera per program.';
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'description');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', desc);
+    let link: HTMLLinkElement | null = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', window.location.origin + '/tasks');
+  }, []);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -244,6 +265,16 @@ export function TasksPage() {
           Skapa uppgift
         </Button>
       </div>
+
+      <section className="mb-6">
+        <ProgramOverviewCard onSelectPlan={(planId) => setSelectedPlanId(planId)} />
+      </section>
+
+      <section className="mb-6">
+        {user?.id && (
+          <ActionablePriorityDashboard userId={user.id} planId={selectedPlanId || undefined} />
+        )}
+      </section>
 
       <LiveTaskList />
     </div>
