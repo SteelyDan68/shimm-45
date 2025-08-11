@@ -56,63 +56,54 @@ export function TopNavigation() {
           </NavLink>
         </div>
 
-        {/* Navigation Menu for Client */}
+        {/* Main Navigation for Client - Visible horizontal menu */}
         {isClient && (
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-sm font-medium">
-                  Utveckling
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-4 w-[400px]">
-                    <NavigationMenuLink asChild>
-                      <NavLink 
-                        to="/six-pillars" 
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                      >
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4" />
-                          <div className="text-sm font-medium leading-none">Six Pillars</div>
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Starta din utvecklingsresa med våra sex grundpelare
-                        </p>
-                      </NavLink>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                      <NavLink 
-                        to="/user-analytics" 
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                      >
-                        <div className="flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4" />
-                          <div className="text-sm font-medium leading-none">Min utvecklingsanalys</div>
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Se din progress och utvecklingsmönster
-                        </p>
-                      </NavLink>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                      <NavLink 
-                        to="/tasks" 
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                      >
-                        <div className="flex items-center gap-2">
-                          <CheckSquare className="h-4 w-4" />
-                          <div className="text-sm font-medium leading-none">Uppgifter</div>
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Hantera och genomför dina utvecklingsuppgifter
-                        </p>
-                      </NavLink>
-                    </NavigationMenuLink>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          <nav className="flex items-center gap-6">
+            <NavLink 
+              to="/six-pillars" 
+              className={({ isActive }) => 
+                `flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                }`
+              }
+            >
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Six Pillars</span>
+              <span className="sm:hidden">Six Pillars</span>
+            </NavLink>
+            
+            <NavLink 
+              to="/user-analytics" 
+              className={({ isActive }) => 
+                `flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                }`
+              }
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Min utvecklingsanalys</span>
+              <span className="sm:hidden">Analys</span>
+            </NavLink>
+            
+            <NavLink 
+              to="/tasks" 
+              className={({ isActive }) => 
+                `flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                }`
+              }
+            >
+              <CheckSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Uppgifter</span>
+              <span className="sm:hidden">Tasks</span>
+            </NavLink>
+          </nav>
         )}
 
         {/* Center Search */}
