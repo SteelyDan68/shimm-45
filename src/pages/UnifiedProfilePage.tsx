@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Edit } from 'lucide-react';
 import type { UnifiedProfileData } from '@/types/unifiedProfile';
-import { SelfPasswordResetCard } from '@/components/Profile/SelfPasswordResetCard';
+// import { SelfPasswordResetCard } from '@/components/Profile/SelfPasswordResetCard';
 
 export default function UnifiedProfilePage() {
   const { user, hasRole } = useAuth();
@@ -124,10 +124,7 @@ export default function UnifiedProfilePage() {
             </p>
           </CardContent>
         </Card>
-        <SelfPasswordResetCard 
-          userEmail={user?.email || ''} 
-          userName={profileData ? `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || (user?.email?.split('@')[0] || 'Användare') : (user?.email?.split('@')[0] || 'Användare')}
-        />
+{/* SelfPasswordResetCard temporärt borttagen enligt önskemål */}
       </div>
 
       <UnifiedProfileForm 

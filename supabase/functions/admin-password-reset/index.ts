@@ -69,16 +69,23 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Either newPassword or sendResetEmail must be provided');
     }
 
-    // Validate admin permissions using our database function
-    const { data: validationResult, error: validationError } = await supabaseClient
-      .rpc('validate_admin_action', {
-        _admin_id: adminUser.id,
-        _action_type: sendResetEmail ? 'password_reset_email' : 'password_reset_direct',
-        _target_user_id: targetUserId
-      });
+    // Validate permissions: superadmin/admin OR self OR coach-of-client
+    const { data: isSuper } = await supabaseClient.rpc('has_role', {
+      _user_id: adminUser.id,
+      _role: 'superadmin'
+    });
+    const { data: isAdminRole } = await supabaseClient.rpc('has_role', {
+      _user_id: adminUser.id,
+      _role: 'admin'
+    });
+    const isSelf = adminUser.id === targetUserId;
+    const { data: isCoachRel } = await supabaseClient.rpc('is_coach_of_client', {
+      _coach_id: adminUser.id,
+      _client_id: targetUserId
+    });
 
-    if (validationError || !validationResult) {
-      throw new Error('Admin validation failed: ' + (validationError?.message || 'Unauthorized'));
+    if (!isSuper && !isAdminRole && !isSelf && !isCoachRel) {
+      throw new Error('Unauthorized: insufficient permissions');
     }
 
     let result;

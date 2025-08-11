@@ -23,6 +23,7 @@ import { useUserData } from '@/hooks/useUserData';
 import { ClientProfileView } from './UnifiedUserProfile/ClientProfileView';
 import { UserCrmView } from './UnifiedUserProfile/UserCrmView';
 import { AssessmentView } from './UnifiedUserProfile/AssessmentView';
+import { PasswordInlineEditor } from '@/components/Profile/PasswordInlineEditor';
 
 interface UnifiedUserProfileProps {
   // No props needed - everything comes from URL and context
@@ -222,6 +223,8 @@ export const UnifiedUserProfile = () => {
         {/* Context-specific actions - REMOVED per team decision */}
         {/* Placeholder buttons eliminated for cleaner UX */}
       </div>
+
+      <PasswordInlineEditor userId={userId!} userEmail={profile.email} userName={getUserDisplayName()} />
 
       {/* CONTEXT-DRIVEN CONTENT */}
       {context === 'client' && (
