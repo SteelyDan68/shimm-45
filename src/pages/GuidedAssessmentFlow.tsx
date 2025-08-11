@@ -35,6 +35,7 @@ import { PillarEducation } from '@/components/Assessment/PillarEducation';
 import type { OnboardingData } from '@/types/onboarding';
 import { useIntelligentPillarNavigation } from '@/hooks/useIntelligentPillarNavigation';
 import { PillarKey } from '@/types/sixPillarsModular';
+import { HelpTooltip } from '@/components/HelpTooltip';
 
 type FlowStep = 'welcome' | 'intent' | 'education' | 'recommendations' | 'select' | 'ready';
 
@@ -181,9 +182,12 @@ export const GuidedAssessmentFlow: React.FC = () => {
         <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center mb-4">
           <Brain className="w-8 h-8 text-white" />
         </div>
-        <CardTitle className="text-2xl">Dags för din assessment!</CardTitle>
+        <CardTitle className="text-2xl flex items-center justify-center gap-2">
+          Dags för din självskattning!
+          <HelpTooltip content="Självskattningen hjälper oss matcha dig med rätt pillar. Tar ca 8–15 min." />
+        </CardTitle>
         <CardDescription className="text-base">
-          Stefan hjälper dig hitta rätt assessment baserat på dina mål och behov
+          Stefan hjälper dig hitta rätt självskattning baserat på dina mål och behov
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -197,18 +201,21 @@ export const GuidedAssessmentFlow: React.FC = () => {
           <p className="text-blue-800 text-left">
             {isFirstAssessment ? (
               `"Hej! Välkommen till din utvecklingsresa! Jag är Stefan, din AI-coach. 
-              Baserat på ditt onboarding kan jag föreslå vilken assessment som passar dig bäst som start. 
-              Varje assessment tar 8-15 minuter och ger dig personliga insikter samt en handlingsplan."`
+              Baserat på ditt onboarding kan jag föreslå vilken självskattning som passar dig bäst som start. 
+              Varje självskattning tar 8-15 minuter och ger dig personliga insikter samt en handlingsplan."`
             ) : (
-              `"Hej igen! Jag har analyserat dina tidigare assessments och kan rekommendera 
-              vilka områden som skulle vara bra att utforska härnäst. Varje assessment bygger 
+              `"Hej igen! Jag har analyserat dina tidigare självskattningar och kan rekommendera 
+              vilka områden som skulle vara bra att utforska härnäst. Varje självskattning bygger 
               på det vi redan vet om dig och ger dig djupare insikter."`
             )}
           </p>
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-semibold">Vad händer efter din assessment?</h3>
+          <h3 className="font-semibold flex items-center gap-2">
+            Vad händer efter din självskattning?
+            <HelpTooltip content="Efter självskattningen får du en rapport, AI-analys och ett konkret program." />
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex flex-col items-center gap-2">
               <div className="p-3 bg-green-100 rounded-full">
@@ -406,7 +413,10 @@ export const GuidedAssessmentFlow: React.FC = () => {
           >
             <IconComponent className="w-8 h-8" />
           </div>
-          <CardTitle className="text-2xl">Redo för {option.name} Assessment</CardTitle>
+          <CardTitle className="text-2xl flex items-center justify-center gap-2">
+            Redo för {option.name} Assessment
+            <HelpTooltip content="Kort introduktion innan du startar. Du kan pausa och återuppta när som helst." />
+          </CardTitle>
           <CardDescription className="text-base">
             {option.description}
           </CardDescription>
