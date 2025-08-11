@@ -41,18 +41,25 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
   const [generatedActivities, setGeneratedActivities] = useState<any[]>([]);
   const [searchParams] = useSearchParams();
 
-  // Read query params for deep-linking into intro
+  // Read query params for deep-linking: intro, resume
   useEffect(() => {
     const pillarParam = searchParams.get('pillar');
     const view = searchParams.get('view');
+    const resume = searchParams.get('resume');
     const validKeys: PillarKey[] = ['self_care','skills','talent','brand','economy','open_track'];
     if (pillarParam && (validKeys as unknown as string[]).includes(pillarParam)) {
       setSelectedPillar(pillarParam as PillarKey);
-      if (view === 'intro') {
+      if (resume === 'true') {
+        setFlowState('assessment');
+        toast({
+          title: 'Återupptar bedömning',
+          description: 'Din pågående bedömning har återupptagits.',
+        });
+      } else if (view === 'intro') {
         setFlowState('intro');
       }
     }
-  }, [searchParams]);
+  }, [searchParams, toast]);
   // Hooks for data
   const { 
     activations, 
