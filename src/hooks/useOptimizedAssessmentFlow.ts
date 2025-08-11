@@ -102,7 +102,7 @@ export const useOptimizedAssessmentFlow = (pillarKey: PillarKey) => {
       }
 
       // 3. Generate actionables if analysis succeeded
-      let actionables = [];
+      let actionables: any[] = [];
       if (analysisResult?.success) {
         const { data: actionablesResult } = await supabase.functions
           .invoke('enhanced-ai-planning', {
@@ -126,7 +126,62 @@ export const useOptimizedAssessmentFlow = (pillarKey: PillarKey) => {
         }
       }
 
-      // 4. Clean up draft state
+      // 3b. Create AI coaching plan and link tasks to it
+      try {
+        // Map preference duration (weeks) to days; default 28 for an initial cycle
+        const durationDays = 28;
+        const { data: plan, error: planError } = await supabase
+          .from('ai_coaching_plans')
+          .insert({
+            user_id: user.id,
+            duration: durationDays,
+            status: 'active',
+            focus_areas: [
+              {
+                pillarKey,
+                priority: 1,
+                currentLevel: (Object.values(scores).reduce((a, b) => a + b, 0) / Math.max(1, Object.values(scores).length)),
+                targetLevel: null
+              }
+            ],
+            weekly_goals: [],
+            milestones: [],
+            adaptation_triggers: []
+          })
+          .select()
+          .maybeSingle();
+
+        if (planError) {
+          console.warn('Failed creating ai_coaching_plan:', planError);
+        } else if (plan) {
+          // Create calendar tasks for each actionable and link to plan
+          if (actionables.length > 0) {
+            const tasksPayload = actionables.map((a: any, idx: number) => ({
+              user_id: user.id,
+              pillar_key: pillarKey,
+              title: a.title || `Uppgift ${idx + 1}`,
+              description: a.description || '',
+              priority: a.priority || 'medium',
+              estimated_duration: a.estimated_minutes ?? a.estimatedDuration ?? null,
+              scheduled_date: a.scheduled_date ?? a.scheduledDate ?? null,
+              neuroplasticity_day: a.day_number ?? a.dayNumber ?? null,
+              ai_generated: true,
+              plan_id: plan.id
+            }));
+
+            const { error: taskError } = await supabase
+              .from('calendar_actionables')
+              .insert(tasksPayload);
+
+            if (taskError) {
+              console.warn('Failed creating tasks for plan:', taskError);
+            }
+          }
+        }
+      } catch (planCreateError) {
+        console.warn('Plan creation error:', planCreateError);
+      }
+
       await supabase
         .from('assessment_states')
         .delete()
