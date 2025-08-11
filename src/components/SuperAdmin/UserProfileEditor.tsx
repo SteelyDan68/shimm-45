@@ -13,6 +13,7 @@ import { useUnifiedProfile } from '@/hooks/useUnifiedProfile';
 import { UnifiedProfileForm } from '@/components/Profile/UnifiedProfileForm';
 import { User, Eye, EyeOff } from 'lucide-react';
 import type { UnifiedProfileData } from '@/types/unifiedProfile';
+import { PasswordManagement } from '@/components/UserAdministration/PasswordManagement';
 
 interface UserProfileEditorProps {
   user: any;
@@ -177,12 +178,21 @@ export const UserProfileEditor: React.FC<UserProfileEditorProps> = ({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Användarens Profil</h2>
-          {canEdit && (
-            <Button onClick={() => setIsViewMode(false)}>
-              <Eye className="h-4 w-4 mr-2" />
-              Redigera
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {canEdit && (
+              <>
+                <PasswordManagement 
+                  userId={user.id} 
+                  userEmail={profileData?.email || user.email} 
+                  userName={getDisplayName()} 
+                />
+                <Button onClick={() => setIsViewMode(false)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Redigera
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
         <Card>
