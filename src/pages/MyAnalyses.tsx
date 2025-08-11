@@ -109,6 +109,24 @@ const MyAnalyses = () => {
 
   const hasAnalyses = assessmentRounds && assessmentRounds.length > 0;
 
+  const jsonLdAnalyses = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "AI-analyser",
+    url: typeof window !== 'undefined' ? window.location.origin + '/my-analyses' : undefined,
+    numberOfItems: assessmentRounds?.length || 0,
+    itemListElement: (assessmentRounds || []).slice(0, 10).map((a: any, idx: number) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      item: {
+        "@type": "Article",
+        headline: `${getPillarDisplayName(a.pillar_type)} analys`,
+        datePublished: a.created_at,
+        inLanguage: 'sv-SE'
+      }
+    }))
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -120,7 +138,7 @@ const MyAnalyses = () => {
             </div>
             <h1 className="text-3xl font-bold">Mina analyser</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 no-print">
             <HelpTooltip content="Skriv ut eller spara som PDF för att dela dina analyser eller läsa offline." />
             <Button
               variant="outline"
@@ -136,6 +154,8 @@ const MyAnalyses = () => {
         <p className="text-muted-foreground max-w-2xl">
           Stefans AI-analyser av dina assessments ger dig djupa insikter och personliga rekommendationer för din utvecklingsresa.
         </p>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdAnalyses) }} />
+        <style>{`@media print { .no-print{display:none!important} body{background:white} .card, .container{box-shadow:none!important} }`}</style>
       </div>
 
       {!hasAnalyses ? (
@@ -238,12 +258,12 @@ const MyAnalyses = () => {
                           <h4 className="font-medium mb-2">Viktiga insikter</h4>
                           <div className="space-y-2">
                             {detailedAnalysis.insights.map((insight: any, index: number) => (
-                              <div key={index} className="bg-blue-50 border border-blue-200 rounded p-3">
-                                <p className="text-sm font-medium text-blue-900">
+                              <div key={index} className="bg-primary/10 border border-primary/20 rounded p-3">
+                                <p className="text-sm font-medium text-primary">
                                   {insight.title || insight.insight || insight}
                                 </p>
                                 {insight.description && (
-                                  <p className="text-xs text-blue-700 mt-1">
+                                  <p className="text-xs text-primary mt-1">
                                     {insight.description}
                                   </p>
                                 )}
@@ -259,12 +279,12 @@ const MyAnalyses = () => {
                           <h4 className="font-medium mb-2">Rekommendationer</h4>
                           <div className="space-y-2">
                             {detailedAnalysis.recommendations.map((rec: any, index: number) => (
-                              <div key={index} className="bg-green-50 border border-green-200 rounded p-3">
-                                <p className="text-sm font-medium text-green-900">
+                              <div key={index} className="bg-success/10 border border-success/20 rounded p-3">
+                                <p className="text-sm font-medium text-success">
                                   {rec.title || rec.recommendation || rec}
                                 </p>
                                 {rec.description && (
-                                  <p className="text-xs text-green-700 mt-1">
+                                  <p className="text-xs text-success mt-1">
                                     {rec.description}
                                   </p>
                                 )}

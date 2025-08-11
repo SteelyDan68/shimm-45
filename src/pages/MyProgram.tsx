@@ -84,23 +84,22 @@ const MyProgram = () => {
 
   const getPriorityColor = (priority: string) => {
     const colors: Record<string, string> = {
-      'high': 'bg-red-100 text-red-800 border-red-200',
-      'medium': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'low': 'bg-green-100 text-green-800 border-green-200'
+      high: 'bg-destructive/10 text-destructive border-destructive/20',
+      medium: 'bg-warning/10 text-warning border-warning/20',
+      low: 'bg-success/10 text-success border-success/20'
     };
     return colors[priority] || colors['medium'];
   };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      'completed': 'bg-green-100 text-green-800 border-green-200',
-      'in_progress': 'bg-blue-100 text-blue-800 border-blue-200',
-      'pending': 'bg-gray-100 text-gray-800 border-gray-200',
-      'paused': 'bg-orange-100 text-orange-800 border-orange-200'
+      completed: 'bg-success/10 text-success border-success/20',
+      in_progress: 'bg-primary/10 text-primary border-primary/20',
+      pending: 'bg-muted text-muted-foreground border-border',
+      paused: 'bg-warning/10 text-warning border-warning/20'
     };
     return colors[status] || colors['pending'];
   };
-
   const getStatusIcon = (status: string) => {
     const icons: Record<string, React.ReactNode> = {
       'completed': <CheckCircle2 className="h-4 w-4" />,
@@ -158,6 +157,38 @@ const MyProgram = () => {
 
   const hasProgram = totalItems > 0;
 
+  const jsonLdProgram = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Personligt utvecklingsprogram",
+    url: typeof window !== 'undefined' ? window.location.origin + '/my-program' : undefined,
+    numberOfItems: totalItems,
+    itemListElement: [
+      ...activeRecommendations.map((rec: any, index: number) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "CreativeWork",
+          name: rec.title,
+          description: rec.description,
+          dateCreated: rec.created_at,
+          inLanguage: 'sv-SE'
+        }
+      })),
+      ...activeActionables.map((act: any, index: number) => ({
+        "@type": "ListItem",
+        position: activeRecommendations.length + index + 1,
+        item: {
+          "@type": "HowTo",
+          name: act.title,
+          description: act.description,
+          totalTime: act.estimated_duration ? `PT${act.estimated_duration}M` : undefined,
+          inLanguage: 'sv-SE'
+        }
+      }))
+    ]
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -169,7 +200,7 @@ const MyProgram = () => {
             </div>
             <h1 className="text-3xl font-bold">Mitt program</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 no-print">
             <HelpTooltip content="Skriv ut eller spara som PDF för att dela ditt program eller jobba offline." />
             <Button
               variant="outline"
@@ -185,6 +216,8 @@ const MyProgram = () => {
         <p className="text-muted-foreground max-w-2xl">
           Dina personliga handlingsplaner och rekommendationer baserat på Stefans AI-analyser av dina assessments.
         </p>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdProgram) }} />
+        <style>{`@media print { .no-print{display:none!important} body{background:white} .card, .container{box-shadow:none!important} }`}</style>
       </div>
 
       {!hasProgram ? (
@@ -281,16 +314,16 @@ const MyProgram = () => {
                         </div>
 
                         {rec.reasoning && (
-                          <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
-                            <p className="text-sm text-blue-900">
+                          <div className="bg-primary/10 border border-primary/20 rounded p-3 mb-4">
+                            <p className="text-sm text-primary">
                               <strong>Stefans resonemang:</strong> {rec.reasoning}
                             </p>
                           </div>
                         )}
 
                         {rec.expected_outcome && (
-                          <div className="bg-green-50 border border-green-200 rounded p-3 mb-4">
-                            <p className="text-sm text-green-900">
+                          <div className="bg-success/10 border border-success/20 rounded p-3 mb-4">
+                            <p className="text-sm text-success">
                               <strong>Förväntat resultat:</strong> {rec.expected_outcome}
                             </p>
                           </div>
@@ -425,7 +458,7 @@ const MyProgram = () => {
                           Slutförd {('completed_at' in item && item.completed_at) && format(new Date(item.completed_at), 'PPP', { locale: sv })}
                         </div>
                       </div>
-                      <Badge className="bg-green-100 text-green-800 border-green-200">
+                      <Badge className="bg-success/10 text-success border-success/20">
                         Slutförd
                       </Badge>
                     </div>
