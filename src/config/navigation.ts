@@ -140,7 +140,12 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         icon: Smartphone,
         roles: ["client"]
       },
-      // Meddelanden moved to UnifiedNotificationSystem in top menu
+      {
+        title: "Meddelanden",
+        url: NAVIGATION_ROUTES.MESSAGES,
+        icon: MessageSquare,
+        roles: ["superadmin", "admin", "coach", "client"]
+      }
     ]
   },
   {

@@ -32,7 +32,73 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
 
   return (
     <div className={cn('min-h-screen bg-background', className)}>
-      {/* Main Content - No duplicate header since TopNavigation handles it */}
+      {/* Mobile Header */}
+      {showNavigation && (
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-14 items-center justify-between px-4">
+            {/* Menu Button */}
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Öppna meny</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+                <nav className="flex flex-col gap-4 mt-6">
+                  <div className="px-4 py-2 text-lg font-semibold">SHIMMS</div>
+                  {navigationItems.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-lg">{item.icon}</span>
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+
+            {/* Logo/Brand */}
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-lg">SHIMMS</span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm">
+                <Bell className="h-4 w-4" />
+                <span className="sr-only">Notifikationer</span>
+              </Button>
+              <Button variant="ghost" size="sm">
+                <User className="h-4 w-4" />
+                <span className="sr-only">Profil</span>
+              </Button>
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* Desktop Navigation */}
+      {showNavigation && (
+        <nav className="hidden md:flex items-center justify-center gap-6 py-4 border-b">
+          {navigationItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted transition-colors"
+            >
+              <span>{item.icon}</span>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      )}
+
+      {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8 space-y-6">
         {children}
       </main>
