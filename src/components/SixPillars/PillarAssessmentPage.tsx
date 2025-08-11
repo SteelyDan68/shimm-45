@@ -19,7 +19,7 @@ const PILLAR_NAMES: Record<PillarKey, string> = {
   'talent': 'Talent',
   'brand': 'Brand',
   'economy': 'Economy',
-  'open_track': 'Open Track'
+  'open_track': 'Öppet spår'
 };
 
 export const PillarAssessmentPage: React.FC = () => {

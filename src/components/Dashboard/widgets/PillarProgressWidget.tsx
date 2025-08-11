@@ -42,7 +42,7 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
     { key: 'talent', name: 'Talent' },
     { key: 'brand', name: 'Brand' },
     { key: 'economy', name: 'Economy' },
-    { key: 'open_track', name: 'Open Track' }
+    { key: 'open_track', name: 'Öppet spår' }
   ], []);
 
   // OPTIMIZED: Memoized pillar data processing

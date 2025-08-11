@@ -236,7 +236,7 @@ export function OpenTrackAssessmentForm({ onComplete }: OpenTrackAssessmentFormP
           question_key: questionKey,
           answer: answer,
           assessment_type: 'open_track_vision',
-          context: `Open Track pillar vision analysis for: ${questionKey}`
+          context: `Öppet spår vision analysis for: ${questionKey}`
         }
       });
 

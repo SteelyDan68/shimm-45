@@ -33,6 +33,8 @@ import { useWelcomeAssessment } from '@/hooks/useWelcomeAssessment';
 import { IntentDiscovery, IntentData } from '@/components/Assessment/IntentDiscovery';
 import { PillarEducation } from '@/components/Assessment/PillarEducation';
 import type { OnboardingData } from '@/types/onboarding';
+import { useIntelligentPillarNavigation } from '@/hooks/useIntelligentPillarNavigation';
+import { PillarKey } from '@/types/sixPillarsModular';
 
 type FlowStep = 'welcome' | 'intent' | 'education' | 'recommendations' | 'select' | 'ready';
 
@@ -90,7 +92,7 @@ const PILLAR_OPTIONS: Record<string, Omit<AssessmentOption, 'priority' | 'reason
   },
   'open-track': {
     pillar: 'open-track',
-    name: 'Open Track',
+    name: 'Öppet spår',
     icon: Route,
     color: 'hsl(var(--primary))',
     description: 'Din personliga utvecklingsresa med fria mål',

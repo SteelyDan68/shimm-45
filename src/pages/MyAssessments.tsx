@@ -83,7 +83,7 @@ const PILLAR_CONFIG = {
     description: 'Din ekonomiska utveckling'
   },
   'open_track': { 
-    name: 'Open Track', 
+    name: 'Öppet spår', 
     icon: Route, 
     color: 'hsl(var(--primary))',
     bgColor: 'hsl(var(--primary) / 0.1)',

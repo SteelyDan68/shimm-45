@@ -22,6 +22,8 @@ import {
   Target
 } from 'lucide-react';
 import { IntentData } from './IntentDiscovery';
+import { useIntelligentPillarNavigation } from '@/hooks/useIntelligentPillarNavigation';
+import { PillarKey } from '@/types/sixPillarsModular';
 
 interface PillarInfo {
   key: string;
@@ -145,7 +147,7 @@ const PILLAR_DETAILS: PillarInfo[] = [
   },
   {
     key: 'open-track',
-    name: 'Open Track',
+    name: 'Öppet spår',
     icon: Route,
     color: 'hsl(var(--primary))',
     description: 'Din personliga utvecklingsresa med fria mål',
@@ -212,6 +214,7 @@ export const PillarEducation: React.FC<PillarEducationProps> = ({
   onPillarSelect,
   onBack
 }) => {
+  const { smartNavigate } = useIntelligentPillarNavigation();
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState<string | null>(null);
 
@@ -384,11 +387,15 @@ export const PillarEducation: React.FC<PillarEducationProps> = ({
         <Button 
           size="lg"
           disabled={!selectedPillar}
-          onClick={() => selectedPillar && onPillarSelect(selectedPillar)}
+          onClick={async () => {
+            if (!selectedPillar) return;
+            const toPillarKey = (k: string) => k.replace(/-/g, '_') as PillarKey;
+            await smartNavigate(toPillarKey(selectedPillar));
+          }}
           className="px-8"
         >
           {selectedPillar ? 
-            `Starta ${PILLAR_DETAILS.find(p => p.key === selectedPillar)?.name} Assessment` : 
+            `Starta ${PILLAR_DETAILS.find(p => p.key === selectedPillar)?.name}` : 
             'Välj ett område'
           }
           <ArrowRight className="w-4 h-4 ml-2" />

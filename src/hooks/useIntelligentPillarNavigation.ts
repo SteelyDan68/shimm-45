@@ -60,10 +60,10 @@ export const useIntelligentPillarNavigation = () => {
         };
       }
 
-      // Start new assessment
+      // Start new assessment - show intro first
       return {
         shouldNavigate: true,
-        url: `/pillar-journey?pillar=${pillarKey}&start=true`,
+        url: `/pillar-journey?pillar=${pillarKey}&view=intro`,
         reason: 'start_new'
       };
 

@@ -65,6 +65,7 @@ import { AIInsights } from "./pages/AIInsights";
 import SystemMapPage from "./pages/SystemMap";
 import NotFound from "./pages/NotFound";
 import { Client360Page } from "./pages/Client360";
+import { PillarJourneyPage } from "./pages/PillarJourney";
 
 const queryClient = new QueryClient();
 
@@ -158,7 +159,8 @@ const AppRoutes = () => {
                <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
                <Route path={NAVIGATION_ROUTES.CLIENT_360} element={<Client360Page />} />
                <Route path={NAVIGATION_ROUTES.CLIENT_360_USER(":userId")} element={<Client360Page />} />
-                 <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
+               <Route path="/pillar-journey" element={<PillarJourneyPage />} />
+               <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
                <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
                <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
                  <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />

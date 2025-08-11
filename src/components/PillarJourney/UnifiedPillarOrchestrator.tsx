@@ -14,9 +14,11 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Target, Sparkles } from 'lucide-react';
 import { PILLAR_MODULES } from '@/config/pillarModules';
 import { AllPillarsCompletedCelebration } from './AllPillarsCompletedCelebration';
+import { useSearchParams } from 'react-router-dom';
 
 type FlowState = 
   | 'gateway'           // Show pillar selection
+  | 'intro'             // Intro before assessment
   | 'assessment'        // Taking pillar assessment  
   | 'calibration'       // Intensity/duration selection
   | 'plan_generation'   // AI creating development plan
@@ -37,7 +39,20 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
   const [intensity, setIntensity] = useState<IntensityLevel | null>(null);
   const [duration, setDuration] = useState<DurationLevel | null>(null);
   const [generatedActivities, setGeneratedActivities] = useState<any[]>([]);
+  const [searchParams] = useSearchParams();
 
+  // Read query params for deep-linking into intro
+  useEffect(() => {
+    const pillarParam = searchParams.get('pillar');
+    const view = searchParams.get('view');
+    const validKeys: PillarKey[] = ['self_care','skills','talent','brand','economy','open_track'];
+    if (pillarParam && (validKeys as unknown as string[]).includes(pillarParam)) {
+      setSelectedPillar(pillarParam as PillarKey);
+      if (view === 'intro') {
+        setFlowState('intro');
+      }
+    }
+  }, [searchParams]);
   // Hooks for data
   const { 
     activations, 
@@ -164,7 +179,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
                 Din Pillar-Utvecklingsresa
               </h2>
               <p className="text-sm text-muted-foreground">
-                Steg {flowState === 'gateway' ? '1' : flowState === 'assessment' ? '2' : flowState === 'calibration' ? '3' : '4'} av 4
+                Steg {flowState === 'gateway' ? '1' : (flowState === 'intro' || flowState === 'assessment') ? '2' : flowState === 'calibration' ? '3' : '4'} av 4
               </p>
             </div>
             <div className="text-right">
@@ -178,7 +193,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
           <Progress 
             value={
               flowState === 'gateway' ? 25 : 
-              flowState === 'assessment' ? 50 : 
+              (flowState === 'intro' || flowState === 'assessment') ? 50 : 
               flowState === 'calibration' ? 75 : 100
             } 
             className="h-2 mt-3" 
@@ -210,6 +225,37 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
           recommendedPillar={recommendedPillar}
           isFirstTime={isFirstTime}
         />
+      )}
+      {flowState === 'intro' && selectedPillar && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Introduktion: {PILLAR_MODULES[selectedPillar].name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                {PILLAR_MODULES[selectedPillar].description}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setFlowState('assessment')}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Starta {PILLAR_MODULES[selectedPillar].name}
+                </button>
+                <button
+                  onClick={handleStartNewPillar}
+                  className="flex-1 border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Välj annan pillar
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {flowState === 'assessment' && selectedPillar && (

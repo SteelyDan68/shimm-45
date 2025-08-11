@@ -255,7 +255,7 @@ export const PillarSystemView: React.FC<{ pillarData: any }> = ({ pillarData }) 
       id: 'open-track',
       type: 'custom',
       position: { x: 500, y: 200 },
-      data: { label: 'Open Track', category: 'frontend', description: 'Fritt val' }
+      data: { label: 'Öppet spår', category: 'frontend', description: 'Fritt val' }
     },
     {
       id: 'pillar-orchestrator',
