@@ -66,7 +66,7 @@ export const HarmonizedCoachDashboard: React.FC = () => {
         <Alert className="max-w-2xl mx-auto">
           <Users className="h-4 w-4" />
           <AlertDescription>
-            Du behöver coach-behörighet för att komma åt denna dashboard.
+            Du behöver coach-behörighet för att komma åt denna översikt.
           </AlertDescription>
         </Alert>
       </div>
@@ -78,7 +78,7 @@ export const HarmonizedCoachDashboard: React.FC = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center space-y-4">
           <UserCheck className="h-12 w-12 animate-pulse text-primary mx-auto" />
-          <p>Laddar coach dashboard...</p>
+          <p>Laddar coach översikt...</p>
         </div>
       </div>
     );
@@ -90,7 +90,7 @@ export const HarmonizedCoachDashboard: React.FC = () => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <UserCheck className="h-10 w-10 text-green-600" />
-          <h1 className="text-4xl font-bold">Coach Dashboard</h1>
+          <h1 className="text-4xl font-bold">Coach Översikt</h1>
           <HelpTooltip content="Din centrala kontrollpanel för coaching och klienthantering med Six Pillars metodiken." />
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -132,7 +132,7 @@ export const HarmonizedCoachDashboard: React.FC = () => {
 
         <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-purple-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva Assessments</CardTitle>
+            <CardTitle className="text-sm font-medium">Aktiva Självskattningar</CardTitle>
             <ClipboardList className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>

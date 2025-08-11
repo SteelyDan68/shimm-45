@@ -88,7 +88,7 @@ const CLIENT_CONFIG: DashboardConfig = {
   navigation: [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Översikt',
       icon: BarChart3,
       path: '/client-dashboard',
       permissions: ['read-own-data']
@@ -139,7 +139,7 @@ const COACH_CONFIG: DashboardConfig = {
     {
       id: 'coach-overview',
       type: 'welcome',
-      title: 'Coach Dashboard',
+      title: 'Coach Översikt',
       description: 'Översikt av din coaching-verksamhet',
       icon: Users,
       span: 12,
@@ -215,7 +215,7 @@ const COACH_CONFIG: DashboardConfig = {
   navigation: [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Översikt',
       icon: BarChart3,
       path: '/coach-dashboard',
       permissions: ['read-client-data']
@@ -267,7 +267,7 @@ const ADMIN_CONFIG: DashboardConfig = {
     {
       id: 'admin-overview',
       type: 'welcome',
-      title: 'Admin Dashboard',
+      title: 'Admin Översikt',
       description: 'Systemadministration och övervakning',
       icon: Shield,
       span: 12,
@@ -346,7 +346,7 @@ const ADMIN_CONFIG: DashboardConfig = {
   navigation: [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Översikt',
       icon: BarChart3,
       path: '/administration',
       permissions: ['admin-all']

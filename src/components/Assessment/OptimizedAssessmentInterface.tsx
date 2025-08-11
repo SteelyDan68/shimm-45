@@ -80,7 +80,7 @@ export const OptimizedAssessmentInterface: React.FC<OptimizedAssessmentInterface
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-semibold">
-                {pillarKey.replace('_', ' ').toUpperCase()} Assessment
+                {pillarKey.replace('_', ' ').toUpperCase()} Självskattning
               </h2>
             </div>
             <Badge variant={isComplete ? "default" : "secondary"}>
@@ -185,7 +185,7 @@ export const OptimizedAssessmentInterface: React.FC<OptimizedAssessmentInterface
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Slutför assessment
+                    Slutför självskattning
                   </>
                 )}
               </Button>

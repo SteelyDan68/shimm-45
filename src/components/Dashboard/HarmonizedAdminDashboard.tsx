@@ -64,7 +64,7 @@ export const HarmonizedAdminDashboard: React.FC = () => {
           <Alert className="max-w-2xl mx-auto">
             <Shield className="h-4 w-4" />
             <AlertDescription>
-              Fel vid laddning av Superadmin Dashboard. Kontakta support.
+              Fel vid laddning av Superadmin Översikt. Kontakta support.
             </AlertDescription>
           </Alert>
         </div>
@@ -78,7 +78,7 @@ export const HarmonizedAdminDashboard: React.FC = () => {
         <Alert className="max-w-2xl mx-auto">
           <Shield className="h-4 w-4" />
           <AlertDescription>
-            Du behöver admin-behörighet för att komma åt denna dashboard.
+            Du behöver admin-behörighet för att komma åt denna översikt.
           </AlertDescription>
         </Alert>
       </div>
@@ -92,7 +92,7 @@ export const HarmonizedAdminDashboard: React.FC = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center space-y-4">
           <Shield className="h-12 w-12 animate-pulse text-primary mx-auto" />
-          <p>Laddar admin dashboard...</p>
+          <p>Laddar admin översikt...</p>
         </div>
       </div>
     );
@@ -125,7 +125,7 @@ export const HarmonizedAdminDashboard: React.FC = () => {
             <Shield className="h-10 w-10 text-blue-600" />
           )}
           <h1 className="text-4xl font-bold">
-            {isSuperAdmin ? 'Superadmin' : 'Admin'} Dashboard
+            {isSuperAdmin ? 'Superadmin' : 'Admin'} Översikt
           </h1>
           <HelpTooltip content="Central kontrollpanel för systemadministration och användarhantering med Six Pillars metodiken." />
         </div>

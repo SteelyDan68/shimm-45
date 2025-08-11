@@ -242,7 +242,7 @@ const MyProgram = () => {
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <a href="/my-analyses">Se analyser</a>
+                <Link to="/my-analyses">Se analyser</Link>
               </Button>
             </div>
           </div>

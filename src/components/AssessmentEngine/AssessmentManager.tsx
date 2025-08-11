@@ -52,7 +52,7 @@ export const AssessmentManager = ({ clientId, clientName }: AssessmentManagerPro
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Assessment Management - {clientName}</CardTitle>
+        <CardTitle>Självskattningshantering - {clientName}</CardTitle>
         <p className="text-muted-foreground">
           Hantera vilka formulär som ska vara aktiva för denna klient
         </p>
@@ -126,7 +126,7 @@ export const AssessmentManager = ({ clientId, clientName }: AssessmentManagerPro
                     }
                   }}
                 />
-                <Label htmlFor="use-due-date">Sätt deadline för assessmenten</Label>
+                <Label htmlFor="use-due-date">Sätt deadline för självskattningen</Label>
               </div>
 
               {selectedDueDate && (
@@ -159,7 +159,7 @@ export const AssessmentManager = ({ clientId, clientName }: AssessmentManagerPro
                   className="flex-1"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Skicka assessment
+                  Skicka självskattning
                 </Button>
                 <Button
                   variant="outline"

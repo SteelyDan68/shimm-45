@@ -110,7 +110,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
       return { status: 'Behöver onboarding', nextStep: 'Genomför onboarding', color: 'bg-orange-500' };
     }
     if (!client.assessment_completed) {
-      return { status: 'Behöver assessment', nextStep: 'Genomför Six Pillars', color: 'bg-blue-500' };
+      return { status: 'Behöver självskattning', nextStep: 'Genomför Six Pillars', color: 'bg-blue-500' };
     }
     if ((client.habits_active || 0) === 0) {
       return { status: 'Behöver vanor', nextStep: 'Skapa vanor', color: 'bg-purple-500' };
@@ -199,7 +199,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
     switch (currentStep) {
       case 'create': return 'Skapa ny klient';
       case 'onboard': return 'Onboarding';
-      case 'assess': return 'Six Pillars Assessment';
+      case 'assess': return 'Six Pillars Självskattning';
       case 'habits': return 'Vanformning';
       case 'complete': return 'Klar!';
       default: return '';
@@ -270,7 +270,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                 Six Pillars Assessment för {getClientDisplayName(selectedClient!)}
               </CardTitle>
               <CardDescription>
-                Genomför den modulära Six Pillars-bedömningen
+                Genomför den modulära Six Pillars-självskattningen
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -292,7 +292,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                 Vanformning för {getClientDisplayName(selectedClient!)}
               </CardTitle>
               <CardDescription>
-                Skapa neuroplasticitet-baserade vanor baserat på assessment-resultaten
+                Skapa neuroplasticitet-baserade vanor baserat på självskattningsresultaten
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -324,7 +324,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
                 </div>
                 <div className="text-center p-4 border rounded-lg">
                   <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <h4 className="font-medium">Assessment</h4>
+                  <h4 className="font-medium">Självskattning</h4>
                   <p className="text-sm text-muted-foreground">Genomförd</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
@@ -370,7 +370,7 @@ export const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ onClose 
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
             <div className="flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${currentStep === 'assess' ? 'bg-primary' : 'bg-muted-foreground'}`} />
-              <span className="text-sm">Assessment</span>
+              <span className="text-sm">Självskattning</span>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
             <div className="flex items-center gap-2">

@@ -161,7 +161,7 @@ export const FormBuilder = () => {
         {/* Forms List */}
         <Card>
           <CardHeader>
-            <CardTitle>Assessment Formulär</CardTitle>
+            <CardTitle>Självskattningsformulär</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {forms.map((form) => (
@@ -303,7 +303,7 @@ const FormEditor = ({ form, onSave, onCancel, loading }: FormEditorProps) => {
       </div>
 
       <div>
-        <Label htmlFor="assessment_type">Assessment Typ</Label>
+        <Label htmlFor="assessment_type">Självskattningstyp</Label>
         <Select 
           value={formData.assessment_type} 
           onValueChange={(value) => setFormData({ ...formData, assessment_type: value })}

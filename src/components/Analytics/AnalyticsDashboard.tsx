@@ -81,7 +81,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* Header */}
       <div className={isMobile ? "space-y-4" : "flex flex-row items-center justify-between"}>
         <div>
-          <h1 className={isMobile ? "text-xl font-bold" : "text-2xl font-bold"}>Analytics Dashboard</h1>
+          <h1 className={isMobile ? "text-xl font-bold" : "text-2xl font-bold"}>Analytics Översikt</h1>
           <p className="text-muted-foreground">
             Spåra din utveckling och framsteg
           </p>
