@@ -13,7 +13,9 @@ import {
   Shield,
   HelpCircle,
   MessageSquare,
-  Menu
+  Menu,
+  User as UserIcon,
+  Smartphone
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -55,6 +57,8 @@ export function TopNavigation() {
             <NavLink to="/my-assessments" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Självskattning</NavLink>
             <NavLink to="/my-analyses" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Analys</NavLink>
             <NavLink to="/my-program" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Program</NavLink>
+            <NavLink to="/tasks" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Uppgifter</NavLink>
+            <NavLink to="/calendar" className="px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">Kalender</NavLink>
           </nav>
         )}
 
@@ -80,6 +84,8 @@ export function TopNavigation() {
                   <DropdownMenuItem asChild><NavLink to="/my-assessments" className="w-full">Självskattning</NavLink></DropdownMenuItem>
                   <DropdownMenuItem asChild><NavLink to="/my-analyses" className="w-full">Analys</NavLink></DropdownMenuItem>
                   <DropdownMenuItem asChild><NavLink to="/my-program" className="w-full">Program</NavLink></DropdownMenuItem>
+                  <DropdownMenuItem asChild><NavLink to="/tasks" className="w-full">Uppgifter</NavLink></DropdownMenuItem>
+                  <DropdownMenuItem asChild><NavLink to="/calendar" className="w-full">Kalender</NavLink></DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -132,6 +138,23 @@ export function TopNavigation() {
                       <span>Administration</span>
                     </NavLink>
                   </DropdownMenuItem>
+                )}
+
+                {isClient && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <NavLink to="/edit-profile" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                        <UserIcon className="h-4 w-4 mr-3 text-muted-foreground" />
+                        <span>Min profil</span>
+                      </NavLink>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <NavLink to="/mobile" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                        <Smartphone className="h-4 w-4 mr-3 text-muted-foreground" />
+                        <span>Mobil</span>
+                      </NavLink>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 
                 <DropdownMenuItem asChild>
