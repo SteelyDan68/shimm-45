@@ -136,19 +136,20 @@ const handler = async (req: Request): Promise<Response> => {
           });
           // Fallback to simple HTML
           html = `
-            <h1>Inbjudan till plattformen</h1>
-            <p>Du har blivit inbjuden att gå med i plattformen som ${role === 'client' ? 'klient' : role === 'admin' ? 'administratör' : 'användare'}.</p>
-            <p><a href="${appUrl}/invitation-signup?token=${invitation.token}">Klicka här för att acceptera inbjudan</a></p>
+            <h1>Välkommen till SHIMMS!</h1>
+            <p>Hej! Välkommen till SHIMMS! Du har blivit registrerad att kunna använda den personliga utvecklingsplattformen "SHIMMS" som klient. Logga in och börja din resa! :-)</p>
+            <p><a href="${appUrl}/invitation-signup?token=${invitation.token}">Logga in på SHIMMS</a></p>
             ${custom_message ? `<p><strong>Meddelande:</strong> ${custom_message}</p>` : ''}
+            <p><strong>Det här meddelandet går inte att svara på.</strong></p>
           `;
           console.log(`🔄 Using fallback HTML template for ${email}`);
         }
 
         // Send the email
         const emailResponse = await resend.emails.send({
-          from: "Plattformen <onboarding@resend.dev>",
+          from: "SHIMMS <onboarding@resend.dev>",
           to: [email],
-          subject: `Inbjudan till plattformen`,
+          subject: `Välkommen till SHIMMS`,
           html,
         });
 

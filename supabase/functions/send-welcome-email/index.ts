@@ -107,8 +107,8 @@ const handler = async (req: Request): Promise<Response> => {
             
             <div class="footer">
               <p><strong>SHIMMS</strong> - Din partner för personlig utveckling</p>
-              <p style="font-size: 12px; margin: 5px 0;">
-                Detta mail går inte att svara på.
+              <p style="font-size: 12px; margin: 5px 0; font-weight: bold;">
+                Det här meddelandet går inte att svara på.
               </p>
               <p style="font-size: 12px; margin: 5px 0;">
                 Om du inte begärde detta konto kan du ignorera detta meddelande.
@@ -120,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: `${Deno.env.get('RESEND_FROM_NAME') || 'SHIMMS'} <${Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@resend.dev'}>`,
+      from: "SHIMMS <onboarding@resend.dev>",
       to: [to],
       subject: `Välkommen till SHIMMS, ${firstName || 'ditt utvecklingscentrum väntar'}!`,
       html: emailHtml,

@@ -86,9 +86,12 @@ export const AuthEmail = ({
           <Text style={{ ...text, color: '#666', marginTop: '32px' }}>
             Om du inte begärde detta kan du ignorera detta mail.
           </Text>
+          <Text style={{ ...text, color: '#666', fontSize: '12px', fontWeight: 'bold' }}>
+            Det här meddelandet går inte att svara på.
+          </Text>
           <Text style={footer}>
             Med vänliga hälsningar,<br />
-            Plattformsteamet
+            SHIMMS-teamet
           </Text>
         </Container>
       </Body>

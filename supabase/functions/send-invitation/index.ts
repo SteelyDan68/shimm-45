@@ -100,17 +100,17 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email via Resend
     try {
       const emailResponse = await resend.emails.send({
-        from: 'HappyMinds <noreply@send.shimms.com>',
+        from: 'SHIMMS <noreply@send.shimms.com>',
         to: [email],
-        subject: `Inbjudan till HappyMinds - ${role}`,
+        subject: `Välkommen till SHIMMS`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
-              Välkommen till HappyMinds!
+              Välkommen till SHIMMS!
             </h1>
             
             <p style="font-size: 16px; line-height: 1.5; color: #555;">
-              Du har blivit inbjuden att gå med i HappyMinds som <strong>${role}</strong>.
+              Hej! Välkommen till SHIMMS! Du har blivit registrerad att kunna använda den personliga utvecklingsplattformen "SHIMMS" som klient. Logga in och börja din resa! :-)
             </p>
             
             ${custom_message ? `
@@ -124,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
                  style="background-color: #007bff; color: white; padding: 12px 30px; 
                         text-decoration: none; border-radius: 5px; font-weight: bold;
                         display: inline-block;">
-                Acceptera inbjudan
+                Logga in på SHIMMS
               </a>
             </div>
             
@@ -138,6 +138,9 @@ const handler = async (req: Request): Promise<Response> => {
             
             <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
               Denna inbjudan är giltig i 7 dagar. Om du inte har begärt denna inbjudan kan du ignorera detta e-postmeddelande.
+            </p>
+            <p style="font-size: 12px; color: #999; font-weight: bold;">
+              Det här meddelandet går inte att svara på.
             </p>
           </div>
         `,

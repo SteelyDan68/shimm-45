@@ -75,14 +75,13 @@ export const InvitationEmail: React.FC<InvitationEmailProps> = ({
       </head>
       <body>
         <div className="header">
-          <h1>Välkommen till plattformen!</h1>
-          <p>Du har blivit inbjuden av {invitedBy}</p>
+          <h1>Välkommen till SHIMMS!</h1>
+          <p>SHIMMS - En AI-driven plattform för personal utveckling</p>
         </div>
         
         <div className="content">
-          <h2>Din inbjudan</h2>
           <p>
-            Du har blivit inbjuden att gå med i vår plattform som <strong>{role}</strong>.
+            Hej! Välkommen till SHIMMS! Du har blivit registrerad att kunna använda den personliga utvecklingsplattformen "SHIMMS" som klient. Logga in och börja din resa! :-)
           </p>
           
           {customMessage && (
@@ -92,11 +91,11 @@ export const InvitationEmail: React.FC<InvitationEmailProps> = ({
             </div>
           )}
           
-          <p>Klicka på knappen nedan för att acceptera din inbjudan och skapa ditt konto:</p>
+          <p>Klicka på knappen nedan för att logga in och börja din resa:</p>
           
           <div style={{ textAlign: 'center' }}>
             <a href={invitationUrl} className="button">
-              Acceptera inbjudan
+              Logga in på SHIMMS
             </a>
           </div>
           
@@ -111,6 +110,7 @@ export const InvitationEmail: React.FC<InvitationEmailProps> = ({
         <div className="footer">
           <p>Denna inbjudan är giltig i 7 dagar.</p>
           <p>Om du inte förväntade dig denna inbjudan kan du ignorera detta e-postmeddelande.</p>
+          <p><strong>Det här meddelandet går inte att svara på.</strong></p>
         </div>
       </body>
     </html>

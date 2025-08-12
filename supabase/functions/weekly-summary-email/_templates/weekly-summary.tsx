@@ -109,6 +109,9 @@ export const WeeklySummaryEmail = ({
         <Text style={footerSmall}>
           Detta email skickades automatiskt varje måndag från ditt utvecklingsstöd.
         </Text>
+        <Text style={{ ...footerSmall, fontWeight: 'bold', marginTop: '16px' }}>
+          Det här meddelandet går inte att svara på.
+        </Text>
       </Container>
     </Body>
   </Html>
