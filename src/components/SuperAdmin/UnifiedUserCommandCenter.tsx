@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useNeuroplasticLoading, usePredictiveCache, useSmartTransitions } from '@/hooks/useAdvancedUX';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +51,7 @@ import { InviteUserForm } from './InviteUserForm';
 import { UserProfileEditor } from './UserProfileEditor';
 import { UserRoleManager } from './UserRoleManager';
 import { CoachAssignmentManager } from './CoachAssignmentManager';
+import { SmartPerformanceMonitor } from '@/components/ui/SmartPerformanceMonitor';
 import { deleteUserCompletely } from '@/utils/userDeletion';
 
 interface UserExtended {
@@ -106,6 +108,11 @@ export const UnifiedUserCommandCenter: React.FC = () => {
   const { user: currentUser, hasRole } = useAuth();
   const { users, loading, refreshUsers } = useUsers();
   
+  // ✨ SPRINT 3: Avancerad UX-integration
+  const { loadingState, startNeuroplasticLoading } = useNeuroplasticLoading();
+  const { addToPredictionModel, preloadPredicted, getCached } = usePredictiveCache();
+  const { startTransition, getTransitionClasses } = useSmartTransitions();
+  
   // Cast users to extended interface for full functionality
   const extendedUsers = users as UserExtended[];
   const { toast } = useToast();
@@ -161,10 +168,44 @@ export const UnifiedUserCommandCenter: React.FC = () => {
     };
   }, [extendedUsers]);
 
-  // Handle user selection for detailed view
-  const handleUserSelect = (userId: string) => {
+  // 🚀 SPRINT 3: Smart user selection med neuroplastisk feedback
+  const handleUserSelect = async (userId: string) => {
+    const userToSelect = extendedUsers.find(u => u.id === userId);
+    if (!userToSelect) return;
+
+    // Neuroplastisk loading för user data
+    await startNeuroplasticLoading(
+      async () => {
+        // Prediktiv cache check
+        const cachedData = getCached(`user_${userId}`);
+        if (cachedData) {
+          logger.debug('Using cached user data', { userId });
+          return cachedData;
+        }
+
+        // Simulera laddning av användardata
+        await new Promise(resolve => setTimeout(resolve, 200));
+        return userToSelect;
+      },
+      {
+        component: 'user_selection',
+        complexity: 0.3,
+        userFamiliarity: 0.8
+      }
+    );
+
+    // Smart transition
+    startTransition('forward', {
+      complexity: 0.4,
+      userConfidence: 0.9,
+      contentSimilarity: 0.6
+    });
+
     setSelectedUserId(userId);
     setActiveTab('profile');
+    
+    // Lär prediction model
+    addToPredictionModel(`user_${userId}`);
   };
 
   // Handle user soft deletion with confirmation
@@ -292,19 +333,30 @@ export const UnifiedUserCommandCenter: React.FC = () => {
 
   const selectedUser = selectedUserId ? extendedUsers.find(u => u.id === selectedUserId) : null;
 
-  if (loading) {
+  if (loading || loadingState.isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <Users className="h-12 w-12 animate-pulse text-primary mx-auto mb-4" />
-          <p>Laddar användare...</p>
+          <p>{loadingState.isLoading ? `${loadingState.stage} (${Math.round(loadingState.progress)}%)` : 'Laddar användare...'}</p>
+          {loadingState.isLoading && (
+            <div className="w-48 bg-gray-200 rounded-full h-2 mx-auto mt-2">
+              <div 
+                className="bg-primary h-2 rounded-full transition-all duration-300" 
+                style={{ width: `${loadingState.progress}%` }}
+              />
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${getTransitionClasses()}`}>
+      {/* 🚀 SPRINT 3: Smart Performance Monitor */}
+      <SmartPerformanceMonitor />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
