@@ -42,7 +42,7 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="manage" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Hantera användare
@@ -55,12 +55,6 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
             </TabsTrigger>
           )}
           
-          {canInviteUsers && (
-            <TabsTrigger value="invite" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Bjud in användare
-            </TabsTrigger>
-          )}
         </TabsList>
 
         {/* Hantera användare tab */}
@@ -93,12 +87,6 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
           </TabsContent>
         )}
 
-        {/* Bjud in användare tab */}
-        {canInviteUsers && (
-          <TabsContent value="invite" className="space-y-6">
-            <SendInvitationForm onSuccess={handleUserCreated} />
-          </TabsContent>
-        )}
       </Tabs>
     </div>
   );
