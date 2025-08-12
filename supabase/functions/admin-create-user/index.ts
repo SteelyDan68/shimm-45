@@ -1,472 +1,184 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0'
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 interface CreateUserRequest {
   email: string;
-  password: string;
   firstName: string;
   lastName: string;
   role: string;
-  extendedProfile?: {
-    personnummer?: string;
-    phone?: string;
-    address?: {
-      street?: string;
-      postalCode?: string;
-      city?: string;
-      country?: string;
-    };
-    bio?: string;
-    organization?: string;
-    job_title?: string;
-    instagram_handle?: string;
-    youtube_handle?: string;
-    tiktok_handle?: string;
-    facebook_handle?: string;
-    twitter_handle?: string;
-    snapchat_handle?: string;
-  };
-  sendInviteEmail?: boolean;
+  temporaryPassword: string;
+  sendWelcomeEmail?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  console.log('Admin create user function called at:', new Date().toISOString());
-
   try {
-    // Get the authorization header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('Missing or invalid authorization header');
-      return new Response(
-        JSON.stringify({ error: 'Missing or invalid authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Initialize Supabase client with service role key for admin operations
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
-
-    // Initialize regular client to verify the requesting user
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
-
-    // Verify the requesting user's token and get their info
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
-
-    if (authError || !user) {
-      console.error('Authentication error:', authError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('Checking admin privileges for user:', user.id);
-    console.log('Using Supabase admin client for role check');
+    console.log('🚀 Admin Create User Function Started');
     
-    // Check if the requesting user has admin privileges using admin client (bypasses RLS)
-    const { data: userRoles, error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id);
-
-    console.log('Role query result:', { userRoles, roleError });
-
-    if (roleError) {
-      console.error('Role check error:', roleError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to verify user permissions: ' + roleError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('User roles found:', userRoles);
-    const hasAdminRole = userRoles?.some(r => ['superadmin', 'admin', 'coach'].includes(r.role));
-    console.log('Has admin role:', hasAdminRole, 'for user:', user.id);
-    console.log('Checking roles:', userRoles?.map(r => r.role));
-    
-    if (!hasAdminRole) {
-      console.error('Unauthorized user creation attempt by user:', user.id);
-      console.error('Available roles:', userRoles?.map(r => r.role));
-      return new Response(
-        JSON.stringify({ 
-          error: 'Insufficient privileges to create users',
-          debug: `User ${user.id} has roles: ${userRoles?.map(r => r.role).join(', ') || 'none'}`
-        }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('Admin check passed, proceeding to parse request body...');
-
-    // Parse and validate request body
-    let requestBody;
-    try {
-      console.log('Attempting to parse request body...');
-      requestBody = await req.json();
-      console.log('Request body parsed successfully:', { email: requestBody?.email, role: requestBody?.role });
-    } catch (parseError) {
-      console.error('Failed to parse request body:', parseError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid JSON in request body' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('Extracting fields from request body...');
     const { 
-      email, 
-      password, 
-      firstName, 
-      lastName, 
-      role: rawRole, 
-      extendedProfile,
-      sendInviteEmail = false 
-    }: CreateUserRequest = requestBody;
-    
-    // Handle role extraction - it might come as array or string
-    const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
-    console.log('Fields extracted:', { 
       email, 
       firstName, 
       lastName, 
       role, 
-      hasPassword: !!password,
-      hasExtendedProfile: !!extendedProfile,
-      sendInviteEmail 
-    });
+      temporaryPassword,
+      sendWelcomeEmail = true 
+    }: CreateUserRequest = await req.json();
+    
+    console.log(`Creating user: ${email} with role: ${role}`);
 
-    // Input validation (role is now optional)
-    console.log('Performing input validation...');
-    if (!email || !password || !firstName || !lastName) {
-      console.error('Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName });
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Validate admin permissions
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      throw new Error('Ingen behörighet - saknar autentisering');
     }
 
-    // Validate email format
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Verify admin user
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user: adminUser }, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !adminUser) {
+      throw new Error('Ogiltig autentisering');
+    }
+
+    // Check admin permissions
+    const { data: adminRoles } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', adminUser.id);
+
+    const hasAdminRole = adminRoles?.some(r => ['admin', 'superadmin'].includes(r.role));
+    if (!hasAdminRole) {
+      throw new Error('Otillräcklig behörighet - endast admin/superadmin');
+    }
+
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid email format' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Ogiltig e-postadress');
     }
 
-    // Validate password strength (minimum 8 characters)
-    if (password.length < 8) {
-      return new Response(
-        JSON.stringify({ error: 'Password must be at least 8 characters long' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Password validation
+    if (!temporaryPassword || temporaryPassword.length < 8) {
+      throw new Error('Temporärt lösenord måste vara minst 8 tecken');
     }
 
-    // Validate personnummer if provided
-    if (extendedProfile?.personnummer) {
-      const cleaned = extendedProfile.personnummer.replace(/\D/g, '');
-      if (cleaned.length !== 12 || !/^\d{12}$/.test(cleaned)) {
-        return new Response(
-          JSON.stringify({ error: 'Personnummer must be 12 digits' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    }
+    console.log('Creating user in auth system...');
 
-    // Validate role if provided (roles are now optional)
-    if (role) {
-      const allowedRoles = ['superadmin', 'admin', 'coach', 'client'];
-      if (!allowedRoles.includes(role)) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid role specified' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
-    // Check if user already exists and clean up any ghost references
-    console.log('Checking if user already exists with email:', email);
-    
-    // First, clean up any potential ghost references for this email
-    console.log('Performing cleanup of any ghost references...');
-    try {
-      const { error: cleanupError } = await supabaseAdmin
-        .rpc('cleanup_user_references', { target_email: email });
-      
-      if (cleanupError) {
-        console.error('Cleanup error (non-critical):', cleanupError);
-        console.error('Cleanup error details:', JSON.stringify(cleanupError, null, 2));
-        // Continue anyway - cleanup failure shouldn't block user creation
-      } else {
-        console.log('Ghost reference cleanup completed successfully');
-      }
-    } catch (cleanupErr) {
-      console.log('Cleanup failed (continuing anyway):', cleanupErr);
-    }
-    
-    // Check auth.users table using admin listUsers and force delete if needed
-    const { data: existingUser, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers();
-    if (existingUserError) {
-      console.error('Error checking existing users:', existingUserError);
-      return new Response(
-        JSON.stringify({ error: 'Kunde inte kontrollera befintliga användare' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const existingAuthUser = existingUser.users.find(u => u.email === email);
-    if (existingAuthUser) {
-      console.log('Found existing auth user, attempting to delete:', existingAuthUser.id);
-      const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingAuthUser.id);
-      if (deleteError) {
-        console.error('Failed to delete existing auth user:', deleteError);
-        return new Response(
-          JSON.stringify({ 
-            error: `Kunde inte ta bort befintlig användare med email ${email}. Kontakta systemadministratör.`,
-            details: { deleteError: deleteError.message }
-          }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      console.log('Successfully deleted existing auth user');
-    }
-
-    // Check profiles table for any leftover profiles after cleanup
-    const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
-      .from('profiles')
-      .select('id, email')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (profileCheckError) {
-      console.error('Error checking existing profiles:', profileCheckError);
-      return new Response(
-        JSON.stringify({ error: 'Kunde inte kontrollera befintliga profiler' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (existingProfile) {
-      console.log('Found existing profile, attempting to delete:', existingProfile.id);
-      const { error: deleteProfileError } = await supabaseAdmin
-        .from('profiles')
-        .delete()
-        .eq('id', existingProfile.id);
-      
-      if (deleteProfileError) {
-        console.error('Failed to delete existing profile:', deleteProfileError);
-        return new Response(
-          JSON.stringify({ 
-            error: `Kunde inte ta bort befintlig profil för ${email}. Kontakta systemadministratör.`,
-            details: { deleteError: deleteProfileError.message }
-          }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      console.log('Successfully deleted existing profile');
-    }
-
-    console.log('User cleanup complete, ready to create new user');
-
-    // Create user using admin client - the profile will be created automatically by the trigger
-    console.log('Creating user with email:', email);
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    // Create user in Supabase Auth
+    const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email,
-      password,
-      email_confirm: true,
+      password: temporaryPassword,
+      email_confirm: true, // Skip email confirmation
       user_metadata: {
         first_name: firstName,
-        last_name: lastName
+        last_name: lastName,
+        role: role,
+        created_by_admin: true,
+        force_password_change: true, // Flag för påtvingat lösenordsbyte
+        temp_password: true
       }
     });
 
     if (createError) {
       console.error('User creation error:', createError);
-      return new Response(
-        JSON.stringify({ error: 'Kunde inte skapa användare: ' + createError.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error(`Kunde inte skapa användare: ${createError.message}`);
     }
 
     if (!newUser.user) {
-      return new Response(
-        JSON.stringify({ error: 'Kunde inte skapa användare' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Användaren skapades inte korrekt');
     }
 
-    console.log('User created successfully, ID:', newUser.user.id);
+    console.log('User created successfully:', newUser.user.id);
 
-    // Wait longer for the trigger to create the profile
-    console.log('Waiting for trigger to create profile...');
-    await new Promise(resolve => setTimeout(resolve, 500)); // Increased to 500ms
+    // Create profile
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .insert({
+        id: newUser.user.id,
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        force_password_change: true
+      });
 
-    // Verify that the profile was created by the trigger - try multiple times
-    let createdProfile = null;
-    let attempts = 0;
-    const maxAttempts = 5;
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
+      // Don't fail completely, profile might be created by trigger
+    }
+
+    // Assign role
+    const { error: roleError } = await supabaseClient
+      .from('user_roles')
+      .insert({
+        user_id: newUser.user.id,
+        role: role,
+        assigned_by: adminUser.id,
+        assigned_at: new Date().toISOString()
+      });
+
+    if (roleError) {
+      console.error('Role assignment error:', roleError);
+      throw new Error('Användare skapad men roll kunde inte tilldelas');
+    }
+
+    // Log admin action
+    await supabaseClient
+      .from('admin_audit_log')
+      .insert({
+        admin_user_id: adminUser.id,
+        action: 'manual_user_creation',
+        target_user_id: newUser.user.id,
+        details: {
+          email: email,
+          role: role,
+          firstName: firstName,
+          lastName: lastName,
+          temporaryPassword: '***masked***',
+          timestamp: new Date().toISOString()
+        }
+      });
+
+    console.log('User creation completed successfully');
+
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: `Användare ${email} skapad framgångsrikt`,
+      user_id: newUser.user.id,
+      email: email,
+      temporary_password: temporaryPassword,
+      role: role,
+      force_password_change: true
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+
+  } catch (error: any) {
+    console.error("❌ User creation error:", error);
     
-    while (!createdProfile && attempts < maxAttempts) {
-      attempts++;
-      console.log(`Profile verification attempt ${attempts}/${maxAttempts}`);
-      
-      const { data: profileData, error: profileCheckError } = await supabaseAdmin
-        .from('profiles')
-        .select('id, email, first_name, last_name')
-        .eq('id', newUser.user.id)
-        .maybeSingle();
-
-      if (profileCheckError) {
-        console.error(`Profile check error on attempt ${attempts}:`, profileCheckError);
-        if (attempts === maxAttempts) {
-          // Clean up the created user
-          console.log('Max attempts reached, cleaning up user...');
-          await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-          return new Response(
-            JSON.stringify({ error: 'Profil skapades inte automatiskt: ' + profileCheckError.message }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 200));
-        continue;
-      }
-      
-      createdProfile = profileData;
-      if (createdProfile) {
-        console.log('Profile created successfully by trigger:', createdProfile);
-        break;
-      } else {
-        console.log(`Profile not found on attempt ${attempts}, retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-    }
-
-    if (!createdProfile) {
-      console.error('Profile was not created by trigger after all attempts');
-      // Clean up the created user
-      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-      return new Response(
-        JSON.stringify({ error: 'Profil skapades inte automatiskt av databasutlösaren' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Update profile with extended information if provided
-    if (extendedProfile) {
-      console.log('Updating profile with extended information...');
-      
-      const profileUpdateData: any = {};
-      
-      if (extendedProfile.personnummer) {
-        profileUpdateData.profile_metadata = {
-          personnummer: extendedProfile.personnummer
-        };
-      }
-      
-      if (extendedProfile.phone) profileUpdateData.phone = extendedProfile.phone;
-      if (extendedProfile.bio) profileUpdateData.bio = extendedProfile.bio;
-      if (extendedProfile.organization) profileUpdateData.organization = extendedProfile.organization;
-      if (extendedProfile.job_title) profileUpdateData.job_title = extendedProfile.job_title;
-      
-      // Address information
-      if (extendedProfile.address) {
-        profileUpdateData.address = extendedProfile.address;
-      }
-      
-      // Social media handles
-      if (extendedProfile.instagram_handle) profileUpdateData.instagram_handle = extendedProfile.instagram_handle;
-      if (extendedProfile.youtube_handle) profileUpdateData.youtube_handle = extendedProfile.youtube_handle;
-      if (extendedProfile.tiktok_handle) profileUpdateData.tiktok_handle = extendedProfile.tiktok_handle;
-      if (extendedProfile.facebook_handle) profileUpdateData.facebook_handle = extendedProfile.facebook_handle;
-      if (extendedProfile.twitter_handle) profileUpdateData.twitter_handle = extendedProfile.twitter_handle;
-      if (extendedProfile.snapchat_handle) profileUpdateData.snapchat_handle = extendedProfile.snapchat_handle;
-
-      if (Object.keys(profileUpdateData).length > 0) {
-        const { error: profileUpdateError } = await supabaseAdmin
-          .from('profiles')
-          .update(profileUpdateData)
-          .eq('id', newUser.user.id);
-
-        if (profileUpdateError) {
-          console.error('Error updating profile with extended data:', profileUpdateError);
-          // Don't fail the entire operation, just log the error
-        } else {
-          console.log('Profile updated with extended information successfully');
-        }
-      }
-    }
-
-    // Tilldela roll endast om en specificerades (roller är nu optionella)
-    if (role) {
-      console.log('Assigning role:', role);
-      const { error: roleAssignError } = await supabaseAdmin
-        .from('user_roles')
-        .insert([{
-          user_id: newUser.user.id,
-          role: role
-        }]);
-
-      if (roleAssignError) {
-        console.error('Role assignment error:', roleAssignError);
-        // Attempt to clean up
-        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-        return new Response(
-          JSON.stringify({ error: 'Failed to assign user role' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      console.log('Role assigned successfully');
-    } else {
-      console.log('No role specified - user created without roles (universal identifier only)');
-    }
-
-    console.log('User created successfully:', { userId: newUser.user.id, email, role, createdBy: user.id });
-
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        user: {
-          id: newUser.user.id,
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          role
-        }
+        error: error?.message || "Ett fel uppstod vid skapande av användare"
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
     );
   }
 };

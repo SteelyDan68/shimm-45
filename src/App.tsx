@@ -67,10 +67,14 @@ import NotFound from "./pages/NotFound";
 import { Client360Page } from "./pages/Client360";
 import { PillarJourneyPage } from "./pages/PillarJourney";
 
+import { useForcePasswordChange } from '@/hooks/useForcePasswordChange';
+import { ForcePasswordChangeDialog } from '@/components/Auth/ForcePasswordChangeDialog';
+
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { user, hasRole } = useAuth();
+  const { mustChangePassword } = useForcePasswordChange();
   const { isKeyboardUser, announceToScreenReader } = useKeyboardNavigation();
   
   // Initialize mobile viewport optimizations
@@ -180,6 +184,9 @@ const AppRoutes = () => {
         )
       } />
     </Routes>
+    
+    {/* Force password change dialog - shown when user must change password */}
+    <ForcePasswordChangeDialog open={mustChangePassword} />
     </>
   );
 };

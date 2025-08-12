@@ -25,16 +25,8 @@ export function useForcePasswordChange() {
           setMustChangePassword(true);
         }
 
-        // Dubbelkolla med profiles tabellen
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('force_password_change')
-          .eq('id', user.id)
-          .single();
-
-        if (profile?.force_password_change) {
-          setMustChangePassword(true);
-        }
+        // Bara kolla user metadata eftersom force_password_change kanske inte finns i DB än
+        // Efter migration kommer den att finnas i profiles tabellen också
 
       } catch (error) {
         console.error('Error checking password change requirement:', error);
