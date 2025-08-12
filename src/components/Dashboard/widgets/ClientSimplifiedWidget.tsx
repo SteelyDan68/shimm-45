@@ -32,9 +32,9 @@ const ClientSimplifiedWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
       return [
         {
           id: 'first-assessment',
-          title: 'Gör din första assessment',
+          title: 'Gör din första självskattning',
           description: 'Stefan behöver förstå dig för att ge personliga rekommendationer',
-          action: 'Starta assessment',
+          action: 'Starta självskattning',
           href: '/guided-assessment',
           priority: 'high',
           icon: Target
@@ -47,9 +47,9 @@ const ClientSimplifiedWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
     if (stats.completedPillars < 3) {
       steps.push({
         id: 'continue-assessments',
-        title: 'Fortsätt med assessments',
+        title: 'Fortsätt med självskattningar',
         description: 'Ju fler områden du utforskar, desto bättre kan Stefan hjälpa dig',
-        action: 'Fortsätt assessment',
+        action: 'Fortsätt självskattning',
         href: '/guided-assessment',
         priority: 'high',
         icon: Target
@@ -186,7 +186,7 @@ const ClientSimplifiedWidget: React.FC<WidgetProps> = ({ widget, stats }) => {
               <div className="text-lg font-semibold text-blue-600">
                 {stats.completedPillars}
               </div>
-              <p className="text-xs text-muted-foreground">Slutförda assessments</p>
+              <p className="text-xs text-muted-foreground">Slutförda självskattningar</p>
             </div>
             <div className="space-y-1">
               <div className="text-lg font-semibold text-green-600">

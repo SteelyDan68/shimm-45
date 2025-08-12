@@ -80,9 +80,9 @@ const StefanGuidanceWidget = () => {
         id: 'no-assessments',
         type: 'recommendation',
         title: 'Välkommen till din utvecklingsresa!',
-        message: 'Hej! Jag är Stefan, din AI-guide. För att kunna hjälpa dig bäst behöver jag först förstå dig bättre. Låt oss börja med din första assessment.',
+        message: 'Hej! Jag är Stefan, din AI-guide. För att kunna hjälpa dig bäst behöver jag först förstå dig bättre. Låt oss börja med din första självskattning.',
         action: {
-          label: 'Gör din första assessment',
+          label: 'Gör din första självskattning',
           href: '/guided-assessment'
         },
         priority: 'high',
@@ -101,7 +101,7 @@ const StefanGuidanceWidget = () => {
         id: 'recent-assessment',
         type: 'insight',
         title: 'Ny analys klar!',
-        message: `Jag har analyserat din ${latestAssessment.pillar_type === 'self_care' ? 'Självomvårdnad' : latestAssessment.pillar_type}-assessment. Kolla in dina personliga insikter och rekommendationer.`,
+        message: `Jag har analyserat din ${latestAssessment.pillar_type === 'self_care' ? 'Självomvårdnad' : latestAssessment.pillar_type}-självskattning. Kolla in dina personliga insikter och rekommendationer.`,
         action: {
           label: 'Se analys',
           href: '/my-analyses'
@@ -165,9 +165,9 @@ const StefanGuidanceWidget = () => {
         id: 'next-assessment',
         type: 'recommendation',
         title: 'Redo för nästa steg?',
-        message: `Bra jobbat med dina assessments! Nästa område jag rekommenderar är ${pillarNames[nextPillar]}. Detta kommer ge oss en ännu djupare förståelse av din utveckling.`,
+        message: `Bra jobbat med dina självskattningar! Nästa område jag rekommenderar är ${pillarNames[nextPillar]}. Detta kommer ge oss en ännu djupare förståelse av din utveckling.`,
         action: {
-          label: 'Fortsätt med assessment',
+          label: 'Fortsätt med självskattning',
           href: '/guided-assessment'
         },
         priority: 'low',

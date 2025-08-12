@@ -88,8 +88,8 @@ export function getContextualGuidance(userLevel: UserExperienceLevel, currentRou
   // Nya användare
   if (level === 'beginner' && completedPillars === 0) {
     return {
-      message: 'Välkommen! Låt oss börja med din första assessment för att förstå dina mål.',
-      action: { label: 'Starta assessment', href: '/guided-assessment' },
+      message: 'Välkommen! Låt oss börja med din första självskattning för att förstå dina mål.',
+      action: { label: 'Starta självskattning', href: '/guided-assessment' },
       priority: 'high'
     };
   }
@@ -97,8 +97,8 @@ export function getContextualGuidance(userLevel: UserExperienceLevel, currentRou
   // Användare som börjat men inte varit aktiva
   if (level === 'intermediate' && daysSinceFirstAssessment > 7 && completedPillars < 3) {
     return {
-      message: 'Bra att du är tillbaka! Fortsätt din utvecklingsresa med nästa assessment.',
-      action: { label: 'Fortsätt assessment', href: '/guided-assessment' },
+      message: 'Bra att du är tillbaka! Fortsätt din utvecklingsresa med nästa självskattning.',
+      action: { label: 'Fortsätt självskattning', href: '/guided-assessment' },
       priority: 'medium'
     };
   }
@@ -161,7 +161,7 @@ export function getOnboardingSteps(userLevel: UserExperienceLevel): {
   return [
     {
       id: 'first-assessment',
-      title: 'Gör din första assessment',
+      title: 'Gör din första självskattning',
       description: 'Låt Stefan förstå dina mål och utmaningar',
       completed: completedPillars > 0,
       href: completedPillars === 0 ? '/guided-assessment' : undefined
@@ -183,7 +183,7 @@ export function getOnboardingSteps(userLevel: UserExperienceLevel): {
     {
       id: 'expand-assessment',
       title: 'Utforska fler områden',
-      description: 'Gör assessments för andra utvecklingsområden',
+      description: 'Gör självskattningar för andra utvecklingsområden',
       completed: completedPillars >= 3,
       href: completedPillars < 6 ? '/guided-assessment' : undefined
     },
