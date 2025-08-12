@@ -127,6 +127,8 @@ VIKTIGT: Användaren måste byta lösenord vid första inloggning.
         }
       });
 
+      console.log('create-user response:', { data, error });
+
       if (error) throw error;
 
       if (data?.success) {
