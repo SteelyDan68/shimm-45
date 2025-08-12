@@ -160,12 +160,20 @@ export const useMessagingV2 = () => {
 
           const readMessageIds = readMessages?.map(r => r.message_id) || [];
 
-          const { count: unreadCount } = await supabase
+          // Count unread without huge URL params: total others minus read in this conversation
+          const { count: totalOthers } = await supabase
             .from('messages_v2')
             .select('id', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
-            .not('sender_id', 'eq', user.id)
-            .not('id', 'in', `(${readMessageIds.map(id => `'${id}'`).join(',') || "'00000000-0000-0000-0000-000000000000'"})`);
+            .neq('sender_id', user.id);
+
+          const { count: readInConv } = await supabase
+            .from('message_read_receipts')
+            .select('message_id, messages_v2!inner(id)', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('messages_v2.conversation_id', conv.id);
+
+          const unreadCount = Math.max((totalOthers || 0) - (readInConv || 0), 0);
 
           return {
             ...conv,
