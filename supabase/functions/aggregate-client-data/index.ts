@@ -1,3 +1,4 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 
 const corsHeaders = {
@@ -15,7 +16,7 @@ interface AggregationRequest {
   force_refresh?: boolean;
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -154,7 +155,9 @@ Deno.serve(async (req) => {
       }
     );
   }
-});
+};
+
+serve(handler);
 
 function createAssessmentRecordXML(assessment: any): string {
   return `<?xml version="1.0" encoding="UTF-8"?>

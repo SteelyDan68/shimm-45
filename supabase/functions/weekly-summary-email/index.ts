@@ -1,9 +1,8 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 import { Resend } from 'npm:resend@4.0.0';
-import React from 'npm:react@18.3.1';
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx';
 
 const corsHeaders = {
@@ -36,7 +35,7 @@ const PILLAR_CONFIG = {
   economy: { name: 'Economy', icon: '💰' },
 };
 
-serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -149,7 +148,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-});
+};
+
+serve(handler);
 
 async function gatherWeeklyData(supabase: any, clientId: string, startDate: Date, endDate: Date): Promise<WeeklyData> {
   // Fetch path entries from last week

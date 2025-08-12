@@ -1,3 +1,4 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import React from 'npm:react@18.3.1';
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 import { Resend } from 'npm:resend@4.0.0';
@@ -7,7 +8,7 @@ import { AuthEmail } from './_templates/auth-email.tsx';
 const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string);
 const hookSecret = Deno.env.get('AUTH_WEBHOOK_SECRET') as string;
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   console.log('Auth webhook request received');
 
   if (req.method !== 'POST') {
@@ -88,7 +89,9 @@ Deno.serve(async (req) => {
       }
     );
   }
-});
+};
+
+serve(handler);
 
 function getEmailSubject(actionType: string): string {
   switch (actionType) {
