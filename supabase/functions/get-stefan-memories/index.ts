@@ -36,31 +36,48 @@ serve(async (req) => {
       });
     }
 
+    // Handle both GET and POST requests
     let body = {};
-    try {
-      const bodyText = await req.text();
-      if (bodyText.trim()) {
-        body = JSON.parse(bodyText);
+    
+    if (req.method === 'POST') {
+      try {
+        const bodyText = await req.text();
+        if (bodyText.trim()) {
+          body = JSON.parse(bodyText);
+        }
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        return new Response(JSON.stringify({ 
+          error: 'Invalid JSON in request body',
+          memories: [],
+          count: 0
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      return new Response(JSON.stringify({ 
-        error: 'Invalid JSON in request body',
-        memories: [],
-        count: 0
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     }
 
     const query: string = body?.query || '';
     const match_count: number = Math.max(1, Math.min(50, Number(body?.match_count ?? 5)));
     const min_similarity: number = Math.max(0, Math.min(1, Number(body?.min_similarity ?? 0.75)));
 
-    if (!query || typeof query !== 'string' || query.trim().length === 0) {
-      return new Response(JSON.stringify({ error: 'query is required' }), {
-        status: 400,
+    // If no query provided, return default memories for the user
+    if (!query || query.trim().length === 0) {
+      const { data: defaultMemories, error: dbError } = await supabase
+        .from('stefan_ai_memories')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('last_accessed', { ascending: false })
+        .limit(match_count);
+
+      if (dbError) throw dbError;
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        memories: defaultMemories || [],
+        count: defaultMemories?.length || 0
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -101,7 +118,12 @@ serve(async (req) => {
       throw error;
     }
 
-    return new Response(JSON.stringify({ success: true, results: data || [] }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      results: data || [],
+      memories: data || [],
+      count: data?.length || 0
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
