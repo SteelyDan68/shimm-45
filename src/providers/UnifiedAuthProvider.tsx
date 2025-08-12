@@ -273,11 +273,12 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
   // ============= AUTH ACTIONS =============
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
-      console.log('🔥 SignUp: Starting registration process...', {
+      console.log('🔥🔥🔥 SignUp: STARTING REGISTRATION PROCESS...', {
         email: email?.toLowerCase()?.trim(),
         hasPassword: !!password,
         firstName: firstName?.trim(),
-        lastName: lastName?.trim()
+        lastName: lastName?.trim(),
+        timestamp: new Date().toISOString()
       });
 
       // Input validation and sanitization
@@ -287,6 +288,7 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
 
       if (!cleanEmail) {
         const error = new Error('E-post adress krävs');
+        console.error('🔥🔥🔥 SignUp: VALIDATION ERROR - No email');
         toast({
           title: "Valideringsfel",
           description: error.message,
@@ -297,6 +299,7 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
 
       if (!password || password.length < 6) {
         const error = new Error('Lösenord måste vara minst 6 tecken');
+        console.error('🔥🔥🔥 SignUp: VALIDATION ERROR - Password too short');
         toast({
           title: "Valideringsfel", 
           description: error.message,
@@ -309,6 +312,7 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
       const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(cleanEmail)) {
         const error = new Error('Ogiltig e-post format');
+        console.error('🔥🔥🔥 SignUp: VALIDATION ERROR - Invalid email format');
         toast({
           title: "Valideringsfel",
           description: error.message,
@@ -317,11 +321,16 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
         return { error };
       }
 
-      // Server-side validation would go here when database function is available
-      // For now, relying on client-side validation and Supabase auth validation
-      console.log('🔥 SignUp: Using client-side validation for now');
+      console.log('🔥🔥🔥 SignUp: VALIDATION PASSED - Calling Supabase auth...');
 
       const redirectUrl = `${window.location.origin}/`;
+      
+      console.log('🔥🔥🔥 SignUp: ABOUT TO CALL supabase.auth.signUp with:', {
+        email: cleanEmail,
+        redirectUrl,
+        firstName: cleanFirstName,
+        lastName: cleanLastName
+      });
       
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
@@ -333,6 +342,16 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
             last_name: cleanLastName,
           }
         }
+      });
+      
+      console.log('🔥🔥🔥 SignUp: SUPABASE AUTH RESPONSE RECEIVED:', {
+        hasData: !!data,
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        userId: data?.user?.id,
+        hasError: !!error,
+        errorMessage: error?.message,
+        errorCode: error?.['code']
       });
 
       console.log('🔥 SignUp: Supabase auth response:', {
