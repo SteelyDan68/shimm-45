@@ -51,14 +51,29 @@ serve(async (req) => {
 
     } else if (req.method === 'POST') {
       // Uppdatera konfiguration
+      let requestBody = {};
+      
+      try {
+        const bodyText = await req.text();
+        if (bodyText.trim()) {
+          requestBody = JSON.parse(bodyText);
+        }
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const {
-        primaryModel,
-        enableAssessmentContext,
-        enableRecommendations,
-        confidenceThreshold,
-        maxTokens,
-        temperature
-      } = await req.json();
+        primaryModel = 'auto',
+        enableAssessmentContext = true,
+        enableRecommendations = true,
+        confidenceThreshold = 0.7,
+        maxTokens = 800,
+        temperature = 0.7
+      } = requestBody;
 
       const { data, error } = await supabase
         .from('stefan_ai_config')

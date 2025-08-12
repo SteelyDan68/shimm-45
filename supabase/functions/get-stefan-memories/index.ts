@@ -36,8 +36,25 @@ serve(async (req) => {
       });
     }
 
-    const body = await req.json();
-    const query: string = body?.query;
+    let body = {};
+    try {
+      const bodyText = await req.text();
+      if (bodyText.trim()) {
+        body = JSON.parse(bodyText);
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid JSON in request body',
+        memories: [],
+        count: 0
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const query: string = body?.query || '';
     const match_count: number = Math.max(1, Math.min(50, Number(body?.match_count ?? 5)));
     const min_similarity: number = Math.max(0, Math.min(1, Number(body?.min_similarity ?? 0.75)));
 
