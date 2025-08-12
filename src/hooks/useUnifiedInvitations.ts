@@ -125,17 +125,27 @@ export const useUnifiedInvitations = (): UseUnifiedInvitationsReturn => {
 
       // Visa framgångsmeddelande
       if (unifiedResponse.summary.successful > 0) {
-        toast.success(`🎉 ${unifiedResponse.message}`, {
-          description: data.dev_mode ? 'Utvecklingsläge: E-post kunde inte skickas' : `Framgångsgrad: ${unifiedResponse.summary.success_rate}`
+        toast.success(`✅ MAIL SKICKAT FRAMGÅNGSRIKT!`, {
+          description: `Inbjudan till ${firstEmail} har skickats. ${data.dev_mode ? 'Dev-mode aktiv' : 'E-post levererad'}`,
+          duration: 6000
         });
       }
 
       // Visa varningar för fel
       if (unifiedResponse.errors && unifiedResponse.errors.length > 0) {
-        toast.warning('⚠️ Inbjudning misslyckades', {
-          description: unifiedResponse.errors[0]
+        toast.error('❌ Inbjudning misslyckades', {
+          description: unifiedResponse.errors[0],
+          duration: 8000
         });
       }
+
+      // Debug information
+      console.log('📧 MAIL STATUS:', {
+        email_sent: data.email_sent,
+        email_id: data.email_id,
+        dev_mode: data.dev_mode,
+        success: data.success
+      });
 
       return unifiedResponse;
 
