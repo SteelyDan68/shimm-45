@@ -25,6 +25,7 @@ export interface InvitationResult {
   invitation_token?: string;
   invitation_url?: string;
   email_id?: string;
+  email_sent?: boolean;
   error?: string;
   dev_mode?: boolean;
 }
@@ -88,25 +89,29 @@ export const useUnifiedInvitations = (): UseUnifiedInvitationsReturn => {
         throw new Error('Inget svar från inbjudningsfunktion');
       }
 
-      // Transform simple response to unified format
+      // Normalize edge response (treat email_sent=false as failure to deliver)
+      const emailSent = data.email_sent !== false;
+      const overallSuccess = Boolean(data.success && emailSent);
+
       const unifiedResponse: InvitationResponse = {
-        success: data.success,
+        success: overallSuccess,
         message: data.message,
         results: [{
           email: firstEmail,
-          success: data.success,
+          success: overallSuccess,
           invitation_id: data.invitation_id,
           email_id: data.email_id,
           invitation_url: data.invitation_url,
           dev_mode: data.dev_mode,
-          error: data.success ? undefined : (data.error || 'Unknown error')
+          email_sent: emailSent,
+          error: overallSuccess ? undefined : (data.email_error || data.error || (emailSent ? undefined : 'E-post kunde inte skickas'))
         }],
-        errors: data.success ? undefined : [data.error || 'Unknown error'],
+        errors: overallSuccess ? undefined : [data.email_error || data.error || 'E-post kunde inte skickas'],
         summary: {
           total_requested: 1,
-          successful: data.success ? 1 : 0,
-          failed: data.success ? 0 : 1,
-          success_rate: data.success ? '100%' : '0%'
+          successful: overallSuccess ? 1 : 0,
+          failed: overallSuccess ? 0 : 1,
+          success_rate: overallSuccess ? '100%' : '0%'
         }
       };
 
