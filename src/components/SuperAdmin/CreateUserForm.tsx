@@ -83,19 +83,30 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess }) => 
         body: {
           email: formData.email,
           password: formData.password || undefined,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          roles: formData.roles,
+          firstName: formData.first_name,
+          lastName: formData.last_name,
+          role: formData.roles[0],
+          extendedProfile: {
+            phone: formData.phone,
+            bio: formData.bio,
+            job_title: undefined,
+            organization: undefined,
+          },
         }
       });
 
       if (error) {
         console.error('❌ Create user error:', error);
-        throw error;
+        throw new Error(error.message || 'Edge function error');
+      }
+
+      if (!data?.success) {
+        console.error('❌ Create user returned failure:', data);
+        throw new Error(data?.error || 'Kunde inte skapa användaren');
       }
 
       toast({
-        title: "Användare skapad",
+        title: 'Användare skapad',
         description: `${formData.first_name} ${formData.last_name} har skapats framgångsrikt`,
       });
 
