@@ -79,7 +79,29 @@ export const useUsers = () => {
         } as User;
       }) || [];
 
-      setUsers(usersWithRoles);
+      // Superadmin enhancement: include auth users without profiles (e.g., unconfirmed)
+      let additionalUsers: User[] = [];
+      try {
+        const { data: authRes, error: authErr } = await supabase.functions.invoke('admin-list-auth-users', { body: {} });
+        if (!authErr && (authRes as any)?.users) {
+          const existingIds = new Set(usersWithRoles.map(u => u.id));
+          additionalUsers = ((authRes as any).users as any[])
+            .filter(u => !existingIds.has(u.id))
+            .map(u => ({
+              id: u.id,
+              email: u.email || '',
+              name: u.email || 'Okänd användare',
+              roles: [],
+              primary_role: 'user',
+              created_at: u.created_at,
+              updated_at: u.created_at,
+            } as User));
+        }
+      } catch (_) {
+        // Non-superadmins or function unavailable: ignore silently
+      }
+
+      setUsers([...usersWithRoles, ...additionalUsers]);
       setError(null);
     } catch (err) {
       console.error('Error fetching users:', err);
