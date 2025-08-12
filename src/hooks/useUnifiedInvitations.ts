@@ -76,14 +76,13 @@ export const useUnifiedInvitations = (): UseUnifiedInvitationsReturn => {
         custom_message: request.custom_message || ''
       };
 
-      console.log('🔄 FIXAD: Anropar nu send-invitations istället för send-invitation');
+      console.log('🔄 Använder fungerande send-invitation funktionen');
       
-      const { data, error: edgeError } = await supabase.functions.invoke('send-invitations', {
+      const { data, error: edgeError } = await supabase.functions.invoke('send-invitation', {
         body: {
-          emails: [firstEmail],
+          email: firstEmail,
           role: request.role,
-          custom_message: request.custom_message || '',
-          expires_in_days: request.expires_in_days || 7
+          custom_message: request.custom_message || ''
         }
       });
 
