@@ -151,18 +151,21 @@ export const useMessagingV2 = () => {
             }
           }
 
-          // Count unread messages for current user
+          // Count unread messages for current user - FIXED: Proper query structure
+          // First get read message IDs
+          const { data: readMessages } = await supabase
+            .from('message_read_receipts')
+            .select('message_id')
+            .eq('user_id', user.id);
+
+          const readMessageIds = readMessages?.map(r => r.message_id) || [];
+
           const { count: unreadCount } = await supabase
             .from('messages_v2')
             .select('id', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
             .not('sender_id', 'eq', user.id)
-            .not('id', 'in', 
-              supabase
-                .from('message_read_receipts')
-                .select('message_id')
-                .eq('user_id', user.id)
-            );
+            .not('id', 'in', `(${readMessageIds.map(id => `'${id}'`).join(',') || "'00000000-0000-0000-0000-000000000000'"})`);
 
           return {
             ...conv,

@@ -171,11 +171,11 @@ class ProductionErrorTracker {
 
     // Log error appropriately
     if (severity === 'critical') {
-      logger.error(`CRITICAL ERROR [${errorReport.errorId}]:`, errorReport);
+      logger.error(`CRITICAL ERROR [${errorReport.errorId}]: ${message}`, undefined, errorReport);
     } else if (severity === 'high') {
-      logger.error(`HIGH PRIORITY ERROR [${errorReport.errorId}]:`, errorReport);
+      logger.error(`HIGH PRIORITY ERROR [${errorReport.errorId}]: ${message}`, undefined, errorReport);
     } else {
-      logger.warn(`ERROR [${errorReport.errorId}]:`, message);
+      logger.warn(`ERROR [${errorReport.errorId}]: ${message}`, errorReport);
     }
 
     // Queue for batch sending in production

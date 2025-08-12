@@ -54,8 +54,8 @@ export class ErrorBoundary extends Component<Props, State> {
     });
 
     // Log error with full context
-    logger.error('Error Boundary Caught Error', {
-      error: {
+    logger.error('Error Boundary Caught Error', error, {
+      errorData: {
         name: error.name,
         message: error.message,
         stack: error.stack

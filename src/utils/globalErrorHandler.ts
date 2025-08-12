@@ -99,10 +99,7 @@ class GlobalErrorHandlerImpl implements GlobalErrorHandler {
     }
 
     // Log error
-    logger.error('Global Error Caught', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
+    logger.error('Global Error Caught', error, {
       context,
       queueSize: this.errorQueue.length
     });

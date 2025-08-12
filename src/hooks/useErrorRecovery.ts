@@ -45,8 +45,7 @@ export const useErrorRecovery = (options: UseErrorRecoveryOptions = {}) => {
       canRetry: prev.retryCount < maxRetries
     }));
 
-    logger.error('Error Recovery - Error Set', {
-      error: error.message,
+    logger.error('Error Recovery - Error Set', error, {
       retryCount: state.retryCount,
       canRetry: state.retryCount < maxRetries
     });
@@ -135,7 +134,7 @@ export const useAsyncWithRetry = <T, Args extends any[]>(
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       errorRecovery.setError(err);
-      logger.error('Async operation failed', { error: err.message, args });
+      logger.error('Async operation failed', err, { args });
       throw err;
     } finally {
       setLoading(false);

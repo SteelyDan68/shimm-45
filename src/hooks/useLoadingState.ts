@@ -119,7 +119,7 @@ export const useLoadingState = (options: UseLoadingOptions = {}) => {
       error
     }));
 
-    logger.error('Loading failed', { error: error.message, stage: state.stage });
+    logger.error('Loading failed', error, { stage: state.stage });
     onError?.(error);
   }, [onError, state.stage]);
 
@@ -248,8 +248,7 @@ export const useMultiStageLoading = (stages: LoadingStage[]) => {
     setError(error);
     setIsLoading(false);
 
-    logger.error('Multi-stage loading failed', {
-      error: error.message,
+    logger.error('Multi-stage loading failed', error, {
       stage: stages[currentStageIndex]?.name,
       stageIndex: currentStageIndex
     });
