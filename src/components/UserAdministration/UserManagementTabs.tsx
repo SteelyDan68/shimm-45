@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users } from "lucide-react";
+import { UserPlus, Mail, Users, Settings } from "lucide-react";
 import { useAuth } from "@/providers/UnifiedAuthProvider";
-
+import { SendInvitationForm } from "@/components/InvitationSystem/SendInvitationForm";
 import { CreateUserForm } from "./CreateUserForm";
 import { SafeCentralUserManager } from "@/components/Universal/SafeCentralUserManager";
 import { UserManagementErrorBoundary } from "@/components/Universal/UserManagementErrorBoundary";
@@ -14,7 +14,7 @@ interface UserManagementTabsProps {
 }
 
 export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) => {
-  const { canCreateUsers, canManageUsers } = useAuth();
+  const { canCreateUsers, canInviteUsers, canManageUsers } = useAuth();
   const [activeTab, setActiveTab] = useState("manage");
 
   const handleUserCreated = () => {
@@ -33,6 +33,12 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
             Manuell registrering
           </Badge>
         )}
+        {canInviteUsers && (
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Mail className="h-3 w-3" />
+            E-postinbjudan
+          </Badge>
+        )}
         {canManageUsers && (
           <Badge variant="outline" className="flex items-center gap-1">
             <Users className="h-3 w-3" />
@@ -42,7 +48,7 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="manage" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Hantera användare
@@ -55,6 +61,12 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
             </TabsTrigger>
           )}
           
+          {canInviteUsers && (
+            <TabsTrigger value="invite" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Bjud in användare
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Hantera användare tab */}
@@ -87,6 +99,12 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
           </TabsContent>
         )}
 
+        {/* Bjud in användare tab */}
+        {canInviteUsers && (
+          <TabsContent value="invite" className="space-y-6">
+            <SendInvitationForm onSuccess={handleUserCreated} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

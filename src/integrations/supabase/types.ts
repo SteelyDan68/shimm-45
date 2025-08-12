@@ -17,7 +17,7 @@ export type Database = {
       admin_audit_log: {
         Row: {
           action: string
-          admin_user_id: string | null
+          admin_user_id: string
           created_at: string | null
           details: Json | null
           id: string
@@ -28,7 +28,7 @@ export type Database = {
         }
         Insert: {
           action: string
-          admin_user_id?: string | null
+          admin_user_id: string
           created_at?: string | null
           details?: Json | null
           id?: string
@@ -39,7 +39,7 @@ export type Database = {
         }
         Update: {
           action?: string
-          admin_user_id?: string | null
+          admin_user_id?: string
           created_at?: string | null
           details?: Json | null
           id?: string
@@ -3559,7 +3559,6 @@ export type Database = {
           facebook_handle: string | null
           first_name: string | null
           follower_counts: Json | null
-          force_password_change: boolean | null
           gender: string | null
           has_children: string | null
           height: string | null
@@ -3626,7 +3625,6 @@ export type Database = {
           facebook_handle?: string | null
           first_name?: string | null
           follower_counts?: Json | null
-          force_password_change?: boolean | null
           gender?: string | null
           has_children?: string | null
           height?: string | null
@@ -3693,7 +3691,6 @@ export type Database = {
           facebook_handle?: string | null
           first_name?: string | null
           follower_counts?: Json | null
-          force_password_change?: boolean | null
           gender?: string | null
           has_children?: string | null
           height?: string | null
@@ -4928,10 +4925,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      claim_pending_invitation_for_current_user: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
       cleanup_old_audit_logs: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -5086,10 +5079,6 @@ export type Database = {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: unknown
       }
-      log_security_event: {
-        Args: { event_type: string; event_details?: Json }
-        Returns: undefined
-      }
       log_sensitive_access: {
         Args: {
           table_name: string
@@ -5154,10 +5143,6 @@ export type Database = {
           p_comments?: string
           p_ai_analysis?: string
         }
-        Returns: string
-      }
-      safe_uuid_cast: {
-        Args: { input_text: string }
         Returns: string
       }
       secure_validate_invitation: {
@@ -5245,10 +5230,6 @@ export type Database = {
           _from_role: Database["public"]["Enums"]["app_role"]
           _to_role: Database["public"]["Enums"]["app_role"]
         }
-        Returns: Json
-      }
-      validate_signup_data: {
-        Args: { p_email: string; p_first_name?: string; p_last_name?: string }
         Returns: Json
       }
       vector_avg: {

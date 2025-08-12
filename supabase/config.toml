@@ -27,8 +27,5 @@ verify_jwt = false
 [functions.send-welcome-email]
 verify_jwt = false
 
-[functions.preapproved-signup]
-verify_jwt = false
-
 [auth]
 enabled = true
