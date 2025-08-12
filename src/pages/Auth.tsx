@@ -92,6 +92,39 @@ export const Auth = () => {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!signInEmail) {
+      toast({
+        title: 'E-postadress krävs',
+        description: 'Ange din e-post ovan för att skicka om verifiering.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await (supabase as any).auth.resend({
+        type: 'signup',
+        email: signInEmail
+      });
+      if (error) throw error;
+
+      toast({
+        title: 'Verifieringsmail skickat',
+        description: `En ny bekräftelselänk har skickats till ${signInEmail}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Kunde inte skicka',
+        description: error?.message || 'Ett fel uppstod när verifieringsmailet skulle skickas',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <div className="w-full max-w-md">
@@ -167,7 +200,7 @@ export const Auth = () => {
                 {isLoading ? 'Loggar in...' : 'Logga in'}
               </Button>
               
-              <div className="text-center mt-2">
+              <div className="text-center mt-2 flex items-center justify-center gap-2">
                 <Button
                   type="button"
                   variant="link"
@@ -175,6 +208,15 @@ export const Auth = () => {
                   onClick={() => handleForgotPassword()}
                 >
                   Har du glömt ditt lösenord?
+                </Button>
+                <span className="text-muted-foreground">·</span>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="p-0 h-auto font-normal"
+                  onClick={() => handleResendVerification()}
+                >
+                  Skicka om verifieringsmail
                 </Button>
               </div>
             </form>
