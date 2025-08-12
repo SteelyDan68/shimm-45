@@ -165,7 +165,7 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
   const hasValidEmails = emailValidation.valid.length > 0;
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 max-h-[calc(100vh-4rem)] overflow-y-auto ${className}`}>
       {/* Huvudformulär */}
       <Card>
         <CardHeader>
