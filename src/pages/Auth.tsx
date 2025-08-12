@@ -87,7 +87,17 @@ export const Auth = () => {
             <Shield className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold text-foreground">Välkommen till SHIMMS</h1>
-          <p className="text-muted-foreground">En AI-driven plattform för att ge dig kunskap om och verktyg för det du behöver i livet- och karriären.</p>
+          <p className="text-muted-foreground">En AI-driven plattform som ger dig verktyg för det du behöver i livet och karriären.</p>
+          <p className="text-xs text-muted-foreground/70 mt-2">
+            Skapad och utvecklad 2025 av{' '}
+            <a 
+              href="mailto:stefan.hallgren@gmail.com" 
+              className="hover:underline"
+            >
+              Stefan Hallgren
+            </a>
+            {' '}© All rights reserved
+          </p>
         </div>
 
         <Card>
