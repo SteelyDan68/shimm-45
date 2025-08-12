@@ -95,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               
               <p style="text-align: center;">
-                <a href="${Deno.env.get('SUPABASE_URL') || 'https://gcoorbcglxczmukzcmqs.supabase.co'}/auth/v1/verify" class="btn">
+                <a href="https://00a0d53e-45e2-45a5-8d70-ae3e74d84396.lovableproject.com/auth" class="btn">
                   Logga in på SHIMMS
                 </a>
               </p>
@@ -107,6 +107,9 @@ const handler = async (req: Request): Promise<Response> => {
             
             <div class="footer">
               <p><strong>SHIMMS</strong> - Din partner för personlig utveckling</p>
+              <p style="font-size: 12px; margin: 5px 0;">
+                Detta mail går inte att svara på.
+              </p>
               <p style="font-size: 12px; margin: 5px 0;">
                 Om du inte begärde detta konto kan du ignorera detta meddelande.
               </p>
