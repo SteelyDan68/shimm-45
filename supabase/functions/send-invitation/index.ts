@@ -124,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
                  style="background-color: #007bff; color: white; padding: 12px 30px; 
                         text-decoration: none; border-radius: 5px; font-weight: bold;
                         display: inline-block;">
-                Logga in på SHIMMS
+                Skapa ditt konto
               </a>
             </div>
             
