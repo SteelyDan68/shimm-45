@@ -53,6 +53,7 @@ import { UnifiedUserManagementPage } from "./pages/UnifiedUserManagement";
 import { CoachDashboardPage } from "./pages/CoachDashboard";
 import UserAnalytics from "./pages/UserAnalytics";
 import { InvitationSignup } from "./pages/InvitationSignup";
+import CompleteInvite from "./pages/CompleteInvite";
 import { Intelligence } from "./pages/Intelligence";
 import { IntelligenceOverview } from "./pages/IntelligenceOverview";
 import { IntelligenceHubPage } from "./pages/IntelligenceHub";
@@ -103,6 +104,7 @@ const AppRoutes = () => {
       <Routes>
       {/* Public routes that don't require authentication */}
       <Route path="/invitation-signup" element={<InvitationSignup />} />
+      <Route path="/complete-invite" element={<CompleteInvite />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       

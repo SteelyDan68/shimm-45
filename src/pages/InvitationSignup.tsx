@@ -73,7 +73,7 @@ export const InvitationSignup = () => {
 
     try {
       // Kör serverledd pre-approved signup som skickar verifieringslänk
-      const redirectTo = `${window.location.origin}/auth`;
+      const redirectTo = `${window.location.origin}/complete-invite`;
       const { data, error } = await supabase.functions.invoke('preapproved-signup', {
         body: {
           token,
