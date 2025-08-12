@@ -147,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Send the email
         const emailResponse = await resend.emails.send({
-          from: "SHIMMS <onboarding@resend.dev>",
+          from: "SHIMMS <noreply@send.shimms.com>",
           to: [email],
           subject: `Välkommen till SHIMMS`,
           html,
