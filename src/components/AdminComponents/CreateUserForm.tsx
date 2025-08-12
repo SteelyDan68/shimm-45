@@ -117,14 +117,24 @@ VIKTIGT: Användaren måste byta lösenord vid första inloggning.
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('admin-create-user', {
-        body: formData
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: formData.email,
+          password: formData.temporaryPassword,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: formData.role
+        }
       });
 
       if (error) throw error;
 
       if (data?.success) {
-        setCreatedUser(data);
+        setCreatedUser({
+          email: formData.email,
+          temporary_password: formData.temporaryPassword,
+          role: formData.role
+        });
         toast({
           title: "Användare skapad",
           description: `${formData.email} har skapats framgångsrikt`
