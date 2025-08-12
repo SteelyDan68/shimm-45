@@ -506,8 +506,8 @@ export const UnifiedUserCommandCenter: React.FC = () => {
 
                       <div className="flex items-center gap-4">
                         <div className="flex gap-2">
-                          {user.roles?.map(role => (
-                            <Badge key={role} variant="outline">{role}</Badge>
+                          {user.roles?.map((role, roleIndex) => (
+                            <Badge key={`${user.id}-${role}-${roleIndex}`} variant="outline">{role}</Badge>
                           ))}
                         </div>
                         <div className="text-sm text-muted-foreground">
