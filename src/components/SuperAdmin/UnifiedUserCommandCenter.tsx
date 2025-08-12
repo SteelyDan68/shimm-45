@@ -42,6 +42,7 @@ import {
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useUsers } from '@/hooks/useUsers';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/productionLogger';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
 import { CreateUserForm } from './CreateUserForm';
@@ -214,7 +215,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       // Refresh the user list to reflect changes
       refreshUsers();
     } catch (error) {
-      console.error('Error deactivating user:', error);
+      logger.error('Error deactivating user', error as Error, { userId, userEmail: userToDelete.email });
       toast({
         title: "Fel",
         description: "Kunde inte inaktivera användaren",
@@ -273,7 +274,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
       // Refresh the user list to reflect changes
       refreshUsers();
     } catch (error) {
-      console.error('Error reactivating user:', error);
+      logger.error('Error reactivating user', error as Error, { userId, userEmail: userToReactivate.email });
       toast({
         title: "Fel",
         description: "Kunde inte återaktivera användaren",

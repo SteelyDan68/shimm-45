@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/productionLogger';
 
 interface ActionableItem {
   id: string;
@@ -83,7 +84,7 @@ export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardPr
       if (error) throw error;
       setActionables((data || []) as ActionableItem[]);
     } catch (error) {
-      console.error('Error loading actionables:', error);
+      logger.error('Error loading actionables', error as Error, { userId, planId });
       toast({
         title: "Fel vid laddning",
         description: "Kunde inte ladda dina actionables",
@@ -114,7 +115,7 @@ export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardPr
         description: `Uppgift schemalagd för ${format(date, 'dd MMM yyyy')}${time ? ` kl ${time}` : ''}`,
       });
     } catch (error) {
-      console.error('Error scheduling actionable:', error);
+      logger.error('Error scheduling actionable', error as Error, { actionableId, date: date.toISOString(), time });
       toast({
         title: "Fel vid schemaläggning",
         description: "Kunde inte schemalägga uppgiften",
@@ -138,7 +139,7 @@ export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardPr
         description: `Uppgift markerad som ${newPriority === 'high' ? 'hög' : newPriority === 'medium' ? 'medium' : 'låg'} prioritet`,
       });
     } catch (error) {
-      console.error('Error updating priority:', error);
+      logger.error('Error updating priority', error as Error, { actionableId, newPriority });
     }
   };
 

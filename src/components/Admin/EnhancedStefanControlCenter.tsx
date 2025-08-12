@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/productionLogger';
 
 interface AIPerformanceMetric {
   model: 'openai' | 'gemini';
@@ -85,7 +86,7 @@ export function EnhancedStefanControlCenter() {
         loadSystemConfiguration()
       ]);
     } catch (error) {
-      console.error('Error loading system data:', error);
+      logger.error('Error loading system data', error as Error);
       toast({
         title: "Fel vid laddning",
         description: "Kunde inte ladda systemdata",
@@ -103,7 +104,7 @@ export function EnhancedStefanControlCenter() {
         setAIModels(data.metrics || []);
       }
     } catch (error) {
-      console.warn('Could not load AI performance metrics:', error);
+      logger.warn('Could not load AI performance metrics', { error: error instanceof Error ? error.message : error });
       // Use default empty array if no data
       setAIModels([]);
     }
@@ -116,7 +117,7 @@ export function EnhancedStefanControlCenter() {
         setAssessmentStatus(data.status);
       }
     } catch (error) {
-      console.warn('Could not load assessment status:', error);
+      logger.warn('Could not load assessment status', { error: error instanceof Error ? error.message : error });
       // Use default values if no data
       setAssessmentStatus({
         totalUsers: 0,
@@ -137,7 +138,7 @@ export function EnhancedStefanControlCenter() {
         setConfidenceThreshold(data.confidenceThreshold || 0.7);
       }
     } catch (error) {
-      console.warn('Could not load system configuration:', error);
+      logger.warn('Could not load system configuration', { error: error instanceof Error ? error.message : error });
     }
   };
 

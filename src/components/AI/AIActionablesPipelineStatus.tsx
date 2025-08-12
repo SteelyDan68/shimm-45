@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { Brain, CheckCircle, AlertCircle, Clock, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/utils/productionLogger';
 
 interface PipelineStatusProps {
   userId: string;
@@ -48,7 +49,7 @@ export function AIActionablesPipelineStatus({ userId }: PipelineStatusProps) {
       setAssessments(assessmentData || []);
       setActionables(actionableData || []);
     } catch (error) {
-      console.error('Error loading pipeline data:', error);
+      logger.error('Error loading pipeline data', error as Error, { userId });
       toast.error('Kunde inte ladda pipeline-data');
     } finally {
       setLoading(false);
@@ -82,7 +83,7 @@ export function AIActionablesPipelineStatus({ userId }: PipelineStatusProps) {
       toast.success('Pipeline-test genomfört! Kontrollera nya actionables');
       setTimeout(loadData, 2000); // Reload data after 2 seconds
     } catch (error) {
-      console.error('Error testing pipeline:', error);
+      logger.error('Error testing pipeline', error as Error, { userId, assessmentId: assessments[0]?.id });
       toast.error('Pipeline-test misslyckades: ' + (error as Error).message);
     } finally {
       setTestingPipeline(false);
