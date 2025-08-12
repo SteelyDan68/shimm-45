@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Mail, Users, Settings } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 import { useAuth } from "@/providers/UnifiedAuthProvider";
-import { SendInvitationForm } from "@/components/InvitationSystem/SendInvitationForm";
+
 import { CreateUserForm } from "./CreateUserForm";
 import { SafeCentralUserManager } from "@/components/Universal/SafeCentralUserManager";
 import { UserManagementErrorBoundary } from "@/components/Universal/UserManagementErrorBoundary";
@@ -14,7 +14,7 @@ interface UserManagementTabsProps {
 }
 
 export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) => {
-  const { canCreateUsers, canInviteUsers, canManageUsers } = useAuth();
+  const { canCreateUsers, canManageUsers } = useAuth();
   const [activeTab, setActiveTab] = useState("manage");
 
   const handleUserCreated = () => {
@@ -31,12 +31,6 @@ export const UserManagementTabs = ({ onUserCreated }: UserManagementTabsProps) =
           <Badge variant="outline" className="flex items-center gap-1">
             <UserPlus className="h-3 w-3" />
             Manuell registrering
-          </Badge>
-        )}
-        {canInviteUsers && (
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Mail className="h-3 w-3" />
-            E-postinbjudan
           </Badge>
         )}
         {canManageUsers && (
