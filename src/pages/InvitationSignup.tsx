@@ -47,46 +47,113 @@ export const InvitationSignup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!invitation) return;
+    if (!invitation) {
+      toast.error("Ingen giltig inbjudan hittades");
+      return;
+    }
 
-    if (formData.password !== formData.confirmPassword) {
+    // Enhanced client-side validation
+    const trimmedFirstName = formData.firstName.trim();
+    const trimmedLastName = formData.lastName.trim();
+    const trimmedPassword = formData.password.trim();
+    const trimmedConfirmPassword = formData.confirmPassword.trim();
+
+    // Validation checks
+    if (!trimmedFirstName) {
+      toast.error("Förnamn krävs");
+      return;
+    }
+
+    if (!trimmedLastName) {
+      toast.error("Efternamn krävs");
+      return;
+    }
+
+    if (!trimmedPassword) {
+      toast.error("Lösenord krävs");
+      return;
+    }
+
+    if (trimmedPassword !== trimmedConfirmPassword) {
       toast.error("Lösenorden matchar inte");
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (trimmedPassword.length < 6) {
       toast.error("Lösenordet måste vara minst 6 tecken långt");
+      return;
+    }
+
+    // Enhanced password validation
+    const hasUpperCase = /[A-Z]/.test(trimmedPassword);
+    const hasLowerCase = /[a-z]/.test(trimmedPassword);
+    const hasNumbers = /\d/.test(trimmedPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      toast.error("Lösenordet måste innehålla minst en stor bokstav, en liten bokstav och en siffra");
       return;
     }
 
     setIsRegistering(true);
 
     try {
-      // Register the user
-      const { error: signUpError } = await signUp(
+      console.log('🔥 InvitationSignup: Starting registration for:', invitation.email);
+      
+      // Register the user with enhanced error handling
+      const { data, error: signUpError } = await signUp(
         invitation.email,
-        formData.password,
-        formData.firstName,
-        formData.lastName
+        trimmedPassword,
+        trimmedFirstName,
+        trimmedLastName
       );
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        console.error('🔥 InvitationSignup: SignUp error:', signUpError);
+        throw signUpError;
+      }
+
+      console.log('🔥 InvitationSignup: SignUp successful, marking invitation as accepted...');
 
       // Mark invitation as accepted
-      await acceptInvitation(invitation.invitation_id);
+      try {
+        await acceptInvitation(invitation.invitation_id);
+        console.log('🔥 InvitationSignup: Invitation accepted successfully');
+      } catch (invitationError) {
+        console.warn('🔥 InvitationSignup: Failed to mark invitation as accepted:', invitationError);
+        // Don't fail the whole process if invitation marking fails
+      }
 
       toast.success("Kontot har skapats! Kontrollera din e-post för verifiering.");
       
       // Redirect to auth page for verification message
       navigate("/auth", { 
         state: { 
-          message: "Konto skapat! Kontrollera din e-post för att verifiera ditt konto innan du loggar in." 
+          message: "Konto skapat! Kontrollera din e-post för att verifiera ditt konto innan du loggar in.",
+          email: invitation.email
         }
       });
 
     } catch (error: any) {
-      console.error('Registration error:', error);
-      toast.error(error.message || "Ett fel uppstod vid registreringen");
+      console.error('🔥 InvitationSignup: Registration error:', error);
+      
+      // Enhanced error message handling
+      let errorMessage = "Ett fel uppstod vid registreringen";
+      
+      if (error.message) {
+        if (error.message.includes('User already registered') || error.message.includes('already exists')) {
+          errorMessage = "En användare med denna e-post existerar redan";
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = "Ogiltig e-post adress";
+        } else if (error.message.includes('Database error')) {
+          errorMessage = "Databasfel - kontakta support";
+        } else if (error.message.includes('network') || error.message.includes('connection')) {
+          errorMessage = "Nätverksfel - kontrollera din internetanslutning";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsRegistering(false);
     }

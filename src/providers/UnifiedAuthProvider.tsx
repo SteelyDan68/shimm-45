@@ -273,24 +273,92 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
   // ============= AUTH ACTIONS =============
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
+      console.log('🔥 SignUp: Starting registration process...', {
+        email: email?.toLowerCase()?.trim(),
+        hasPassword: !!password,
+        firstName: firstName?.trim(),
+        lastName: lastName?.trim()
+      });
+
+      // Input validation and sanitization
+      const cleanEmail = email?.toLowerCase()?.trim();
+      const cleanFirstName = firstName?.trim() || '';
+      const cleanLastName = lastName?.trim() || '';
+
+      if (!cleanEmail) {
+        const error = new Error('E-post adress krävs');
+        toast({
+          title: "Valideringsfel",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      if (!password || password.length < 6) {
+        const error = new Error('Lösenord måste vara minst 6 tecken');
+        toast({
+          title: "Valideringsfel", 
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      // Validate email format
+      const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      if (!emailRegex.test(cleanEmail)) {
+        const error = new Error('Ogiltig e-post format');
+        toast({
+          title: "Valideringsfel",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      // Server-side validation would go here when database function is available
+      // For now, relying on client-side validation and Supabase auth validation
+      console.log('🔥 SignUp: Using client-side validation for now');
+
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: cleanEmail,
         password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            first_name: firstName,
-            last_name: lastName,
+            first_name: cleanFirstName,
+            last_name: cleanLastName,
           }
         }
       });
 
+      console.log('🔥 SignUp: Supabase auth response:', {
+        hasData: !!data,
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        userId: data?.user?.id,
+        error: error?.message
+      });
+
       if (error) {
+        console.error('🔥 SignUp: Auth error:', error);
+        
+        // Handle specific Supabase auth errors
+        let userMessage = error.message;
+        if (error.message.includes('User already registered')) {
+          userMessage = 'En användare med denna e-post existerar redan';
+        } else if (error.message.includes('Invalid email')) {
+          userMessage = 'Ogiltig e-post adress';
+        } else if (error.message.includes('Password')) {
+          userMessage = 'Lösenordet uppfyller inte kraven';
+        }
+
         toast({
           title: "Registreringsfel",
-          description: error.message,
+          description: userMessage,
           variant: "destructive",
         });
         return { error };
@@ -301,13 +369,27 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
           title: "Bekräfta din e-post",
           description: "Vi har skickat en bekräftelselänk till din e-post.",
         });
+      } else if (data.user && data.session) {
+        toast({
+          title: "Välkommen!",
+          description: "Ditt konto har skapats och du är nu inloggad.",
+        });
       }
 
+      console.log('🔥 SignUp: Registration completed successfully for:', cleanEmail);
       return { data, error: null };
+      
     } catch (error: any) {
+      console.error('🔥 SignUp: Unexpected error:', error);
+      
+      let userMessage = "Ett oväntat fel uppstod vid registreringen";
+      if (error.message.includes('Database error')) {
+        userMessage = "Databasfel - kontakta support om problemet kvarstår";
+      }
+      
       toast({
         title: "Registreringsfel",
-        description: error.message,
+        description: userMessage,
         variant: "destructive",
       });
       return { error };
