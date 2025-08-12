@@ -16,7 +16,7 @@ export const InvitationSignup = () => {
   const searchParams = new URLSearchParams(location.search);
   const token = searchParams.get('token');
   const { validateInvitation, acceptInvitation } = useInvitations();
-  const { signUp } = useAuth();
+  const { signUp, session, signOut } = useAuth();
 
   const [invitation, setInvitation] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(true);
@@ -105,6 +105,16 @@ export const InvitationSignup = () => {
         timestamp: new Date().toISOString()
       });
       
+      // Ensure no conflicting session before sign-up (invited email must own this flow)
+      if (session?.user?.email && session.user.email.toLowerCase() !== invitation.email.toLowerCase()) {
+        toast.info(`Du är inloggad som ${session.user.email}. Loggar ut för att skapa konto för ${invitation.email}...`);
+        try {
+          await signOut();
+        } catch (e) {
+          console.warn('Could not sign out prior to invitation signup:', e);
+        }
+      }
+
       // Register the user with enhanced error handling
       const signUpResult = await signUp(
         invitation.email,
