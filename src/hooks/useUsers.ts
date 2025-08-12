@@ -26,6 +26,7 @@ export const useUsers = () => {
 
   const fetchUsers = async () => {
     console.log('🔄 Fetching users from database...');
+    console.log('🔍 DEBUG: Starting fetchUsers - checking auth users function...');
     try {
       setLoading(true);
       
@@ -82,8 +83,14 @@ export const useUsers = () => {
       // Superadmin enhancement: include auth users without profiles (e.g., unconfirmed)
       let additionalUsers: User[] = [];
       try {
+        console.log('🔍 DEBUG: Attempting to call admin-list-auth-users function...');
         const { data: authRes, error: authErr } = await supabase.functions.invoke('admin-list-auth-users', { body: {} });
-        if (!authErr && (authRes as any)?.users) {
+        console.log('🔍 DEBUG: admin-list-auth-users response:', { authRes, authErr });
+        
+        if (authErr) {
+          console.error('❌ admin-list-auth-users error:', authErr);
+        } else if ((authRes as any)?.users) {
+          console.log('✅ admin-list-auth-users success, users found:', (authRes as any).users.length);
           const existingIds = new Set(usersWithRoles.map(u => u.id));
           additionalUsers = ((authRes as any).users as any[])
             .filter(u => !existingIds.has(u.id))
@@ -96,11 +103,14 @@ export const useUsers = () => {
               created_at: u.created_at,
               updated_at: u.created_at,
             } as User));
+          console.log('🆕 Additional users from auth.users:', additionalUsers);
         }
-      } catch (_) {
-        // Non-superadmins or function unavailable: ignore silently
+      } catch (authError) {
+        console.error('🚨 CRITICAL: admin-list-auth-users function call failed:', authError);
+        // Non-superadmins or function unavailable: continue anyway
       }
 
+      console.log('📊 Final user count:', [...usersWithRoles, ...additionalUsers].length, 'profiles:', usersWithRoles.length, 'additional:', additionalUsers.length);
       setUsers([...usersWithRoles, ...additionalUsers]);
       setError(null);
     } catch (err) {
