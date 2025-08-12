@@ -74,7 +74,6 @@ export const useAnalyticsTracking = () => {
     interactionBufferRef.current = [];
 
     try {
-      // Using direct HTTP call to bypass TypeScript issues with new table
       const eventsPayload = events.map(event => ({
         ...event,
         user_id: user?.id || null,
@@ -84,19 +83,13 @@ export const useAnalyticsTracking = () => {
         user_agent: navigator.userAgent
       }));
 
-      const response = await fetch(`https://gcoorbcglxczmukzcmqs.supabase.co/rest/v1/analytics_events`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb29yYmNnbHhjem11a3pjbXFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4MTE3NzYsImV4cCI6MjA2OTM4Nzc3Nn0.5gNGvMZ6aG3UXoYR6XbJPqn8L8ktMYaFbZIQ4mZTFf4',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(eventsPayload)
+      // Use secure RPC to bypass RLS via SECURITY DEFINER function
+      const { error: rpcError } = await supabase.rpc('insert_analytics_events', {
+        events_data: eventsPayload
       });
 
-      if (!response.ok) {
-        throw new Error(`Analytics insert failed: ${response.statusText}`);
+      if (rpcError) {
+        throw new Error(`Analytics insert failed: ${rpcError.message}`);
       }
     } catch (error) {
       console.error('Analytics network error:', error);
