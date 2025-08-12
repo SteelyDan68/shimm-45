@@ -215,7 +215,7 @@ const MyProgram = () => {
           </div>
         </div>
         <p className="text-muted-foreground max-w-2xl">
-          Dina personliga handlingsplaner och rekommendationer baserat på Stefans AI-analyser av dina assessments.
+          Dina personliga handlingsplaner och rekommendationer baserat på Stefans AI-analyser av dina självskattningar.
         </p>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdProgram) }} />
         <style>{`@media print { .no-print{display:none!important} body{background:white} .card, .container{box-shadow:none!important} }`}</style>
