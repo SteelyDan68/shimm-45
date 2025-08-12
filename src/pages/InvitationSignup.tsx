@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Mail, Lock, User, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const InvitationSignup = () => {
   const navigate = useNavigate();
@@ -137,15 +138,19 @@ export const InvitationSignup = () => {
         throw signUpError;
       }
 
-      console.log('🔥 InvitationSignup: SignUp successful, marking invitation as accepted...');
+      console.log('🔥 InvitationSignup: SignUp successful, attempting to claim invitation and assign role...');
 
-      // Mark invitation as accepted
       try {
-        await acceptInvitation(invitation.invitation_id);
-        console.log('🔥 InvitationSignup: Invitation accepted successfully');
-      } catch (invitationError) {
-        console.warn('🔥 InvitationSignup: Failed to mark invitation as accepted:', invitationError);
-        // Don't fail the whole process if invitation marking fails
+        const { data: claim, error: claimErr } = await (supabase as any).rpc('claim_pending_invitation_for_current_user');
+        if (claimErr) {
+          console.warn('🔥 InvitationSignup: Claim RPC error (likely awaiting email verification):', claimErr);
+        } else if ((claim as any)?.status === 'claimed') {
+          console.log('🔥 InvitationSignup: Invitation claimed and role assigned:', claim);
+        } else {
+          console.log('🔥 InvitationSignup: No claim performed (awaiting verification or no pending invitation).');
+        }
+      } catch (e) {
+        console.warn('🔥 InvitationSignup: Claim RPC call failed:', e);
       }
 
       toast.success("Kontot har skapats! Kontrollera din e-post för verifiering.");

@@ -36,6 +36,19 @@ export const Auth = () => {
       const { error } = await signIn(signInEmail, signInPassword);
       
       if (!error) {
+        try {
+          const { data: claim, error: claimErr } = await (supabase as any).rpc('claim_pending_invitation_for_current_user');
+          if (claimErr) {
+            console.warn('Invitation claim error:', claimErr);
+          } else if ((claim as any)?.status === 'claimed') {
+            toast({
+              title: 'Inbjudan aktiverad',
+              description: `Rollen ${(claim as any).assigned_role} har tilldelats.`,
+            });
+          }
+        } catch (e) {
+          console.warn('Claim RPC failed:', e);
+        }
         navigate('/');
       }
     } finally {
