@@ -97,15 +97,30 @@ export const InvitationSignup = () => {
     setIsRegistering(true);
 
     try {
-      console.log('🔥 InvitationSignup: Starting registration for:', invitation.email);
+      console.log('🔥🔥🔥 InvitationSignup: STARTING REGISTRATION FOR:', {
+        email: invitation.email,
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        passwordLength: trimmedPassword.length,
+        timestamp: new Date().toISOString()
+      });
       
       // Register the user with enhanced error handling
-      const { data, error: signUpError } = await signUp(
+      const signUpResult = await signUp(
         invitation.email,
         trimmedPassword,
         trimmedFirstName,
         trimmedLastName
       );
+      
+      console.log('🔥🔥🔥 InvitationSignup: SIGNUP RESULT RECEIVED:', {
+        hasData: !!signUpResult.data,
+        hasError: !!signUpResult.error,
+        errorMessage: signUpResult.error?.message,
+        errorDetails: signUpResult.error
+      });
+      
+      const { data, error: signUpError } = signUpResult;
 
       if (signUpError) {
         console.error('🔥 InvitationSignup: SignUp error:', signUpError);
