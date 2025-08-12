@@ -1,118 +1,132 @@
-import React from 'npm:react@18.3.1';
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Link,
+  Preview,
+  Text,
+} from 'npm:@react-email/components@0.0.22'
+import * as React from 'npm:react@18.3.1'
 
 interface InvitationEmailProps {
-  invitedBy: string;
-  invitationToken: string;
-  role: string;
-  appUrl: string;
-  customMessage?: string;
+  invitedBy: string
+  invitationToken: string
+  role: string
+  appUrl: string
+  customMessage?: string
 }
 
-export const InvitationEmail: React.FC<InvitationEmailProps> = ({
+export const InvitationEmail = ({
   invitedBy,
   invitationToken,
   role,
   appUrl,
   customMessage,
-}) => {
-  const invitationUrl = `${appUrl}/invitation-signup?token=${invitationToken}`;
+}: InvitationEmailProps) => (
+  <Html>
+    <Head />
+    <Preview>Välkommen till SHIMMS - Din inbjudan väntar</Preview>
+    <Body style={main}>
+      <Container style={container}>
+        <Heading style={h1}>Välkommen till SHIMMS!</Heading>
+        <Text style={text}>
+          Hej!
+        </Text>
+        <Text style={text}>
+          Du har blivit inbjuden av {invitedBy} att använda SHIMMS - en personlig utvecklingsplattform som {role}.
+        </Text>
+        
+        {customMessage && (
+          <Text style={{ ...text, backgroundColor: '#f8f9fa', padding: '16px', borderRadius: '8px' }}>
+            <strong>Meddelande från {invitedBy}:</strong><br />
+            {customMessage}
+          </Text>
+        )}
+        
+        <Text style={text}>
+          Klicka på länken nedan för att slutföra din registrering och komma igång:
+        </Text>
+        
+        <Link
+          href={`${appUrl}/invitation-signup?token=${invitationToken}`}
+          target="_blank"
+          style={{
+            ...link,
+            display: 'block',
+            marginBottom: '16px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            textAlign: 'center' as const,
+          }}
+        >
+          Slutför registrering och logga in
+        </Link>
+        
+        <Text style={{ ...text, color: '#6c757d', fontSize: '14px' }}>
+          Om länken inte fungerar, kopiera och klistra in denna URL i din webbläsare:
+          <br />
+          {appUrl}/invitation-signup?token={invitationToken}
+        </Text>
+        
+        <Text style={{ ...text, color: '#6c757d', fontSize: '12px', marginTop: '24px' }}>
+          Om du inte förväntade dig denna inbjudan kan du ignorera detta e-postmeddelande.
+          <br />
+          Detta meddelande går inte att svara på.
+        </Text>
+        
+        <Text style={footer}>
+          Med vänliga hälsningar,<br />
+          SHIMMS-teamet
+        </Text>
+      </Container>
+    </Body>
+  </Html>
+)
 
-  return (
-    <html>
-      <head>
-        <meta charSet="utf-8" />
-        <title>Inbjudan till plattformen</title>
-        <style>{`
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-          }
-          .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            border-radius: 10px 10px 0 0;
-          }
-          .content {
-            background: #f9f9f9;
-            padding: 30px;
-            border-radius: 0 0 10px 10px;
-            border: 1px solid #e0e0e0;
-            border-top: none;
-          }
-          .button {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            margin: 20px 0;
-            font-weight: bold;
-            text-align: center;
-          }
-          .footer {
-            text-align: center;
-            color: #666;
-            font-size: 12px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-          }
-          .custom-message {
-            background: #fff;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-          }
-        `}</style>
-      </head>
-      <body>
-        <div className="header">
-          <h1>Välkommen till SHIMMS!</h1>
-          <p>SHIMMS - En AI-driven plattform för personal utveckling</p>
-        </div>
-        
-        <div className="content">
-          <p>
-            Hej! Välkommen till SHIMMS! Du har blivit registrerad att kunna använda den personliga utvecklingsplattformen "SHIMMS" som klient. Logga in och börja din resa! :-)
-          </p>
-          
-          {customMessage && (
-            <div className="custom-message">
-              <h3>Personligt meddelande:</h3>
-              <p>{customMessage}</p>
-            </div>
-          )}
-          
-          <p>Klicka på knappen nedan för att logga in och börja din resa:</p>
-          
-          <div style={{ textAlign: 'center' }}>
-            <a href={invitationUrl} className="button">
-              Logga in på SHIMMS
-            </a>
-          </div>
-          
-          <p>
-            Om knappen inte fungerar kan du kopiera och klistra in följande länk i din webbläsare:
-          </p>
-          <p style={{ wordBreak: 'break-all', background: '#f0f0f0', padding: '10px', borderRadius: '4px' }}>
-            {invitationUrl}
-          </p>
-        </div>
-        
-        <div className="footer">
-          <p>Denna inbjudan är giltig i 7 dagar.</p>
-          <p>Om du inte förväntade dig denna inbjudan kan du ignorera detta e-postmeddelande.</p>
-          <p><strong>Det här meddelandet går inte att svara på.</strong></p>
-        </div>
-      </body>
-    </html>
-  );
-};
+export default InvitationEmail
+
+const main = {
+  backgroundColor: '#ffffff',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+}
+
+const container = {
+  paddingLeft: '20px',
+  paddingRight: '20px',
+  margin: '0 auto',
+  maxWidth: '600px',
+}
+
+const h1 = {
+  color: '#333',
+  fontSize: '24px',
+  fontWeight: 'bold',
+  margin: '40px 0',
+  padding: '0',
+}
+
+const link = {
+  color: '#007bff',
+  fontSize: '16px',
+  textDecoration: 'underline',
+}
+
+const text = {
+  color: '#333',
+  fontSize: '16px',
+  margin: '16px 0',
+  lineHeight: '1.5',
+}
+
+const footer = {
+  color: '#6c757d',
+  fontSize: '14px',
+  lineHeight: '22px',
+  marginTop: '32px',
+  marginBottom: '24px',
+}
