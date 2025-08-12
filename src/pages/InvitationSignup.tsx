@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useInvitations } from "@/hooks/useInvitations";
 import { useAuth } from "@/providers/UnifiedAuthProvider";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,10 @@ import { toast } from "sonner";
 import { Mail, Lock, User, Loader2, CheckCircle, XCircle } from "lucide-react";
 
 export const InvitationSignup = () => {
-  const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const token = searchParams.get('token');
   const { validateInvitation, acceptInvitation } = useInvitations();
   const { signUp } = useAuth();
 

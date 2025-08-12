@@ -3,9 +3,10 @@
  * 
  * Komplett inbjudningshantering med enhetlig UX
  * Ersätter alla fragmenterade invitation komponenter
+ * Inkluderar dubblettskydd och statushantering
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,8 @@ import { AlertCircle, Mail, Plus, Send, Users, X, CheckCircle2, Clock, AlertTria
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useUnifiedInvitations, InvitationResult } from '@/hooks/useUnifiedInvitations';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { PendingInvitations } from './PendingInvitations';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UnifiedInvitationManagerProps {
   onSuccess?: () => void;
@@ -46,6 +49,8 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
   // UI state
   const [results, setResults] = useState<InvitationResult[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [pendingEmails, setPendingEmails] = useState<string[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const inviterName = profile?.first_name && profile?.last_name 
     ? `${profile.first_name} ${profile.last_name}`
@@ -67,28 +72,61 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
     setEmails(newEmails);
   };
 
-  const validateEmails = (): string[] => {
-    const validEmails = emails
+  // Ladda pågående inbjudningar för dubblettskydd
+  const loadPendingInvitations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('invitations')
+        .select('email')
+        .eq('status', 'pending');
+      
+      if (error) throw error;
+      setPendingEmails(data?.map(inv => inv.email) || []);
+    } catch (error) {
+      console.error('Error loading pending invitations:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadPendingInvitations();
+  }, [refreshTrigger]);
+
+  const validateEmails = (): { valid: string[], duplicates: string[], invalid: string[] } => {
+    const trimmedEmails = emails
       .map(email => email.trim())
       .filter(email => email.length > 0);
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return validEmails.filter(email => emailRegex.test(email));
+    const valid: string[] = [];
+    const invalid: string[] = [];
+    const duplicates: string[] = [];
+    
+    trimmedEmails.forEach(email => {
+      if (!emailRegex.test(email)) {
+        invalid.push(email);
+      } else if (pendingEmails.includes(email)) {
+        duplicates.push(email);
+      } else {
+        valid.push(email);
+      }
+    });
+    
+    return { valid, duplicates, invalid };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
 
-    const validEmails = validateEmails();
+    const emailValidation = validateEmails();
 
-    if (validEmails.length === 0) {
+    if (emailValidation.valid.length === 0) {
       return;
     }
 
     try {
       const response = await sendInvitations({
-        emails: validEmails,
+        emails: emailValidation.valid,
         role,
         invitedBy: inviterName,
         custom_message: customMessage.trim() || undefined,
@@ -103,10 +141,11 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
         onSuccess();
       }
 
-      // Rensa formuläret vid framgång
+      // Rensa formuläret vid framgång och uppdatera pending lista
       if (response.summary.successful > 0) {
         setEmails(['']);
         setCustomMessage('');
+        setRefreshTrigger(prev => prev + 1); // Trigga refresh av pending lista
       }
 
     } catch (err) {
@@ -122,9 +161,8 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
     clearError();
   };
 
-  const validEmails = validateEmails();
-  const hasValidEmails = validEmails.length > 0;
-  const invalidEmailsCount = emails.filter(e => e.trim()).length - validEmails.length;
+  const emailValidation = validateEmails();
+  const hasValidEmails = emailValidation.valid.length > 0;
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -187,15 +225,27 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
               {hasValidEmails && (
                 <div className="flex items-center gap-2 text-sm text-green-600">
                   <CheckCircle2 className="h-4 w-4" />
-                  {validEmails.length} giltig{validEmails.length !== 1 ? 'a' : ''} e-postadress{validEmails.length !== 1 ? 'er' : ''}
+                  {emailValidation.valid.length} giltig{emailValidation.valid.length !== 1 ? 'a' : ''} e-postadress{emailValidation.valid.length !== 1 ? 'er' : ''}
                 </div>
               )}
               
-              {invalidEmailsCount > 0 && (
+              {emailValidation.invalid.length > 0 && (
                 <div className="flex items-center gap-2 text-sm text-orange-600">
                   <AlertTriangle className="h-4 w-4" />
-                  {invalidEmailsCount} ogiltig{invalidEmailsCount !== 1 ? 'a' : ''} e-postadress{invalidEmailsCount !== 1 ? 'er' : ''}
+                  {emailValidation.invalid.length} ogiltig{emailValidation.invalid.length !== 1 ? 'a' : ''} e-postadress{emailValidation.invalid.length !== 1 ? 'er' : ''}
                 </div>
+              )}
+              
+              {emailValidation.duplicates.length > 0 && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="font-medium mb-1">Pågående inbjudningar hittades:</div>
+                    <div className="text-sm">
+                      {emailValidation.duplicates.join(', ')} har redan skickats inbjudningar som väntar på svar.
+                    </div>
+                  </AlertDescription>
+                </Alert>
               )}
             </div>
 
@@ -283,7 +333,7 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
-                    Skicka {validEmails.length > 1 ? `${validEmails.length} inbjudningar` : 'inbjudan'}
+                    Skicka {emailValidation.valid.length > 1 ? `${emailValidation.valid.length} inbjudningar` : 'inbjudan'}
                   </>
                 )}
               </Button>
@@ -353,6 +403,9 @@ export const UnifiedInvitationManager: React.FC<UnifiedInvitationManagerProps> =
           </CardContent>
         </Card>
       )}
+
+      {/* Pågående inbjudningar */}
+      <PendingInvitations onRefresh={() => setRefreshTrigger(prev => prev + 1)} />
     </div>
   );
 };

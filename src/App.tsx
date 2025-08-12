@@ -102,7 +102,7 @@ const AppRoutes = () => {
       
       <Routes>
       {/* Public routes that don't require authentication */}
-      <Route path="/invitation/:token" element={<InvitationSignup />} />
+      <Route path="/invitation-signup" element={<InvitationSignup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       
