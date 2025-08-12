@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +18,12 @@ export const Auth = () => {
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
 
+  // Tabs + Sign up form
+  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
+  const [signUpConfirm, setSignUpConfirm] = useState('');
+
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -27,6 +34,32 @@ export const Auth = () => {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // SEO: Title, meta description, canonical
+  useEffect(() => {
+    document.title = 'Logga in eller skapa konto | SHIMMS';
+
+    const ensureMeta = (name: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        (el as HTMLMetaElement).name = name;
+        document.head.appendChild(el);
+      }
+      return el as HTMLMetaElement;
+    };
+
+    const metaDesc = ensureMeta('description');
+    metaDesc.setAttribute('content', 'Logga in eller skapa konto för SHIMMS – AI-driven plattform. E-postverifiering och säker inloggning.');
+
+    let linkCanonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!linkCanonical) {
+      linkCanonical = document.createElement('link');
+      linkCanonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(linkCanonical);
+    }
+    linkCanonical.setAttribute('href', window.location.href);
+  }, []);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,10 +158,59 @@ export const Auth = () => {
     }
   };
 
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!signUpEmail || !signUpPassword) {
+      toast({
+        title: 'Fyll i alla fält',
+        description: 'E-post och lösenord krävs.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (signUpPassword !== signUpConfirm) {
+      toast({
+        title: 'Lösenorden matchar inte',
+        description: 'Bekräfta att båda lösenorden är identiska.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      const { error } = await (supabase as any).auth.signUp({
+        email: signUpEmail,
+        password: signUpPassword,
+        options: { emailRedirectTo: redirectUrl },
+      });
+      if (error) throw error;
+
+      toast({
+        title: 'Verifiering skickad',
+        description: `Vi har skickat ett verifieringsmail till ${signUpEmail}. Öppna länken för att aktivera ditt konto.`,
+      });
+
+      // Växla till inloggningsfliken
+      setActiveTab('login');
+    } catch (error: any) {
+      toast({
+        title: 'Kunde inte skapa konto',
+        description: error?.message || 'Ett fel uppstod. Försök igen senare.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <header className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
             <Shield className="h-8 w-8 text-primary-foreground" />
           </div>
@@ -144,85 +226,145 @@ export const Auth = () => {
             </a>
             {' '}© All rights reserved
           </p>
-        </div>
+        </header>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center">Logga in</CardTitle>
-          </CardHeader>
+        <Tabs defaultValue="login" value={activeTab} onValueChange={(v) => setActiveTab(v as 'login' | 'signup')}>
+          <TabsList className="grid w-full grid-cols-2 mb-2">
+            <TabsTrigger value="login">Logga in</TabsTrigger>
+            <TabsTrigger value="signup">Skapa konto</TabsTrigger>
+          </TabsList>
 
-          <CardContent>
-            <form onSubmit={handleSignIn} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signin-email">E-postadress</Label>
-                <Input
-                  id="signin-email"
-                  type="email"
-                  placeholder="din@email.com"
-                  value={signInEmail}
-                  onChange={(e) => setSignInEmail(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="signin-password">Lösenord</Label>
-                <div className="relative">
-                  <Input
-                    id="signin-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Ditt lösenord"
-                    value={signInPassword}
-                    onChange={(e) => setSignInPassword(e.target.value)}
-                    required
-                  />
+          <TabsContent value="login">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">Logga in</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">E-postadress</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="din@email.com"
+                      value={signInEmail}
+                      onChange={(e) => setSignInEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Lösenord</Label>
+                    <div className="relative">
+                      <Input
+                        id="signin-password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Ditt lösenord"
+                        value={signInPassword}
+                        onChange={(e) => setSignInPassword(e.target.value)}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+  
                   <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {isLoading ? 'Loggar in...' : 'Logga in'}
                   </Button>
-                </div>
-              </div>
+                  
+                  <div className="text-center mt-2 flex items-center justify-center gap-2">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 h-auto font-normal"
+                      onClick={() => handleForgotPassword()}
+                    >
+                      Har du glömt ditt lösenord?
+                    </Button>
+                    <span className="text-muted-foreground">·</span>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 h-auto font-normal"
+                      onClick={() => handleResendVerification()}
+                    >
+                      Skicka om verifieringsmail
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Loggar in...' : 'Logga in'}
-              </Button>
-              
-              <div className="text-center mt-2 flex items-center justify-center gap-2">
-                <Button
-                  type="button"
-                  variant="link"
-                  className="p-0 h-auto font-normal"
-                  onClick={() => handleForgotPassword()}
-                >
-                  Har du glömt ditt lösenord?
-                </Button>
-                <span className="text-muted-foreground">·</span>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="p-0 h-auto font-normal"
-                  onClick={() => handleResendVerification()}
-                >
-                  Skicka om verifieringsmail
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+          <TabsContent value="signup">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">Skapa konto</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">E-postadress</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="din@email.com"
+                      value={signUpEmail}
+                      onChange={(e) => setSignUpEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Lösenord</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Minst 12 tecken"
+                      value={signUpPassword}
+                      onChange={(e) => setSignUpPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm">Bekräfta lösenord</Label>
+                    <Input
+                      id="signup-confirm"
+                      type="password"
+                      placeholder="Bekräfta lösenord"
+                      value={signUpConfirm}
+                      onChange={(e) => setSignUpConfirm(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Skapar konto...' : 'Skapa konto'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Vi skickar en verifieringslänk till din e-post för att aktivera kontot.
+                  </p>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </main>
   );
 };
