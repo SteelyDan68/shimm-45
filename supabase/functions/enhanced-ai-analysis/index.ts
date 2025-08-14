@@ -187,7 +187,9 @@ Använd denna kontextuella information från tidigare sessioner:
 
 ${stefanContext}
 
-Svara med Stefans personliga, uppmuntrande stil. Integrera neuroplastiska principer naturligt i din analys.`;
+VIKTIGT: Generera EXAKT 5 specifika, handlingsbara rekommendationer (inte generiska).
+Svara med Stefans personliga, uppmuntrande stil. Integrera neuroplastiska principer naturligt i din analys.
+Undvik standardfraser från Wheel of Life. Fokusera på klientens unika situation.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -196,19 +198,18 @@ Svara med Stefans personliga, uppmuntrande stil. Integrera neuroplastiska princi
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-5-2025-08-07',
       messages: [
         {
           role: 'system',
-          content: 'Du är Stefan AI - en varm, professionell coach specialiserad på neuroplastisk utveckling. Svara alltid med empati, konkreta råd och motiverande tonalitet.'
+          content: 'Du är Stefan AI - en varm, professionell coach specialiserad på neuroplastisk utveckling. Svara alltid med empati, konkreta råd och motiverande tonalitet. Skapa 5 specifika rekommendationer som är unika för varje klient.'
         },
         {
           role: 'user',
           content: stefanPrompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 2000
+      max_completion_tokens: 2000
     })
   });
 
@@ -227,7 +228,9 @@ Analysera bedömningen med särskilt fokus på:
 - Vanor som stärker önskade beteenden
 - Kognitiv omstrukturering för förbättrad prestanda
 - Gradvis progression för hållbar förändring
-- Positiv förstärkning och belöningssystem`;
+- Positiv förstärkning och belöningssystem
+
+VIKTIGT: Skapa EXAKT 5 specifika, handlingsbara rekommendationer (ej generiska).`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -236,19 +239,18 @@ Analysera bedömningen med särskilt fokus på:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-5-2025-08-07',
       messages: [
         {
           role: 'system',
-          content: 'Du är en neuroplasticitetsexpert som hjälper människor förstå hur hjärnan kan tränas för personlig utveckling.'
+          content: 'Du är en neuroplasticitetsexpert som hjälper människor förstå hur hjärnan kan tränas för personlig utveckling. Leverera alltid 5 specifika, personliga rekommendationer.'
         },
         {
           role: 'user',
           content: neuroplasticPrompt
         }
       ],
-      temperature: 0.6,
-      max_tokens: 2000
+      max_completion_tokens: 2000
     })
   });
 
