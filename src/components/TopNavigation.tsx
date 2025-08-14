@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { TotalSystemResetSection } from "@/components/Profile/TotalSystemResetSection";
 
 export function TopNavigation() {
   const { user, signOut, isSuperAdmin, isAdmin, isCoach, isClient, isLoading } = useOptimizedAuth();
@@ -148,12 +149,18 @@ export function TopNavigation() {
                         <span>Min profil</span>
                       </NavLink>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <NavLink to="/mobile" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
-                        <Smartphone className="h-4 w-4 mr-3 text-muted-foreground" />
-                        <span>Mobil</span>
-                      </NavLink>
-                    </DropdownMenuItem>
+                     <DropdownMenuItem asChild>
+                       <NavLink to="/mobile" className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                         <Smartphone className="h-4 w-4 mr-3 text-muted-foreground" />
+                         <span>Mobil</span>
+                       </NavLink>
+                     </DropdownMenuItem>
+                     
+                     <DropdownMenuSeparator />
+                     
+                     <div className="px-3 py-2">
+                       <TotalSystemResetSection />
+                     </div>
                   </>
                 )}
                 

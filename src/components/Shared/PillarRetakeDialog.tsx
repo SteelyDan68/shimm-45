@@ -30,6 +30,43 @@ export const PillarRetakeDialog: React.FC<PillarRetakeDialogProps> = ({
 
   if (!isOpen) return null;
 
+  const handleConfirmWithWarnings = async () => {
+    // STEG 1: Första varning
+    const firstConfirm = window.confirm(
+      '🚨 KRITISK VARNING!\n\n' +
+      `Detta kommer att radera ALL din ${pillarConfig?.name} data PERMANENT:\n` +
+      '• Alla självskattningar\n' +
+      '• Alla AI-analyser\n' +
+      '• Alla uppgifter och handlingsplaner\n' +
+      '• All framstegshistorik\n\n' +
+      'Är du säker på att du vill fortsätta?'
+    );
+
+    if (!firstConfirm) return;
+
+    // STEG 2: Sista chansen
+    const finalConfirm = window.confirm(
+      '⚠️ SISTA CHANSEN!\n\n' +
+      'Detta kan INTE ångras. All data kommer att raderas permanent från alla tabeller i databasen.\n\n' +
+      'Skriv "RADERA ALLT" i nästa ruta för att bekräfta.'
+    );
+
+    if (!finalConfirm) return;
+
+    // STEG 3: Textbekräftelse
+    const textConfirm = window.prompt(
+      'Skriv "RADERA ALLT" (utan citattecken) för att bekräfta den permanenta raderingen:'
+    );
+
+    if (textConfirm !== 'RADERA ALLT') {
+      alert('Felaktig bekräftelse. Reset avbruten.');
+      return;
+    }
+
+    // Genomför reset om alla varningar bekräftats
+    await onConfirm();
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent className="max-w-md">
@@ -68,7 +105,7 @@ export const PillarRetakeDialog: React.FC<PillarRetakeDialogProps> = ({
             Avbryt
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={handleConfirmWithWarnings}
             disabled={isLoading}
             className="bg-orange-600 hover:bg-orange-700 focus:ring-orange-600"
           >

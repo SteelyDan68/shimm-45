@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Edit } from 'lucide-react';
 import type { UnifiedProfileData } from '@/types/unifiedProfile';
+import { TotalSystemResetSection } from '@/components/Profile/TotalSystemResetSection';
 // import { SelfPasswordResetCard } from '@/components/Profile/SelfPasswordResetCard';
 
 export default function UnifiedProfilePage() {
@@ -137,6 +138,12 @@ export default function UnifiedProfilePage() {
         isClientView={hasRole('client')}
         showGDPRSection={true}
       />
+      
+      {hasRole('client') && (
+        <div className="mt-8">
+          <TotalSystemResetSection />
+        </div>
+      )}
     </div>
   );
 }

@@ -292,10 +292,6 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
         })()}
       </div>
 
-      {/* KRITISK NÖDLÄGESRESET */}
-      <div className="mt-6">
-        <ForceResetButton />
-      </div>
 
       {/* Retake Dialog */}
       <PillarRetakeDialog
