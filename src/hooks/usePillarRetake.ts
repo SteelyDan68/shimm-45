@@ -22,10 +22,10 @@ export const usePillarRetake = (userId?: string) => {
     }
 
     setIsRetaking(true);
-    console.log(`🔄 Starting retake for pillar: ${pillarKey}`);
+    console.log(`🔄 Starting TOTAL RETAKE for pillar: ${pillarKey}`);
 
     try {
-      // Call the enhanced clear-pillar-dependencies edge function
+      // STEP 1: Call enhanced cleanup function for single pillar
       const { data, error } = await supabase.functions.invoke('clear-pillar-dependencies', {
         body: { 
           userId, 
@@ -38,16 +38,33 @@ export const usePillarRetake = (userId?: string) => {
         throw error;
       }
 
-      console.log('✅ Retake cleanup completed:', data);
+      console.log('✅ Single pillar cleanup completed:', data);
 
-      // Refresh pillar data to trigger UI updates
+      // STEP 2: CRITICAL - Also delete from assessment_rounds (dashboard data source)
+      const { error: assessmentError } = await supabase
+        .from('assessment_rounds')
+        .delete()
+        .eq('user_id', userId)
+        .eq('pillar_type', pillarKey);
+
+      if (assessmentError) {
+        console.error('Assessment rounds cleanup error:', assessmentError);
+        throw assessmentError;
+      }
+
+      console.log('✅ Assessment rounds cleaned for:', pillarKey);
+
+      // STEP 3: Clear any cached UI state
       await refetch();
 
-      // Show success message with cleanup details
-      const cleanupSummary = data?.cleanup_summary?.[0];
+      // STEP 4: Force UI refresh to show reset state immediately
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
       toast({
-        title: "✅ Pillar fullständigt återställd",
-        description: `${pillarKey} och alla relaterade data har rensats. ${cleanupSummary?.message || 'Systemintegritet säkerställd.'} Redo för ny bedömning.`,
+        title: "🔄 KOMPLETT PILLAR-RESET GENOMFÖRD",
+        description: `${pillarKey} är nu fullständigt nollställd. Alla data, analyser och bedömningar har raderats. Du kan börja om från början.`,
         variant: "default",
       });
 

@@ -23,7 +23,7 @@ import {
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { HelpTooltip } from '@/components/HelpTooltip';
-import PrintPDFActions from '@/components/ui/print-pdf-actions';
+import { PrintPDFActions } from '@/components/ui/print-pdf-actions';
 import { Link } from 'react-router-dom';
 
 const MyProgram = () => {

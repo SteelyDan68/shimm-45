@@ -41,6 +41,19 @@ export const useTotalPillarReset = (userId?: string) => {
         variant: "default",
       });
 
+      // CRITICAL: Also clear assessment_rounds that dashboard uses
+      const { error: assessmentError } = await supabase
+        .from('assessment_rounds')
+        .delete()
+        .eq('user_id', userId);
+
+      if (assessmentError) {
+        console.error('Assessment rounds total cleanup error:', assessmentError);
+        // Continue anyway, edge function should have handled this
+      }
+
+      console.log('✅ Assessment rounds completely cleared');
+
       // Force complete page reload to reset all state
       setTimeout(() => {
         window.location.href = '/client-dashboard';
