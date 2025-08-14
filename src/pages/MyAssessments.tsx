@@ -49,7 +49,7 @@ interface AssessmentResult {
 
 const PILLAR_CONFIG = {
   'self_care': { 
-    name: 'Self Care', 
+    name: 'Självomvårdnad', 
     icon: Heart, 
     color: 'hsl(var(--self-care))',
     bgColor: 'hsl(var(--self-care) / 0.1)',
@@ -326,7 +326,7 @@ export const MyAssessments: React.FC = () => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <FileText className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Mina Självskattningar</h1>
+        <h1 className="text-3xl font-bold">Mina Självskattningar</h1>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Här ser du alla dina genomförda självskattningar formaterade som vackra rapporter. 

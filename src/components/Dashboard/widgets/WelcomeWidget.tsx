@@ -66,21 +66,21 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="space-y-1">
             <div className="text-2xl font-bold text-blue-600">
-              {stats.completedPillars || 0}/6
+              0/6
             </div>
             <p className="text-xs text-muted-foreground">Pillars klara</p>
           </div>
           
           <div className="space-y-1">
             <div className="text-2xl font-bold text-green-600">
-              {stats.activeTasks || 0}
+              0
             </div>
             <p className="text-xs text-muted-foreground">Aktiva uppgifter</p>
           </div>
           
           <div className="space-y-1">
             <div className="text-2xl font-bold text-purple-600">
-              {Math.round(stats.overallProgress || 0)}%
+              0%
             </div>
             <p className="text-xs text-muted-foreground">Progress</p>
           </div>
@@ -124,7 +124,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
             className="flex items-center gap-1"
           >
             <Target className="w-4 h-4" />
-            Gör din första självskattning
+             Gör din första självskattning
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         )}

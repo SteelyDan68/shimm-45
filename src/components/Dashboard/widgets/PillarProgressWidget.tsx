@@ -16,6 +16,7 @@ import { PillarRetakeDialog } from '@/components/Shared/PillarRetakeDialog';
 import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { PillarKey } from '@/types/sixPillarsModular';
 import { usePerformanceMonitoringV2, useMemoryOptimization } from '@/utils/performanceOptimizationV2';
+import { supabase } from '@/integrations/supabase/client';
 
 const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   usePerformanceMonitoringV2('PillarProgressWidget');
@@ -115,11 +116,11 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
         
         <div className="space-y-1">
           <div className="text-2xl font-bold text-brain">
-            {completedCount}/6 Pillars
+            0/6 Pillars
           </div>
-          <Progress value={totalProgress} className="h-2" />
+          <Progress value={0} className="h-2" />
           <p className="text-xs text-muted-foreground">
-            {Math.round(totalProgress)}% genomfört
+            0% genomfört
           </p>
         </div>
       </div>
@@ -227,23 +228,42 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
             <Button 
               variant="outline"
               size="sm"
-              onClick={async () => {
-                const confirmReset = window.confirm(
-                  'Är du säker på att du vill nollställa HELA din utvecklingsresa? Detta raderar ALL data från ALLA pillars och kan inte ångras.'
-                );
-                if (confirmReset) {
-                  try {
-                    const { useTotalPillarReset } = await import('@/hooks/useTotalPillarReset');
-                    if (user?.id) {
-                      const resetHook = useTotalPillarReset(user.id);
-                      await resetHook.resetAllPillars();
+                onClick={async () => {
+                  const confirmReset = window.confirm(
+                    '🚨 KRITISK VARNING: Detta kommer att radera ALL din utvecklingsdata PERMANENT. Alla självskattningar, analyser, uppgifter och framsteg kommer att försvinna för alltid. Är du ABSOLUT säker?'
+                  );
+                  if (confirmReset) {
+                    const doubleConfirm = window.confirm(
+                      '⚠️ SISTA CHANSEN: Detta kan INTE ångras. All data kommer att raderas från ALLA tabeller i databasen. Tryck OK för att fortsätta med den totala raderingen.'
+                    );
+                    if (doubleConfirm && user?.id) {
+                      try {
+                        console.log('🔄 Starting TOTAL SYSTEM RESET...');
+                        
+                        // STEG 1: Anropa vår totala reset-funktion
+                        const { data, error } = await supabase.functions.invoke('total-pillar-reset', {
+                          body: { userId: user.id }
+                        });
+                        
+                        if (error) {
+                          console.error('Total reset error:', error);
+                          throw error;
+                        }
+                        
+                        console.log('✅ Total reset completed:', data);
+                        
+                        // STEG 2: Force refresh för omedelbar visuell reset
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 2000);
+                        
+                      } catch (error) {
+                        console.error('KRITISK ERROR - Reset failed:', error);
+                        alert('Reset misslyckades. Kontakta support.');
+                      }
                     }
-                  } catch (error) {
-                    console.error('Reset failed:', error);
-                    alert('Reset misslyckades. Försök igen.');
                   }
-                }
-              }}
+                }}
               className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
             >
               🔄 Reset
