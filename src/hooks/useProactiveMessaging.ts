@@ -177,7 +177,7 @@ export const useProactiveMessaging = () => {
   // Förbättra meddelande med Stefans personlighet
   const enhanceMessageWithPersonality = async (content: string, triggerType: string): Promise<string> => {
     const personalityPrefixes = {
-      inactivity_check: "Hej! Jag märkte att du har varit borta ett tag. ",
+      inactivity_check: "Hej! Hur mår du? ",
       task_reminder: "🎯 Hej igen! Jag ville påminna dig om ",
       progress_celebration: "🎉 Fantastiskt! Jag såg att du ",
       struggling_support: "💪 Hej! Jag märker att du kanske behöver lite extra stöd. ",
@@ -237,11 +237,7 @@ export const useProactiveMessaging = () => {
           new Date(currentSessionState.last_active_at) < twoHoursAgo &&
           currentSessionState.total_time_spent_minutes > 10) {
         
-        await sendProactiveMessage(
-          'inactivity_check',
-          'Hur går det med din utvecklingsresa? Jag finns här om du behöver stöd eller vill prata om dina mål! 😊',
-          'low'
-        );
+        // Disabled proactive inactivity messages to improve UX
       }
 
       // 2. STRUGGELING SUPPORT (många abandoned tasks)

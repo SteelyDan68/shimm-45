@@ -3,7 +3,7 @@
  * Dedicerad sida för att genomföra pillar-assessment
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { ModularPillarAssessment } from './ModularPillarAssessment';
@@ -26,10 +26,17 @@ export const PillarAssessmentPage: React.FC = () => {
   const { pillarKey } = useParams<{ pillarKey: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   // Validera pillar key
   const validPillarKey = pillarKey as PillarKey;
   const isValidPillar = Object.keys(PILLAR_NAMES).includes(validPillarKey);
+
+  useEffect(() => {
+    // Initialize page to prevent flicker
+    const timer = setTimeout(() => setIsPageLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!isValidPillar) {
@@ -38,11 +45,13 @@ export const PillarAssessmentPage: React.FC = () => {
     }
   }, [pillarKey, isValidPillar, navigate]);
 
-  if (!user) {
+  if (!user || !isPageLoaded) {
     return (
-      <div className="p-6 text-center">
-        <h2 className="text-xl font-semibold mb-2">Inloggning krävs</h2>
-        <p className="text-muted-foreground">Du måste vara inloggad för att genomföra assessments.</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse space-y-4 text-center">
+          <div className="h-4 bg-muted rounded w-32 mx-auto"></div>
+          <div className="h-4 bg-muted rounded w-24 mx-auto"></div>
+        </div>
       </div>
     );
   }

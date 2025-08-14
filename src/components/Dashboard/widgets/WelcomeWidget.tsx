@@ -89,7 +89,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
 
       {/* Quick Actions */}
       <div className="flex gap-2 justify-center flex-wrap">
-        {stats && stats.completedPillars && stats.completedPillars > 0 ? (
+        {stats && stats.completedAssessments && stats.completedAssessments > 0 ? (
           <>
             <Button 
               size="sm"

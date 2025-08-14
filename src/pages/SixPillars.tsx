@@ -1,4 +1,5 @@
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useState, useEffect } from 'react';
 import { ModularPillarDashboard } from '@/components/SixPillars/ModularPillarDashboard';
 import { PillarAssessmentPage } from '@/components/SixPillars/PillarAssessmentPage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,9 +27,23 @@ export const SixPillars = () => {
   const { user, profile } = useAuth();
   const { pillarKey } = useParams<{ pillarKey: string }>();
   const navigate = useNavigate();
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  if (!user || !profile) {
-    return <div>Laddar...</div>;
+  // Initialize page to prevent flicker
+  useEffect(() => {
+    const timer = setTimeout(() => setIsPageLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!user || !profile || !isPageLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse space-y-4 text-center">
+          <div className="h-4 bg-muted rounded w-32 mx-auto"></div>
+          <div className="h-4 bg-muted rounded w-24 mx-auto"></div>
+        </div>
+      </div>
+    );
   }
 
   // Om vi har en pillarKey, visa assessment-sidan

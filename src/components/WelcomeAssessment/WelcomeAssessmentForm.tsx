@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -22,6 +22,8 @@ interface WelcomeAssessmentFormProps {
 type AssessmentStep = 'wheel_of_life' | 'adaptive' | 'free_text' | 'quick_wins' | 'review';
 
 export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps) => {
+  // Add loading state to prevent flicker
+  const [isInitialized, setIsInitialized] = useState(false);
   const { submitWelcomeAssessment, submitting } = useWelcomeAssessment();
   const { createStefanInteraction } = useStefanPersonality();
   const { toast } = useToast();
@@ -225,6 +227,13 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
     return success;
   };
 
+  // Initialize component to prevent flicker
+  useEffect(() => {
+    // Delay to ensure stable render
+    const timer = setTimeout(() => setIsInitialized(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Uppdatera osparade ändringar när data ändras
   useEffect(() => {
     const hasData = Object.keys(assessmentData.wheelOfLife).length > 0 ||
@@ -341,6 +350,20 @@ export const WelcomeAssessmentForm = ({ onComplete }: WelcomeAssessmentFormProps
         return null;
     }
   };
+
+  // Show loading state during initialization
+  if (!isInitialized) {
+    return (
+      <Card className="max-w-4xl mx-auto">
+        <CardContent className="p-8 text-center">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+            <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="max-w-4xl mx-auto">

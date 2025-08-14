@@ -33,13 +33,22 @@ export const useUnifiedClients = () => {
     try {
       console.log('🔄 useUnifiedClients: Migrated to simplified user fetching from profiles table');
       
-      // Temporarily simplified: Get all profiles with basic client detection
+      // Check if user is authenticated and has proper access
+      const { data: currentUser } = await supabase.auth.getUser();
+      if (!currentUser?.user) {
+        throw new Error('Not authenticated');
+      }
+
+      // Get profiles with proper RLS checking
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('*')
-        .limit(50); // Basic limit for safety
+        .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
       // Process profiles as clients for now
       const processedClients: UnifiedClient[] = (profiles || []).map(profile => ({
@@ -63,7 +72,7 @@ export const useUnifiedClients = () => {
       console.error('Error fetching clients:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte hämta klientdata",
+        description: "Kunde inte hämta klientdata från databasen",
         variant: "destructive"
       });
     } finally {

@@ -71,16 +71,8 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
     };
 
     if (assessmentStatus.hasCompleted) {
-      return {
-        ...baseData,
-        state: 'completed' as const,
-        description: "Du har slutfört välkomstbedömningen och fått din AI-analys!",
-        completedAt: assessmentStatus.latestAssessment?.created_at,
-        canStart: false,
-        canResume: false,
-        canRestart: true,
-        shouldShowForm: false
-      };
+      // Hide completed assessments completely from dashboard
+      return null;
     }
 
     if (assessmentStatus.hasInProgress) {
@@ -140,6 +132,11 @@ export const WelcomeAssessmentCard = ({ userId }: WelcomeAssessmentCardProps) =>
   // Use the unified state card if we have state data
   if (stateData) {
     return <AssessmentStateCard {...stateData} />;
+  }
+
+  // Don't show anything if completed
+  if (assessmentStatus?.hasCompleted) {
+    return null;
   }
 
   // Fallback
