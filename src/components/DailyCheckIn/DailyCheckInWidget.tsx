@@ -63,7 +63,7 @@ export const DailyCheckInWidget: React.FC = () => {
   };
 
   const pillars = [
-    { key: 'self_care', name: 'Self Care', icon: Heart, description: 'Hälsa & välbefinnande' },
+    { key: 'self_care', name: 'Självomvårdnad', icon: Heart, description: 'Hälsa & välbefinnande' },
     { key: 'skills', name: 'Skills', icon: Brain, description: 'Kompetensutveckling' },
     { key: 'talent', name: 'Talent', icon: Zap, description: 'Naturliga gåvor' },
     { key: 'brand', name: 'Brand', icon: Target, description: 'Personlig image' },

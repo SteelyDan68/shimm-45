@@ -121,7 +121,7 @@ export const AIPlanningDialog = ({
   };
 
   const PILLAR_NAMES = {
-    self_care: 'Self Care',
+    self_care: 'Självomvårdnad',
     skills: 'Skills',
     talent: 'Talent',
     brand: 'Brand',

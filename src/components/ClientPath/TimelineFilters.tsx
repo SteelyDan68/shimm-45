@@ -23,7 +23,7 @@ const ENTRY_TYPES: { value: PathEntryType; label: string }[] = [
 ];
 
 const PILLARS: { value: PillarType; label: string; icon: string }[] = [
-  { value: 'self_care', label: 'Self Care', icon: '🧘' },
+  { value: 'self_care', label: 'Självomvårdnad', icon: '🧘' },
   { value: 'skills', label: 'Skills', icon: '🎯' },
   { value: 'talent', label: 'Talent', icon: '⭐' },
   { value: 'brand', label: 'Brand', icon: '🏆' },

@@ -18,7 +18,7 @@ interface ClientPathTimelineProps {
 }
 
 const PILLAR_CONFIG = {
-  self_care: { name: 'Self Care', icon: '🧘', color: '#10b981' },
+  self_care: { name: 'Självomvårdnad', icon: '🧘', color: '#10b981' },
   skills: { name: 'Skills', icon: '🎯', color: '#3b82f6' },
   talent: { name: 'Talent', icon: '⭐', color: '#8b5cf6' },
   brand: { name: 'Brand', icon: '🏆', color: '#f59e0b' },

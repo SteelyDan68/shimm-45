@@ -37,7 +37,7 @@ interface UnifiedTaskEventCreatorProps {
 }
 
 const PILLAR_TYPES = [
-  { value: 'self_care', label: 'Self Care', icon: '🧘', color: 'bg-green-100 text-green-800' },
+  { value: 'self_care', label: 'Självomvårdnad', icon: '🧘', color: 'bg-green-100 text-green-800' },
   { value: 'skills', label: 'Skills', icon: '🎯', color: 'bg-blue-100 text-blue-800' },
   { value: 'talent', label: 'Talent', icon: '⭐', color: 'bg-purple-100 text-purple-800' },
   { value: 'brand', label: 'Brand', icon: '🏆', color: 'bg-orange-100 text-orange-800' },

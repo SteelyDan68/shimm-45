@@ -312,7 +312,7 @@ const FormEditor = ({ form, onSave, onCancel, loading }: FormEditorProps) => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="self_care">Self Care</SelectItem>
+            <SelectItem value="self_care">Självomvårdnad</SelectItem>
             <SelectItem value="skills">Skills</SelectItem>
             <SelectItem value="talent">Talent</SelectItem>
             <SelectItem value="brand">Brand</SelectItem>

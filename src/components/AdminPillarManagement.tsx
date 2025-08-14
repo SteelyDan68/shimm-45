@@ -62,7 +62,7 @@ export const AdminPillarManagement = () => {
   } = useSixPillarsModular(selectedClient?.id);
 
   const PILLAR_CONFIG = {
-    self_care: { name: 'Self Care', icon: '🧘', description: 'Personlig hälsa och välmående' },
+    self_care: { name: 'Självomvårdnad', icon: '🧘', description: 'Personlig hälsa och välmående' },
     skills: { name: 'Skills', icon: '🎯', description: 'Färdigheter och kunskapsutveckling' },
     talent: { name: 'Talent', icon: '⭐', description: 'Talang och unika styrkor' },
     brand: { name: 'Brand', icon: '🏆', description: 'Varumärke och profilering' },

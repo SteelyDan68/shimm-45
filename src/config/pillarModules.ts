@@ -14,7 +14,7 @@ export const PILLAR_PRIORITY_ORDER: PillarKey[] = [
 export const PILLAR_MODULES: Record<PillarKey, PillarModuleConfig> = {
   self_care: {
     key: 'self_care',
-    name: 'Self Care',
+    name: 'Självomvårdnad',
     description: 'Utvärdera din grundläggande välbefinnande och livskvalitet. Detta pillar fokuserar på de fundamentala behoven som måste vara tillgodosedda för att du ska kunna fungera optimalt.',
     icon: '💚',
     color: '#10B981',

@@ -95,7 +95,7 @@ export const PersonalAnalyticsDashboard: React.FC = () => {
   };
 
   const pillars = [
-    { key: 'self_care', name: 'Self Care', icon: Heart, color: '#ef4444' },
+    { key: 'self_care', name: 'Självomvårdnad', icon: Heart, color: '#ef4444' },
     { key: 'skills', name: 'Skills', icon: Brain, color: '#3b82f6' },
     { key: 'talent', name: 'Talent', icon: Star, color: '#f59e0b' },
     { key: 'brand', name: 'Brand', icon: Target, color: '#8b5cf6' },

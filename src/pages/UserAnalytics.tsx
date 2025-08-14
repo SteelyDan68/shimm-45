@@ -128,18 +128,15 @@ export default function UserAnalytics() {
           }
         }
 
-        // Visa framgångsmeddelande
-        if (assessments.length > 0) {
-          toast({
-            title: "✅ Analys laddad!",
-            description: `${assessments.length} analyser hittades via universal service`
-          });
-        } else {
-          toast({
-            title: "ℹ️ Ingen data ännu",
-            description: "Genomför dina första pillar-bedömningar för att få analyser",
-            variant: "default"
-          });
+        // Visa framgångsmeddelande endast för verklig laddning
+        if (consolidatedAssessments.length > 0) {
+          const completedAssessments = consolidatedAssessments.filter(a => a.ai_analysis && !a.metadata?.needs_ai_regeneration);
+          if (completedAssessments.length > 0) {
+            toast({
+              title: "✅ Analyser laddade!",
+              description: `${consolidatedAssessments.length} analyser tillgängliga (${completedAssessments.length} färdiga)`
+            });
+          }
         }
 
       } catch (serviceError) {
@@ -189,12 +186,6 @@ export default function UserAnalytics() {
           toast({
             title: "✅ Data laddad (fallback)",
             description: `${fallbackAssessments.length} analyser hittades direkt från databasen`
-          });
-        } else {
-          toast({
-            title: "ℹ️ Ingen data ännu",
-            description: "Genomför dina första pillar-bedömningar för att få analyser",
-            variant: "default"
           });
         }
       }

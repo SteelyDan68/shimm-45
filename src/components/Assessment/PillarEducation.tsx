@@ -47,7 +47,7 @@ interface PillarEducationProps {
 const PILLAR_DETAILS: PillarInfo[] = [
   {
     key: 'self-care',
-    name: 'Self Care',
+    name: 'Självomvårdnad',
     icon: Heart,
     color: 'hsl(var(--self-care))',
     description: 'Din fysiska och mentala hälsa, energi och balans',

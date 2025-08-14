@@ -37,7 +37,7 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
   
   // OPTIMIZED: Memoized pillar data calculation
   const allPillars = useMemo(() => [
-    { key: 'self_care', name: 'Self Care' },
+    { key: 'self_care', name: 'Självomvårdnad' },
     { key: 'skills', name: 'Skills' },
     { key: 'talent', name: 'Talent' },
     { key: 'brand', name: 'Brand' },
