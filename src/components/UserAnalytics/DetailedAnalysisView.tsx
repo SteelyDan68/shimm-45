@@ -219,37 +219,52 @@ export function DetailedAnalysisView({ pillarKey, userId, onBack }: DetailedAnal
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[600px] pr-4">
-                <div className="space-y-4">
-                  {analysisTextSections.map((section, index) => {
-                    const sectionType = getSectionType(section);
-                    
-                    if (sectionType === 'header') {
-                      return (
-                        <div key={index} className="py-2">
-                          <h3 className="text-lg font-semibold text-gray-900 border-b pb-1">
-                            {section.replace(/\*\*/g, '').replace(/#{1,3}/g, '').replace(/^\d+\./, '').trim()}
-                          </h3>
-                        </div>
-                      );
-                    } else if (sectionType === 'bullet') {
-                      return (
-                        <div key={index} className="pl-4">
-                          <p className="text-gray-700 leading-relaxed">
-                            {section.replace(/^[•-]\s*/, '• ')}
-                          </p>
-                        </div>
-                      );
-                    } else {
-                      return (
-                        <div key={index}>
-                          <p className="text-gray-700 leading-relaxed">
-                            {section}
-                          </p>
-                        </div>
-                      );
-                    }
-                  })}
-                </div>
+                {!analysisData.ai_analysis || analysisData.ai_analysis.trim() === '' ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                    <Brain className="h-16 w-16 text-muted-foreground opacity-50" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                        Ingen AI-analys tillgänglig
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        AI-analysen kunde inte genereras eller ladda för denna pillar. 
+                        Prova att göra om självskattningen eller kontakta support.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {analysisTextSections.map((section, index) => {
+                      const sectionType = getSectionType(section);
+                      
+                      if (sectionType === 'header') {
+                        return (
+                          <div key={index} className="py-2">
+                            <h3 className="text-lg font-semibold text-gray-900 border-b pb-1">
+                              {section.replace(/\*\*/g, '').replace(/#{1,3}/g, '').replace(/^\d+\./, '').trim()}
+                            </h3>
+                          </div>
+                        );
+                      } else if (sectionType === 'bullet') {
+                        return (
+                          <div key={index} className="pl-4">
+                            <p className="text-gray-700 leading-relaxed">
+                              {section.replace(/^[•-]\s*/, '• ')}
+                            </p>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div key={index}>
+                            <p className="text-gray-700 leading-relaxed">
+                              {section}
+                            </p>
+                          </div>
+                        );
+                      }
+                    })}
+                  </div>
+                )}
               </ScrollArea>
             </CardContent>
           </Card>

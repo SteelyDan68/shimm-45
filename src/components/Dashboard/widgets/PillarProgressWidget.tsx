@@ -118,11 +118,11 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
         
         <div className="space-y-1">
           <div className="text-2xl font-bold text-brain">
-            0/6 Pillars
+            {completedCount}/6 Pillars
           </div>
-          <Progress value={0} className="h-2" />
+          <Progress value={totalProgress} className="h-2" />
           <p className="text-xs text-muted-foreground">
-            0% genomfört
+            {Math.round(totalProgress)}% genomfört
           </p>
         </div>
       </div>

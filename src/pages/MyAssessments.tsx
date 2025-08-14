@@ -271,26 +271,77 @@ export const MyAssessments: React.FC = () => {
             </div>
           )}
 
-          {/* Actions */}
+          {/* Visual Self-Assessment Report */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Grafisk Rapport av Dina Svar
+            </h3>
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-lg border">
+              
+              {/* Slider Values Visualization */}
+              {assessment.scores && Object.keys(assessment.scores).length > 0 && (
+                <div className="space-y-4 mb-6">
+                  <h4 className="font-semibold text-gray-800">Dina Poängvärden</h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    {Object.entries(assessment.scores).map(([key, value]) => (
+                      <div key={key} className="bg-white p-3 rounded border-l-4 border-primary">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-sm">{key.replace(/_/g, ' ')}</span>
+                          <span className="text-lg font-bold text-primary">{value}/10</span>
+                        </div>
+                        {/* Visual Slider Representation */}
+                        <div className="relative bg-gray-200 h-6 rounded-full overflow-hidden">
+                          <div 
+                            className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all"
+                            style={{ width: `${(value / 10) * 100}%` }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs font-medium text-white drop-shadow">
+                              {value}/10
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Free Text Responses */}
+              {assessment.responses && Object.keys(assessment.responses).length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-800">Dina Fritextsvar</h4>
+                  <div className="space-y-3">
+                    {Object.entries(assessment.responses)
+                      .filter(([_, answer]) => typeof answer === 'string' && answer.length > 10)
+                      .map(([question, answer]) => (
+                        <div key={question} className="bg-white p-4 rounded-lg border-l-4 border-secondary">
+                          <h5 className="font-medium text-sm text-gray-700 mb-2">
+                            {question.replace(/_/g, ' ')}
+                          </h5>
+                          <p className="text-sm text-gray-600 italic">
+                            "{String(answer)}"
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Actions - Single PDF Button */}
           <div className="flex gap-4 pt-4 border-t">
-            <Button 
-              variant="outline"
-              className="flex-1"
-              onClick={() => {
-                // PDF export is handled by PrintPDFActions component
-                console.log('PDF export functionality available in header');
-              }}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Ladda ner som PDF
-            </Button>
             <PrintPDFActions 
-              title="Mina Självskattningar"
-              filename="mina-sjalvskattningar"
-              variant="outline"
-              size="sm"
+              title={`${pillarConfig?.name || assessment.pillar_type} Självskattning`}
+              filename={`${assessment.pillar_type}-sjalvskattning-${formatAssessmentDate(assessment.created_at)}`}
+              variant="default"
+              size="default"
+              className="flex-1"
             />
             <Button 
+              variant="outline"
               className="flex-1"
               onClick={() => navigate('/my-analyses')}
             >
