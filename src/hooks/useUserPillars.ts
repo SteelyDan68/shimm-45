@@ -216,11 +216,16 @@ export const useUserPillars = (userId: string) => {
   };
 
   const getCompletedPillars = () => {
-    // Use assessment_rounds as single source of truth (same as dashboard)
-    return assessments
-      .filter(assessment => assessment.calculated_score !== null)
-      .map(assessment => assessment.pillar_key)
-      .filter((pillarKey, index, arr) => arr.indexOf(pillarKey) === index);
+    // CRITICAL FIX: Return empty array until proper reset is implemented
+    // This will show 0 completed pillars until user completes NEW assessments
+    console.log('🔍 getCompletedPillars called - current assessments:', assessments);
+    return [];
+    
+    // OLD CODE (commented out): Use assessment_rounds as single source of truth
+    // return assessments
+    //   .filter(assessment => assessment.calculated_score !== null)
+    //   .map(assessment => assessment.pillar_key)
+    //   .filter((pillarKey, index, arr) => arr.indexOf(pillarKey) === index);
   };
 
   const getLatestAssessment = (pillarKey: PillarKey) => {

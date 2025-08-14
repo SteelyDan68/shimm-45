@@ -17,6 +17,7 @@ import { useSixPillarsModular } from '@/hooks/useSixPillarsModular';
 import { PillarKey } from '@/types/sixPillarsModular';
 import { usePerformanceMonitoringV2, useMemoryOptimization } from '@/utils/performanceOptimizationV2';
 import { supabase } from '@/integrations/supabase/client';
+import { ForceResetButton } from '../ForceResetButton';
 
 const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   usePerformanceMonitoringV2('PillarProgressWidget');
@@ -289,6 +290,11 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
             </Button>
           ) : null;
         })()}
+      </div>
+
+      {/* KRITISK NÖDLÄGESRESET */}
+      <div className="mt-6">
+        <ForceResetButton />
       </div>
 
       {/* Retake Dialog */}
