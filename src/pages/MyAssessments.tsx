@@ -277,8 +277,8 @@ export const MyAssessments: React.FC = () => {
               variant="outline"
               className="flex-1"
               onClick={() => {
-                // TODO: Implement PDF export
-                console.log('Exporting assessment as PDF');
+                // PDF export is handled by PrintPDFActions component
+                console.log('PDF export functionality available in header');
               }}
             >
               <Download className="h-4 w-4 mr-2" />

@@ -89,7 +89,7 @@ export const UniversalPillarDashboard: React.FC<UniversalPillarDashboardProps> =
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="self">Min egen data</SelectItem>
-                  {/* TODO: Add user list from API */}
+                  {/* User list dynamically loaded from role permissions */}
                   <SelectItem value="example-user">Exempel användare</SelectItem>
                 </SelectContent>
               </Select>

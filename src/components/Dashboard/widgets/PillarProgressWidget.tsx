@@ -18,6 +18,7 @@ import { PillarKey } from '@/types/sixPillarsModular';
 import { usePerformanceMonitoringV2, useMemoryOptimization } from '@/utils/performanceOptimizationV2';
 import { supabase } from '@/integrations/supabase/client';
 import { ForceResetButton } from '../ForceResetButton';
+import { OFFICIAL_TERMINOLOGY } from '@/constants/terminology';
 
 const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   usePerformanceMonitoringV2('PillarProgressWidget');
@@ -39,12 +40,12 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
   
   // OPTIMIZED: Memoized pillar data calculation
   const allPillars = useMemo(() => [
-    { key: 'self_care', name: 'Självomvårdnad' },
-    { key: 'skills', name: 'Skills' },
-    { key: 'talent', name: 'Talent' },
-    { key: 'brand', name: 'Brand' },
-    { key: 'economy', name: 'Economy' },
-    { key: 'open_track', name: 'Öppet spår' }
+    { key: 'self_care', name: OFFICIAL_TERMINOLOGY.PILLARS.self_care },
+    { key: 'skills', name: OFFICIAL_TERMINOLOGY.PILLARS.skills },
+    { key: 'talent', name: OFFICIAL_TERMINOLOGY.PILLARS.talent },
+    { key: 'brand', name: OFFICIAL_TERMINOLOGY.PILLARS.brand },
+    { key: 'economy', name: OFFICIAL_TERMINOLOGY.PILLARS.economy },
+    { key: 'open_track', name: OFFICIAL_TERMINOLOGY.PILLARS.open_track }
   ], []);
 
   // OPTIMIZED: Memoized pillar data processing

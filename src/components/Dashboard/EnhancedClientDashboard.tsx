@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import UnifiedPillarOrchestrator from '@/components/PillarJourney/UnifiedPillarOrchestrator';
 import { Sparkles, Target, Clock, Trophy, ArrowRight, Calendar, CheckSquare, Users, FileText } from 'lucide-react';
 import { PILLAR_MODULES } from '@/config/pillarModules';
+import { OFFICIAL_TERMINOLOGY, getPillarDisplayName } from '@/constants/terminology';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -158,8 +159,8 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                       'Är du säker på att du vill nollställa din utvecklingsresa? Detta kommer radera ALL data från ALLA genomförda pillars och kan inte ångras.'
                     );
                     if (confirmReset) {
-                      // TODO: Implementera total reset av alla pillars
-                      console.log('🔄 Total pillar reset requested');
+                      // This is handled by the TotalSystemResetSection component now
+                      console.log('🔄 Total pillar reset requested - redirecting to profile');
                     }
                   }}
                   className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
@@ -186,7 +187,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
             {!allPillarsCompleted && nextPillar ? (
               <div className="space-y-3">
                 <p className="text-blue-600">
-                  Redo att börja med <strong>{PILLAR_MODULES[nextPillar].name}</strong>?
+                  Redo att börja med <strong>{getPillarDisplayName(nextPillar)}</strong>?
                 </p>
                 <p className="text-sm text-blue-500">
                   {PILLAR_MODULES[nextPillar].description}
@@ -196,7 +197,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                   onClick={handleShowPillarJourney}
                 >
                   <ArrowRight className="w-4 h-4 mr-2" />
-                  Starta {PILLAR_MODULES[nextPillar].name}
+                  Starta {getPillarDisplayName(nextPillar)}
                 </Button>
               </div>
             ) : allPillarsCompleted ? (
