@@ -147,6 +147,27 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
               <span>{Math.round(overallProgress)}%</span>
             </div>
             <Progress value={overallProgress} className="h-3 bg-gray-200" />
+            {/* 🔄 RESET BUTTON för pillars - direkt på dashboard som begärt */}
+            {completedPillars > 0 && (
+              <div className="mt-3 flex justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    const confirmReset = window.confirm(
+                      'Är du säker på att du vill nollställa din utvecklingsresa? Detta kommer radera ALL data från ALLA genomförda pillars och kan inte ångras.'
+                    );
+                    if (confirmReset) {
+                      // TODO: Implementera total reset av alla pillars
+                      console.log('🔄 Total pillar reset requested');
+                    }
+                  }}
+                  className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
+                >
+                  🔄 Nollställ utvecklingsresa
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

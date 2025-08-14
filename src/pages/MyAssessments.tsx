@@ -283,6 +283,13 @@ export const MyAssessments: React.FC = () => {
               <Download className="h-4 w-4 mr-2" />
               Ladda ner som PDF
             </Button>
+            <PrintPDFActions 
+              title="Mina Självskattningar"
+              filename="mina-sjalvskattningar"
+              variant="outline"
+              size="sm"
+            />
+            </Button>
             <Button 
               className="flex-1"
               onClick={() => navigate('/my-analyses')}

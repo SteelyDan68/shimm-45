@@ -10,7 +10,7 @@ import { Brain, TrendingUp, Target, Calendar, ArrowRight, Sparkles } from 'lucid
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { HelpTooltip } from '@/components/HelpTooltip';
-import { Printer } from 'lucide-react';
+import PrintPDFActions from '@/components/ui/print-pdf-actions';
 import { Link } from 'react-router-dom';
 
 const MyAnalyses = () => {
