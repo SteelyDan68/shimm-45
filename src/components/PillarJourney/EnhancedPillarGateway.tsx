@@ -26,6 +26,13 @@ const EnhancedPillarGateway: React.FC<EnhancedPillarGatewayProps> = ({
   const { toast } = useToast();
   const [selectedPillar, setSelectedPillar] = useState<PillarKey | null>(null);
   const [showGatewayBlock, setShowGatewayBlock] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize component to prevent flicker
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitialized(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Check if user needs to complete mandatory first pillar
   useEffect(() => {
@@ -33,6 +40,20 @@ const EnhancedPillarGateway: React.FC<EnhancedPillarGatewayProps> = ({
       setShowGatewayBlock(true);
     }
   }, [isFirstTime, completedPillars]);
+
+  // Don't render until initialized to prevent flicker
+  if (!isInitialized) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+            <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const getPillarStatus = (pillarKey: PillarKey) => {
     if (completedPillars.includes(pillarKey)) {

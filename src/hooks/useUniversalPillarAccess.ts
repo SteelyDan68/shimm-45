@@ -69,7 +69,7 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
     recent_activities: 0,
     user_level: 1
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState<string | null>(null);
 
   // Determine effective user ID
@@ -108,8 +108,22 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
 
   // Fetch pillar progress from path_entries (SINGLE SOURCE OF TRUTH)
   const fetchPillarProgress = useCallback(async () => {
-    if (!effectiveUserId || !canView) {
+    if (!effectiveUserId) {
       setPillarProgress([]);
+      setStats({
+        total_completed: 0,
+        active_pillars: 0,
+        overall_progress: 0,
+        recent_activities: 0,
+        user_level: 1
+      });
+      setError('Ingen användare angiven');
+      return;
+    }
+
+    if (!canView) {
+      setPillarProgress([]);
+      setError('Du har inte behörighet att visa denna data');
       return;
     }
 
@@ -124,10 +138,25 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
         .from('path_entries')
         .select('*')
         .eq('user_id', effectiveUserId)
-        .or('type.eq.pillar_activation,type.eq.pillar_assessment,type.eq.pillar_completion,type.eq.pillar_milestone')
+        .or('type.eq.pillar_activation,type.eq.pillar_assessment,type.eq.pillar_completion,type.eq.pillar_milestone,type.eq.assessment')
         .order('timestamp', { ascending: false });
 
-      if (pathError) throw pathError;
+      if (pathError) {
+        console.error('Error fetching path entries:', pathError);
+        throw new Error(`Database error: ${pathError.message}`);
+      }
+
+      // Also get assessment_rounds as supplementary data
+      const { data: assessmentRounds, error: assessmentError } = await supabase
+        .from('assessment_rounds')
+        .select('*')
+        .eq('user_id', effectiveUserId)
+        .order('created_at', { ascending: false });
+
+      if (assessmentError) {
+        console.warn('Warning: Could not fetch assessment rounds:', assessmentError);
+        // Continue without assessment data - this is supplementary only
+      }
 
       // Process path entries to create pillar progress
       const progressMap = new Map<PillarKey, PillarProgress>();
@@ -147,7 +176,7 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
         });
       });
 
-      // Process entries
+      // Process path entries
       pathEntries?.forEach(entry => {
         const entryMetadata = entry.metadata as any;
         const pillarKey = entryMetadata?.pillar_key || entryMetadata?.pillar_type;
@@ -163,6 +192,7 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
             break;
           
           case 'pillar_assessment':
+          case 'assessment': // Also handle assessment type
           case 'pillar_completion':
             pillar.completion_count += 1;
             pillar.progress_percentage = Math.min(100, pillar.completion_count * 20);
@@ -182,6 +212,34 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
         // Merge metadata
         const entryMetadata3 = entry.metadata as any;
         pillar.metadata = { ...pillar.metadata, ...entryMetadata3 };
+      });
+
+      // Also process assessment_rounds for additional data
+      assessmentRounds?.forEach(assessment => {
+        const pillarKey = assessment.pillar_type as PillarKey;
+        if (!pillarKey || !PILLAR_KEYS.includes(pillarKey)) return;
+
+        const pillar = progressMap.get(pillarKey);
+        if (!pillar) return;
+
+        // Mark as active and completed if we have assessment
+        pillar.is_active = true;
+        pillar.completion_count = Math.max(pillar.completion_count, 1);
+        pillar.progress_percentage = Math.max(pillar.progress_percentage, 20);
+        
+        // Update last activity from assessment
+        const assessmentDate = assessment.created_at;
+        if (!pillar.last_activity || assessmentDate > pillar.last_activity) {
+          pillar.last_activity = assessmentDate;
+        }
+
+        // Add assessment metadata
+        pillar.metadata = { 
+          ...pillar.metadata, 
+          assessment_id: assessment.id,
+          has_ai_analysis: !!assessment.ai_analysis,
+          last_assessment_date: assessmentDate
+        };
       });
 
       const progressArray = Array.from(progressMap.values());
@@ -210,12 +268,17 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
 
     } catch (err: any) {
       console.error('❌ Universal Pillar Access: Error loading data:', err);
-      setError(err.message || 'Failed to load pillar progress');
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda pillar progress: " + err.message,
-        variant: "destructive"
-      });
+      const errorMessage = err.message || 'Okänt fel vid laddning av pillar progress';
+      setError(errorMessage);
+      
+      // Don't show toast for permission errors - they're handled in UI
+      if (!errorMessage.includes('behörighet')) {
+        toast({
+          title: "Kunde inte ladda pillar progress",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -383,10 +446,23 @@ export const useUniversalPillarAccess = (targetUserId?: string): UniversalPillar
 
   // Load data on mount and dependencies change
   useEffect(() => {
-    if (effectiveUserId && canView) {
+    // Always attempt to fetch data if we have a user ID, 
+    // even if canView is initially false (permissions might still be loading)
+    if (effectiveUserId) {
       fetchPillarProgress();
+    } else {
+      // If no user, set error state
+      setError('Ingen användare inloggad');
+      setLoading(false);
     }
-  }, [effectiveUserId, canView, fetchPillarProgress]);
+  }, [effectiveUserId, fetchPillarProgress]);
+
+  // Separate effect to handle permission changes
+  useEffect(() => {
+    if (effectiveUserId && !canView && !loading) {
+      setError('Du har inte behörighet att visa denna data');
+    }
+  }, [effectiveUserId, canView, loading]);
 
   return {
     // Data

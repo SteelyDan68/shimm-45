@@ -63,13 +63,16 @@ export const UniversalPillarProgressTracker: React.FC<UniversalPillarProgressTra
     );
   }
 
-  // Loading State
+  // Loading State with more user-friendly messaging
   if (loading) {
     return (
       <Card className={className}>
         <CardContent className="p-6 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Laddar pillar progress...</p>
+          <p className="text-muted-foreground">Laddar pillar-data...</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Detta kan ta några sekunder första gången
+          </p>
         </CardContent>
       </Card>
     );
@@ -78,22 +81,30 @@ export const UniversalPillarProgressTracker: React.FC<UniversalPillarProgressTra
   // Error State
   if (error) {
     return (
-      <Card className={`border-red-200 ${className}`}>
+      <Card className={`border-amber-200 ${className}`}>
         <CardContent className="p-6">
-          <Alert variant="destructive">
+          <Alert>
             <XCircle className="h-4 w-4" />
             <AlertDescription>
-              {error}
+              <strong>Problem med pillar progress:</strong> {error}
             </AlertDescription>
           </Alert>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refreshData}
-            className="mt-4"
-          >
-            Försök igen
-          </Button>
+          <div className="mt-4 flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refreshData}
+            >
+              Försök igen
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+            >
+              Ladda om sidan
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
