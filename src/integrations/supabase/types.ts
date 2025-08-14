@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -4941,7 +4941,7 @@ export type Database = {
         Returns: undefined
       }
       cleanup_pillar_assessments_on_retake: {
-        Args: { p_user_id: string; p_pillar_type: string }
+        Args: { p_pillar_type: string; p_user_id: string }
         Returns: {
           cleaned_count: number
           message: string
@@ -4964,19 +4964,19 @@ export type Database = {
         Returns: Json
       }
       get_user_attribute: {
-        Args: { _user_id: string; _attribute_key: string }
+        Args: { _attribute_key: string; _user_id: string }
         Returns: Json
       }
       get_user_context: {
         Args: { target_user_id: string }
         Returns: {
-          user_id: string
+          can_access: boolean
           email: string
           full_name: string
-          roles: string[]
-          primary_role: string
           permission_level: number
-          can_access: boolean
+          primary_role: string
+          roles: string[]
+          user_id: string
         }[]
       }
       get_user_organization_ids: {
@@ -4990,10 +4990,10 @@ export type Database = {
       get_user_roles_and_relationships: {
         Args: { target_user_id: string }
         Returns: {
-          user_id: string
-          roles: Database["public"]["Enums"]["app_role"][]
-          coach_relationships: string[]
           client_relationships: string[]
+          coach_relationships: string[]
+          roles: Database["public"]["Enums"]["app_role"][]
+          user_id: string
         }[]
       }
       get_users_with_attribute: {
@@ -5018,15 +5018,15 @@ export type Database = {
       }
       has_role: {
         Args:
-          | { _user_id: string; _role: Database["public"]["Enums"]["app_role"] }
-          | { _user_id: string; _role: string }
+          | { _role: Database["public"]["Enums"]["app_role"]; _user_id: string }
+          | { _role: string; _user_id: string }
         Returns: boolean
       }
       has_user_attribute: {
         Args: {
-          _user_id: string
           _attribute_key: string
           _attribute_value?: Json
+          _user_id: string
         }
         Returns: boolean
       }
@@ -5055,11 +5055,11 @@ export type Database = {
         Returns: boolean
       }
       is_coach_of_client: {
-        Args: { _coach_id: string; _client_id: string }
+        Args: { _client_id: string; _coach_id: string }
         Returns: boolean
       }
       is_organization_member: {
-        Args: { _user_id: string; _organization_id: string }
+        Args: { _organization_id: string; _user_id: string }
         Returns: boolean
       }
       is_superadmin: {
@@ -5087,50 +5087,64 @@ export type Database = {
         Returns: unknown
       }
       log_security_event: {
-        Args: { event_type: string; event_details?: Json }
+        Args: { event_details?: Json; event_type: string }
         Returns: undefined
       }
       log_sensitive_access: {
         Args: {
-          table_name: string
           action_type: string
-          target_user_id?: string
           additional_context?: Json
+          table_name: string
+          target_user_id?: string
         }
         Returns: undefined
       }
       match_ai_memories: {
         Args:
           | {
-              p_user_id: string
-              p_query_embedding: string
-              p_match_count?: number
-              p_min_similarity?: number
-            }
-          | {
+              filter?: Json
+              match_count: number
+              match_threshold: number
               p_user_id: string
               query_embedding: string
-              match_threshold: number
-              match_count: number
-              filter?: Json
+            }
+          | {
+              p_match_count?: number
+              p_min_similarity?: number
+              p_query_embedding: string
+              p_user_id: string
             }
         Returns: {
-          id: string
           content: string
+          created_at: string
+          id: string
+          metadata: Json
+          similarity: number
           source: string
           tags: string[]
+        }[]
+      }
+      match_stefan_memories: {
+        Args: {
+          match_count: number
+          match_threshold: number
+          query_embedding: string
+          target_user_id: string
+        }
+        Returns: {
+          content: string
+          id: string
           metadata: Json
-          created_at: string
           similarity: number
         }[]
       }
       migrate_all_legacy_assessments: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
-          pillar_type: string
-          migration_status: string
           details: string
+          migration_status: string
+          pillar_type: string
+          user_id: string
         }[]
       }
       reactivate_user: {
@@ -5138,7 +5152,7 @@ export type Database = {
         Returns: string
       }
       recover_assessment_draft: {
-        Args: { p_user_id: string; p_assessment_key: string }
+        Args: { p_assessment_key: string; p_user_id: string }
         Returns: Json
       }
       reset_user_welcome_assessment: {
@@ -5147,12 +5161,12 @@ export type Database = {
       }
       safe_assessment_upsert: {
         Args: {
-          p_user_id: string
-          p_pillar_type: string
-          p_answers: Json
-          p_scores: Json
-          p_comments?: string
           p_ai_analysis?: string
+          p_answers: Json
+          p_comments?: string
+          p_pillar_type: string
+          p_scores: Json
+          p_user_id: string
         }
         Returns: string
       }
@@ -5166,15 +5180,15 @@ export type Database = {
       }
       set_user_attribute: {
         Args: {
-          _user_id: string
           _attribute_key: string
-          _attribute_value: Json
           _attribute_type?: string
+          _attribute_value: Json
+          _user_id: string
         }
         Returns: undefined
       }
       soft_delete_user: {
-        Args: { user_uuid: string; deactivation_reason?: string }
+        Args: { deactivation_reason?: string; user_uuid: string }
         Returns: string
       }
       sparsevec_out: {
@@ -5203,21 +5217,21 @@ export type Database = {
       }
       validate_admin_action: {
         Args:
-          | { _user_id: string; _action: string }
+          | { _action: string; _user_id: string }
           | { action_type: string; admin_id: string }
         Returns: Json
       }
       validate_and_sanitize_input: {
-        Args: { input_text: string; max_length?: number; allow_html?: boolean }
+        Args: { allow_html?: boolean; input_text: string; max_length?: number }
         Returns: Json
       }
       validate_edge_function_auth: {
         Args: {
           _function_name: string
-          _user_id?: string
-          _required_role?: Database["public"]["Enums"]["app_role"]
           _request_ip?: unknown
+          _required_role?: Database["public"]["Enums"]["app_role"]
           _user_agent?: string
+          _user_id?: string
         }
         Returns: Json
       }
@@ -5228,10 +5242,10 @@ export type Database = {
       validate_invitation_token: {
         Args: { invitation_token: string }
         Returns: {
-          invitation_id: string
           email: string
-          invited_role: string
           expires_at: string
+          invitation_id: string
+          invited_role: string
           is_valid: boolean
         }[]
       }
@@ -5241,9 +5255,9 @@ export type Database = {
       }
       validate_role_context_switch: {
         Args: {
-          _user_id: string
           _from_role: Database["public"]["Enums"]["app_role"]
           _to_role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: Json
       }
