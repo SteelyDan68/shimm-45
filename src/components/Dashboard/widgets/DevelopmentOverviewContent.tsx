@@ -99,17 +99,19 @@ export const DevelopmentOverviewContent: React.FC = () => {
       if (actionablesError) throw actionablesError;
       setCompletedActionables(actionablesData || []);
 
-      // Load recent AI insights from coaching sessions
-      const { data: sessionsData, error: sessionsError } = await supabase
-        .from('coaching_sessions')
-        .select('ai_analysis, created_at, session_type')
-        .eq('user_id', user.id)
-        .not('ai_analysis', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Load recent AI insights from assessment rounds (LIVE DATA)
+      const recentAssessments = assessmentData?.filter(assessment => 
+        assessment.ai_analysis && assessment.ai_analysis.length > 100
+      ).slice(0, 3) || [];
 
-      if (sessionsError) throw sessionsError;
-      setRecentInsights(sessionsData || []);
+      // Transform assessment data to insights format for consistent display
+      const transformedInsights = recentAssessments.map(assessment => ({
+        ai_analysis: assessment.ai_analysis,
+        created_at: assessment.created_at,
+        session_type: `${assessment.pillar_type} bedömning`
+      }));
+
+      setRecentInsights(transformedInsights);
 
     } catch (error) {
       console.error('Error loading development data:', error);

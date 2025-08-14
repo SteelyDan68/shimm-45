@@ -12,19 +12,20 @@ export const useTotalPillarReset = (userId?: string) => {
   const [isResetting, setIsResetting] = useState(false);
   const { toast } = useToast();
 
-  const resetAllPillars = async (): Promise<void> => {
-    if (!userId) {
+  const resetAllPillars = async (userIdParam?: string): Promise<void> => {
+    const actualUserId = userIdParam || userId;
+    if (!actualUserId) {
       throw new Error('User ID is required for total reset');
     }
 
     setIsResetting(true);
-    console.log(`🔄 Starting TOTAL RESET for user: ${userId}`);
+    console.log(`🔄 Starting TOTAL RESET for user: ${actualUserId}`);
 
     try {
       // Call the total reset edge function
       const { data, error } = await supabase.functions.invoke('total-pillar-reset', {
         body: { 
-          userId
+          userId: actualUserId
         }
       });
 
@@ -45,7 +46,7 @@ export const useTotalPillarReset = (userId?: string) => {
       const { error: assessmentError } = await supabase
         .from('assessment_rounds')
         .delete()
-        .eq('user_id', userId);
+        .eq('user_id', actualUserId);
 
       if (assessmentError) {
         console.error('Assessment rounds total cleanup error:', assessmentError);

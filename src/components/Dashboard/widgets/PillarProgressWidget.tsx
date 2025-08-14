@@ -221,19 +221,27 @@ const PillarProgressWidgetComponent: React.FC<WidgetProps> = ({ widget, stats, o
           </Button>
         </ActionTooltip>
         
-        {/* 🔄 RESET BUTTON för alla pillars som begärt */}
+        {/* 🔄 LIVE RESET BUTTON för alla pillars */}
         {completedCount > 0 && (
           <ActionTooltip content="Nollställ hela utvecklingsresan och börja om från början">
             <Button 
               variant="outline"
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 const confirmReset = window.confirm(
                   'Är du säker på att du vill nollställa HELA din utvecklingsresa? Detta raderar ALL data från ALLA pillars och kan inte ångras.'
                 );
                 if (confirmReset) {
-                  // TODO: Implementera total reset
-                  console.log('🔄 Complete pillar reset requested from widget');
+                  try {
+                    const { useTotalPillarReset } = await import('@/hooks/useTotalPillarReset');
+                    if (user?.id) {
+                      const resetHook = useTotalPillarReset(user.id);
+                      await resetHook.resetAllPillars();
+                    }
+                  } catch (error) {
+                    console.error('Reset failed:', error);
+                    alert('Reset misslyckades. Försök igen.');
+                  }
                 }
               }}
               className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
