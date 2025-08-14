@@ -22,15 +22,15 @@ interface DevelopmentProgress {
 
 export const calculateUserDevelopmentProgress = async (userId: string): Promise<DevelopmentProgress> => {
   try {
-    // 1. Hämta slutförda assessments (30% vikt)
+    // 1. FIXAT: Hämta slutförda assessments från assessment_rounds (30% vikt)
     const { data: assessments } = await supabase
-      .from('assessment_states')
-      .select('assessment_type, completed_at')
+      .from('assessment_rounds')
+      .select('pillar_type, created_at, scores')
       .eq('user_id', userId)
-      .eq('is_draft', false);
+      .not('scores', 'is', null);
 
     const completedAssessments = assessments?.length || 0;
-    const totalExpectedAssessments = 7; // welcome + 6 pillars
+    const totalExpectedAssessments = 6; // 6 pillars (welcome_assessment är separat)
 
     // 2. Hämta slutförda uppgifter (40% vikt)
     const { data: tasks } = await supabase
@@ -41,19 +41,24 @@ export const calculateUserDevelopmentProgress = async (userId: string): Promise<
     const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
     const totalTasks = tasks?.length || 1;
 
-    // 3. Hämta pillar aktivering från attribute system (25% vikt)
-    const { data: activationData } = await supabase.functions.invoke('get-user-attribute', {
-      body: {
-        user_id: userId,
-        attribute_key: 'pillar_activations'
-      }
-    });
+    // 3. FIXAT: Hämta pillar aktivering från path_entries (25% vikt)
+    const { data: pathEntries } = await supabase
+      .from('path_entries')
+      .select('metadata')
+      .eq('user_id', userId)
+      .eq('type', 'recommendation')
+      .not('metadata->pillar_type', 'is', null);
 
-    const pillarActivations = Array.isArray(activationData?.data) 
-      ? activationData.data.filter((p: any) => p.is_active !== false) 
-      : [];
-
-    const activePillars = pillarActivations?.length || 0;
+    // Räkna unika aktiva pillars från path_entries (med typ-säkerhet)
+    const uniquePillars = new Set(
+      pathEntries?.map(entry => {
+        if (entry.metadata && typeof entry.metadata === 'object' && entry.metadata !== null) {
+          return (entry.metadata as any).pillar_type;
+        }
+        return null;
+      }).filter(Boolean) || []
+    );
+    const activePillars = uniquePillars.size;
     const totalPillars = 6;
 
     // 4. Hämta milestone framsteg (5% vikt) 

@@ -146,16 +146,59 @@ export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardPr
   const triggerAICoaching = async () => {
     toast({
       title: "🧠 AI-Coaching startar...",
-      description: "AI:n analyserar dina actionables och föreslår optimeringar för neuroplastisk utveckling",
+      description: "Analyserar och prioriterar dina uppgifter baserat på assessment-svar",
     });
 
-    // I framtiden: Anropa AI-coaching edge function
-    setTimeout(() => {
-      toast({
-        title: "✨ AI-Coaching klar!",
-        description: "Dina actionables har optimerats för maximal neuroplastisk påverkan och hållbar utveckling",
+    try {
+      // Hämta användarens assessment-data för smart prioritering
+      const { data: assessments } = await supabase
+        .from('assessment_rounds')
+        .select('pillar_type, scores, answers')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      // Anropa AI för intelligent omprioritering baserat på assessment-svar
+      const { data: aiResult, error } = await supabase.functions.invoke('enhance-ai-planning', {
+        body: {
+          user_id: userId,
+          assessment_data: assessments || [],
+          current_actionables: actionables,
+          optimization_type: 'priority_rebalancing'
+        }
       });
-    }, 3000);
+
+      if (error) throw error;
+
+      if (aiResult?.updated_priorities) {
+        // Uppdatera prioriteringar baserat på AI-analys
+        for (const update of aiResult.updated_priorities) {
+          await supabase
+            .from('calendar_actionables')
+            .update({ priority: update.new_priority })
+            .eq('id', update.actionable_id);
+        }
+
+        await loadActionables();
+        
+        toast({
+          title: "✨ AI-Coaching slutförd!",
+          description: `${aiResult.updated_priorities.length} uppgifter omprioriterade baserat på dina assessment-svar. Resultatet visas nu i din prioriteringslista.`,
+          duration: 6000
+        });
+      } else {
+        toast({
+          title: "✅ AI-Analys klar",
+          description: "Dina prioriteringar är redan optimala baserat på dina assessment-svar",
+        });
+      }
+    } catch (error) {
+      console.error('AI coaching error:', error);
+      toast({
+        title: "⚠️ AI-Coaching misslyckades",
+        description: "Kunde inte koppla till AI-tjänsten. Prioriteringarna behåller nuvarande ordning.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getPriorityColor = (priority: string) => {

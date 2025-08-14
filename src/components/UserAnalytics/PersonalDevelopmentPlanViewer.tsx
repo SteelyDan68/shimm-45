@@ -666,7 +666,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
               {isRegeneratingAI ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  AI analyserar...
+                  AI optimerar...
                 </>
               ) : (
                 <>
@@ -690,11 +690,11 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
             <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center gap-2 text-sm text-blue-700">
                 <Sparkles className="h-4 w-4" />
-                <span className="font-medium">AI-Coaching funktionalitet:</span>
+                <span className="font-medium">AI-Coaching resultat:</span>
               </div>
               <p className="text-sm text-blue-600 mt-1">
-                Analyserar dina genomförda strategier och assessments för att optimera din utvecklingsplan 
-                med nya neuroplastiska strategier anpassade efter din progress.
+                När AI-coachingen är klar visas resultatet direkt i din utvecklingsplan här på denna sida. 
+                Nya strategier läggs till och befintliga optimeras baserat på dina assessment-svar.
               </p>
             </div>
             

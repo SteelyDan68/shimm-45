@@ -710,9 +710,6 @@ Baserat på din poäng på ${score}/10 inom ${pillarName} finns det flera områd
                         <div className="flex-1">
                           <h4 className="font-semibold flex items-center gap-2">
                             {getPillarName(assessment.pillar_type)} - Analys
-                            <Badge variant={assessment.source === 'assessment_rounds' ? 'default' : 'secondary'} className="text-xs">
-                              {assessment.source === 'assessment_rounds' ? 'Modern' : 'Legacy'}
-                            </Badge>
                           </h4>
                           <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                             {assessment.ai_analysis.substring(0, 150)}...
