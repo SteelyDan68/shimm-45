@@ -289,7 +289,6 @@ export const MyAssessments: React.FC = () => {
               variant="outline"
               size="sm"
             />
-            </Button>
             <Button 
               className="flex-1"
               onClick={() => navigate('/my-analyses')}

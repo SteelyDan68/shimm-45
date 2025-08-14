@@ -203,15 +203,12 @@ const MyProgram = () => {
           </div>
           <div className="flex items-center gap-2 no-print">
             <HelpTooltip content="Skriv ut eller spara som PDF för att dela ditt program eller jobba offline." />
-            <Button
+            <PrintPDFActions 
+              title="Mitt Personliga Utvecklingsprogram"
+              filename="mitt-program"
               variant="outline"
               size="sm"
-              onClick={() => window.print()}
-              aria-label="Skriv ut eller spara som PDF"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Skriv ut / PDF
-            </Button>
+            />
           </div>
         </div>
         <p className="text-muted-foreground max-w-2xl">

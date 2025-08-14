@@ -5204,6 +5204,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      total_pillar_reset: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       user_has_any_role: {
         Args: { _user_id: string }
         Returns: boolean
