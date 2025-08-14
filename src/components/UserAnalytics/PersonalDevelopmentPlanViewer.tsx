@@ -499,7 +499,7 @@ export const PersonalDevelopmentPlanViewer: React.FC<PersonalDevelopmentPlanProp
           <div className="space-y-4">
             <Progress value={66} className="h-3" />
             <p className="text-muted-foreground text-center">
-              Analyserar dina assessments och skapar optimala utvecklingsstrategier...
+              Analyserar dina självskattningar och skapar optimala utvecklingsstrategier...
             </p>
           </div>
         </CardContent>

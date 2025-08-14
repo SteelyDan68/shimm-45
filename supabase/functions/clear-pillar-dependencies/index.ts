@@ -33,7 +33,7 @@ serve(async (req) => {
       }
     });
 
-    // Call the new cleanup function that handles complete system integrity
+    // Call the comprehensive cleanup function that handles complete system integrity
     const { data: cleanupResult, error: cleanupError } = await supabase
       .rpc('cleanup_pillar_assessments_on_retake', {
         p_user_id: userId,

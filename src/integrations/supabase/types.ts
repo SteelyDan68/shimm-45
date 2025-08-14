@@ -4942,10 +4942,7 @@ export type Database = {
       }
       cleanup_pillar_assessments_on_retake: {
         Args: { p_pillar_type: string; p_user_id: string }
-        Returns: {
-          cleaned_count: number
-          message: string
-        }[]
+        Returns: Json
       }
       cleanup_user_references: {
         Args: { target_email: string }

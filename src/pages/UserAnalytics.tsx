@@ -94,7 +94,7 @@ export default function UserAnalytics() {
               user_id: round.user_id,
               pillar_type: round.pillar_type,
               assessment_data: round.answers || {},
-              ai_analysis: round.ai_analysis || `**BRAND ASSESSMENT GENOMFÖRD**\n\nPoäng: ${calculatedScore}\n\nAssessment genomförd ${new Date(round.created_at).toLocaleDateString('sv-SE')} men AI-analys väntar på regenerering.\n\n*Systemet konsoliderar nu alla assessments oavsett AI-status.*`,
+              ai_analysis: round.ai_analysis || `**${round.pillar_type === 'self_care' ? 'SJÄLVOMVÅRDNAD' : round.pillar_type.toUpperCase()} SJÄLVSKATTNING GENOMFÖRD**\n\nPoäng: ${calculatedScore}\n\nSjälvskattning genomförd ${new Date(round.created_at).toLocaleDateString('sv-SE')} men AI-analys väntar på regenerering.\n\n*Systemet konsoliderar nu alla självskattningar oavsett AI-status.*`,
               calculated_score: typeof calculatedScore === 'number' ? calculatedScore : parseFloat(calculatedScore) || 0,
               created_at: round.created_at,
               updated_at: round.updated_at,
