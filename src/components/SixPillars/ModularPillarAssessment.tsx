@@ -119,7 +119,7 @@ export const ModularPillarAssessment = ({
       );
       
       if (hasEmptyRequiredText) {
-        navigate.push && navigate.push('/error-toast');
+        // Show validation error toast
         return;
       }
 
