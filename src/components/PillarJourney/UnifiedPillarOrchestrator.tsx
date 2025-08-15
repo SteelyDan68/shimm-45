@@ -93,18 +93,20 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
   };
 
   const handleAssessmentComplete = async (pillarKey: PillarKey, data: Record<string, any>) => {
-    
+    console.log('Assessment completed for:', pillarKey, data);
     setAssessmentData(data);
     
     // Uppdatera pillar data efter genomförd assessment
     await refetchPillarData();
     
-    setFlowState('calibration');
-
-    toast({
-      title: "🎯 Assessment genomförd!",
-      description: "Nu anpassar vi din utvecklingsplan efter dina preferenser.",
-    });
+    // Automatically advance to calibration
+    setTimeout(() => {
+      setFlowState('calibration');
+      toast({
+        title: "🎯 Assessment genomförd!",
+        description: "Nu anpassar vi din utvecklingsplan efter dina preferenser.",
+      });
+    }, 500);
   };
 
   const handleCalibrationComplete = (selectedIntensity: IntensityLevel, selectedDuration: DurationLevel) => {
@@ -284,7 +286,7 @@ const UnifiedPillarOrchestrator: React.FC<UnifiedPillarOrchestratorProps> = ({
           <ModularPillarAssessment
             userId={user?.id || ''}
             pillarKey={selectedPillar}
-            onComplete={() => handleAssessmentComplete(selectedPillar, {})}
+            onComplete={(data) => handleAssessmentComplete(selectedPillar, data || {})}
           />
         </div>
       )}

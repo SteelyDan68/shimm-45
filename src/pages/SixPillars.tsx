@@ -173,16 +173,16 @@ export const SixPillars = () => {
                       </ul>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button 
-                        className="w-full mt-4 text-sm sm:text-base px-2 sm:px-4 py-2"
-                        style={{ backgroundColor: pillar.color }}
-                        onClick={() => navigate('/client-dashboard?tab=pillars', { state: { activatePillar: pillar.key } })}
-                      >
-                        <span className="whitespace-normal text-center leading-tight">
-                          Aktivera denna pelare
-                        </span>
-                        <ArrowRight className="h-4 w-4 ml-2 flex-shrink-0" />
-                      </Button>
+                       <Button 
+                         className="w-full mt-4 text-sm sm:text-base px-2 sm:px-4 py-2"
+                         style={{ backgroundColor: pillar.color }}
+                         onClick={() => navigate(`/pillar-journey?pillar=${pillar.key}&view=intro`)}
+                       >
+                         <span className="whitespace-normal text-center leading-tight">
+                           Starta {pillar.name}
+                         </span>
+                         <ArrowRight className="h-4 w-4 ml-2 flex-shrink-0" />
+                       </Button>
                       <HelpTooltip content="Aktiverar pelaren i din översikt och öppnar för självskattning och rekommendationer." />
                     </div>
                   </div>

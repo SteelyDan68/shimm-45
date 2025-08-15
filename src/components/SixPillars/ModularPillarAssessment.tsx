@@ -21,7 +21,7 @@ interface ModularPillarAssessmentProps {
   clientId?: string;
   userId?: string;
   pillarKey: PillarKey;
-  onComplete?: () => void;
+  onComplete?: (data?: Record<string, any>) => void;
   onBack?: () => void;
 }
 
@@ -109,23 +109,46 @@ export const ModularPillarAssessment = ({
   };
 
   const handleSubmit = async () => {
-    await assessmentSafety.safeSubmit(async () => {
-      // Calculate score using the pillar's scoring function
-      const calculatedScore = pillarConfig.scoreCalculation(answers);
+    if (!onComplete) return;
+    
+    try {
+      // Validate required text fields
+      const textQuestions = pillarConfig.questions.filter(q => q.type === 'text');
+      const hasEmptyRequiredText = textQuestions.some(q => 
+        !answers[q.key] || answers[q.key].toString().trim().length < 10
+      );
       
-      // Logga submission försök
-      await logActivity('pillar_assessment_submitted', {
-        pillar_key: pillarKey,
-        calculated_score: calculatedScore,
-        answers_count: Object.keys(answers).length
-      });
-      
-      const result = await submitPillarAssessment(pillarKey, answers, calculatedScore);
-      if (result && onComplete) {
-        setHasUnsavedChanges(false);
-        onComplete();
+      if (hasEmptyRequiredText) {
+        navigate.push && navigate.push('/error-toast');
+        return;
       }
-    }, true);
+
+      await assessmentSafety.safeSubmit(async () => {
+        // Calculate score using the pillar's scoring function
+        const calculatedScore = pillarConfig.scoreCalculation(answers);
+        
+        // Logga submission försök
+        await logActivity('pillar_assessment_submitted', {
+          pillar_key: pillarKey,
+          calculated_score: calculatedScore,
+          answers_count: Object.keys(answers).length
+        });
+        
+        const result = await submitPillarAssessment(pillarKey, answers, calculatedScore);
+        if (result) {
+          setHasUnsavedChanges(false);
+          // Pass the assessment data to parent
+          onComplete({
+            answers,
+            score: calculatedScore,
+            comments,
+            pillarKey
+          });
+        }
+      }, true);
+    } catch (error) {
+      console.error('Assessment submission error:', error);
+    }
   };
 
   const getScorePreview = () => {

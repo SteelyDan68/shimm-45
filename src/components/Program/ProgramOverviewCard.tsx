@@ -93,7 +93,16 @@ export const ProgramOverviewCard: React.FC<ProgramOverviewCardProps> = ({ onSele
             ))}
           </div>
         ) : plans.length === 0 ? (
-          <div className="text-sm text-muted-foreground">Inga aktiva program ännu. Gör en assessment så skapas ett personligt program automatiskt.</div>
+          <div className="text-sm text-muted-foreground">
+            <p className="mb-2">Dina AI-genererade uppgifter kommer att visas här när du genomför en pillar-bedömning.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.href = '/pillar-journey'}
+            >
+              Gör din första bedömning
+            </Button>
+          </div>
         ) : (
           <div className="flex flex-wrap gap-3">
             <Button
