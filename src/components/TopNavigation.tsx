@@ -46,7 +46,7 @@ export function TopNavigation() {
         {/* Logo - Hidden on mobile when sidebar is open */}
         <div className={`flex items-center ${isMobile && sidebarOpen ? 'hidden' : ''}`}>
           <NavLink to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <h1 className="text-lg font-bold text-primary">SHIMMS</h1>
+            <h1 className="text-lg font-bold text-primary">NCCS</h1>
           </NavLink>
         </div>
 

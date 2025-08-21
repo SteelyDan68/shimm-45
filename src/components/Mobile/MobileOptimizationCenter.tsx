@@ -477,7 +477,7 @@ export function MobileOptimizationCenter() {
                       className="w-full"
                       onClick={() => {
                         navigator.share({
-                          title: 'SHIMMS App',
+                          title: 'NCCS App',
                           text: 'Kolla in denna fantastiska app!',
                           url: window.location.href
                         });

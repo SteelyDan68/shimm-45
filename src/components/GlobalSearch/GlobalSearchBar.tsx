@@ -56,7 +56,7 @@ const SEARCH_TYPE_ICONS = {
 
 export const GlobalSearchBar: React.FC<SearchBarProps> = ({
   variant = 'compact',
-  placeholder = 'Sök i SHIMMS...',
+  placeholder = 'Sök i NCCS...',
   className = '',
   onResultSelect
 }) => {
@@ -172,7 +172,7 @@ export const GlobalSearchBar: React.FC<SearchBarProps> = ({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] p-0">
           <DialogHeader className="px-6 py-4 border-b">
-            <DialogTitle className="text-mobile-lg">Sök i SHIMMS</DialogTitle>
+            <DialogTitle className="text-mobile-lg">Sök i NCCS</DialogTitle>
           </DialogHeader>
           
           <div className="flex flex-col h-full">

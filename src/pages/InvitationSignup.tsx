@@ -238,7 +238,7 @@ export const InvitationSignup = () => {
           <div className="flex justify-center mb-2">
             <CheckCircle className="h-12 w-12 text-green-500" />
           </div>
-          <CardTitle>Välkommen till SHIMMS!</CardTitle>
+          <CardTitle>Välkommen till NCCS!</CardTitle>
           <CardDescription>
             Du har bjudits in som <strong>{invitation.invited_role}</strong>. 
             Skapa ditt konto för att komma igång.
