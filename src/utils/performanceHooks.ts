@@ -1,6 +1,6 @@
 /**
  * 🚀 PERFORMANCE OPTIMIZATION HOOKS
- * Samlar alla prestanda-optimeringsverktåg för SHIMMS
+ * Samlar alla prestanda-optimeringsverktåg för NCCS
  */
 
 import { useCallback, useMemo, useRef, useEffect } from 'react';

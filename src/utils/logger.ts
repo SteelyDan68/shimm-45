@@ -1,7 +1,7 @@
 /**
  * 🚀 PRODUCTION-READY LOGGING SYSTEM
  * 
- * Centralized logging with intelligent levels for SHIMMS stability
+ * Centralized logging with intelligent levels for NCCS stability
  * Eliminates console spam and provides structured error tracking
  */
 
@@ -19,7 +19,7 @@ interface LogContext {
   metadata?: Record<string, any>;
 }
 
-class ShimmsLogger {
+class NccsLogger {
   private level: LogLevel = process.env.NODE_ENV === 'production' ? LogLevel.ERROR : LogLevel.INFO;
   private context: LogContext = {};
 
@@ -62,4 +62,4 @@ class ShimmsLogger {
   }
 }
 
-export const logger = new ShimmsLogger();
+export const logger = new NccsLogger();
