@@ -235,7 +235,7 @@ export const HarmonizedCoachDashboard: React.FC = () => {
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                    {client.name?.charAt(0) || client.email.charAt(0)}
+                    {client.name?.charAt(0) || client.email?.charAt(0) || 'C'}
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg">{client.name || client.email}</CardTitle>

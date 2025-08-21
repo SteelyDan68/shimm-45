@@ -111,7 +111,7 @@ export function TopNavigation() {
               >
                 <Avatar className="h-7 w-7">
                   <AvatarFallback className="text-xs bg-primary text-primary-foreground font-semibold">
-                    {user?.email?.charAt(0).toUpperCase() || "U"}
+                    {user?.email?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
               </Button>

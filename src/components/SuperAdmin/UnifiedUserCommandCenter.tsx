@@ -538,7 +538,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
                           {user.avatar_url ? (
                             <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                           ) : (
-                            user.name?.charAt(0) || user.email.charAt(0)
+                            user.name?.charAt(0) || user.email?.charAt(0) || 'U'
                           )}
                         </div>
                         <div>
@@ -648,7 +648,7 @@ export const UnifiedUserCommandCenter: React.FC = () => {
                             {user.avatar_url ? (
                               <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                             ) : (
-                              user.name?.charAt(0) || user.email.charAt(0)
+                              user.name?.charAt(0) || user.email?.charAt(0) || 'U'
                             )}
                           </div>
                           <div className="flex-1 min-w-0">

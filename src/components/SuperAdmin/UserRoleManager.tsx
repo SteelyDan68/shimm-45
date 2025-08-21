@@ -255,7 +255,7 @@ export const UserRoleManager: React.FC<UserRoleManagerProps> = ({
         <CardContent>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-              {user.name?.charAt(0) || user.email?.charAt(0)}
+              {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
             </div>
             <div>
               <h3 className="font-semibold">{user.name || user.email}</h3>
