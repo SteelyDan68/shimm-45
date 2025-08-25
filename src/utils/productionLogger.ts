@@ -22,6 +22,7 @@ class ProductionLogger {
   private isDevelopment = import.meta.env.DEV;
   private sessionId = this.generateSessionId();
   private context: Record<string, any> = {};
+  private userId?: string;
 
   private generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -29,6 +30,11 @@ class ProductionLogger {
 
   setContext(newContext: Record<string, any>) {
     this.context = { ...this.context, ...newContext };
+  }
+
+  setUserId(userId: string) {
+    this.userId = userId;
+    this.context = { ...this.context, userId };
   }
 
   clearContext() {
@@ -42,6 +48,7 @@ class ProductionLogger {
       timestamp: new Date().toISOString(),
       context: { ...this.context, ...additionalContext },
       error,
+      userId: this.userId,
       sessionId: this.sessionId,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
@@ -49,13 +56,16 @@ class ProductionLogger {
   }
 
   private sendToBackend(entry: LogEntry) {
-    // I produktionsmiljö: skicka till logging service
+    // I produktionsmiljö: skicka till logging edge function
     if (!this.isDevelopment) {
       try {
-        // Implementera async logging till Supabase eller extern service
-        fetch('/api/logs', {
+        // Send to Supabase edge function för server-side logging
+        fetch('https://gcoorbcglxczmukzcmqs.supabase.co/functions/v1/log', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb29yYmNnbHhjem11a3pjbXFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4MTE3NzYsImV4cCI6MjA2OTM4Nzc3Nn0.5gNGvMZ6aG3UXoYR6XbJPqn8L8ktMYaFbZIQ4mZTFf4`
+          },
           body: JSON.stringify(entry)
         }).catch(() => {
           // Silent fail för logging - vi vill inte krascha appen

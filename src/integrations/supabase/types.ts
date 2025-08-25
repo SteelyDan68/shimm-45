@@ -3871,6 +3871,51 @@ export type Database = {
         }
         Relationships: []
       }
+      server_log_events: {
+        Row: {
+          context: Json
+          created_at: string
+          error_stack: string | null
+          id: string
+          ip_address: unknown | null
+          level: string
+          message: string
+          session_id: string | null
+          timestamp: string
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          error_stack?: string | null
+          id?: string
+          ip_address?: unknown | null
+          level: string
+          message: string
+          session_id?: string | null
+          timestamp?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          error_stack?: string | null
+          id?: string
+          ip_address?: unknown | null
+          level?: string
+          message?: string
+          session_id?: string | null
+          timestamp?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       stefan_ai_config: {
         Row: {
           confidence_threshold: number | null

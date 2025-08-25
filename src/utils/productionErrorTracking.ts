@@ -145,6 +145,8 @@ class ProductionErrorTracker {
 
   setUserId(userId: string) {
     this.userId = userId;
+    // 🔗 SYNC: Sätt också userId i productionLogger för konsistent felrapportering
+    logger.setUserId(userId);
   }
 
   reportError({
@@ -166,7 +168,13 @@ class ProductionErrorTracker {
       sessionId: this.sessionId,
       severity,
       category,
-      metadata
+      metadata: {
+        ...metadata,
+        // 📊 OBSERVABILITY: Inkludera alltid userId + sessionId för spårbarhet
+        contextUserId: this.userId,
+        contextSessionId: this.sessionId,
+        errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      }
     };
 
     // Log error appropriately
