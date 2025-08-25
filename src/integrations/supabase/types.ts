@@ -4916,6 +4916,15 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      calculate_dynamic_task_priority: {
+        Args: {
+          pillar_score?: number
+          task_category: string
+          user_assessment_score: number
+          user_input_urgency?: string
+        }
+        Returns: string
+      }
       calculate_task_priority: {
         Args: {
           task_category: string
