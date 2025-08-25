@@ -229,6 +229,7 @@ class AssessmentDataService {
       }
 
       // 🔄 BACKWARD COMPATIBILITY: Spara även i path_entries för äldre system
+      const { error: entryError } = await supabase
         .from('path_entries')
         .insert({
           user_id: request.user_id,
