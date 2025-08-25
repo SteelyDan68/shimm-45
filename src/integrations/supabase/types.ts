@@ -362,6 +362,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_rate_limits: {
+        Row: {
+          count: number
+          id: number
+          identity: string
+          last_request_at: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          id?: number
+          identity: string
+          last_request_at?: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          id?: number
+          identity?: string
+          last_request_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       ai_recommendations: {
         Row: {
           category: string
@@ -438,6 +462,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_response_logs: {
+        Row: {
+          completion_tokens: number | null
+          cost_estimate: number | null
+          created_at: string
+          error: string | null
+          function_name: string
+          id: string
+          identity: string | null
+          latency_ms: number
+          metadata: Json
+          model: string
+          prompt_tokens: number | null
+          provider: string
+          request_id: string | null
+          status: string
+          total_tokens: number | null
+          user_id: string | null
+        }
+        Insert: {
+          completion_tokens?: number | null
+          cost_estimate?: number | null
+          created_at?: string
+          error?: string | null
+          function_name: string
+          id?: string
+          identity?: string | null
+          latency_ms: number
+          metadata?: Json
+          model: string
+          prompt_tokens?: number | null
+          provider: string
+          request_id?: string | null
+          status: string
+          total_tokens?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          completion_tokens?: number | null
+          cost_estimate?: number | null
+          created_at?: string
+          error?: string | null
+          function_name?: string
+          id?: string
+          identity?: string | null
+          latency_ms?: number
+          metadata?: Json
+          model?: string
+          prompt_tokens?: number | null
+          provider?: string
+          request_id?: string | null
+          status?: string
+          total_tokens?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       ai_service_logs: {
         Row: {
