@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { AIComponentWrapper } from '@/components/AI/AIComponentWrapper';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +68,21 @@ const getStatusColor = (status: AIProcessingSession['status']) => {
 };
 
 export function AIProcessingIndicator({ session, className, compact = false }: AIProcessingIndicatorProps) {
+  if (!session) return null;
+
+  return (
+    <AIComponentWrapper
+      componentName="AI Processing Indicator"
+      loadingMessage="Förbereder AI-bearbetning..."
+      enableAutoRetry={false}
+    >
+      <AIProcessingIndicatorContent session={session} className={className} compact={compact} />
+    </AIComponentWrapper>
+  );
+}
+
+function AIProcessingIndicatorContent({ session, className, compact = false }: AIProcessingIndicatorProps) {
+  if (!session) return null;
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [animationKey, setAnimationKey] = useState(0);
 

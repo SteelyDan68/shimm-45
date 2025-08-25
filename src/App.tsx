@@ -16,7 +16,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { MobileOptimizedLayout, useMobileViewport } from "@/components/ui/mobile-optimized-layout";
 import { AccessibleSkipLink, KeyboardNavigationIndicator, useKeyboardNavigation } from "@/components/ui/accessibility";
 import { errorTracker } from "@/utils/productionErrorTracking";
-import { AutoNotificationSystem } from "@/components/Notifications/AutoNotificationSystem";
+import { AutoNotificationSystem } from "@/components/notifications-old/AutoNotificationSystem";
 
 import { CriticalErrorBoundary, PageErrorBoundary } from "@/components/error/ErrorBoundary";
 import { Dashboard } from "./pages/Dashboard";

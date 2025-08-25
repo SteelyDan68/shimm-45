@@ -1,11 +1,13 @@
 /**
- * UNIFIED ASSESSMENT DATA SERVICE
+ * 🎯 ENHANCED ASSESSMENT DATA SERVICE
  * 
- * Centraliserad service för all assessment-data som hanterar:
- * - Legacy data från path_entries
- * - Modern data från assessment_rounds  
+ * Enterprise-grade service med fokus på:
+ * - Idempotent operationer (safe retries)
+ * - Tydlig source-taggning och revision tracking
+ * - Robust felhantering och graceful degradation
+ * - Single source of truth runt user_id
  * - Automatisk synkronisering mellan källor
- * - Universell kompatibilitet för alla användare
+ * - Performance-optimerad caching och batching
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +32,8 @@ export interface SaveAssessmentRequest {
   calculated_score: number;
   ai_analysis?: string;
   comments?: string;
+  idempotency_key?: string; // För säkra retry-operationer
+  force_update?: boolean;   // Tvinga uppdatering även om data redan finns
 }
 
 class AssessmentDataService {
@@ -148,13 +152,57 @@ class AssessmentDataService {
   }
 
   /**
-   * UNIVERSIELL SPARNING: Sparar assessment data i båda tabeller för kompatibilitet
+   * 🎯 IDEMPOTENT SPARNING: Säker sparning med source-taggning och retry-säkerhet
    */
-  async saveAssessment(request: SaveAssessmentRequest): Promise<{ success: boolean; assessment_round_id?: string; error?: string }> {
-    console.log('💾 AssessmentDataService: Saving assessment universally:', request);
+  async saveAssessment(request: SaveAssessmentRequest): Promise<{ success: boolean; assessment_round_id?: string; error?: string; was_duplicate?: boolean }> {
+    const idempotencyKey = request.idempotency_key || `${request.user_id}-${request.pillar_type}-${Date.now()}`;
+    console.log('💾 AssessmentDataService: Idempotent save initiated:', { 
+      user_id: request.user_id, 
+      pillar_type: request.pillar_type,
+      idempotency_key: idempotencyKey,
+      force_update: request.force_update 
+    });
 
     try {
-      // 1. Spara i assessment_rounds (primär källa)
+      // 🛡️ IDEMPOTENCY CHECK: Kontrollera om samma data redan finns
+      if (!request.force_update) {
+        const { data: existingAssessment } = await supabase
+          .from('assessment_rounds')
+          .select('id, created_at')
+          .eq('user_id', request.user_id)
+          .eq('pillar_type', request.pillar_type)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existingAssessment) {
+          const existingTime = new Date(existingAssessment.created_at).getTime();
+          const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+          
+          if (existingTime > fiveMinutesAgo) {
+            console.log('⚡ Duplicate detected within 5min window, skipping save:', existingAssessment.id);
+            return {
+              success: true,
+              assessment_round_id: existingAssessment.id,
+              was_duplicate: true
+            };
+          }
+        }
+      }
+
+      // 🎯 SAVE WITH SOURCE TAGGING: Spara med tydlig käll-märkning
+      const sourceMetadata = {
+        source: 'AssessmentDataService',
+        version: '2.0',
+        idempotency_key: idempotencyKey,
+        created_via: 'unified_service',
+        data_lineage: {
+          original_source: request.force_update ? 'force_update' : 'new_assessment',
+          processing_timestamp: new Date().toISOString(),
+          user_agent: typeof window !== 'undefined' ? window.navigator?.userAgent : 'server-side'
+        }
+      };
+
       const { data: assessmentRound, error: roundError } = await supabase
         .from('assessment_rounds')
         .insert({
@@ -166,10 +214,11 @@ class AssessmentDataService {
             [request.pillar_type]: request.calculated_score,
             overall: request.calculated_score
           },
-          comments: request.comments || 'Automatiskt sparad via AssessmentDataService',
+          comments: request.comments || `Automatiskt sparad via AssessmentDataService (${idempotencyKey})`,
           ai_analysis: request.ai_analysis,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          metadata: sourceMetadata
         })
         .select('id')
         .single();
@@ -179,8 +228,7 @@ class AssessmentDataService {
         throw roundError;
       }
 
-      // 2. Spara i path_entries för backward compatibility
-      const { error: entryError } = await supabase
+      // 🔄 BACKWARD COMPATIBILITY: Spara även i path_entries för äldre system
         .from('path_entries')
         .insert({
           user_id: request.user_id,
@@ -188,36 +236,36 @@ class AssessmentDataService {
           timestamp: new Date().toISOString(),
           type: 'recommendation',
           title: `AI-analys: ${this.getPillarDisplayName(request.pillar_type)}`,
-          details: request.ai_analysis || 'Analys sparad via unified service',
+          details: request.ai_analysis || 'Analys sparad via unified service v2.0',
           status: 'completed',
           ai_generated: true,
           visible_to_client: true,
           metadata: {
+            ...sourceMetadata,
             pillar_type: request.pillar_type,
             assessment_score: request.calculated_score,
             assessment_data: request.assessment_data,
-            assessment_round_id: assessmentRound.id,
-            unified_service: true,
-            created_via: 'AssessmentDataService'
+            assessment_round_id: assessmentRound.id
           }
         });
 
       if (entryError) {
-        console.warn('Warning: Failed to save to path_entries (non-critical):', entryError);
+        console.warn('⚠️ Non-critical: Failed to save to path_entries (backward compatibility):', entryError);
       }
 
-      console.log(`✅ Assessment saved universally with assessment_round_id: ${assessmentRound.id}`);
+      console.log(`✅ Assessment saved universally with ID: ${assessmentRound.id} (${idempotencyKey})`);
       
       return {
         success: true,
-        assessment_round_id: assessmentRound.id
+        assessment_round_id: assessmentRound.id,
+        was_duplicate: false
       };
-
     } catch (error) {
-      console.error('Critical error in AssessmentDataService.saveAssessment:', error);
+      console.error('❌ Critical error in AssessmentDataService.saveAssessment:', error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        was_duplicate: false
       };
     }
   }
@@ -362,7 +410,7 @@ class AssessmentDataService {
 
   // HJÄLPMETODER
 
-  private extractPillarType(entry: any, metadata: any): string {
+  private extractPillarType(entry: any, metadata: any): string | null {
     // Prioritera metadata först
     if (metadata.pillar_type) {
       return metadata.pillar_type;

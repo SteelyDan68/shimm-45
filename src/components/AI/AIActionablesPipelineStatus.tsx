@@ -1,21 +1,35 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { AIComponentWrapper } from '@/components/AI/AIComponentWrapper';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { Progress } from '@/components/ui/progress';
 import { Brain, CheckCircle, AlertCircle, Clock, Zap } from 'lucide-react';
-import { toast } from 'sonner';
-import { logger } from '@/utils/productionLogger';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PipelineStatusProps {
   userId: string;
 }
 
 export function AIActionablesPipelineStatus({ userId }: PipelineStatusProps) {
+  return (
+    <AIComponentWrapper
+      componentName="AI Actionables Pipeline"
+      loadingMessage="Laddar pipeline status..."
+      enableAutoRetry={true}
+    >
+      <AIActionablesPipelineStatusContent userId={userId} />
+    </AIComponentWrapper>
+  );
+}
+
+function AIActionablesPipelineStatusContent({ userId }: PipelineStatusProps) {
   const [assessments, setAssessments] = useState<any[]>([]);
   const [actionables, setActionables] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [testingPipeline, setTestingPipeline] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadData();
@@ -49,8 +63,12 @@ export function AIActionablesPipelineStatus({ userId }: PipelineStatusProps) {
       setAssessments(assessmentData || []);
       setActionables(actionableData || []);
     } catch (error) {
-      logger.error('Error loading pipeline data', error as Error, { userId });
-      toast.error('Kunde inte ladda pipeline-data');
+      console.error('Error loading pipeline data:', error);
+      toast({
+        title: 'Fel',
+        description: 'Kunde inte ladda pipeline-data',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
@@ -58,7 +76,11 @@ export function AIActionablesPipelineStatus({ userId }: PipelineStatusProps) {
 
   const testPipeline = async () => {
     if (assessments.length === 0) {
-      toast.error('Inga assessments att testa med');
+      toast({
+        title: 'Ingen data',
+        description: 'Inga assessments att testa med',
+        variant: 'destructive'
+      });
       return;
     }
 
@@ -80,11 +102,18 @@ export function AIActionablesPipelineStatus({ userId }: PipelineStatusProps) {
         throw error;
       }
 
-      toast.success('Pipeline-test genomfört! Kontrollera nya actionables');
+      toast({
+        title: 'Success',
+        description: 'Pipeline-test genomfört! Kontrollera nya actionables'
+      });
       setTimeout(loadData, 2000); // Reload data after 2 seconds
     } catch (error) {
-      logger.error('Error testing pipeline', error as Error, { userId, assessmentId: assessments[0]?.id });
-      toast.error('Pipeline-test misslyckades: ' + (error as Error).message);
+      console.error('Error testing pipeline:', error);
+      toast({
+        title: 'Fel',
+        description: 'Pipeline-test misslyckades: ' + (error as Error).message,
+        variant: 'destructive'
+      });
     } finally {
       setTestingPipeline(false);
     }
