@@ -70,11 +70,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract client IP and User-Agent
+    // CRITICAL FIX: Clean IP address to prevent database errors
     const clientIP = req.headers.get('x-forwarded-for') || 
                      req.headers.get('x-real-ip') || 
-                     'unknown';
-    const userAgent = req.headers.get('user-agent') || '';
+                     req.headers.get('cf-connecting-ip') || 
+                     '127.0.0.1';
+    
+    // Extract only the first valid IP address from comma-separated list
+    const cleanIP = clientIP.split(',')[0].trim();
+    
+    // Validate IP format before using
+    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+    const validIP = ipRegex.test(cleanIP) ? cleanIP : '127.0.0.1';
 
     // Normalize to batch format
     let logs: LogEntry[];
@@ -105,8 +112,8 @@ Deno.serve(async (req) => {
         user_id: log.userId || null,
         session_id: log.sessionId || null,
         url: log.url || null,
-        user_agent: log.userAgent || userAgent,
-        ip_address: clientIP !== 'unknown' ? clientIP : null
+        user_agent: log.userAgent || req.headers.get('user-agent') || '',
+        ip_address: validIP !== '127.0.0.1' ? validIP : null
       };
     });
 

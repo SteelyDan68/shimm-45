@@ -192,7 +192,7 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  // FIXED: Fetch user roles from user_roles table (not user_attributes)
+  // FIXED: Fetch user roles from user_roles table (STABLE VERSION)
   const fetchUserRoles = useCallback(async (userId: string) => {
     try {
       console.log('🔥 UnifiedAuth: Fetching roles for user:', userId);
@@ -211,20 +211,15 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
       }
 
       const userRoles = data?.map(item => item.role) as AppRole[] || [];
-      console.log('🔥 UnifiedAuth: Found roles:', userRoles, 'Setting roles state...');
+      console.log('🔥 UnifiedAuth: Found roles:', userRoles);
       
-      // Force update roles state
-      setRoles([]);
-      setTimeout(() => {
-        setRoles(userRoles);
-        console.log('🔥 UnifiedAuth: Roles state forcefully updated:', userRoles);
-      }, 50);
+      // CRITICAL FIX: Remove setTimeout and force updates that cause race conditions
+      setRoles(userRoles);
       
     } catch (error) {
       console.error('🔥 UnifiedAuth: Error in fetchUserRoles:', error);
-      // Fallback: assign client role if none found
-      setRoles(['client'] as AppRole[]);
-      console.log('🔥 UnifiedAuth: Fallback - assigned client role');
+      setRoles([]); // Set empty on error, don't fallback to client
+      console.log('🔥 UnifiedAuth: Set empty roles due to error');
     }
   }, []);
 
@@ -239,11 +234,9 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
         
         if (session?.user) {
           console.log('🔥 UnifiedAuth: Valid session found, fetching profile and roles for:', session.user.id);
-          // CRITICAL: Use setTimeout to prevent deadlock
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
-            fetchUserRoles(session.user.id);
-          }, 0);
+          // CRITICAL FIX: Remove setTimeout that causes race conditions
+          fetchUserProfile(session.user.id);
+          fetchUserRoles(session.user.id);
         } else {
           console.log('🔥 UnifiedAuth: No session/user, clearing profile and roles');
           setProfile(null);
@@ -259,10 +252,8 @@ export const UnifiedAuthProvider = ({ children }: { children: React.ReactNode })
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        setTimeout(() => {
-          fetchUserProfile(session.user.id);
-          fetchUserRoles(session.user.id);
-        }, 0);
+        fetchUserProfile(session.user.id);
+        fetchUserRoles(session.user.id);
       }
       setIsLoading(false);
     });

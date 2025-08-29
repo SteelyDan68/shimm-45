@@ -7,12 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface PasswordResetRequest {
-  targetUserId: string;
-  newPassword?: string;
-  sendResetEmail?: boolean;
-}
-
 const handler = async (req: Request): Promise<Response> => {
   console.log('🔐 Admin password reset request received');
 
@@ -28,7 +22,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Supabase configuration missing');
     }
 
-    // Create admin client
+    // Create service role client for all operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
@@ -36,20 +30,18 @@ const handler = async (req: Request): Promise<Response> => {
       }
     });
 
-    // Create client for user validation
-    const supabaseClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') || '');
-
     // Get admin user from JWT
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
     }
 
-    const { data: { user: adminUser }, error: authError } = await supabaseClient.auth.getUser(
+    const { data: { user: adminUser }, error: authError } = await supabaseAdmin.auth.getUser(
       authHeader.replace('Bearer ', '')
     );
 
     if (authError || !adminUser) {
+      console.error('❌ Auth error:', authError);
       throw new Error('Invalid authentication');
     }
 
@@ -69,39 +61,57 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Either newPassword or sendResetEmail must be provided');
     }
 
-    // Validate permissions: superadmin/admin OR self OR coach-of-client
     console.log('🔍 Checking permissions for user:', adminUser.id);
 
-    // 1) Self check
-    const isSelf = adminUser.id === targetUserId;
-    console.log('🔐 Self check:', isSelf);
-
-    // 2) Role checks via service client (avoid RPC overloading issues)
+    // CRITICAL FIX: Use service role client for all permission checks
     const { data: rolesRows, error: rolesErr } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', adminUser.id);
-    if (rolesErr) console.error('❌ roles query error:', rolesErr);
+    
+    console.log('🔐 Roles query result:', { rolesRows, rolesErr });
+
+    if (rolesErr) {
+      console.error('❌ Failed to fetch user roles:', rolesErr);
+      throw new Error('Permission check failed');
+    }
 
     const roles = (rolesRows || []).map((r: any) => r.role);
     const isSuper = roles.includes('superadmin');
     const isAdminRole = roles.includes('admin');
-    console.log('🔐 Roles:', roles);
+    const isCoach = roles.includes('coach');
+    const isSelf = adminUser.id === targetUserId;
+    
+    console.log('🔐 Permission analysis:', {
+      userId: adminUser.id,
+      targetUserId,
+      roles,
+      isSuper,
+      isAdminRole,
+      isCoach,
+      isSelf
+    });
 
-    // 3) Coach relationship check
-    const { data: coachRelRows, error: coachRelErr } = await supabaseAdmin
-      .from('coach_client_assignments')
-      .select('id')
-      .eq('coach_id', adminUser.id)
-      .eq('client_id', targetUserId)
-      .eq('is_active', true)
-      .limit(1);
-    if (coachRelErr) console.error('❌ coach relation query error:', coachRelErr);
+    // Coach relationship check (only if needed)
+    let isCoachRel = false;
+    if (isCoach && !isSuper && !isAdminRole && !isSelf) {
+      const { data: coachRelRows, error: coachRelErr } = await supabaseAdmin
+        .from('coach_client_assignments')
+        .select('id')
+        .eq('coach_id', adminUser.id)
+        .eq('client_id', targetUserId)
+        .eq('is_active', true)
+        .limit(1);
+      
+      if (coachRelErr) console.error('❌ coach relation query error:', coachRelErr);
+      isCoachRel = Array.isArray(coachRelRows) && coachRelRows.length > 0;
+      console.log('🔐 Coach relationship:', isCoachRel);
+    }
 
-    const isCoachRel = Array.isArray(coachRelRows) && coachRelRows.length > 0;
-    console.log('🔐 Coach relationship:', isCoachRel);
-
-    if (!isSuper && !isAdminRole && !isSelf && !isCoachRel) {
+    // Permission validation
+    const hasPermission = isSuper || isAdminRole || isSelf || isCoachRel;
+    
+    if (!hasPermission) {
       const details = {
         userId: adminUser.id,
         targetUserId,
@@ -109,10 +119,17 @@ const handler = async (req: Request): Promise<Response> => {
         isSuper,
         isAdminRole,
         isSelf,
-        isCoachRel
+        isCoachRel,
+        message: 'Access denied - insufficient permissions'
       };
       console.error('❌ Permission denied. Details:', details);
-      return new Response(JSON.stringify({ success: false, error: 'Unauthorized: insufficient permissions', details }), {
+      
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Unauthorized: insufficient permissions', 
+        details,
+        debug: 'User does not have required permissions for this action'
+      }), {
         status: 403,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
@@ -173,13 +190,18 @@ const handler = async (req: Request): Promise<Response> => {
       };
     } else {
       // Direct password reset
+      console.log('🔑 Attempting direct password update for user:', targetUserId);
+      
       const { data, error } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
         password: newPassword
       });
 
       if (error) {
+        console.error('❌ Password update failed:', error);
         throw new Error(`Failed to update password: ${error.message}`);
       }
+
+      console.log('✅ Password updated successfully for user:', data.user?.id);
 
       result = {
         success: true,
@@ -204,7 +226,9 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         error: error.message || "Ett fel uppstod vid lösenordsåterställning",
-        success: false
+        success: false,
+        debug: error.stack,
+        timestamp: new Date().toISOString()
       }),
       {
         status: 500,
