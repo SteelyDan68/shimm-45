@@ -70,23 +70,45 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Validate permissions: superadmin/admin OR self OR coach-of-client
-    const { data: isSuper } = await supabaseClient.rpc('has_role', {
+    console.log('🔍 Checking permissions for user:', adminUser.id);
+    
+    const { data: isSuper, error: superError } = await supabaseAdmin.rpc('has_role', {
       _user_id: adminUser.id,
       _role: 'superadmin'
     });
-    const { data: isAdminRole } = await supabaseClient.rpc('has_role', {
+    console.log('🔐 Superadmin check:', { isSuper, error: superError });
+    
+    const { data: isAdminRole, error: adminError } = await supabaseAdmin.rpc('has_role', {
       _user_id: adminUser.id,
       _role: 'admin'
     });
+    console.log('🔐 Admin check:', { isAdminRole, error: adminError });
+    
     const isSelf = adminUser.id === targetUserId;
-    const { data: isCoachRel } = await supabaseClient.rpc('is_coach_of_client', {
+    console.log('🔐 Self check:', isSelf);
+    
+    const { data: isCoachRel, error: coachError } = await supabaseAdmin.rpc('is_coach_of_client', {
       _coach_id: adminUser.id,
       _client_id: targetUserId
     });
+    console.log('🔐 Coach relationship check:', { isCoachRel, error: coachError });
 
     if (!isSuper && !isAdminRole && !isSelf && !isCoachRel) {
+      console.error('❌ Permission denied. User permissions:', {
+        userId: adminUser.id,
+        targetUserId,
+        isSuper,
+        isAdminRole,
+        isSelf,
+        isCoachRel,
+        superError,
+        adminError,
+        coachError
+      });
       throw new Error('Unauthorized: insufficient permissions');
     }
+    
+    console.log('✅ Permission check passed');
 
     let result;
 
