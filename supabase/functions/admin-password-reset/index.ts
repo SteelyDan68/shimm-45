@@ -71,43 +71,53 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate permissions: superadmin/admin OR self OR coach-of-client
     console.log('🔍 Checking permissions for user:', adminUser.id);
-    
-    const { data: isSuper, error: superError } = await supabaseAdmin.rpc('has_role', {
-      _user_id: adminUser.id,
-      _role: 'superadmin'
-    });
-    console.log('🔐 Superadmin check:', { isSuper, error: superError });
-    
-    const { data: isAdminRole, error: adminError } = await supabaseAdmin.rpc('has_role', {
-      _user_id: adminUser.id,
-      _role: 'admin'
-    });
-    console.log('🔐 Admin check:', { isAdminRole, error: adminError });
-    
+
+    // 1) Self check
     const isSelf = adminUser.id === targetUserId;
     console.log('🔐 Self check:', isSelf);
-    
-    const { data: isCoachRel, error: coachError } = await supabaseAdmin.rpc('is_coach_of_client', {
-      _coach_id: adminUser.id,
-      _client_id: targetUserId
-    });
-    console.log('🔐 Coach relationship check:', { isCoachRel, error: coachError });
+
+    // 2) Role checks via service client (avoid RPC overloading issues)
+    const { data: rolesRows, error: rolesErr } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', adminUser.id);
+    if (rolesErr) console.error('❌ roles query error:', rolesErr);
+
+    const roles = (rolesRows || []).map((r: any) => r.role);
+    const isSuper = roles.includes('superadmin');
+    const isAdminRole = roles.includes('admin');
+    console.log('🔐 Roles:', roles);
+
+    // 3) Coach relationship check
+    const { data: coachRelRows, error: coachRelErr } = await supabaseAdmin
+      .from('coach_client_assignments')
+      .select('id')
+      .eq('coach_id', adminUser.id)
+      .eq('client_id', targetUserId)
+      .eq('is_active', true)
+      .limit(1);
+    if (coachRelErr) console.error('❌ coach relation query error:', coachRelErr);
+
+    const isCoachRel = Array.isArray(coachRelRows) && coachRelRows.length > 0;
+    console.log('🔐 Coach relationship:', isCoachRel);
 
     if (!isSuper && !isAdminRole && !isSelf && !isCoachRel) {
-      console.error('❌ Permission denied. User permissions:', {
+      const details = {
         userId: adminUser.id,
         targetUserId,
+        roles,
         isSuper,
         isAdminRole,
         isSelf,
-        isCoachRel,
-        superError,
-        adminError,
-        coachError
+        isCoachRel
+      };
+      console.error('❌ Permission denied. Details:', details);
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized: insufficient permissions', details }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
-      throw new Error('Unauthorized: insufficient permissions');
     }
-    
+
     console.log('✅ Permission check passed');
 
     let result;
