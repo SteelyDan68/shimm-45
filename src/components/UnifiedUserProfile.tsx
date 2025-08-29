@@ -39,57 +39,32 @@ export const UnifiedUserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isSuperAdmin, isAdmin, canManageUsers } = useAuth();
   const { toast } = useToast();
   
   // SINGLE SOURCE OF TRUTH: All data fetched via user_id
-  const { profile, loading: profileLoading, hasRole, roles } = useUserData(userId);
-  const { isSuperAdmin, isAdmin, canManageUsers } = useAuth();
-  
+  const { profile, loading, hasRole, roles } = useUserData(userId);
   
   // Context determines UI behavior
-  const context = searchParams.get('context') || 'profile'; // client, assessment, profile
+  const context = searchParams.get('context') || 'profile';
   const tab = searchParams.get('tab');
   const pillar = searchParams.get('pillar');
   
-  // 🚨 SUPERADMIN GOD MODE: ABSOLUTE ACCESS TO EVERYTHING
-  // CRITICAL FIX: Wait for user data to load before checking permissions
+  // SIMPLIFIED ACCESS CONTROL: Only check once when user/userId changes
   const canViewProfile = useMemo(() => {
-    // Wait for user data to load
-    if (!user || !user.id) {
-      return false;
-    }
+    if (!user?.id || !userId) return false;
+    
+    return (
+      isSuperAdmin() ||
+      isAdmin() ||
+      userId === user.id ||
+      canManageUsers
+    );
+  }, [user?.id, userId, isSuperAdmin, isAdmin, canManageUsers]);
 
-    // Superadmin access
-    if (isSuperAdmin()) {
-      return true;
-    }
-    
-    // Admin access
-    if (isAdmin()) {
-      return true;
-    }
-    
-    // Self-access
-    if (userId === user?.id) {
-      return true;
-    }
-    
-    // User management permissions
-    if (canManageUsers) {
-      return true;
-    }
-    
-    return false;
-  }, [user?.id, user?.email, userId, isSuperAdmin, isAdmin, canManageUsers]);
-  
-  const [extendedProfile, setExtendedProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  
-
+  // SIMPLIFIED ACCESS CHECK: Only redirect once on access denial
   useEffect(() => {
-    if (!canViewProfile) {
+    if (user?.id && userId && !canViewProfile) {
       console.error('❌ Access denied for unified user profile');
       toast({
         title: "Åtkomst nekad",
@@ -97,33 +72,8 @@ export const UnifiedUserProfile = () => {
         variant: "destructive"
       });
       navigate('/');
-      return;
     }
-
-    if (userId) {
-      loadUserData();
-    }
-  }, [userId, canViewProfile]);
-
-  const loadUserData = async () => {
-    try {
-      setLoading(true);
-      
-      // Extended profile is now handled by useUserData hook
-      // No need for additional API calls
-      setExtendedProfile(profile);
-      
-    } catch (error) {
-      console.error('Error loading user data:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda användardata",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user?.id, userId, canViewProfile]);
 
   const getUserDisplayName = () => {
     if (!profile) return 'Okänd användare';
@@ -153,8 +103,8 @@ export const UnifiedUserProfile = () => {
     }
   };
 
-  // Show loading while user auth data is loading OR profile is loading
-  if (!user || !user.id || profileLoading || loading) {
+  // SIMPLIFIED LOADING STATE: Single source of loading
+  if (!user?.id || loading || !userId) {
     return (
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -164,9 +114,7 @@ export const UnifiedUserProfile = () => {
           </Button>
         </div>
         <div className="text-center py-8">
-          Laddar profil... 
-          {!user && <div className="text-sm text-muted-foreground mt-2">Väntar på användardata...</div>}
-          {profileLoading && <div className="text-sm text-muted-foreground mt-2">Laddar profildata...</div>}
+          <div className="animate-pulse">Laddar profil...</div>
         </div>
       </div>
     );
@@ -199,9 +147,9 @@ export const UnifiedUserProfile = () => {
             Tillbaka
           </Button>
           
-          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={profile.avatar_url || extendedProfile?.avatar_url} />
+              <AvatarImage src={profile.avatar_url} />
               <AvatarFallback>{getUserInitials()}</AvatarFallback>
             </Avatar>
             
@@ -231,7 +179,7 @@ export const UnifiedUserProfile = () => {
         <ClientProfileView 
           userId={userId!}
           profile={profile}
-          extendedProfile={extendedProfile}
+          extendedProfile={profile}
           defaultTab={tab}
           defaultPillar={pillar}
         />
@@ -245,13 +193,13 @@ export const UnifiedUserProfile = () => {
       )}
       
       {/* Default: CRM/Profile view */}
-      {!context || context === 'profile' && (
+      {(!context || context === 'profile') && (
         <UserCrmView 
           userId={userId!}
           profile={profile}
-          extendedProfile={extendedProfile}
+          extendedProfile={profile}
           canEdit={isSuperAdmin() || isAdmin()}
-          onProfileUpdate={loadUserData}
+          onProfileUpdate={() => {}} // No longer needed - useUserData handles updates
         />
       )}
     </div>
