@@ -38,7 +38,8 @@ serve(async (req) => {
       .select(`
         id, 
         email, 
-        full_name,
+        first_name,
+        last_name,
         updated_at,
         user_roles(role)
       `)

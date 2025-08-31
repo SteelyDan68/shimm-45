@@ -65,10 +65,10 @@ serve(async (req) => {
     // If no query provided, return default memories for the user
     if (!query || query.trim().length === 0) {
       const { data: defaultMemories, error: dbError } = await supabase
-        .from('stefan_ai_memories')
+        .from('stefan_memory')
         .select('*')
         .eq('user_id', user.id)
-        .order('last_accessed', { ascending: false })
+        .order('updated_at', { ascending: false })
         .limit(match_count);
 
       if (dbError) throw dbError;
@@ -106,7 +106,7 @@ serve(async (req) => {
       throw new Error('Invalid embedding response');
     }
 
-    const { data, error } = await supabase.rpc('match_ai_memories', {
+    const { data, error } = await supabase.rpc('match_stefan_memories', {
       p_user_id: user.id,
       p_query_embedding: embedding,
       p_match_count: match_count,
