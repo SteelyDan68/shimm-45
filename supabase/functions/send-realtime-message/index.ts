@@ -159,7 +159,7 @@ serve(async (req) => {
       error: error.message,
       details: 'Check edge function logs for more information'
     }), {
-      status: 400,
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }

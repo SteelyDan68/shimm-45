@@ -194,7 +194,7 @@ serve(async (req) => {
         timestamp: new Date().toISOString()
       }),
       {
-        status: 400,
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
