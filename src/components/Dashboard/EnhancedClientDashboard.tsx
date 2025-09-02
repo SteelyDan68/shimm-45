@@ -7,7 +7,7 @@ import { useAuth } from '@/providers/UnifiedAuthProvider';
 import { useRoleCache } from '@/hooks/useRoleCache';
 import { useUserPillars } from '@/hooks/useUserPillars'; // FIXED to use path_entries
 import { useTasks } from '@/hooks/useTasks';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '@/hooks/useNavigation';
 import UnifiedPillarOrchestrator from '@/components/PillarJourney/UnifiedPillarOrchestrator';
 import { Sparkles, Target, Clock, Trophy, ArrowRight, Calendar, CheckSquare, Users, FileText } from 'lucide-react';
 import { PILLAR_MODULES } from '@/config/pillarModules';
@@ -25,7 +25,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
 }) => {
   const { user, profile } = useAuth();
   const { isClient } = useRoleCache(); // Use cached role check
-  const navigate = useNavigate();
+  const { goTo } = useNavigation();
   const [showPillarJourney, setShowPillarJourney] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
@@ -220,7 +220,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                   <Button 
                     variant="outline" 
                     className="flex-1"
-                    onClick={() => navigate('/calendar')}
+                    onClick={() => goTo.calendar()}
                   >
                     <Calendar className="w-4 h-4 mr-2" />
                     Se Kalender
@@ -228,7 +228,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                   <Button 
                     variant="outline" 
                     className="flex-1"
-                    onClick={() => navigate('/tasks')}
+                    onClick={() => goTo.tasks()}
                   >
                     <CheckSquare className="w-4 h-4 mr-2" />
                     Se Uppgifter
@@ -298,7 +298,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                     variant="outline" 
                     size="sm" 
                     className="flex-1"
-                    onClick={() => navigate('/calendar')}
+                    onClick={() => goTo.calendar()}
                   >
                     <Calendar className="w-3 h-3 mr-1" />
                     Kalender
@@ -307,7 +307,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
                     variant="outline" 
                     size="sm" 
                     className="flex-1"
-                    onClick={() => navigate('/tasks')}
+                    onClick={() => goTo.tasks()}
                   >
                     <CheckSquare className="w-3 h-3 mr-1" />
                     Uppgifter
@@ -381,7 +381,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
       {/* Action Cards for Live Functionality */}
       {allPillarsCompleted && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/calendar')}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => goTo.calendar()}>
             <CardContent className="p-6 text-center">
               <Calendar className="w-8 h-8 text-blue-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-blue-600">{calendarEvents.length}</div>
@@ -390,7 +390,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
             </CardContent>
           </Card>
           
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/tasks')}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => goTo.tasks()}>
             <CardContent className="p-6 text-center">
               <CheckSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-green-600">{tasks?.length || 0}</div>
@@ -399,7 +399,7 @@ const EnhancedClientDashboard: React.FC<EnhancedClientDashboardProps> = ({
             </CardContent>
           </Card>
           
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/messages')}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => goTo.messages()}>
             <CardContent className="p-6 text-center">
               <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-purple-600">Coach</div>

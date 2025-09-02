@@ -9,13 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, ArrowRight, Trophy, Target } from 'lucide-react';
 import { WidgetProps } from '../types/dashboard-types';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '@/hooks/useNavigation';
 import { DevelopmentOverviewContent } from './DevelopmentOverviewContent';
 import StefanGuidanceWidget from '@/components/Stefan/StefanGuidanceWidget';
 
 const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
   const { user, profile } = useAuth();
-  const navigate = useNavigate();
+  const { goTo } = useNavigation();
   
   const displayName = profile?.first_name 
     ? `${profile.first_name} ${profile.last_name || ''}`.trim()
@@ -93,7 +93,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
           <>
             <Button 
               size="sm"
-              onClick={() => navigate('/my-assessments')}
+              onClick={() => goTo.myAssessments()}
               className="flex items-center gap-1"
             >
               <Target className="w-4 h-4" />
@@ -103,7 +103,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => navigate('/my-analyses')}
+              onClick={() => goTo.myAnalyses()}
               className="flex items-center gap-1"
             >
               Mina analyser
@@ -111,7 +111,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => navigate('/my-program')}
+              onClick={() => goTo.myProgram()}
               className="flex items-center gap-1"
             >
               Mitt program
@@ -120,7 +120,7 @@ const WelcomeWidget: React.FC<WidgetProps> = ({ widget, stats, onAction }) => {
         ) : (
           <Button 
             size="sm"
-            onClick={() => navigate('/guided-assessment')}
+            onClick={() => goTo.guidedAssessment()}
             className="flex items-center gap-1"
           >
             <Target className="w-4 h-4" />

@@ -8,6 +8,7 @@ import {
   NavigationItem,
   NavigationGroup
 } from '@/config/navigation';
+import { NAVIGATION_PATTERNS } from '@/utils/navigationHelpers';
 import { shouldShowBetaFeatures } from '@/utils/userHelpers';
 
 export const useNavigation = () => {
@@ -55,6 +56,29 @@ export const useNavigation = () => {
 
   const navigateToAssessment = (userId: string) => {
     navigate(NAVIGATION_ROUTES.USER_ASSESSMENT(userId));
+  };
+
+  // Standardized navigation methods using patterns
+  const goTo = {
+    home: () => navigate(NAVIGATION_PATTERNS.HOME()),
+    dashboard: () => navigate(NAVIGATION_PATTERNS.DASHBOARD()),
+    clientDashboard: () => navigate(NAVIGATION_PATTERNS.CLIENT_DASHBOARD()),
+    coachDashboard: () => navigate(NAVIGATION_PATTERNS.COACH_DASHBOARD()),
+    sixPillars: () => navigate(NAVIGATION_PATTERNS.SIX_PILLARS()),
+    tasks: () => navigate(NAVIGATION_PATTERNS.TASKS()),
+    calendar: () => navigate(NAVIGATION_PATTERNS.CALENDAR()),
+    messages: () => navigate(NAVIGATION_PATTERNS.MESSAGES()),
+    onboarding: () => navigate(NAVIGATION_PATTERNS.ONBOARDING()),
+    myAssessments: () => navigate(NAVIGATION_PATTERNS.MY_ASSESSMENTS()),
+    myAnalyses: () => navigate(NAVIGATION_PATTERNS.MY_ANALYSES()),
+    myProgram: () => navigate(NAVIGATION_PATTERNS.MY_PROGRAM()),
+    guidedAssessment: () => navigate(NAVIGATION_PATTERNS.GUIDED_ASSESSMENT()),
+    userAnalytics: (tab?: string) => navigate(NAVIGATION_PATTERNS.USER_ANALYTICS(tab)),
+    intelligenceHub: () => navigate(NAVIGATION_PATTERNS.INTELLIGENCE_HUB()),
+    administration: () => navigate(NAVIGATION_PATTERNS.ADMINISTRATION()),
+    stefanChat: () => navigate(NAVIGATION_PATTERNS.STEFAN_CHAT()),
+    editProfile: () => navigate(NAVIGATION_PATTERNS.EDIT_PROFILE()),
+    mobile: () => navigate(NAVIGATION_PATTERNS.MOBILE()),
   };
 
   const canAccess = (item: NavigationItem): boolean => {
@@ -131,6 +155,9 @@ export const useNavigation = () => {
     navigateToIntelligence,
     navigateToAssessment,
     
+    // Standardized navigation patterns
+    goTo,
+    
     // Utility methods
     isActive,
     canAccess,
@@ -143,6 +170,7 @@ export const useNavigation = () => {
     currentState: location.state,
     
     // Route constants
-    routes: NAVIGATION_ROUTES
+    routes: NAVIGATION_ROUTES,
+    patterns: NAVIGATION_PATTERNS
   };
 };

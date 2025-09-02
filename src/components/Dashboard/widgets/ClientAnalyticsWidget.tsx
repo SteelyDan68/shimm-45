@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/providers/UnifiedAuthProvider';
+import { useNavigation } from '@/hooks/useNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -46,7 +46,7 @@ export const ClientAnalyticsWidget = ({
 }: ClientAnalyticsWidgetProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const { goTo } = useNavigation();
   
   const [quickStats, setQuickStats] = useState<QuickStats>({
     totalAnalyses: 0,
@@ -194,7 +194,7 @@ export const ClientAnalyticsWidget = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/user-analytics')}
+              onClick={() => goTo.userAnalytics()}
               className="flex items-center gap-1 text-xs"
             >
               <ExternalLink className="h-3 w-3" />
@@ -281,7 +281,7 @@ export const ClientAnalyticsWidget = ({
             variant="outline" 
             size="sm" 
             className="w-full justify-between"
-            onClick={() => navigate('/user-analytics?tab=analyses')}
+            onClick={() => goTo.userAnalytics('analyses')}
           >
             <div className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
@@ -294,7 +294,7 @@ export const ClientAnalyticsWidget = ({
             variant="outline" 
             size="sm" 
             className="w-full justify-between"
-            onClick={() => navigate('/user-analytics?tab=timeline')}
+            onClick={() => goTo.userAnalytics('timeline')}
           >
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -307,7 +307,7 @@ export const ClientAnalyticsWidget = ({
             variant="outline" 
             size="sm" 
             className="w-full justify-between"
-            onClick={() => navigate('/user-analytics?tab=actionables')}
+            onClick={() => goTo.userAnalytics('actionables')}
           >
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -326,7 +326,7 @@ export const ClientAnalyticsWidget = ({
             <div className="inline-flex items-center gap-2 w-full">
               <Button 
                 size="sm" 
-                onClick={() => navigate('/six-pillars')}
+                onClick={() => goTo.sixPillars()}
                 className="w-full"
               >
                 Genomför första bedömning

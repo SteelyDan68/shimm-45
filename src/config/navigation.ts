@@ -27,14 +27,21 @@ export interface NavigationItem {
   roles: string[];
   exact?: boolean;
   children?: NavigationItem[];
-  betaOnly?: boolean; // Add beta flag
+  betaOnly?: boolean;
+  featureFlag?: string;
+  requiredTables?: string[];
+  requiredFunctions?: string[];
+  description?: string;
 }
 
 export interface NavigationGroup {
   title: string;
   items: NavigationItem[];
   roles: string[];
-  betaOnly?: boolean; // Add beta flag for groups
+  betaOnly?: boolean;
+  featureFlag?: string;
+  requiredTables?: string[];
+  requiredFunctions?: string[];
 }
 
 export const NAVIGATION_ROUTES = {
@@ -90,21 +97,27 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         url: NAVIGATION_ROUTES.DASHBOARD,
         icon: Home,
         roles: ["superadmin", "admin"],
-        exact: true
+        exact: true,
+        description: "Administrativ översikt och statistik",
+        requiredTables: ["profiles", "path_entries"]
       },
       {
         title: "Coach Dashboard", 
         url: NAVIGATION_ROUTES.COACH_DASHBOARD,
         icon: TrendingUp,
         roles: ["coach", "admin"],
-        exact: true
+        exact: true,
+        description: "Coaching översikt och klienthantering",
+        requiredTables: ["profiles", "coach_client_assignments"]
       },
       {
         title: "Översikt",
         url: NAVIGATION_ROUTES.CLIENT_DASHBOARD,
         icon: Home, 
         roles: ["client"],
-        exact: true
+        exact: true,
+        description: "Din personliga översikt och utveckling",
+        requiredTables: ["profiles"]
       },
       // CLIENT NAVIGATION
       {
