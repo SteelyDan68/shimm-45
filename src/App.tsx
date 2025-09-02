@@ -186,6 +186,9 @@ const AppRoutes = () => {
                     
                     {/* Feature Flags Admin */}
                     <Route path="/admin/feature-flags" element={<FeatureFlagsPage />} />
+                    <Route path="/admin/view-telemetry" element={
+                      React.lazy(() => import('./pages/admin/ViewTelemetryLogs').then(m => ({ default: m.ViewTelemetryLogs })))
+                    } />
                  <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>

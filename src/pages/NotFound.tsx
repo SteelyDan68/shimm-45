@@ -3,13 +3,13 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, Home } from "lucide-react";
-import { use404Logger } from "@/hooks/use404Logger";
+import { use404Logging } from "@/hooks/useViewLogging";
 
 const NotFound = () => {
   const location = useLocation();
   
-  // Log 404 event to server_log_events table
-  use404Logger();
+  // Auto-log 404 events to server_log_events table
+  use404Logging();
 
   useEffect(() => {
     console.warn(
