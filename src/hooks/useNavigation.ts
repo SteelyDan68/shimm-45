@@ -10,6 +10,7 @@ import {
 } from '@/config/navigation';
 import { NAVIGATION_PATTERNS } from '@/utils/navigationHelpers';
 import { shouldShowBetaFeatures } from '@/utils/userHelpers';
+import { isFeatureEnabled } from '@/config/FEATURE_FLAGS';
 
 export const useNavigation = () => {
   const navigate = useNavigate();
@@ -82,6 +83,11 @@ export const useNavigation = () => {
   };
 
   const canAccess = (item: NavigationItem): boolean => {
+    // Check feature flags first
+    if (item.featureFlag && !isFeatureEnabled(item.featureFlag)) {
+      return false;
+    }
+    
     return item.roles.some(role => userRoles.includes(role as AppRole));
   };
 

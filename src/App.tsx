@@ -66,9 +66,11 @@ import SystemMapPage from "./pages/SystemMap";
 import NotFound from "./pages/NotFound";
 import { Client360Page } from "./pages/Client360";
 import { PillarJourneyPage } from "./pages/PillarJourney";
+import FeatureFlagsPage from "./pages/admin/FeatureFlags";
 
 import { useForcePasswordChange } from '@/hooks/useForcePasswordChange';
 import { ForcePasswordChangeDialog } from '@/components/Auth/ForcePasswordChangeDialog';
+import { isFeatureEnabled } from '@/config/FEATURE_FLAGS';
 
 const queryClient = new QueryClient();
 
@@ -155,26 +157,35 @@ const AppRoutes = () => {
                  <Route path={NAVIGATION_ROUTES.INTELLIGENCE} element={<IntelligenceOverview />} />
                  <Route path={NAVIGATION_ROUTES.INTELLIGENCE_HUB} element={<IntelligenceHubPage />} />
                  <Route path="/intelligence/:userId" element={<Intelligence />} />
-                 <Route path="/development-overview" element={<DevelopmentOverview />} />
-               <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
-               
-               <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
-               <Route path="/gdpr-management" element={<GDPRManagement />} />
-               <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
-               <Route path={NAVIGATION_ROUTES.CLIENT_360} element={<Client360Page />} />
-               <Route path={NAVIGATION_ROUTES.CLIENT_360_USER(":userId")} element={<Client360Page />} />
-               <Route path="/pillar-journey" element={<PillarJourneyPage />} />
-               <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
-               <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
-               <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
-                 <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
-                 <Route path="/ai-insights" element={<AIInsights />} />
-                 <Route path="/user-analytics" element={<UserAnalytics />} />
-                 <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
-                   <Route path={NAVIGATION_ROUTES.STEFAN_ADMIN} element={<StefanAdministrationPage />} />
-                   <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
-                   <Route path="/stefan/*" element={<StefanAICentralHub />} />
-                   <Route path="/system-map" element={<SystemMapPage />} />
+                  <Route path="/development-overview" element={
+                    isFeatureEnabled('DEVELOPMENT_OVERVIEW') ? <DevelopmentOverview /> : <NotFound />
+                  } />
+                <Route path={NAVIGATION_ROUTES.MESSAGES} element={<Messages />} />
+                
+                <Route path="/unified-users" element={<UnifiedUserManagementPage />} />
+                <Route path="/gdpr-management" element={<GDPRManagement />} />
+                <Route path="/intelligence-hub" element={<IntelligenceHubPage />} />
+                <Route path={NAVIGATION_ROUTES.CLIENT_360} element={<Client360Page />} />
+                <Route path={NAVIGATION_ROUTES.CLIENT_360_USER(":userId")} element={<Client360Page />} />
+                <Route path="/pillar-journey" element={<PillarJourneyPage />} />
+                <Route path={NAVIGATION_ROUTES.ADMINISTRATION} element={<Administration />} />
+                <Route path={NAVIGATION_ROUTES.AUTH} element={<Auth />} />
+                <Route path={NAVIGATION_ROUTES.TASKS} element={<TasksPage />} />
+                  <Route path={NAVIGATION_ROUTES.CALENDAR} element={<CalendarPage />} />
+                  <Route path="/ai-insights" element={
+                    isFeatureEnabled('AI_INSIGHTS') ? <AIInsights /> : <NotFound />
+                  } />
+                  <Route path="/user-analytics" element={<UserAnalytics />} />
+                  <Route path="/user-analytics/:userId" element={<UserAnalytics />} />
+                    <Route path={NAVIGATION_ROUTES.STEFAN_ADMIN} element={<StefanAdministrationPage />} />
+                    <Route path={NAVIGATION_ROUTES.STEFAN_CHAT} element={<StefanChatPage />} />
+                    <Route path="/stefan/*" element={<StefanAICentralHub />} />
+                    <Route path="/system-map" element={
+                      isFeatureEnabled('SYSTEM_MAP') ? <SystemMapPage /> : <NotFound />
+                    } />
+                    
+                    {/* Feature Flags Admin */}
+                    <Route path="/admin/feature-flags" element={<FeatureFlagsPage />} />
                  <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>

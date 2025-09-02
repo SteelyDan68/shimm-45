@@ -28,7 +28,7 @@ export interface NavigationItem {
   exact?: boolean;
   children?: NavigationItem[];
   betaOnly?: boolean;
-  featureFlag?: string;
+  featureFlag?: 'DEBUG_TOOLS' | 'DEVELOPMENT_OVERVIEW' | 'AI_INSIGHTS' | 'SYSTEM_MAP' | 'BETA_FEATURES' | 'COLLABORATION_FEATURES' | 'TESTING_ROUTES';
   requiredTables?: string[];
   requiredFunctions?: string[];
   description?: string;
@@ -39,7 +39,7 @@ export interface NavigationGroup {
   items: NavigationItem[];
   roles: string[];
   betaOnly?: boolean;
-  featureFlag?: string;
+  featureFlag?: 'DEBUG_TOOLS' | 'DEVELOPMENT_OVERVIEW' | 'AI_INSIGHTS' | 'SYSTEM_MAP' | 'BETA_FEATURES' | 'COLLABORATION_FEATURES' | 'TESTING_ROUTES';
   requiredTables?: string[];
   requiredFunctions?: string[];
 }
@@ -191,7 +191,17 @@ export const MAIN_NAVIGATION: NavigationGroup[] = [
         title: "Teknisk administration",
         url: NAVIGATION_ROUTES.ADMINISTRATION,
         icon: Settings,
-        roles: ["superadmin", "admin"]
+        roles: ["superadmin", "admin"],
+        description: "Systemkonfiguration och användarhantering",
+        requiredTables: ["profiles", "stefan_config"]
+      },
+      {
+        title: "Feature Flags",
+        url: "/admin/feature-flags",
+        icon: RefreshCw,
+        roles: ["superadmin"],
+        description: "Hantera experimentella funktioner och routes",
+        featureFlag: "DEBUG_TOOLS"
       },
       {
         title: "Mobil",
@@ -346,6 +356,17 @@ export const getNavigationForRole = (roles: string[], isAnnaAndersson = false): 
     items: group.items.filter(item => {
       // Filter out beta items if not Anna Andersson
       if (item.betaOnly && !isAnnaAndersson) return false;
+      
+      // Filter out items with disabled feature flags
+      if (item.featureFlag) {
+        try {
+          const { isFeatureEnabled } = require('@/config/FEATURE_FLAGS');
+          if (!isFeatureEnabled(item.featureFlag)) return false;
+        } catch (e) {
+          // If feature flags not available, show item
+          console.warn('Feature flags not available:', e);
+        }
+      }
       
       return item.roles.some(role => roles.includes(role));
     })
