@@ -1,0 +1,177 @@
+{
+  "analysis_metadata": {
+    "generated_at": "2025-01-27",
+    "version": "1.0",
+    "methodology": "Import analysis + navigation audit + route accessibility check",
+    "total_files_analyzed": 410
+  },
+  "dead_code_analysis": [
+    {
+      "file": "src/pages/ClientProfile.tsx",
+      "reason": "Legacy component only used by deprecated /client/:clientId route",
+      "referencedBy": [
+        "src/App.tsx (import + route definition)"
+      ],
+      "suggestedAction": "remove",
+      "confidence": "high",
+      "impact": "low",
+      "notes": "Already identified as stale in UI audit. Unified routing makes this obsolete."
+    },
+    {
+      "file": "src/pages/UserProfile.tsx", 
+      "reason": "Imported in App.tsx but no route definition found. Component exists but unreachable.",
+      "referencedBy": [
+        "src/App.tsx (import only, no route)"
+      ],
+      "suggestedAction": "remove",
+      "confidence": "high", 
+      "impact": "none",
+      "notes": "43-line component that's imported but never used. No route exists."
+    },
+    {
+      "file": "src/pages/Collaboration.tsx",
+      "reason": "Has route /collaboration but no navigation links or direct usage found",
+      "referencedBy": [
+        "src/App.tsx (import + route definition)"
+      ],
+      "suggestedAction": "remove",
+      "confidence": "medium",
+      "impact": "low",
+      "notes": "Simple wrapper around CollaborationDashboard. No way to reach this page."
+    },
+    {
+      "file": "src/components/Collaboration/CollaborationDashboard.tsx",
+      "reason": "Only used by unreachable Collaboration page",
+      "referencedBy": [
+        "src/pages/Collaboration.tsx"
+      ],
+      "suggestedAction": "remove",
+      "confidence": "medium",
+      "impact": "low", 
+      "notes": "Check if component has any shared utility before removal."
+    },
+    {
+      "file": "src/pages/DevelopmentOverview.tsx",
+      "reason": "Has route /development-overview but only one hardcoded link found",
+      "referencedBy": [
+        "src/App.tsx (import + route definition)",
+        "src/components/Dashboard/widgets/PillarProgressWidget.tsx (hardcoded window.location.href)"
+      ],
+      "suggestedAction": "keep-shared",
+      "confidence": "low",
+      "impact": "medium",
+      "notes": "Used by pillar progress widget. Consider adding to navigation or refactoring."
+    },
+    {
+      "file": "src/pages/TestingPage.tsx",
+      "reason": "Has route /testing but no navigation links. Internal testing only.",
+      "referencedBy": [
+        "src/App.tsx (import + route definition)"
+      ],
+      "suggestedAction": "keep-internal",
+      "confidence": "medium",
+      "impact": "none",
+      "notes": "Wrapper for UnifiedAIIntegrationTest. Keep for internal testing purposes."
+    },
+    {
+      "file": "src/pages/SystemMap.tsx",
+      "reason": "Has route /system-map but no navigation links. Superadmin only access.",
+      "referencedBy": [
+        "src/App.tsx (import + route definition)",
+        "src/providers/UnifiedAuthProvider.tsx (access control definition)"
+      ],
+      "suggestedAction": "keep-internal",
+      "confidence": "medium", 
+      "impact": "none",
+      "notes": "Documentation page for superadmin. Keep for system documentation."
+    },
+    {
+      "file": "src/pages/AIInsights.tsx",
+      "reason": "Has route /ai-insights with some hardcoded navigation but not in navigation config",
+      "referencedBy": [
+        "src/App.tsx (import + route definition)",
+        "src/components/UserJourney/ProgressFeedbackCard.tsx (navigate call)",
+        "src/components/PillarJourney/AllPillarsCompletedCelebration.tsx (window.open)"
+      ],
+      "suggestedAction": "keep-orphaned",
+      "confidence": "low",
+      "impact": "medium",
+      "notes": "Used by components but not in navigation. Consider adding to navigation or removing usage."
+    }
+  ],
+  "route_accessibility_analysis": [
+    {
+      "route": "/client/:clientId",
+      "status": "legacy",
+      "accessible_via": "navigation redirects only",
+      "notes": "Legacy route that redirects to /user/:userId"
+    },
+    {
+      "route": "/collaboration", 
+      "status": "orphaned",
+      "accessible_via": "direct URL only",
+      "notes": "No navigation links or programmatic navigation found"
+    },
+    {
+      "route": "/development-overview",
+      "status": "orphaned",
+      "accessible_via": "hardcoded link in PillarProgressWidget",
+      "notes": "Only accessible via pillar completion widget"
+    },
+    {
+      "route": "/testing",
+      "status": "internal",
+      "accessible_via": "direct URL only", 
+      "notes": "Internal testing page, no navigation needed"
+    },
+    {
+      "route": "/system-map",
+      "status": "internal",
+      "accessible_via": "direct URL only",
+      "notes": "Superadmin documentation page"
+    },
+    {
+      "route": "/ai-insights",
+      "status": "orphaned",
+      "accessible_via": "hardcoded navigation in 2 components",
+      "notes": "Has some usage but not in navigation config"
+    }
+  ],
+  "import_analysis": [
+    {
+      "file": "src/pages/UserProfile.tsx",
+      "imported_by": ["src/App.tsx"],
+      "used_by": [],
+      "status": "unused_import"
+    },
+    {
+      "file": "src/pages/ClientProfile.tsx", 
+      "imported_by": ["src/App.tsx"],
+      "used_by": ["Route definition in App.tsx"],
+      "status": "legacy_usage"
+    }
+  ],
+  "summary": {
+    "total_dead_files": 8,
+    "safe_to_remove": 3,
+    "requires_investigation": 2,
+    "keep_internal": 2,
+    "orphaned_routes": 3,
+    "unused_imports": 1,
+    "estimated_cleanup_impact": "~500 lines of dead code removal possible"
+  },
+  "removal_priority": {
+    "high": [
+      "src/pages/UserProfile.tsx",
+      "src/pages/ClientProfile.tsx"
+    ],
+    "medium": [
+      "src/pages/Collaboration.tsx",
+      "src/components/Collaboration/CollaborationDashboard.tsx"
+    ],
+    "low": [
+      "Route /development-overview (requires navigation decision)",
+      "Route /ai-insights (requires navigation decision)"
+    ]
+  }
+}

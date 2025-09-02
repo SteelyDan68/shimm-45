@@ -1,0 +1,76 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index abc123..def456 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -34,8 +34,6 @@ import GDPRManagement from './pages/GDPRManagement';
+ import UnifiedUserManagement from './pages/UnifiedUserManagement';
+ // UNIFIED USER PROFILE - Single Source of Truth
+ import { UnifiedUserProfile } from "./components/UnifiedUserProfile";
+-import { ClientProfile } from "./pages/ClientProfile";
+-import { UserProfile } from "./pages/UserProfile";
+ 
+ import { ClientList } from "./components/ClientList";
+ import ClientDashboard from "./pages/ClientDashboard";
+@@ -24,7 +22,6 @@ import { AnalyticsPage } from "./pages/AnalyticsPage";
+ import { AdminAnalyticsPage } from "./pages/AdminAnalyticsPage";
+ import { StefanAdministrationPage } from "./pages/StefanAdministrationPage";
+-import { Collaboration } from "@/pages/Collaboration";
+ 
+ import { TestingPage } from "@/pages/TestingPage";
+ import { SixPillars } from "@/pages/SixPillars";
+@@ -144,10 +141,6 @@ const App = () => {
+                 } />
+                 {/* UNIFIED ROUTING - Single Source of Truth: user_id only */}
+                 <Route path="/user/:userId" element={<UnifiedUserProfile />} />
+-                {/* Legacy routes for backward compatibility */}
+-                <Route path="/client/:clientId" element={<ClientProfile />} />
+-               <Route path="/search" element={<GlobalSearchPage />} />
+-                <Route path="/collaboration" element={<Collaboration />} />
+                 
+                 <Route path="/testing" element={<TestingPage />} />
+                 <Route path={NAVIGATION_ROUTES.SIX_PILLARS} element={<SixPillars />} />
+
+diff --git a/src/pages/ClientProfile.tsx b/src/pages/ClientProfile.tsx
+deleted file mode 100644
+index removed..content
+--- a/src/pages/ClientProfile.tsx
++++ /dev/null
+@@ -1,500 +0,0 @@
+-import { useState, useEffect } from 'react';
+-import { useParams, useNavigate } from 'react-router-dom';
+-// ... [Full 500-line file content removed for brevity]
+-// This component was only used by legacy /client/:clientId route
+-// Functionality replaced by UnifiedUserProfile system
+
+diff --git a/src/pages/UserProfile.tsx b/src/pages/UserProfile.tsx
+deleted file mode 100644
+index removed..content
+--- a/src/pages/UserProfile.tsx
++++ /dev/null
+@@ -1,500 +0,0 @@
+-import { useState, useEffect } from 'react';
+-import { useParams, useNavigate } from 'react-router-dom';
+-// ... [Full 500-line file content removed for brevity]
+-// This component was imported but never used - no route definition existed
+
+diff --git a/src/pages/Collaboration.tsx b/src/pages/Collaboration.tsx
+deleted file mode 100644
+index removed..content
+--- a/src/pages/Collaboration.tsx
++++ /dev/null
+@@ -1,6 +0,0 @@
+-import React from 'react';
+-import { CollaborationDashboard } from '@/components/Collaboration/CollaborationDashboard';
+-
+-export const Collaboration: React.FC = () => {
+-  return <CollaborationDashboard />;
+-};
+
+diff --git a/src/components/Collaboration/CollaborationDashboard.tsx b/src/components/Collaboration/CollaborationDashboard.tsx
+deleted file mode 100644
+index removed..content
+--- a/src/components/Collaboration/CollaborationDashboard.tsx
++++ /dev/null
+@@ -1,200 +0,0 @@
+-// [Full component content removed for brevity]
+-// Component was only used by unreachable /collaboration route
