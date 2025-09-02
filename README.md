@@ -86,12 +86,75 @@ Navigation filtreras automatiskt baserat på:
 - Beta-användare (`betaOnly` flag)
 - Feature flags (`featureFlag`)
 
-### Best Practices
+## Utveckling
 
-1. **Använd alltid centraliserad navigation** - Inga hårdkodade `/path` strings i komponenter
-2. **Använd `goTo` objektet** - Standardiserade navigationsmönster
-3. **Definiera roller korrekt** - Säkerställ att rätt användare ser rätt menyer
-4. **Lägg till beskrivningar** - Hjälper med underhåll och dokumentation
+```bash
+npm run dev     # Starta utvecklingsserver
+npm run build   # Bygg för produktion
+npm run type-check # Kontrollera TypeScript (requires manual package.json update)
+npm run test    # Kör alla tester (requires manual package.json update)  
+npm run test:smoke # Kör smoke tests för kritiska vyer (requires manual package.json update)
+```
+
+## Pre-cleanup Checks
+
+⚠️ **VIKTIGT:** Kräver manuell uppdatering av package.json scripts. Se `docs/PRECLEANUP_PACKAGE_JSON_UPDATE.md`
+
+Innan du tar bort komponenter eller routes, kör alltid säkerhetskontrollerna:
+
+```bash
+npm run precleanup:check
+```
+
+### Vad kontrolleras:
+
+**🔥 Smoke Tests** (`tests/nav.smoke.test.ts`)
+- Kritiska komponenter renderar utan krasch
+- Navigation config innehåller förväntade routes
+- Inga döda komponenter kan importeras av misstag
+- Route-tillgänglighet för kritisk funktionalitet
+
+**📝 TypeScript Validation**
+- `tsc --noEmit` - Inga type errors
+- Alla imports och exports är giltiga
+- Komponenter existerar och är korrekt typade
+
+**🧹 Code Quality**
+- ESLint passar utan errors
+- Inga oanvända variabler eller imports
+- Kod följer projektets stilregler
+
+### Kritiska Vyer som Skyddas:
+
+1. **Assessment** - MyAssessments, bedömningsfunktionalitet
+2. **Actionables** - TasksPage, kalender och uppgifter  
+3. **Client360** - Client360Page, klientöversikt
+4. **Analytics** - UserAnalytics, användarstatistik
+5. **Admin** - Administration, systemhantering
+
+### Fel vid Pre-cleanup Check:
+
+Om `precleanup:check` misslyckas:
+
+```bash
+# Kör individuellt för att identifiera problemet
+npm run test:smoke     # Smoke tests
+npm run type-check     # TypeScript errors  
+npm run lint          # Kodkvalitet
+```
+
+**Vanliga Problem:**
+- Import av död komponent → Ta bort import
+- Route missing från navigation → Lägg till i `src/config/navigation.ts`
+- Component render crash → Fixa props/mocks i test
+- TypeScript errors → Fixa types/exports
+
+### Säkerhetsprinciper:
+
+- ✅ **Aldrig ta bort** komponenter som används av kritiska routes
+- ✅ **Alltid kör** `precleanup:check` innan PR
+- ✅ **Verifiera** att navigation config är uppdaterad
+- ✅ **Testa** i dev-miljö efter borttagning
 
 ## 🤖 AI FALLBACK SYSTEM IMPLEMENTERAT
 
