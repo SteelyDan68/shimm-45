@@ -33,7 +33,13 @@ jobs:
       - name: Lint
         run: npx eslint . --ext .ts,.tsx
 
-      - name: Unit tests (Vitest)
+      - name: Navigation Regression Tests
+        run: npx vitest run tests/nav.render.test.ts --reporter=verbose
+
+      - name: Smoke Tests
+        run: npx vitest run tests/nav.smoke.test.ts --reporter=verbose
+
+      - name: Unit Tests (All)
         run: npx vitest run --reporter=dot
 
       - name: Build (Vite)
