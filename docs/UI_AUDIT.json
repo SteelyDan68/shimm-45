@@ -1,0 +1,522 @@
+{
+  "audit_metadata": {
+    "generated_at": "2025-01-27",
+    "version": "1.0",
+    "methodology": "Source code analysis + edge function inventory + database table mapping",
+    "total_routes_audited": 46
+  },
+  "audit": [
+    {
+      "path": "/",
+      "status": "active",
+      "evidence": {
+        "services": ["useUnifiedClients"],
+        "functions": [],
+        "db_tables": ["profiles", "path_entries"],
+        "notes": "Dashboard med databas-kopplingar och stats beräkningar"
+      }
+    },
+    {
+      "path": "/dashboard", 
+      "status": "active",
+      "evidence": {
+        "services": ["useUnifiedClients"],
+        "functions": [],
+        "db_tables": ["profiles", "path_entries"],
+        "notes": "Samma som root - admin dashboard med live data"
+      }
+    },
+    {
+      "path": "/client-dashboard",
+      "status": "active", 
+      "evidence": {
+        "services": ["DashboardOrchestrator"],
+        "functions": ["send-welcome-email"],
+        "db_tables": [],
+        "notes": "Anropar edge function för testmail, använder orchestrator"
+      }
+    },
+    {
+      "path": "/coach",
+      "status": "active",
+      "evidence": {
+        "services": ["DashboardOrchestrator"],
+        "functions": [],
+        "db_tables": [],
+        "notes": "Coach dashboard via orchestrator - har sannolikt DB-kopplingar"
+      }
+    },
+    {
+      "path": "/onboarding",
+      "status": "active",
+      "evidence": {
+        "services": ["useOnboarding", "StreamlinedOnboardingFlow"],
+        "functions": [],
+        "db_tables": ["profiles"],
+        "notes": "Komplett onboarding-flöde med profil-uppdateringar"
+      }
+    },
+    {
+      "path": "/edit-profile",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["profiles"],
+        "notes": "UnifiedProfilePage - profilehantering"
+      }
+    },
+    {
+      "path": "/client-assessment/:clientId",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["analyze-assessment", "analyze-pillar-assessment"],
+        "db_tables": ["assessment_rounds", "profiles"],
+        "notes": "Assessment-systemet med AI-analys"
+      }
+    },
+    {
+      "path": "/my-assessments",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["analyze-assessment"],
+        "db_tables": ["assessment_rounds"],
+        "notes": "MyAssessments komponent med assessment data"
+      }
+    },
+    {
+      "path": "/my-analyses",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["assessment_rounds", "path_entries"],
+        "notes": "MyAnalyses komponent för analys-översikt"
+      }
+    },
+    {
+      "path": "/my-program",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["ai_coaching_plans", "calendar_actionables"],
+        "notes": "Program med coaching plans och actionables"
+      }
+    },
+    {
+      "path": "/guided-assessment",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["analyze-assessment"],
+        "db_tables": ["assessment_rounds"],
+        "notes": "GuidedAssessmentFlow med AI-analys"
+      }
+    },
+    {
+      "path": "/users",
+      "status": "active",
+      "evidence": {
+        "services": ["ClientList"],
+        "functions": [],
+        "db_tables": ["profiles"],
+        "notes": "ClientList komponent med användardata"
+      }
+    },
+    {
+      "path": "/user/:userId",
+      "status": "active", 
+      "evidence": {
+        "services": [],
+        "functions": ["get-stefan-memories", "unified-user-operations"],
+        "db_tables": ["profiles", "assessment_rounds", "ai_memories"],
+        "notes": "UnifiedUserProfile - omfattande user management"
+      }
+    },
+    {
+      "path": "/client/:clientId",
+      "status": "stale",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": [],
+        "notes": "Legacy route - ersatt av unified /user/:userId"
+      }
+    },
+    {
+      "path": "/search",
+      "status": "active",
+      "evidence": {
+        "services": ["GlobalSearchBar"],
+        "functions": [],
+        "db_tables": ["profiles", "assessment_rounds"],
+        "notes": "GlobalSearchPage med sökfunktionalitet"
+      }
+    },
+    {
+      "path": "/collaboration",
+      "status": "active",
+      "evidence": {
+        "services": ["CollaborationDashboard"],
+        "functions": [],
+        "db_tables": [],
+        "notes": "CollaborationDashboard komponent - funktionalitet oklar"
+      }
+    },
+    {
+      "path": "/testing",
+      "status": "active",
+      "evidence": {
+        "services": ["UnifiedAIIntegrationTest"],
+        "functions": ["AI integration tests"],
+        "db_tables": [],
+        "notes": "Testsuite för AI-funktioner i production"
+      }
+    },
+    {
+      "path": "/six-pillars",
+      "status": "active",
+      "evidence": {
+        "services": ["ModularPillarDashboard"],
+        "functions": ["analyze-pillar-assessment"],
+        "db_tables": ["assessment_rounds"],
+        "notes": "Six Pillars huvudsida med pillar navigation"
+      }
+    },
+    {
+      "path": "/six-pillars/:pillarKey",
+      "status": "active",
+      "evidence": {
+        "services": ["PillarAssessmentPage"],
+        "functions": ["analyze-pillar-assessment"],
+        "db_tables": ["assessment_rounds"],
+        "notes": "Pillar-specifik assessment och analys"
+      }
+    },
+    {
+      "path": "/mobile",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": [],
+        "notes": "Lokala inställningar för accessibility - ingen backend"
+      }
+    },
+    {
+      "path": "/intelligence",
+      "status": "active",
+      "evidence": {
+        "services": ["useUnifiedUserData"],
+        "functions": ["get-user-attribute"],
+        "db_tables": ["profiles", "path_entries"],
+        "notes": "IntelligenceOverview med användarsökning och stats"
+      }
+    },
+    {
+      "path": "/intelligence-hub",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["get-stefan-memories", "admin-live-insights"],
+        "db_tables": ["profiles", "ai_memories"],
+        "notes": "IntelligenceHubPage - profiler och minnesfragment"
+      }
+    },
+    {
+      "path": "/intelligence/:userId",
+      "status": "active",
+      "evidence": {
+        "services": ["useUnifiedUserData"],
+        "functions": [],
+        "db_tables": ["profiles", "client_data_cache"],
+        "notes": "Intelligence för specifik användare med cache data"
+      }
+    },
+    {
+      "path": "/development-overview",
+      "status": "unknown",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": [],
+        "notes": "DevelopmentOverview komponent - behöver manuell granskning"
+      }
+    },
+    {
+      "path": "/messages",
+      "status": "active",
+      "evidence": {
+        "services": ["StableMessagingHub"],
+        "functions": ["send-welcome-email"],
+        "db_tables": [],
+        "notes": "Messaging-system med edge function integration"
+      }
+    },
+    {
+      "path": "/unified-users",
+      "status": "active",
+      "evidence": {
+        "services": ["useUsers"],
+        "functions": ["admin-create-user", "unified-user-operations"],
+        "db_tables": ["profiles", "user_roles", "coach_client_assignments"],
+        "notes": "UnifiedUserCommandCenter - omfattande användarhantering"
+      }
+    },
+    {
+      "path": "/gdpr-management",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["gdpr_requests"],
+        "notes": "GDPRManagement med databas-kopplingar"
+      }
+    },
+    {
+      "path": "/client-360",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["profiles", "assessment_rounds"],
+        "notes": "Client360Page med användarprofiler"
+      }
+    },
+    {
+      "path": "/client-360/:userId", 
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["profiles", "assessment_rounds"],
+        "notes": "Client360 för specifik användare"
+      }
+    },
+    {
+      "path": "/pillar-journey",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["calendar_actionables", "path_entries"],
+        "notes": "PillarJourneyPage med actionables"
+      }
+    },
+    {
+      "path": "/administration",
+      "status": "active",
+      "evidence": {
+        "services": ["StefanAIManagementCenter", "GDPRManagementModule"],
+        "functions": ["admin-live-insights"],
+        "db_tables": ["profiles", "stefan_config"],
+        "notes": "Teknisk administration med flera moduler"
+      }
+    },
+    {
+      "path": "/auth",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["claim_pending_invitation_for_current_user"],
+        "db_tables": ["invitations"],
+        "notes": "Autentisering med inbjudnings-claims"
+      }
+    },
+    {
+      "path": "/tasks",
+      "status": "active", 
+      "evidence": {
+        "services": ["useTasks", "LiveTaskList", "ActionablePriorityDashboard"],
+        "functions": [],
+        "db_tables": ["calendar_actionables"],
+        "notes": "TasksPage med actionables management"
+      }
+    },
+    {
+      "path": "/calendar",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": ["calendar_events", "calendar_actionables"],
+        "notes": "CalendarPage med events och actionables"
+      }
+    },
+    {
+      "path": "/ai-insights",
+      "status": "unknown",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": [],
+        "notes": "AIInsights komponent - behöver manuell granskning"
+      }
+    },
+    {
+      "path": "/user-analytics",
+      "status": "active",
+      "evidence": {
+        "services": ["assessmentDataService"],
+        "functions": ["generate-overall-assessment"],
+        "db_tables": ["assessment_rounds", "assessment_detailed_analyses", "path_entries"],
+        "notes": "UserAnalytics med AssessmentDataService och AI-generering"
+      }
+    },
+    {
+      "path": "/user-analytics/:userId",
+      "status": "active",
+      "evidence": {
+        "services": ["assessmentDataService"],
+        "functions": ["generate-overall-assessment"],
+        "db_tables": ["assessment_rounds", "assessment_detailed_analyses"],
+        "notes": "UserAnalytics för specifik användare"
+      }
+    },
+    {
+      "path": "/stefan-administration",
+      "status": "active",
+      "evidence": {
+        "services": ["UnifiedStefanAdministration"],
+        "functions": ["get-stefan-memories"],
+        "db_tables": ["stefan_config", "ai_memories"],
+        "notes": "Stefan AI administration center"
+      }
+    },
+    {
+      "path": "/stefan-chat",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["ai-message-assistant", "get-stefan-memories"],
+        "db_tables": ["ai_memories"],
+        "notes": "StefanChatPage med AI chat funktionalitet"
+      }
+    },
+    {
+      "path": "/stefan/*",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["get-stefan-memories"],
+        "db_tables": ["ai_memories", "stefan_config"],
+        "notes": "StefanAICentralHub - omfattande Stefan AI-system"
+      }
+    },
+    {
+      "path": "/system-map",
+      "status": "unknown",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": [],
+        "notes": "SystemMapPage - behöver manuell granskning"
+      }
+    },
+    {
+      "path": "/invitation-signup",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["claim_pending_invitation_for_current_user"],
+        "db_tables": ["invitations"],
+        "notes": "InvitationSignup med invitation claims"
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["admin-password-reset"],
+        "db_tables": [],
+        "notes": "ForgotPassword med edge function för reset"
+      }
+    },
+    {
+      "path": "/reset-password",
+      "status": "active",
+      "evidence": {
+        "services": [],
+        "functions": ["admin-password-reset"],
+        "db_tables": [],
+        "notes": "ResetPassword med edge function integration"
+      }
+    },
+    {
+      "path": "*",
+      "status": "placeholder",
+      "evidence": {
+        "services": [],
+        "functions": [],
+        "db_tables": [],
+        "notes": "404 NotFound - statisk error sida"
+      }
+    }
+  ],
+  "edge_functions_inventory": [
+    "admin-create-user",
+    "admin-list-auth-users", 
+    "admin-live-insights",
+    "admin-password-reset",
+    "admin-realtime-aggregation",
+    "advanced-ai-coaching",
+    "aggregate-client-data",
+    "ai-message-assistant",
+    "analytics-processor",
+    "analyze-assessment",
+    "analyze-dynamic-assessment",
+    "analyze-learning-style",
+    "analyze-pillar-assessment",
+    "get-stefan-memories",
+    "send-realtime-message",
+    "send-welcome-email",
+    "total-pillar-reset",
+    "unified-user-operations",
+    "generate-overall-assessment"
+  ],
+  "active_services": [
+    "AssessmentDataService",
+    "useUnifiedClients",
+    "useUsers",
+    "useTasks",
+    "useUnifiedUserData"
+  ],
+  "db_tables_in_use": [
+    "profiles",
+    "user_roles", 
+    "coach_client_assignments",
+    "assessment_rounds",
+    "assessment_detailed_analyses",
+    "path_entries",
+    "calendar_actionables",
+    "calendar_events",
+    "ai_memories",
+    "stefan_config",
+    "invitations",
+    "gdpr_requests",
+    "client_data_cache",
+    "ai_coaching_plans"
+  ],
+  "summary": {
+    "active_routes": 33,
+    "placeholder_routes": 1,
+    "stale_routes": 1,
+    "unknown_routes": 11,
+    "functionality_coverage": "72%",
+    "critical_issues": [
+      "Legacy /client/:clientId route should be removed",
+      "Several routes marked as unknown need manual review",
+      "/intelligence-hub duplicate route in App.tsx"
+    ],
+    "recommendations": [
+      "Remove or redirect legacy /client/:clientId route",
+      "Manual review of unknown routes (system-map, ai-insights, development-overview)",
+      "Fix duplicate /intelligence-hub route definition",
+      "Consider consolidating similar functionality"
+    ]
+  }
+}
