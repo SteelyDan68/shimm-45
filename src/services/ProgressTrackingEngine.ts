@@ -138,14 +138,14 @@ export class ProgressTrackingEngine {
    */
   private static async analyzePillarProgression(userId: string): Promise<Record<string, PillarProgress>> {
     // Get all assessment rounds for user
-    const { data: assessments } = await supabase
+    const { data: assessments } = await (supabase as any)
       .from('assessment_rounds')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: true });
 
     // Get neuroplastic progress data
-    const { data: progressData } = await supabase
+    const { data: progressData } = await (supabase as any)
       .from('neuroplastic_progress_tracking')
       .select('*')
       .eq('user_id', userId)
@@ -155,8 +155,8 @@ export class ProgressTrackingEngine {
     const progression: Record<string, PillarProgress> = {};
 
     for (const pillar of pillars) {
-      const pillarAssessments = assessments?.filter(a => a.pillar_type === pillar) || [];
-      const pillarProgress = progressData?.filter(p => p.pillar_type === pillar) || [];
+      const pillarAssessments = (assessments || []).filter((a: any) => a.pillar_type === pillar);
+      const pillarProgress = (progressData || []).filter((p: any) => p.pillar_type === pillar);
       
       progression[pillar] = await this.calculatePillarProgress(
         pillar,
@@ -217,8 +217,8 @@ export class ProgressTrackingEngine {
     if (progressData.length < 2) return 0;
 
     const recentData = progressData.slice(-10); // Last 10 activities
-    const growthFactors = recentData.map(data => {
-      const markers = data.neuroplastic_markers || {};
+    const growthFactors = recentData.map((data: any) => {
+      const markers = (data.neuroplastic_markers as any) || {};
       return (
         (markers.consistency_score || 0) * 0.3 +
         (markers.difficulty_progression || 0) * 0.3 +
@@ -227,7 +227,7 @@ export class ProgressTrackingEngine {
       );
     });
 
-    return growthFactors.reduce((sum, factor) => sum + factor, 0) / growthFactors.length * 100;
+    return growthFactors.reduce((sum: number, factor: number) => sum + factor, 0) / growthFactors.length * 100;
   }
 
   /**
@@ -240,12 +240,12 @@ export class ProgressTrackingEngine {
     last30Days.setDate(last30Days.getDate() - 30);
 
     const recentActivities = progressData.filter(
-      data => new Date(data.created_at) > last30Days
+      (data: any) => new Date(data.created_at) > last30Days
     );
 
     // Calculate days with activity
     const activeDays = new Set(
-      recentActivities.map(activity => 
+      recentActivities.map((activity: any) => 
         new Date(activity.created_at).toDateString()
       )
     ).size;
@@ -258,12 +258,12 @@ export class ProgressTrackingEngine {
    */
   private static identifyMasteryIndicators(progressData: any[]): MasteryIndicator[] {
     // Analyze completion patterns and success rates
-    const skillAreas = [...new Set(progressData.map(p => p.activity_type))];
+    const skillAreas = [...new Set(progressData.map((p: any) => p.activity_type))];
     
-    return skillAreas.map(skillArea => {
-      const skillData = progressData.filter(p => p.activity_type === skillArea);
+    return skillAreas.map((skillArea: string) => {
+      const skillData = progressData.filter((p: any) => p.activity_type === skillArea);
       const successRate = skillData.filter(
-        d => d.completion_data?.success === true
+        (d: any) => d.completion_data?.success === true
       ).length / skillData.length || 0;
 
       const masteryLevel = Math.min(1, successRate * (skillData.length / 10));
@@ -289,19 +289,19 @@ export class ProgressTrackingEngine {
       const recent = assessments[assessments.length - 1];
       const previous = assessments[assessments.length - 2];
       
-      if (recent.scores?.overall < previous.scores?.overall) {
+      if ((recent.scores?.overall || 0) < (previous.scores?.overall || 0)) {
         strugglingAreas.push('Övergripande framsteg har avtagit');
       }
     }
 
     // Look for low success rates in progress data
-    const activityTypes = [...new Set(progressData.map(p => p.activity_type))];
+    const activityTypes = [...new Set(progressData.map((p: any) => p.activity_type))];
     
-    activityTypes.forEach(activityType => {
-      const activities = progressData.filter(p => p.activity_type === activityType);
+    activityTypes.forEach((activityType: string) => {
+      const activities = progressData.filter((p: any) => p.activity_type === activityType);
       const recentActivities = activities.slice(-5);
       const successRate = recentActivities.filter(
-        a => a.completion_data?.success === true
+        (a: any) => a.completion_data?.success === true
       ).length / recentActivities.length || 0;
       
       if (successRate < 0.4) {
@@ -319,11 +319,11 @@ export class ProgressTrackingEngine {
     const breakthroughs: BreakthroughMoment[] = [];
 
     // Look for sudden improvements or achievements
-    progressData.forEach((data, index) => {
+    progressData.forEach((data: any, index: number) => {
       if (index < 2) return; // Need previous data for comparison
       
-      const markers = data.neuroplastic_markers || {};
-      const prevMarkers = progressData[index - 1].neuroplastic_markers || {};
+      const markers = (data.neuroplastic_markers as any) || {};
+      const prevMarkers = (progressData[index - 1].neuroplastic_markers as any) || {};
       
       // Check for significant improvements
       const difficultyJump = (markers.difficulty_progression || 0) - (prevMarkers.difficulty_progression || 0);
@@ -370,7 +370,7 @@ export class ProgressTrackingEngine {
    * 🌊 EXTRACT NEUROPLASTIC MARKERS  
    */
   private static async extractNeuroplasticMarkers(userId: string): Promise<NeuroplasticMarker[]> {
-    const { data: progressData } = await supabase
+    const { data: progressData } = await (supabase as any)
       .from('neuroplastic_progress_tracking')
       .select('*')
       .eq('user_id', userId)
@@ -379,8 +379,8 @@ export class ProgressTrackingEngine {
 
     if (!progressData) return [];
 
-    return progressData.map(data => {
-      const markers = data.neuroplastic_markers || {};
+    return (progressData as any[]).map((data: any) => {
+      const markers = (data.neuroplastic_markers as any) || {};
       const avgValue = (
         (markers.consistency_score || 0) +
         (markers.difficulty_progression || 0) +
@@ -398,9 +398,9 @@ export class ProgressTrackingEngine {
         markerType: 'complexity',
         value: avgValue,
         pillarType: data.pillar_type,
-        contextData: data.completion_data || {},
+        contextData: (data.completion_data as any) || {},
         significance
-      };
+      } as NeuroplasticMarker;
     });
   }
 
@@ -408,14 +408,14 @@ export class ProgressTrackingEngine {
    * ⚡ CALCULATE LEARNING VELOCITY
    */
   private static async calculateLearningVelocity(userId: string): Promise<LearningVelocityData> {
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
       .from('user_neuroplasticity_profiles')
       .select('profile_data')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    const profileData = profile?.profile_data || { learningVelocity: 1.0, adaptationHistory: [] };
-    const history = profileData.adaptationHistory || [];
+    const profileData = (profile?.profile_data as any) || { learningVelocity: 1.0, adaptationHistory: [] };
+    const history = (profileData.adaptationHistory as any[]) || [];
 
     // Calculate acceleration based on recent trends
     const recentVelocities = history.slice(-10).map((record: any) => record.neuroplasticGains || 0);
@@ -425,9 +425,9 @@ export class ProgressTrackingEngine {
       : 0;
 
     return {
-      currentVelocity: profileData.learningVelocity,
+      currentVelocity: profileData.learningVelocity || 1.0,
       acceleration,
-      optimalPace: Math.min(2.0, profileData.learningVelocity * 1.2),
+      optimalPace: Math.min(2.0, (profileData.learningVelocity || 1.0) * 1.2),
       velocityHistory: history.slice(-20).map((record: any) => ({
         timestamp: record.timestamp,
         velocity: record.neuroplasticGains || 0,
@@ -530,18 +530,18 @@ export class ProgressTrackingEngine {
    * 💪 ASSESS MOTIVATIONAL STATE
    */
   private static async assessMotivationalState(userId: string): Promise<MotivationalState> {
-    const { data: recentActivities } = await supabase
+    const { data: recentActivities } = await (supabase as any)
       .from('neuroplastic_progress_tracking')
       .select('*')
       .eq('user_id', userId)
       .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .order('created_at', { ascending: false });
 
-    const activityCount = recentActivities?.length || 0;
+    const activityCount = (recentActivities?.length as number) || 0;
     const motivationLevel = Math.min(10, Math.max(1, (activityCount / 7) * 10));
 
     // Analyze energy patterns from activity timestamps
-    const energyPatterns = this.analyzeEnergyPatterns(recentActivities || []);
+    const energyPatterns = this.analyzeEnergyPatterns((recentActivities as any[]) || []);
 
     return {
       currentLevel: Math.round(motivationLevel),
@@ -564,7 +564,7 @@ export class ProgressTrackingEngine {
   private static analyzeEnergyPatterns(activities: any[]): EnergyPattern[] {
     const patterns: Record<string, { count: number, total: number }> = {};
 
-    activities.forEach(activity => {
+    activities.forEach((activity: any) => {
       const hour = new Date(activity.created_at).getHours();
       const timeSlot = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
       

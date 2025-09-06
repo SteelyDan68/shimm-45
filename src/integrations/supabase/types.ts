@@ -2689,6 +2689,57 @@ export type Database = {
           },
         ]
       }
+      neuroplastic_learning_modules: {
+        Row: {
+          created_at: string
+          id: string
+          module_data: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module_data?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module_data?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      neuroplastic_progress_tracking: {
+        Row: {
+          activity_type: string
+          completion_data: Json
+          created_at: string
+          id: string
+          neuroplastic_markers: Json
+          pillar_type: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          completion_data?: Json
+          created_at?: string
+          id?: string
+          neuroplastic_markers?: Json
+          pillar_type: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          completion_data?: Json
+          created_at?: string
+          id?: string
+          neuroplastic_markers?: Json
+          pillar_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       neuroplasticity_progress: {
         Row: {
           adaptability_score: number | null
@@ -4738,6 +4789,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_neuroplasticity_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          profile_data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_pillar_activations: {
         Row: {

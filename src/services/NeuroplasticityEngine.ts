@@ -113,14 +113,14 @@ export class NeuroplasticityEngine {
    * 🧠 GET NEUROPLASTICITY PROFILE
    */
   private static async getNeuroplasticityProfile(userId: string): Promise<NeuroplasticityProfile> {
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from('user_neuroplasticity_profiles')
-      .select('*')
+      .select('profile_data')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (existing) {
-      return existing.profile_data;
+    if (existing?.profile_data) {
+      return existing.profile_data as NeuroplasticityProfile;
     }
 
     // Create initial profile based on defaults
@@ -135,7 +135,7 @@ export class NeuroplasticityEngine {
     };
 
     // Save initial profile
-    await supabase.from('user_neuroplasticity_profiles').insert({
+    await (supabase as any).from('user_neuroplasticity_profiles').insert({
       user_id: userId,
       profile_data: initialProfile
     });
@@ -150,7 +150,8 @@ export class NeuroplasticityEngine {
     scores: Record<string, number>,
     profile: NeuroplasticityProfile
   ): number {
-    const avgScore = Object.values(scores).reduce((sum, score) => sum + score, 0) / Object.values(scores).length;
+    const values = Object.values(scores);
+    const avgScore = values.length ? values.reduce((sum, score) => sum + score, 0) / values.length : 5;
     
     // Neuroplasticity sweet spot: challenge should be ~20% above current ability
     const baselineDifficulty = Math.max(1, Math.min(10, avgScore + 2));
@@ -261,7 +262,7 @@ export class NeuroplasticityEngine {
     }
 
     // Save updated profile
-    await supabase
+    await (supabase as any)
       .from('user_neuroplasticity_profiles')
       .upsert({
         user_id: userId,
@@ -281,7 +282,7 @@ export class NeuroplasticityEngine {
     activityType: string,
     completionData: Record<string, any>
   ): Promise<void> {
-    await supabase.from('neuroplastic_progress_tracking').insert({
+    await (supabase as any).from('neuroplastic_progress_tracking').insert({
       user_id: userId,
       pillar_type: pillarType,
       activity_type: activityType,
@@ -384,7 +385,7 @@ export class NeuroplasticityEngine {
   }
 
   private static async saveLearningModule(userId: string, module: LearningModule): Promise<void> {
-    await supabase.from('neuroplastic_learning_modules').insert({
+    await (supabase as any).from('neuroplastic_learning_modules').insert({
       user_id: userId,
       module_data: module,
       created_at: new Date().toISOString()
