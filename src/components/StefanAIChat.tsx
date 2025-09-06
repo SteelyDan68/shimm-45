@@ -110,7 +110,14 @@ const StefanAIChat: React.FC<StefanAIChatProps> = ({ clientId, className = '' })
 
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        throw new Error('Kunde inte generera svar');
+        // Fallback-meddelande istället för att kasta fel
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: 'Jag har tekniska utmaningar just nu, men är här för dig. Kan du försöka formulera om din fråga eller kontakta support för direkt hjälp?',
+          isUser: false,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
       }
     } catch (error) {
       console.error('Error sending message:', error);

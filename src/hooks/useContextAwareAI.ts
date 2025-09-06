@@ -72,7 +72,10 @@ export const useContextAwareAI = () => {
 
     } catch (error) {
       console.error('Context-aware AI error:', error);
-      return null;
+      // Returnera ett hjälpsamt felmeddelande istället för null
+      return `Jag har tekniska problem just nu, men jag kan ändå hjälpa dig! 
+      
+För ${location.pathname === '/pillar-journey' ? 'pillar-systemet' : 'den här sidan'}: Försök navigera med menyn eller kontakta support om du behöver direkt hjälp.`;
     } finally {
       setIsLoading(false);
     }
