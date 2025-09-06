@@ -41,8 +41,8 @@ export class AIService {
   private geminiKey: string | null;
   private supabase: any;
   
-  // Rate limit config (requests per minute)
-  private readonly RATE_LIMIT = 20;
+  // Rate limit config (requests per minute) - Mer generöst för Stefan AI
+  private readonly RATE_LIMIT = 60;
   private readonly RETRY_ATTEMPTS = 3;
   private readonly RETRY_DELAY_MS = 1000;
 
@@ -211,11 +211,11 @@ export class AIService {
       model = 'gpt-4.1-2025-04-14'
     } = options;
 
-    console.log(`AI Service [${functionName}]: Initiating request for ${identity}`);
+    console.log(`AI Service [${functionName}]: Initiating request for user:${identity}`);
 
-    // Kontrollera rate limit
+    // Kontrollera rate limit (med mer generös hantering för Stefan AI)
     const rateLimitResult = await this.checkRateLimit(identity);
-    if (!rateLimitResult.allowed) {
+    if (!rateLimitResult.allowed && !functionName.includes('stefan')) {
       const error = `Rate limit exceeded: ${rateLimitResult.current_count}/${rateLimitResult.limit}. Reset at: ${rateLimitResult.reset_time.toISOString()}`;
       const response: AIResponse = {
         content: '',

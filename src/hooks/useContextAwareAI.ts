@@ -50,11 +50,13 @@ export const useContextAwareAI = () => {
 
       // Enhanced system prompt based on location and role
       const systemPrompt = buildContextualPrompt(context);
+      
+      console.log(`Context-Aware AI: Calling ai-message-assistant for ${question}`);
 
       const { data, error } = await supabase.functions.invoke('ai-message-assistant', {
         body: {
           messageContent: question,
-          senderName: user?.email || 'User',
+          senderName: user?.email?.split('@')[0] || 'Användare',
           context: systemPrompt,
           metadata: context
         }

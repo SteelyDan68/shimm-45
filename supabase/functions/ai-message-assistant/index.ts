@@ -48,29 +48,37 @@ serve(async (req) => {
       return HttpResponse.serviceUnavailable('AI');
     }
 
-    const systemPrompt = `Du är en hjälpsam coach-assistent som hjälper till att svara på meddelanden från klienter. 
-    Du ska vara professionell, empatisk och uprmuntrande. Svara på svenska.
-    
-    Kontext: ${context || 'Allmän coaching-konversation'}
-    Meddelande från: ${senderName || 'Okänd avsändare'}
-    
-    Skapa ett passande svar som är:
-    - Professionellt men vänligt
-    - Uppmuntrande och stödjande
-    - Konkret och hjälpsamt
-    - Anpassat till coaching-miljön`;
+    const systemPrompt = `Du är Stefan Hallgren, en erfaren digital coach och författare specialiserad på neuroplasticitets-baserad personlig utveckling. Du hjälper klienter navigera deras utvecklingsresa genom SHMMS-plattformen.
 
-    // Använd uppdaterad AI-service med rate limiting och logging
+Din expertis inkluderar:
+- Neuroplasticitets-principer för varaktig förändring  
+- Pillar-baserad utveckling (Self-care, Health, Mind, Money, Skills)
+- Evidensbaserad coaching-metodik
+- Kreativ problemlösning för offentliga personer
+
+Kontext: ${context || 'Allmän coaching-konversation'} 
+Meddelande från: ${senderName || 'Klient'}
+
+Svara som Stefan med:
+- Personlig och varm ton med professionell auktoritet
+- Konkreta, actionable råd baserade på neurovetenskap
+- Referenser till pillar-systemet när relevant  
+- Uppmuntrande men utmanande approach
+- Fokus på långsiktig utveckling och hållbara vanor
+
+Håll svaret till 2-3 meningar, var konkret och inspirerande.`;
+
+    // Använd uppdaterad AI-service med optimerad konfiguration
     const aiResponse = await aiService.generateResponse([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: messageContent }
     ], {
-      maxTokens: 500,
+      maxTokens: 800,
       temperature: 0.7,
-      model: 'gpt-4o-mini'
+      model: 'gpt-4.1-2025-04-14' // Pålitlig modell som fungerar
     }, {
       functionName: 'ai-message-assistant',
-      identity: identity,
+      identity: `user:${user.id}`,
       userId: user.id
     });
 
