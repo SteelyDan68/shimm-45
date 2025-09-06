@@ -363,16 +363,20 @@ export class AIService {
     total_tokens?: number;
     request_id?: string;
   }> {
-    const requestBody = {
+    // Bygg rätt request-body beroende på modellgeneration
+    const isLegacy = options.model.includes('gpt-4o') || options.model.includes('gpt-4.1');
+    const requestBody: any = {
       model: options.model,
-      messages: messages,
-      max_completion_tokens: options.maxTokens, // Nyare modeller använder max_completion_tokens
-      // temperature stöds inte för GPT-5 och nyare modeller
+      messages
     };
 
-    // Lägg till temperature endast för äldre modeller
-    if (options.model.includes('gpt-4o') || options.model.includes('gpt-4.1')) {
+    if (isLegacy) {
+      // Legacy-modeller (gpt-4o*, gpt-4.1*) använder max_tokens och stödjer temperature
+      requestBody.max_tokens = options.maxTokens;
       requestBody.temperature = options.temperature;
+    } else {
+      // Nyare modeller (GPT-5, O3/O4 etc.) använder max_completion_tokens och tillåter ej temperature
+      requestBody.max_completion_tokens = options.maxTokens;
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
