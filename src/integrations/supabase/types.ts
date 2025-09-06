@@ -4252,6 +4252,45 @@ export type Database = {
         }
         Relationships: []
       }
+      system_notifications: {
+        Row: {
+          action_data: Json | null
+          created_at: string | null
+          id: string
+          message: string
+          priority: string
+          read_at: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action_data?: Json | null
+          created_at?: string | null
+          id?: string
+          message: string
+          priority?: string
+          read_at?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action_data?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       system_performance_metrics: {
         Row: {
           created_at: string
@@ -4409,6 +4448,7 @@ export type Database = {
           is_active: boolean
           updated_at: string
           user_id: string
+          value: Json | null
         }
         Insert: {
           attribute_key: string
@@ -4420,6 +4460,7 @@ export type Database = {
           is_active?: boolean
           updated_at?: string
           user_id: string
+          value?: Json | null
         }
         Update: {
           attribute_key?: string
@@ -4431,6 +4472,7 @@ export type Database = {
           is_active?: boolean
           updated_at?: string
           user_id?: string
+          value?: Json | null
         }
         Relationships: []
       }

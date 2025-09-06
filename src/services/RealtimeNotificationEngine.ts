@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export interface NotificationPreferences {
   taskReminders: boolean;
@@ -60,13 +60,14 @@ export class RealtimeNotificationEngine {
     try {
       const { data } = await supabase
         .from('user_attributes')
-        .select('value')
+        .select('attribute_value')
         .eq('user_id', userId)
         .eq('attribute_key', 'notification_preferences')
         .maybeSingle();
 
-      if (data?.value) {
-        this.preferences = { ...this.preferences, ...data.value };
+      const prefs = (data?.attribute_value as any) || {};
+      if (prefs && typeof prefs === 'object') {
+        this.preferences = { ...this.preferences, ...(prefs as Partial<NotificationPreferences>) };
       }
     } catch (error) {
       console.error('Failed to load notification preferences:', error);
@@ -201,7 +202,7 @@ export class RealtimeNotificationEngine {
   private async deliverNotification(notification: SystemNotification): Promise<void> {
     try {
       // Store in database
-      await supabase
+      await (supabase as any)
         .from('system_notifications')
         .insert({
           user_id: notification.userId,
@@ -214,7 +215,6 @@ export class RealtimeNotificationEngine {
 
       // Show toast if user is active
       if (document.hasFocus()) {
-        const { toast } = useToast();
         toast({
           title: notification.title,
           description: notification.message,
@@ -241,12 +241,12 @@ export class RealtimeNotificationEngine {
     try {
       this.preferences = { ...this.preferences, ...preferences };
       
-      await supabase
+      await (supabase as any)
         .from('user_attributes')
         .upsert({
           user_id: userId,
           attribute_key: 'notification_preferences',
-          value: this.preferences
+          attribute_value: this.preferences
         });
 
     } catch (error) {
