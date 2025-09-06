@@ -33,119 +33,57 @@ export const useInsightAssessment = (clientId: string) => {
     setIsSubmitting(true);
 
     try {
-      // 1. First get AI analysis
-      const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
-        'analyze-assessment',
-        {
-          body: {
-            user_id: clientId,
-            client_name: clientName,
-            assessment_scores: assessmentData.scores,
-            comments: assessmentData.comments,
-            functional_access: assessmentData.functionalAccess,
-            subjective_opportunities: assessmentData.subjectiveOpportunities,
-            relationships: assessmentData.relationships
-          }
-        }
-      );
+      // 🎯 SPRINT 1 FIX: Use UniversalAssessmentProcessor instead of fragmented approach
+      console.log('🚀 Using Universal Assessment Processor for insight assessment');
 
-      if (analysisError) {
-        throw new Error(`AI analys misslyckades: ${analysisError.message}`);
+      const { UniversalAssessmentProcessor } = await import('@/services/UniversalAssessmentProcessor');
+      
+      const result = await UniversalAssessmentProcessor.processAssessmentToPedagogicalOutput({
+        userId: clientId || '',
+        pillarType: 'insight_assessment',
+        assessmentData: {
+          scores: assessmentData.scores,
+          functionalAccess: assessmentData.functionalAccess,
+          subjectiveOpportunities: assessmentData.subjectiveOpportunities,
+          relationships: assessmentData.relationships,
+          comments: assessmentData.comments
+        },
+        scores: assessmentData.scores,
+        comments: assessmentData.comments
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Universal assessment processing failed');
       }
 
-      const aiAnalysis = analysisData.analysis;
-
-      // 2. Create path_entry with assessment data
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Ingen autentiserad användare');
-
-      // Format assessment details including all sections
-      let assessmentDetails = `Självskattning av hinder inom 13 områden:\n\n${Object.entries(assessmentData.scores)
-        .map(([area, score]) => `${area}: ${score}/10`)
-        .join('\n')}`;
-
-      if (assessmentData.functionalAccess) {
-        assessmentDetails += `\n\n🟠 Funktionstillgång:\n${Object.entries(assessmentData.functionalAccess)
-          .map(([question, answer]) => `${question}: ${answer}`)
-          .join('\n')}`;
-      }
-
-      if (assessmentData.subjectiveOpportunities) {
-        assessmentDetails += `\n\n🟣 Subjektiva möjligheter:\n${Object.entries(assessmentData.subjectiveOpportunities)
-          .map(([question, score]) => `${question}: ${score}/5`)
-          .join('\n')}`;
-      }
-
-      if (assessmentData.relationships) {
-        assessmentDetails += `\n\n🟢 Relationer:\n${Object.entries(assessmentData.relationships)
-          .map(([question, data]) => `${question}: ${data.answer}${data.comment ? ` (${data.comment})` : ''}`)
-          .join('\n')}`;
-      }
-
-      if (assessmentData.comments) {
-        assessmentDetails += `\n\nKommentarer: ${assessmentData.comments}`;
-      }
-
-      const pathEntryData = {
-        user_id: clientId,
-        created_by: user.id,
-        type: 'assessment' as const,
-        title: 'Självskattning genomförd',
-        details: assessmentDetails,
-        status: 'completed' as const,
-        ai_generated: false,
-        timestamp: new Date().toISOString()
-      };
-
-      const { error: pathError } = await supabase
-        .from('path_entries')
-        .insert([pathEntryData]);
-
-      if (pathError) {
-        console.error('Path entry error:', pathError);
-        throw new Error(`Kunde inte spara assessment: ${pathError.message}`);
-      }
-
-      // 3. Create AI-generated path_entry with recommendations
-      const aiPathEntryData = {
-        user_id: clientId,
-        created_by: user.id,
-        type: 'recommendation' as const,
-        title: 'AI-analys och rekommendationer',
-        details: aiAnalysis,
-        status: 'planned' as const,
-        ai_generated: true,
-        timestamp: new Date().toISOString()
-      };
-
-      const { error: aiPathError } = await supabase
-        .from('path_entries')
-        .insert([aiPathEntryData]);
-
-      if (aiPathError) {
-        console.error('AI path entry error:', aiPathError);
-        // Don't throw here - the assessment is already saved
-        toast({
-          title: "Varning",
-          description: "Assessment sparad men AI-rekommendationer kunde inte sparas",
-          variant: "destructive"
-        });
-      }
-
-      const result: AssessmentResult = {
-        analysis: aiAnalysis,
+      // ✅ SPRINT 1 SUCCESS: Universal processor handled everything
+      const assessmentResult: AssessmentResult = {
+        analysis: result.output?.analysis || 'Assessment processed successfully',
         assessment_scores: assessmentData.scores,
         comments: assessmentData.comments
       };
 
-      setLastResult(result);
+      setLastResult(assessmentResult);
 
+      // UX POLICY COMPLIANCE: Clear success feedback with next steps
       toast({
-        title: "Bra jobbat! 🎉",
-        description: "Din självskattning är genomförd och din personliga analys är klar!"
+        title: "🎉 Självskattning Slutförd!",
+        description: "Din personliga analys med pedagogisk utvecklingsplan är nu klar!"
       });
 
-      return result;
+      // Show immediate next step if available
+      if (result.output?.actionPlan.immediate.length) {
+        setTimeout(() => {
+          toast({
+            title: "📋 Börja Idag",
+            description: result.output!.actionPlan.immediate[0],
+            duration: 8000
+          });
+        }, 2000);
+      }
+
+      console.log('✅ Insight Assessment completed with Universal Processor');
+      return assessmentResult;
 
     } catch (error: any) {
       console.error('Assessment submission error:', error);
