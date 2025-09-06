@@ -64,9 +64,19 @@ export const useContextAwareAI = () => {
 
       if (error) throw error;
 
+      console.log('Context-Aware AI: raw response from ai-message-assistant', data);
+
+      const aiSuggestion =
+        data?.aiSuggestion ??
+        data?.data?.aiSuggestion ??
+        data?.generatedText ??
+        data?.message ??
+        data?.content ??
+        null;
+
       const response: AIResponse = {
-        message: data?.aiSuggestion || 'Kunde inte generera svar.',
-        confidence: 0.8
+        message: aiSuggestion || 'Jag är här – jag saknar lite data från servern. Prova igen om en sekund.',
+        confidence: aiSuggestion ? 0.9 : 0.4
       };
 
       setLastResponse(response);
