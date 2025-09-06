@@ -61,12 +61,12 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
   const [error, setError] = useState<string | null>(null);
   const [totalResults, setTotalResults] = useState(0);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    const saved = localStorage.getItem('nccs_recent_searches');
+    const saved = localStorage.getItem('shimms_recent_searches');
     return saved ? JSON.parse(saved) : [];
   });
 
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>(() => {
-    const saved = localStorage.getItem('nccs_saved_searches');
+    const saved = localStorage.getItem('shimms_saved_searches');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -91,14 +91,14 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
     setRecentSearches(prev => {
       const filtered = prev.filter(q => q !== query);
       const updated = [query, ...filtered].slice(0, 10);
-      localStorage.setItem('nccs_recent_searches', JSON.stringify(updated));
+      localStorage.setItem('shimms_recent_searches', JSON.stringify(updated));
       return updated;
     });
   }, []);
 
   const clearRecent = useCallback(() => {
     setRecentSearches([]);
-    localStorage.removeItem('nccs_recent_searches');
+    localStorage.removeItem('shimms_recent_searches');
   }, []);
 
   const clearResults = useCallback(() => {
@@ -117,13 +117,13 @@ export const useGlobalSearch = (): UseGlobalSearchReturn => {
     };
     const updated = [newSearch, ...savedSearches.slice(0, 19)];
     setSavedSearches(updated);
-    localStorage.setItem('nccs_saved_searches', JSON.stringify(updated));
+    localStorage.setItem('shimms_saved_searches', JSON.stringify(updated));
   }, [savedSearches]);
 
   const deleteSavedSearch = useCallback((id: string) => {
     const updated = savedSearches.filter(search => search.id !== id);
     setSavedSearches(updated);
-    localStorage.setItem('nccs_saved_searches', JSON.stringify(updated));
+    localStorage.setItem('shimms_saved_searches', JSON.stringify(updated));
   }, [savedSearches]);
 
   const loadSavedSearch = useCallback(async (savedSearch: SavedSearch) => {

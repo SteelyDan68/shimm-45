@@ -47,7 +47,7 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
               </SheetTrigger>
               <SheetContent side="left" className="w-[280px] sm:w-[350px]">
                 <nav className="flex flex-col gap-4 mt-6">
-                  <div className="px-4 py-2 text-lg font-semibold">NCCS</div>
+                  <div className="px-4 py-2 text-lg font-semibold">SHIMMS</div>
                   {navigationItems.map((item) => (
                     <NavLink
                       key={item.href}
@@ -68,7 +68,7 @@ export const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
 
             {/* Logo/Brand */}
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-lg">NCCS</span>
+              <span className="font-semibold text-lg">SHIMMS</span>
             </div>
 
             {/* Actions */}

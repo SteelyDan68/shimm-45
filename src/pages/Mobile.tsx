@@ -58,7 +58,7 @@ const defaultSettings: MobileSettings = {
 
 export default function Mobile() {
   const [settings, setSettings] = useState<MobileSettings>(() => {
-    const saved = localStorage.getItem('nccs-mobile-settings');
+    const saved = localStorage.getItem('shimms-mobile-settings');
     return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
   });
   
@@ -67,7 +67,7 @@ export default function Mobile() {
   // Applicera inställningar när de ändras
   useEffect(() => {
     // Spara till localStorage
-    localStorage.setItem('nccs-mobile-settings', JSON.stringify(settings));
+    localStorage.setItem('shimms-mobile-settings', JSON.stringify(settings));
     
     // Applicera zoom
     document.documentElement.style.zoom = `${settings.zoomLevel}%`;

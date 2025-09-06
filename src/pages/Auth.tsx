@@ -37,7 +37,7 @@ export const Auth = () => {
 
   // SEO: Title, meta description, canonical
   useEffect(() => {
-    document.title = 'Logga in eller skapa konto | NCCS';
+    document.title = 'Logga in eller skapa konto | SHIMMS';
 
     const ensureMeta = (name: string) => {
       let el = document.querySelector(`meta[name="${name}"]`);
@@ -50,7 +50,7 @@ export const Auth = () => {
     };
 
     const metaDesc = ensureMeta('description');
-    metaDesc.setAttribute('content', 'Logga in eller skapa konto för NCCS – AI-driven plattform. E-postverifiering och säker inloggning.');
+    metaDesc.setAttribute('content', 'Logga in eller skapa konto för SHIMMS – AI-driven plattform. E-postverifiering och säker inloggning.');
 
     let linkCanonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!linkCanonical) {
@@ -214,7 +214,7 @@ export const Auth = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
             <Shield className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Välkommen till NCCS</h1>
+          <h1 className="text-3xl font-bold text-foreground">Välkommen till SHIMMS</h1>
           <p className="text-muted-foreground">En AI-driven plattform som ger dig verktyg för det du behöver i livet och karriären.</p>
           <p className="text-xs text-muted-foreground/70 mt-2">
             Skapad och utvecklad 2025 av{' '}

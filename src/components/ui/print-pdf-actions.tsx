@@ -86,7 +86,7 @@ export const PrintPDFActions: React.FC<PrintPDFActionsProps> = ({
           </main>
           <footer class="print-only" style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #e2e8f0;">
             <p style="font-size: 0.875rem; color: #718096;">
-              Dokument från NCCS utvecklingsplattform
+              Dokument från SHIMMS utvecklingsplattform
             </p>
           </footer>
         </body>
@@ -182,7 +182,7 @@ export const PrintPDFActions: React.FC<PrintPDFActionsProps> = ({
             ${content || '<p>Innehåll från aktuell sida kommer att exporteras som PDF.</p>'}
           </main>
           <div class="footer">
-            <p>Dokument från NCCS utvecklingsplattform</p>
+            <p>Dokument från SHIMMS utvecklingsplattform</p>
           </div>
           <script>
             window.onload = function() {

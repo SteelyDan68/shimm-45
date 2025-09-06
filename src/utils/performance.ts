@@ -1,7 +1,7 @@
 /**
  * 🚀 PERFORMANCE OPTIMIZATION UTILITIES
  * 
- * Tools for measuring and optimizing NCCS performance
+ * Tools for measuring and optimizing SHIMMS performance
  * Prevents flickering, ensures smooth loading, and tracks metrics
  */
 

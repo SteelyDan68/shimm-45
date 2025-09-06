@@ -2,7 +2,7 @@
  * 📝 COMPREHENSIVE TYPESCRIPT DEFINITIONS V2
  * SCRUM-TEAM SENIOR BACKEND & FRONTEND COLLABORATION
  * 
- * Konsoliderar och förbättrar alla TypeScript types för NCCS
+ * Konsoliderar och förbättrar alla TypeScript types för SHIMMS
  * Budget: 1 miljard kronor development standard
  */
 
@@ -412,61 +412,61 @@ export interface ThemeConfig {
 // ============= EXPORT GROUPS =============
 
 // Export all types individually to avoid conflicts
-export type NccsUser = User;
-export type NccsUserIdentity = UserIdentity; 
-export type NccsUserProfile = UserProfile;
-export type NccsAppRole = AppRole;
-export type NccsSecurityContext = SecurityContext;
-export type NccsPermission = Permission;
+export type ShimmsUser = User;
+export type ShimmsUserIdentity = UserIdentity; 
+export type ShimmsUserProfile = UserProfile;
+export type ShimmsAppRole = AppRole;
+export type ShimmsSecurityContext = SecurityContext;
+export type ShimmsPermission = Permission;
 
-export type NccsPillarKey = PillarKey;
-export type NccsPillarDefinition = PillarDefinition;
-export type NccsAssessmentRound = AssessmentRound;
-export type NccsPillarActivation = PillarActivation;
+export type ShimmsPillarKey = PillarKey;
+export type ShimmsPillarDefinition = PillarDefinition;
+export type ShimmsAssessmentRound = AssessmentRound;
+export type ShimmsPillarActivation = PillarActivation;
 
-export type NccsTask = Task;
-export type NccsCreateTaskData = CreateTaskData;
-export type NccsTaskStatus = TaskStatus;
-export type NccsTaskPriority = TaskPriority;
-export type NccsCalendarEvent = CalendarEvent;
+export type ShimmsTask = Task;
+export type ShimmsCreateTaskData = CreateTaskData;
+export type ShimmsTaskStatus = TaskStatus;
+export type ShimmsTaskPriority = TaskPriority;
+export type ShimmsCalendarEvent = CalendarEvent;
 
-export type NccsMessage = Message;
-export type NccsMessageAttachment = MessageAttachment;
-export type NccsConversation = Conversation;
+export type ShimmsMessage = Message;
+export type ShimmsMessageAttachment = MessageAttachment;
+export type ShimmsConversation = Conversation;
 
-export type NccsAnalyticsEvent = AnalyticsEvent;
-export type NccsPerformanceMetric = PerformanceMetric;
+export type ShimmsAnalyticsEvent = AnalyticsEvent;
+export type ShimmsPerformanceMetric = PerformanceMetric;
 
-export type NccsAIRecommendation = AIRecommendation;
-export type NccsCoachingSession = CoachingSession;
+export type ShimmsAIRecommendation = AIRecommendation;
+export type ShimmsCoachingSession = CoachingSession;
 
-export type NccsFormField<T = any> = FormField<T>;
-export type NccsDashboardWidget = DashboardWidget;
-export type NccsDashboardStats = DashboardStats;
-export type NccsNavigationItem = NavigationItem;
-export type NccsBreadcrumbItem = BreadcrumbItem;
+export type ShimmsFormField<T = any> = FormField<T>;
+export type ShimmsDashboardWidget = DashboardWidget;
+export type ShimmsDashboardStats = DashboardStats;
+export type ShimmsNavigationItem = NavigationItem;
+export type ShimmsBreadcrumbItem = BreadcrumbItem;
 
-export type NccsApiResponse<T = any> = ApiResponse<T>;
-export type NccsPaginatedResponse<T> = PaginatedResponse<T>;
+export type ShimmsApiResponse<T = any> = ApiResponse<T>;
+export type ShimmsPaginatedResponse<T> = PaginatedResponse<T>;
 
-export type NccsErrorContext = ErrorContext;
-export type NccsSystemError = SystemError;
+export type ShimmsErrorContext = ErrorContext;
+export type ShimmsSystemError = SystemError;
 
-export type NccsDeepPartial<T> = DeepPartial<T>;
-export type NccsOptional<T, K extends keyof T> = Optional<T, K>;
-export type NccsRequiredFields<T, K extends keyof T> = RequiredFields<T, K>;
-export type NccsTimestamp = Timestamp;
-export type NccsUUID = UUID;
+export type ShimmsDeepPartial<T> = DeepPartial<T>;
+export type ShimmsOptional<T, K extends keyof T> = Optional<T, K>;
+export type ShimmsRequiredFields<T, K extends keyof T> = RequiredFields<T, K>;
+export type ShimmsTimestamp = Timestamp;
+export type ShimmsUUID = UUID;
 
-export type NccsUseAsyncState<T> = UseAsyncState<T>;
-export type NccsUseFormState<T> = UseFormState<T>;
+export type ShimmsUseAsyncState<T> = UseAsyncState<T>;
+export type ShimmsUseFormState<T> = UseFormState<T>;
 
-export type NccsBaseComponentProps = BaseComponentProps;
-export type NccsLoadingProps = LoadingProps;
-export type NccsErrorProps = ErrorProps;
+export type ShimmsBaseComponentProps = BaseComponentProps;
+export type ShimmsLoadingProps = LoadingProps;
+export type ShimmsErrorProps = ErrorProps;
 
-export type NccsThemeMode = ThemeMode;
-export type NccsThemeConfig = ThemeConfig;
+export type ShimmsThemeMode = ThemeMode;
+export type ShimmsThemeConfig = ThemeConfig;
 
 export default {
   // Type guards and validators will be added here

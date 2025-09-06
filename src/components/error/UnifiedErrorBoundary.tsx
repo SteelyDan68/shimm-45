@@ -352,7 +352,7 @@ export const withErrorBoundary = <P extends object>(
 };
 
 /**
- * 🎯 SPECIALIZED ERROR BOUNDARIES FOR NCCS FEATURES
+ * 🎯 SPECIALIZED ERROR BOUNDARIES FOR SHIMMS FEATURES
  */
 
 // Stefan AI features

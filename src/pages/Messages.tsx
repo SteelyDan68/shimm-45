@@ -60,7 +60,7 @@ export function Messages() {
             to: 'stefan.hallgren@gmail.com',
             firstName: (user as any)?.user_metadata?.first_name || 'Stefan',
             role: 'client',
-            inviterName: 'NCCS',
+            inviterName: 'SHIMMS',
           },
         });
         if (error) {

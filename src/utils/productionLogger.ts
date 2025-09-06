@@ -1,5 +1,5 @@
 /**
- * 🚀 NCCS Production Logger System
+ * 🚀 SHIMMS Production Logger System
  * Enterprise-grade logging för miljard-kronors applikationer
  * ZERO console.* statements i production
  */
