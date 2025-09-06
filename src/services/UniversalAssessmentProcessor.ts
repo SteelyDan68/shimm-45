@@ -307,7 +307,7 @@ Svara ENDAST med giltig JSON. Var konkret, specifik och anpassa till användaren
         trigger_type: 'assessment_completion',
         intervention_type: 'congratulatory',
         content: `Grattis! Du har slutfört din ${pillarType} bedömning. Jag har skapat en personlig utvecklingsplan åt dig. Första steget: ${output.actionPlan.immediate[0] || 'Börja med små steg idag!'}`,
-        priority: 'high' as const,
+        priority: 'high',
         context_data: {
           pillar_type: pillarType,
           generated_from: 'universal_assessment_processor',
@@ -323,11 +323,11 @@ Svara ENDAST med giltig JSON. Var konkret, specifik och anpassa till användaren
         trigger_type: 'scheduled_support',
         intervention_type: 'motivational',
         content: output.stefanCoachingStrategy.supportMessages[index] || 'Du gör framsteg! Fortsätt med dina dagliga micro-habits.',
-        priority: 'medium' as const,
+        priority: 'medium',
         context_data: {
           pillar_type: pillarType,
-          trigger_condition: trigger,
-          neuroplastic_principle: output.pedagogicalGuidance.neuroplasticPrinciples[0]
+          generated_from: 'universal_assessment_processor',
+          pedagogical_focus: output.pedagogicalGuidance.neuroplasticPrinciples[0] || 'Neuroplastisk utveckling'
         }
       });
     });
