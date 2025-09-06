@@ -242,7 +242,7 @@ Svara ENDAST med giltig JSON. Var konkret, specifik och anpassa till användaren
   }
 
   /**
-   * 💾 SAVE TO UNIFIED ARCHITECTURE - Single source of truth
+   * 💾 SAVE TO UNIFIED ARCHITECTURE - Single source of truth + DELIVER USER PROMISES
    */
   private static async saveToUnifiedArchitecture(
     input: AssessmentInput,
@@ -261,7 +261,7 @@ Svara ENDAST med giltig JSON. Var konkret, specifik och anpassa till användaren
           overall: Object.values(input.scores).reduce((sum, val) => sum + val, 0) / Object.values(input.scores).length 
         },
         comments: input.comments || '',
-        ai_analysis: JSON.stringify(output, null, 2)
+        ai_analysis: output.analysis // Human-readable analysis
       })
       .select()
       .single();
@@ -270,24 +270,141 @@ Svara ENDAST med giltig JSON. Var konkret, specifik och anpassa till användaren
       throw new Error(`Failed to save assessment round: ${roundError.message}`);
     }
 
-    // Legacy compatibility: Create path_entry
+    // 🎯 BRIDGE GAP: Save structured analysis for MyAnalyses page (Promise #2)
     await supabase.from('path_entries').insert({
       user_id: input.userId,
       created_by: input.userId,
-      type: 'assessment',
+      type: 'detailed_analysis',
       pillar_type: input.pillarType,
-      title: `${input.pillarType} Bedömning Slutförd`,
+      title: `${input.pillarType} - Djupanalys`,
       details: output.analysis,
-      content: JSON.stringify(output.pedagogicalGuidance),
+      content: JSON.stringify({
+        executive_summary: output.analysis,
+        insights: [
+          { title: "Neuroplastiska styrkor", description: output.pedagogicalGuidance.neuroplasticPrinciples.join(", ") },
+          { title: "Tillväxtområden", description: output.pedagogicalGuidance.weeklyGoals.join(", ") },
+          { title: "Utvecklingspotential", description: output.pedagogicalGuidance.nextMilestones.join(", ") }
+        ],
+        recommendations: [
+          { title: "Dagliga mikrovanor", description: output.pedagogicalGuidance.dailyMicroHabits.join(", ") },
+          { title: "Framstegsmätning", description: output.pedagogicalGuidance.progressMeasurement.join(", ") },
+          { title: "Första steget", description: output.actionPlan.immediate.join(", ") }
+        ]
+      }),
       status: 'completed',
       ai_generated: true,
       visible_to_client: true,
       metadata: {
         assessment_round_id: assessmentRound.id,
-        processing_method: 'universal_processor',
-        has_pedagogical_output: true
+        processing_method: 'universal_processor_v2',
+        analysis_type: 'detailed_structured'
       }
     });
+
+    // 🎯 DELIVER PROMISE #3: Create concrete program items for MyProgram page
+    // Stefan's Coaching Recommendations
+    const recommendations = [];
+    
+    // Immediate actions
+    for (let i = 0; i < output.actionPlan.immediate.length; i++) {
+      recommendations.push({
+        user_id: input.userId,
+        title: `Omedelbar åtgärd ${i + 1}: ${input.pillarType}`,
+        description: output.actionPlan.immediate[i],
+        reasoning: `Baserat på din ${input.pillarType} bedömning rekommenderar Stefan att du börjar här för neuroplastisk förändring.`,
+        expected_outcome: "Skapar momentum och bygger grundläggande rutiner för långsiktig förändring.",
+        priority: 'high',
+        status: 'pending',
+        pillar_type: input.pillarType,
+        estimated_time_minutes: 15,
+        due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days
+        metadata: {
+          assessment_round_id: assessmentRound.id,
+          action_type: 'immediate',
+          neuroplastic_principle: output.pedagogicalGuidance.neuroplasticPrinciples[0] || 'Konsistens över intensitet'
+        }
+      });
+    }
+
+    // Weekly goals as actionable items
+    for (let i = 0; i < output.pedagogicalGuidance.weeklyGoals.length; i++) {
+      recommendations.push({
+        user_id: input.userId,
+        title: `Veckomål ${i + 1}: ${input.pillarType}`,
+        description: output.pedagogicalGuidance.weeklyGoals[i],
+        reasoning: `Stefan har identifierat detta som ett nyckelområde för din ${input.pillarType} utveckling.`,
+        expected_outcome: "Etablerar långsiktiga vanor och skapar mätbara framsteg i din utveckling.",
+        priority: 'medium',
+        status: 'pending',
+        pillar_type: input.pillarType,
+        estimated_time_minutes: 30,
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week
+        metadata: {
+          assessment_round_id: assessmentRound.id,
+          action_type: 'weekly_goal',
+          measurement_method: output.pedagogicalGuidance.progressMeasurement[i] || 'Daglig reflektion'
+        }
+      });
+    }
+
+    // Save recommendations to ai_coaching_recommendations table
+    if (recommendations.length > 0) {
+      await supabase.from('ai_coaching_recommendations').insert(recommendations);
+    }
+
+    // Create Calendar Actionables for concrete program structure
+    const actionables = [];
+    
+    // Daily micro-habits as actionable calendar items
+    for (let i = 0; i < output.pedagogicalGuidance.dailyMicroHabits.length; i++) {
+      actionables.push({
+        user_id: input.userId,
+        title: `Daglig mikrovan: ${output.pedagogicalGuidance.dailyMicroHabits[i].substring(0, 50)}...`,
+        description: output.pedagogicalGuidance.dailyMicroHabits[i],
+        pillar_type: input.pillarType,
+        priority: 'high',
+        estimated_duration: 5, // 5 minutes for micro-habits
+        scheduled_date: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000).toISOString(),
+        completion_status: 'pending',
+        completion_percentage: 0,
+        metadata: {
+          assessment_round_id: assessmentRound.id,
+          habit_type: 'daily_micro',
+          neuroplastic_focus: true,
+          stefan_recommendation: true
+        }
+      });
+    }
+
+    // Weekly milestone actions
+    const weeklyActions = [
+      ...output.actionPlan.week1,
+      ...output.actionPlan.week2
+    ];
+
+    for (let i = 0; i < weeklyActions.length; i++) {
+      actionables.push({
+        user_id: input.userId,
+        title: `Veckoåtgärd: ${weeklyActions[i].substring(0, 50)}...`,
+        description: weeklyActions[i],
+        pillar_type: input.pillarType,
+        priority: 'medium',
+        estimated_duration: 45,
+        scheduled_date: new Date(Date.now() + (i + 1) * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        completion_status: 'pending',
+        completion_percentage: 0,
+        metadata: {
+          assessment_round_id: assessmentRound.id,
+          action_type: 'weekly_milestone',
+          week_number: i < output.actionPlan.week1.length ? 1 : 2
+        }
+      });
+    }
+
+    // Save actionables to calendar_actionables table
+    if (actionables.length > 0) {
+      await supabase.from('calendar_actionables').insert(actionables);
+    }
 
     return assessmentRound;
   }
