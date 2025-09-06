@@ -58,12 +58,15 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .limit(3);
 
-    // Generate intensity-based parameters
-    const getIntensityParams = (intensity: CoachingPreferences['intensity']) => {
+    // Generate intensity-based parameters (BEGRÄNSADE för att undvika överbelastning)
+    const getIntensityParams = (intensity: CoachingPreferences['intensity'], existingTasksCount: number = 0) => {
+      // Begränsa baserat på befintliga uppgifter
+      const maxNewTasks = Math.max(3, 15 - existingTasksCount); // Max 15 totala aktiva uppgifter
+      
       switch (intensity) {
         case 'chill':
           return {
-            tasks_per_week: 2,
+            tasks_per_week: Math.min(2, Math.ceil(maxNewTasks / preferences.duration)),
             min_duration: 5,
             max_duration: 15,
             complexity: 'basic',
@@ -71,7 +74,7 @@ serve(async (req) => {
           };
         case 'moderate':
           return {
-            tasks_per_week: 4,
+            tasks_per_week: Math.min(3, Math.ceil(maxNewTasks / preferences.duration)),
             min_duration: 15,
             max_duration: 30,
             complexity: 'intermediate',
@@ -79,17 +82,68 @@ serve(async (req) => {
           };
         case 'intense':
           return {
-            tasks_per_week: 6,
-            min_duration: 30,
-            max_duration: 60,
+            tasks_per_week: Math.min(4, Math.ceil(maxNewTasks / preferences.duration)),
+            min_duration: 20,
+            max_duration: 40,
             complexity: 'advanced',
             stress_level: 'challenging'
           };
       }
     };
 
-    const intensityParams = getIntensityParams(preferences.intensity);
-    const totalTasks = intensityParams.tasks_per_week * preferences.duration;
+    // Kontrollera befintliga aktiva uppgifter för att undvika överbelastning
+    const { data: existingActionables } = await supabase
+      .from('calendar_actionables')
+      .select('id, completion_status')
+      .eq('user_id', user_id)
+      .in('completion_status', ['pending', 'in_progress']);
+
+    const activeTasksCount = existingActionables?.length || 0;
+    console.log('📊 Befintliga aktiva uppgifter:', activeTasksCount);
+
+    // Om användaren redan har många aktiva uppgifter, begränsa eller avbryt
+    if (activeTasksCount >= 15) {
+      console.log('⚠️ Användaren har redan för många aktiva uppgifter, hoppar över planering');
+      return new Response(JSON.stringify({
+        success: true,
+        plan: {
+          tasks_generated: 0,
+          events_created: 0,
+          tasks_created: 0,
+          message: 'Ingen ny plan skapad - du har redan tillräckligt med aktiva uppgifter'
+        },
+        summary: {
+          intensity: preferences.intensity,
+          duration_weeks: preferences.duration,
+          total_tasks: 0,
+          reason: 'Task limit reached'
+        }
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const intensityParams = getIntensityParams(preferences.intensity, activeTasksCount);
+    const totalTasks = Math.min(
+      intensityParams.tasks_per_week * preferences.duration,
+      15 - activeTasksCount // Aldrig överstiga 15 totala aktiva uppgifter
+    );
+
+    console.log('🎯 Kommer skapa', totalTasks, 'nya uppgifter (befintliga:', activeTasksCount, ')');
+
+    if (totalTasks <= 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        plan: {
+          tasks_generated: 0,
+          events_created: 0,
+          tasks_created: 0,
+          message: 'Inga nya uppgifter skapade - din arbetstbelastning är redan optimal'
+        }
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // AI prompt for enhanced actionable generation
     const systemPrompt = `Du är Stefan, en AI-coach som skapar SMART actionables baserat på neuroplasticitet och användarens kapacitet.

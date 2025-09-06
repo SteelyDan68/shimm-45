@@ -157,8 +157,8 @@ export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardPr
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      // Anropa AI för intelligent omprioritering baserat på assessment-svar
-      const { data: aiResult, error } = await supabase.functions.invoke('enhance-ai-planning', {
+      // Anropa AI Task Optimizer för intelligent prioritering
+      const { data: aiResult, error } = await supabase.functions.invoke('ai-task-optimizer', {
         body: {
           user_id: userId,
           assessment_data: assessments || [],
@@ -169,26 +169,33 @@ export const ActionablePriorityDashboard: React.FC<ActionablePriorityDashboardPr
 
       if (error) throw error;
 
-      if (aiResult?.updated_priorities) {
+      if (aiResult?.updated_priorities && aiResult.updated_priorities.length > 0) {
         // Uppdatera prioriteringar baserat på AI-analys
+        let updatedCount = 0;
         for (const update of aiResult.updated_priorities) {
-          await supabase
+          const { error: updateError } = await supabase
             .from('calendar_actionables')
-            .update({ priority: update.new_priority })
+            .update({ 
+              priority: update.new_priority,
+              user_notes: `AI prioritering: ${update.reasoning} - ${new Date().toLocaleDateString('sv-SE')}`
+            })
             .eq('id', update.actionable_id);
+          
+          if (!updateError) updatedCount++;
         }
 
         await loadActionables();
         
         toast({
           title: "✨ AI-Coaching slutförd!",
-          description: `${aiResult.updated_priorities.length} uppgifter omprioriterade baserat på dina assessment-svar. Resultatet visas nu i din prioriteringslista.`,
-          duration: 6000
+          description: `${updatedCount} uppgifter omprioriterade och ${aiResult.tasks_deferred || 0} uppgifter uppskjutna för bättre fokus. Nu har du ${aiResult.active_tasks_count || actionables.length} aktiva uppgifter.`,
+          duration: 8000
         });
       } else {
         toast({
-          title: "✅ AI-Analys klar",
-          description: "Dina prioriteringar är redan optimala baserat på dina assessment-svar",
+          title: "✅ AI-Optimering klar",
+          description: aiResult?.summary || "Dina prioriteringar är redan optimala. Några gamla uppgifter kan ha skjutits upp.",
+          duration: 5000
         });
       }
     } catch (error) {
