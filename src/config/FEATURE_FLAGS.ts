@@ -8,14 +8,33 @@ const getEnvFlag = (key: string, defaultValue: boolean = false): boolean => {
   if (typeof window === 'undefined') return defaultValue;
   
   // Check various sources for environment variables
-  const sources = [
-    // @ts-ignore - Vite env vars
-    import.meta.env?.[`VITE_${key}`],
-    // @ts-ignore - Process env fallback
-    process?.env?.[key],
-    // Local storage override for runtime testing
-    localStorage?.getItem(`feature_flag_${key}`)
-  ];
+  const sources = [];
+  
+  // Vite environment variables (primary source for frontend)
+  try {
+    const viteEnv = import.meta?.env?.[`VITE_${key}`];
+    if (viteEnv !== undefined) sources.push(viteEnv);
+  } catch (e) {
+    // Ignore if import.meta is not available
+  }
+  
+  // Process env fallback (only if process exists - Node.js environments)
+  try {
+    if (typeof process !== 'undefined' && process?.env) {
+      const processEnv = process.env[key];
+      if (processEnv !== undefined) sources.push(processEnv);
+    }
+  } catch (e) {
+    // Ignore if process is not available (browser environment)
+  }
+  
+  // Local storage override for runtime testing
+  try {
+    const storageValue = localStorage?.getItem(`feature_flag_${key}`);
+    if (storageValue !== null) sources.push(storageValue);
+  } catch (e) {
+    // Ignore if localStorage is not available
+  }
 
   for (const source of sources) {
     if (source !== undefined && source !== null) {
